@@ -6,7 +6,7 @@ use App\Models\Staff;
 use App\Models\StaffMessage;
 use App\Models\StaffMessageReply;
 use Illuminate\Http\Request;
-use App\Http\Controllers\BaseServiceController;
+use App\Http\Controllers\Base\BaseServiceController;
 use App\Models\Admin;
 
 class StaffMessageController extends BaseServiceController
@@ -127,6 +127,7 @@ public function show($id)
     StaffMessageReply::create([
         'staff_message_id' => $conversation->id,
         'sender_type'      => 'admin',
+        'sender_id' => auth('admin')->id(),
         'message'          => $request->message,
         'is_read'          => false,
     ]);

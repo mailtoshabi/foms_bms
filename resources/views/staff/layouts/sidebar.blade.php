@@ -17,13 +17,15 @@
                     $operationRoleId = utility('id_operation_dept');
                     $staff = auth('staff')->user();
                     $pendingCount = \App\Models\StudentLead::where('status','pending')->count();
+                    $pendingCount_t = \App\Models\TeacherLead::where('status','pending')->count();
                 @endphp
 
                 @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
-                <li class="{{ set_active(['staff.student-leads.*']) }}">
-                    <a href="{{ route('staff.student-leads.index') }}">
+
+                <li class="{{ set_active(['staff.student-leads.*','staff.students.*']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-user-graduate text-primary"></i>
-                        <span>Student Leads</span>
+                        <span>Students</span>
 
                         @if($pendingCount > 0)
                             <span class="badge bg-warning float-end">
@@ -31,24 +33,85 @@
                             </span>
                         @endif
                     </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+
+                        <li class="{{ set_active(['staff.student-leads.*']) }}">
+                            <a href="{{ route('staff.student-leads.index') }}">
+                                Student Leads
+
+                                @if($pendingCount > 0)
+                                    <span class="badge bg-warning float-end">
+                                        {{ $pendingCount }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['staff.students.*']) }}">
+                            <a href="{{ route('staff.students.index') }}">
+                                Students
+                            </a>
+                        </li>
+
+                    </ul>
                 </li>
+
+
+
+                <li class="{{ set_active(['staff.teacher-leads.*','staff.teachers.*']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="mdi mdi-teach text-primary"></i>
+
+                        <span>Teachers</span>
+
+                        @if($pendingCount_t > 0)
+                            <span class="badge bg-warning float-end">
+                                {{ $pendingCount_t }}
+                            </span>
+                        @endif
+                    </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+
+                        <li class="{{ set_active(['staff.teacher-leads.*']) }}">
+                            <a href="{{ route('staff.teacher-leads.index') }}">
+                                Teacher Leads
+
+                                @if($pendingCount_t > 0)
+                                    <span class="badge bg-warning float-end">
+                                        {{ $pendingCount_t }}
+                                    </span>
+                                @endif
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['staff.teachers.*']) }}">
+                            <a href="{{ route('staff.teachers.index') }}">
+                                Teachers
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
                 @endif
 
 
 
-                <li class="{{ set_active(['admin.classes.*']) }}">
+                <li class="{{ set_active(['staff.class_rooms.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-chalkboard"></i>
                         <span>Classes</span>
                     </a>
                     <ul class="sub-menu">
-                        <li><a href="{{ route('admin.classes.index') }}">List Classes</a></li>
-                        <li><a href="{{ route('admin.classes.create') }}">Add Class</a></li>
+                        <li><a href="{{ route('staff.class_rooms.index') }}">List Classes</a></li>
+                        <li><a href="{{ route('staff.class_rooms.create') }}">Add Class</a></li>
                     </ul>
                 </li>
 
                 {{-- ================= Messages ================= --}}
-                <li class="{{ set_active(['admin.messages.*','staff.messages.*']) }}">
+                <li class="{{ set_active(['staff.messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-envelope"></i>
                         <span>Messages </span>
@@ -57,15 +120,15 @@
                     <ul class="sub-menu" aria-expanded="false">
 
                         {{-- Inbox --}}
-                        <li class="{{ set_active(['admin.messages.index']) }}">
-                            <a href="{{ route('admin.messages.index') }}">
+                        <li class="{{ set_active(['staff.messages.index']) }}">
+                            <a href="{{ route('staff.messages.index') }}">
                                 Inbox
                             </a>
                         </li>
 
                         {{-- New Message --}}
-                        <li class="{{ set_active(['admin.messages.create']) }}">
-                            <a href="{{ route('admin.messages.create') }}">
+                        <li class="{{ set_active(['staff.messages.create']) }}">
+                            <a href="{{ route('staff.messages.create') }}">
                                 New Message
                             </a>
                         </li>

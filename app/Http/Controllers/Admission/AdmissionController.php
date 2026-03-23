@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admission;
 
-use App\Http\Controllers\BaseServiceController;
+use App\Http\Controllers\Base\BaseServiceController;
 use Illuminate\Http\Request;
 
 class AdmissionController extends BaseServiceController

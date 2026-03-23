@@ -39,14 +39,14 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.classes.*']) }}">
+                <li class="{{ set_active(['admin.class_rooms.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-chalkboard"></i>
                         <span>Classes</span>
                     </a>
                     <ul class="sub-menu">
-                        <li><a href="{{ route('admin.classes.index') }}">List Classes</a></li>
-                        <li><a href="{{ route('admin.classes.create') }}">Add Class</a></li>
+                        <li><a href="{{ route('admin.class_rooms.index') }}">List Classes</a></li>
+                        <li><a href="{{ route('admin.class_rooms.create') }}">Add Class</a></li>
                     </ul>
                 </li>
 

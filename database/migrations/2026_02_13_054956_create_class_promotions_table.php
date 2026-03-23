@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('class_promotions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained();
-            $table->foreignId('from_class_id')->constrained('classes');
-            $table->foreignId('to_class_id')->constrained('classes');
+            $table->foreignId('from_class_id')->constrained('class_rooms');
+            $table->foreignId('to_class_id')->constrained('class_rooms');
             $table->date('promotion_date');
             $table->timestamps();
         });

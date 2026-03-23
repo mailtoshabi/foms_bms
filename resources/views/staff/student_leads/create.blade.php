@@ -16,7 +16,7 @@
     <div class="card-body">
 
         <form method="POST"
-              action="{{ $isEdit ? route('staff.student-leads.update', $lead->id) : route('staff.student-leads.store') }}">
+              action="{{ $isEdit ? route('staff.student-leads.update', encrypt($lead->id)) : route('staff.student-leads.store') }}">
             @csrf
 
             @if($isEdit)
@@ -104,22 +104,24 @@
         {{ $isEdit ? 'Update' : 'Save' }}
     </button>
 
+    @if($isEdit && !$lead->hasStudent())
+
+    <button type="button"
+            class="btn btn-success ms-2"
+            data-bs-toggle="modal"
+            data-bs-target="#convertStudentModal"
+            onclick="return confirm('Are you sure you want to convert this lead to a student?')">
+        Convert to Student
+    </button>
+
+    @endif
+
     <a href="{{ route('staff.student-leads.index') }}"
        class="btn btn-light ms-2">
         Cancel
     </a>
 
-    @if($isEdit && !$lead->student)
-        <form method="POST"
-              action="{{ route('staff.student-leads.convert', $lead->id) }}"
-              class="ms-auto"
-              onsubmit="return confirm('Are you sure to convert this lead to student?')">
-            @csrf
-            <button type="submit" class="btn btn-success">
-                Convert to Student
-            </button>
-        </form>
-    @endif
+
 
 </div>
 
@@ -127,6 +129,62 @@
 
     </div>
 </div>
+
+@if($isEdit && !$lead->hasStudent())
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>Admission Form Link</h5>
+    </div>
+
+    <div class="card-body">
+
+        @php
+            $token = $lead->generateFormToken();
+            $link = route('admission.form',['student',$token]);
+            @endphp
+
+            <div class="mt-2">
+                @php
+                $phone = preg_replace('/[^0-9]/','',$lead->contact_number);
+                $message = "Dear {$lead->name}, please complete your admission form using the following link: ".$link;
+                $waLink = "https://wa.me/91{$phone}?text=".urlencode($message);
+                @endphp
+
+                <div class="input-group">
+
+                <input type="text" class="form-control" value="{{ $link }}" readonly>
+
+                <button class="btn btn-primary"
+                onclick="navigator.clipboard.writeText('{{ $link }}')">
+                <i class="mdi mdi-content-copy"></i>
+                </button>
+
+                <a href="{{ $waLink }}"
+                target="_blank"
+                class="btn btn-success">
+                <i class="mdi mdi-whatsapp"></i>
+                Send
+                </a>
+
+                </div>
+            </div>
+
+            @if($lead->form_expires_at && now()->gt($lead->form_expires_at))
+            <span class="badge bg-danger">Link Expired</span>
+            @else
+            <span class="badge bg-success">
+            Expires {{ $lead->form_expires_at->diffForHumans() }}
+            </span>
+            @endif
+
+            @if($lead->form_opened_at)
+            <span class="badge bg-info">
+            Opened {{ $lead->form_opened_at->diffForHumans() }}
+            </span>
+            @endif
+    </div>
+</div>
+@endif
 
 
 {{-- =========================
@@ -225,6 +283,101 @@
         @endforelse
 
     </div>
+</div>
+
+@endif
+
+
+@if($isEdit && !$lead->hasStudent())
+
+<div class="modal fade" id="convertStudentModal" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+
+<div class="modal-header">
+<h5 class="modal-title">Convert Lead to Student</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<form method="POST" action="{{ route('staff.student-leads.convert', encrypt($lead->id)) }}" enctype="multipart/form-data">
+@csrf
+
+<div class="modal-body">
+
+<div class="row">
+
+<div class="col-md-6 mb-3">
+<label>Name</label>
+<input type="text" name="name" class="form-control"
+value="{{ $lead->name }}" required>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Contact Number</label>
+<input type="text" name="contact_number" class="form-control"
+value="{{ $lead->contact_number }}" required>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Email</label>
+<input type="email" name="email" class="form-control"
+value="{{ $lead->email }}">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Date of Birth</label>
+<input type="date" name="dob" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Parent Name</label>
+<input type="text" name="parent_name" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Status</label>
+<select name="status" class="form-control">
+<option value="active">Active</option>
+<option value="passout">Passout</option>
+<option value="dropout">Dropout</option>
+</select>
+</div>
+
+<div class="col-md-12 mb-3">
+<label>Address</label>
+<textarea name="address" class="form-control"></textarea>
+</div>
+
+<div class="col-md-6 mb-3">
+<label>Photo</label>
+<input type="file" name="photo" class="form-control">
+</div>
+
+<div class="col-md-6 mb-3">
+<label>ID Proof</label>
+<input type="file" name="id_proof" class="form-control">
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button type="button" class="btn btn-light" data-bs-dismiss="modal">
+Cancel
+</button>
+
+<button type="submit" class="btn btn-success">
+Create Student
+</button>
+
+</div>
+
+</form>
+
+</div>
+</div>
 </div>
 
 @endif

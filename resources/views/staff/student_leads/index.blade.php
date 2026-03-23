@@ -74,7 +74,7 @@
 <td>
 <div class="d-flex gap-2">
 
-<a href="{{ route('staff.student-leads.edit',$lead->id) }}">
+<a href="{{ route('staff.student-leads.edit',encrypt($lead->id)) }}">
 <i class="mdi mdi-pencil text-success"></i>
 </a>
 
@@ -86,7 +86,7 @@ data-target-form="#delete_{{ $lead->id }}">
 
 <form id="delete_{{ $lead->id }}"
 method="POST"
-action="{{ route('staff.student-leads.destroy',$lead->id) }}">
+action="{{ route('staff.student-leads.destroy',encrypt($lead->id)) }}">
 @csrf
 @method('DELETE')
 </form>

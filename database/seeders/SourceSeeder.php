@@ -22,7 +22,8 @@ class SourceSeeder extends Seeder
             'Walk-in',
             'Referral',
             'WhatsApp',
-            'Phone Inquiry'
+            'Phone Inquiry',
+            'Other'
         ];
 
         foreach ($sources as $source) {

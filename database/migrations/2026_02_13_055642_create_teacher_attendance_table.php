@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('teacher_attendance', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained();
-            $table->foreignId('class_id')->constrained();
+            $table->foreignId('class_room_id')->constrained();
             $table->date('attendance_date');
             $table->boolean('is_present');
             $table->timestamps();

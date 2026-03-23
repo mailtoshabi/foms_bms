@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Coordinator;
 
-use App\Http\Controllers\BaseServiceController;
+use App\Http\Controllers\Base\BaseServiceController;
 use Illuminate\Http\Request;
 
 class CoordinatorController extends BaseServiceController

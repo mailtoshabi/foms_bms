@@ -19,6 +19,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
 
             $table->enum('sender_type',['admin','staff']);
+            $table->unsignedBigInteger('sender_id');
 
             $table->text('message');
 

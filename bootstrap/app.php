@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'last.login' => \App\Http\Middleware\LastLoginTracker::class,
             'role' => \App\Http\Middleware\RolePermission::class,
+            'auth' => \App\Http\Middleware\Authenticate::class,
         ]);
         $middleware->append(\App\Http\Middleware\LastLoginTracker::class);
     })

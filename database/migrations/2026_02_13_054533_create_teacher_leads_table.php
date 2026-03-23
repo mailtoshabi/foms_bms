@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('teacher_leads', function (Blueprint $table) {
             $table->id();
+            $table->string('form_token')->nullable()->unique();
+            $table->timestamp('form_expires_at')->nullable();
+            $table->timestamp('form_opened_at')->nullable();
+            $table->boolean('form_disabled')->default(false);
             $table->string('name');
             $table->string('contact_number');
             $table->string('email')->nullable();

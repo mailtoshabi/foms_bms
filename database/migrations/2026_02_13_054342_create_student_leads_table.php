@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('student_leads', function (Blueprint $table) {
             $table->id();
+            $table->string('form_token')->nullable()->unique();
+            $table->timestamp('form_expires_at')->nullable();
+            $table->timestamp('form_opened_at')->nullable();
+            $table->boolean('form_disabled')->default(false);
             $table->string('name');
             $table->string('contact_number');
             $table->string('email')->nullable();
-            $table->string('source')->nullable();
+            $table->foreignId('source_id')
+                ->nullable()
+                ->constrained('sources')
+                ->nullOnDelete();
             $table->enum('status',['pending','admitted'])->default('pending');
             $table->timestamps();
         });

@@ -12,16 +12,28 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('teacher_salaries', function (Blueprint $table) {
+
             $table->id();
-            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
-            $table->date('salary_date');
+
+            $table->foreignId('teacher_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->decimal('amount',10,2);
-            $table->decimal('deposit_amount',10,2)->default(0);
-            $table->date('deposit_return_date')->nullable();
-            $table->enum('status',['paid','not_paid','partial','deposit'])->default('not_paid');
-            $table->decimal('paid_amount',10,2)->default(0);
-            $table->date('paid_date')->nullable();
+
+            $table->date('payment_date');
+
+            $table->string('payment_method')->nullable();
+            // cash | bank | upi etc
+
+            $table->string('reference_number')->nullable();
+            // bank txn id / upi ref
+
+            $table->text('notes')->nullable();
+
             $table->timestamps();
+
+            $table->index('payment_date');
         });
     }
 

@@ -39,5 +39,18 @@ class StaffMessage extends Model
         }
         return $this->belongsTo(Staff::class,'receiver_id');
     }
+
+    public function senderName()
+    {
+        if ($this->sender_type == 'admin') {
+            return \App\Models\Admin::find($this->sender_id)?->name ?? 'Admin';
+        }
+
+        if ($this->sender_type == 'staff') {
+            return \App\Models\Staff::find($this->sender_id)?->name ?? 'Staff';
+        }
+
+        return 'User';
+    }
 }
 

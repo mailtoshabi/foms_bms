@@ -24,6 +24,15 @@ return new class extends Migration
 
             $table->text('note');
 
+            $table->enum('status', [
+                'pending',
+                'follow_up',
+                'no_response',
+                'not_interested',
+                'interested',
+                'converted'
+            ])->default('pending');
+
             $table->timestamps();
         });
     }

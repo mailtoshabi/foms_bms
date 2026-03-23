@@ -9,6 +9,7 @@ use App\Models\StudentLead;
 use App\Models\Source;
 use App\Models\Student;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class StudentLeadController extends Controller
 {
@@ -90,7 +91,7 @@ class StudentLeadController extends Controller
     */
     public function edit($id)
 {
-    $lead = StudentLead::with('notes.staff')->findOrFail($id);
+    $lead = StudentLead::with('notes.staff')->findOrFail(decrypt($id));
     $sources = Source::where('is_active', true)->get();
 
     return view('staff.student_leads.create', compact('lead', 'sources'));
@@ -103,7 +104,7 @@ class StudentLeadController extends Controller
     */
     public function update(Request $request, $id)
     {
-        $lead = StudentLead::findOrFail($id);
+        $lead = StudentLead::findOrFail(decrypt($id));
 
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
@@ -133,7 +134,7 @@ class StudentLeadController extends Controller
     */
     public function destroy($id)
     {
-        $lead = StudentLead::findOrFail($id);
+        $lead = StudentLead::findOrFail(decrypt($id));
         $lead->delete();
 
         return back()->with('success', 'Lead deleted successfully.');
@@ -158,26 +159,71 @@ public function storeNote(Request $request, $leadId)
 }
 
 
-
-public function convertToStudent($id)
+public function convertToStudent(Request $request, $id)
 {
-    $lead = StudentLead::findOrFail($id);
+    $lead = StudentLead::with('student')->findOrFail(decrypt($id));
 
     // Prevent duplicate conversion
     if ($lead->student) {
-        return back()->with('error', 'Lead already converted to student.');
+        return redirect()
+            ->route('staff.student-leads.edit', $lead->id)
+            ->with('error', 'This lead has already been converted to a student.');
     }
 
-    DB::transaction(function () use ($lead) {
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'contact_number' => 'required|string|max:20',
+        'email' => 'nullable|email',
+        'classes_per_week' => 'nullable|integer',
+        'selected_days' => 'nullable|array',
+        'starting_date' => 'nullable|date',
+    ]);
+
+    DB::transaction(function () use ($request, $lead) {
+
+        $photo = null;
+        $idProof = null;
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo')
+                ->store('students/photos','public');
+        }
+
+        if ($request->hasFile('id_proof')) {
+            $idProof = $request->file('id_proof')
+                ->store('students/id_proofs','public');
+        }
+
+        $phone = $request->contact_number;
 
         Student::create([
+
             'student_lead_id' => $lead->id,
-            'name' => $lead->name,
-            'email' => $lead->email,
-            'contact_number' => $lead->contact_number,
-            'status' => 'active',
+
+            'name' => $request->name,
+            'dob' => $request->dob,
+            'email' => $request->email,
+            'contact_number' => $request->contact_number,
+            'whatsapp_number' => $request->whatsapp_number ?? $request->contact_number,
+            'parent_name' => $request->parent_name,
+            'address' => $request->address,
+
+            'phone' => $phone,
+            'password' => Hash::make($phone),
+
+            'photo' => $photo,
+            'id_proof' => $idProof,
+
+            // Class Schedule
+            'classes_per_week' => $request->classes_per_week,
+            'selected_days' => $request->selected_days ?? [],
+            'time_slot' => $request->time_slot,
+            'starting_date' => $request->starting_date,
+
+            'status' => $request->status ?? 'active'
         ]);
 
+        // Update lead status
         $lead->update([
             'status' => 'admitted'
         ]);
@@ -185,6 +231,6 @@ public function convertToStudent($id)
 
     return redirect()
         ->route('staff.student-leads.index')
-        ->with('success', 'Lead successfully converted to student.');
+        ->with('success','Student created successfully.');
 }
 }

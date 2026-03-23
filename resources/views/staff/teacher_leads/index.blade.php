@@ -1,0 +1,151 @@
+@extends('staff.layouts.master')
+@section('title','Teacher Leads')
+
+@section('content')
+
+<div class="card">
+<div class="card-header d-flex justify-content-between">
+<h4>Teacher Leads ({{ $leads->total() }})</h4>
+
+<a href="{{ route('staff.teacher-leads.create') }}" class="btn btn-primary">
+Add Lead
+</a>
+
+</div>
+
+<div class="card-body table-responsive">
+
+<form method="GET" class="row mb-3">
+
+<div class="col-md-4">
+<select name="status" class="form-control select2">
+<option value="">All Status</option>
+
+<option value="pending"
+{{ request('status')=='pending'?'selected':'' }}>
+Pending
+</option>
+
+<option value="approved"
+{{ request('status')=='approved'?'selected':'' }}>
+Approved
+</option>
+
+<option value="not_interested"
+{{ request('status')=='not_interested'?'selected':'' }}>
+Not Interested
+</option>
+
+</select>
+</div>
+
+<div class="col-md-4">
+<input type="date"
+name="date"
+value="{{ request('date') }}"
+class="form-control">
+</div>
+
+<div class="col-md-4 d-flex gap-2">
+
+<button class="btn btn-primary">
+Filter
+</button>
+
+<a href="{{ route('staff.teacher-leads.index') }}"
+class="btn btn-light">
+Reset
+</a>
+
+</div>
+
+</form>
+
+
+<table class="table table-bordered align-middle">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Contact</th>
+<th>Email</th>
+<th>Source</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+
+@forelse($leads as $lead)
+
+<tr>
+
+<td>{{ $lead->name }}</td>
+<td>{{ $lead->contact_number }}</td>
+<td>{{ $lead->email ?? '-' }}</td>
+<td>{{ $lead->source ?? '-' }}</td>
+
+<td>
+
+<span class="badge
+{{ $lead->status=='pending'?'bg-warning':'' }}
+{{ $lead->status=='approved'?'bg-success':'' }}
+{{ $lead->status=='not_interested'?'bg-danger':'' }}">
+
+{{ ucfirst(str_replace('_',' ',$lead->status)) }}
+
+</span>
+
+</td>
+
+<td>
+
+<div class="d-flex gap-2">
+
+<a href="{{ route('staff.teacher-leads.edit',encrypt($lead->id)) }}">
+<i class="mdi mdi-pencil text-success"></i>
+</a>
+
+<a href="#"
+data-plugin="delete-data"
+data-target-form="#delete_{{ $lead->id }}">
+<i class="mdi mdi-trash-can text-danger"></i>
+</a>
+
+<form id="delete_{{ $lead->id }}"
+method="POST"
+action="{{ route('staff.teacher-leads.destroy',encrypt($lead->id)) }}">
+@csrf
+@method('DELETE')
+</form>
+
+</div>
+
+</td>
+
+</tr>
+
+@empty
+
+<tr>
+<td colspan="6" class="text-center">No Leads Found</td>
+</tr>
+
+@endforelse
+
+</tbody>
+</table>
+
+{{ $leads->links() }}
+
+</div>
+</div>
+
+@endsection
+
+@section('script')
+<script>
+$('.select2').select2();
+</script>
+@endsection

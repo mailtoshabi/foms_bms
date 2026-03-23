@@ -1,0 +1,234 @@
+@props([
+    'class_rooms',
+    'courses',
+    'types',
+    'createRoute',
+    'indexRoute',
+    'editRoute',
+    'deleteRoute'
+])
+<div class="card">
+
+<div class="card-header d-flex justify-content-between">
+
+<h4>Classes ({{ $class_rooms->total() }})</h4>
+
+<a href="{{ $createRoute }}" class="btn btn-primary">
+Add Class
+</a>
+
+</div>
+
+
+<div class="card-body table-responsive">
+
+{{-- ================= FILTER ================= --}}
+<form method="GET" class="row mb-3">
+
+<div class="col-md-3">
+
+<select name="course_id" class="form-control select2">
+
+<option value="">All Courses</option>
+
+@foreach($courses as $course)
+
+<option value="{{ $course->id }}"
+{{ request('course_id')==$course->id?'selected':'' }}>
+
+{{ $course->name }}
+
+</option>
+
+@endforeach
+
+</select>
+
+</div>
+
+
+<div class="col-md-3">
+
+<select name="class_type_id" class="form-control select2">
+
+<option value="">All Types</option>
+
+@foreach($types as $type)
+
+<option value="{{ $type->id }}"
+{{ request('class_type_id')==$type->id?'selected':'' }}>
+
+{{ ucfirst($type->name) }}
+
+</option>
+
+@endforeach
+
+</select>
+
+</div>
+
+
+<div class="col-md-3">
+
+<select name="status" class="form-control">
+
+<option value="">All Status</option>
+
+<option value="active"
+{{ request('status')=='active'?'selected':'' }}>
+Active
+</option>
+
+<option value="completed"
+{{ request('status')=='completed'?'selected':'' }}>
+Completed
+</option>
+
+</select>
+
+</div>
+
+
+<div class="col-md-3 d-flex gap-2">
+
+<button class="btn btn-primary">
+Filter
+</button>
+
+<a href="{{ $indexRoute }}" class="btn btn-light">
+Reset
+</a>
+
+</div>
+
+</form>
+
+
+
+{{-- ================= TABLE ================= --}}
+
+<table class="table table-bordered align-middle">
+
+<thead>
+
+<tr>
+<th>Course</th>
+<th>Class</th>
+<th>Type</th>
+<th>Schedule</th>
+<th>Fees</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+
+<tbody>
+
+@forelse($class_rooms as $class)
+
+<tr>
+
+<td>{{ $class->course->name ?? '-' }}</td>
+
+<td>{{ $class->name }}</td>
+
+<td>{{ ucfirst($class->classType->name ?? '-') }}</td>
+
+<td>
+
+@if($class->selected_days)
+
+<small>
+
+{{ implode(', ', $class->selected_days ?? []) }}
+
+<br>
+
+{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
+
+</small>
+
+@endif
+
+</td>
+
+
+<td>
+
+Admission: ₹{{ number_format($class->admission_fee,2) }} <br>
+
+Monthly: ₹{{ number_format($class->monthly_fee,2) }}
+
+</td>
+
+
+<td>
+
+<span class="badge {{ $class->is_completed ? 'bg-secondary' : 'bg-success' }}">
+
+{{ $class->is_completed ? 'Completed' : 'Active' }}
+
+</span>
+
+</td>
+
+
+<td>
+
+<div class="d-flex gap-2">
+
+<a href="{{ route('staff.class_rooms.show', encrypt($class->id)) }}"
+class="">
+
+<i class="fas fa-eye"></i>
+
+</a>
+
+<a href="{{ $editRoute(encrypt($class->id)) }}">
+<i class="mdi mdi-pencil text-success"></i>
+</a>
+
+<a href="#"
+data-plugin="delete-data"
+data-target-form="#delete_{{ $class->id }}">
+<i class="mdi mdi-trash-can text-danger"></i>
+</a>
+
+<form id="delete_{{ $class->id }}"
+method="POST"
+action="{{ $deleteRoute($class->id) }}">
+
+@csrf
+@method('DELETE')
+
+</form>
+
+</div>
+
+</td>
+
+</tr>
+
+@empty
+
+<tr>
+<td colspan="7" class="text-center">
+No Classes Found
+</td>
+</tr>
+
+@endforelse
+
+</tbody>
+
+</table>
+
+
+{{ $class_rooms->links() }}
+
+</div>
+
+</div>

@@ -11,11 +11,31 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         Role::insert([
-            ['name' => 'enrolment department'],
-            ['name' => 'administrator department'],
-            ['name' => 'finance department'],
-            ['name' => 'hr department'],
-            ['name' => 'operation department'],
+            [
+                'name' => 'enrolment department',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'administrator department',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'finance department',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'hr department',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'operation department',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
         $utilities = [
@@ -31,7 +51,8 @@ class RoleSeeder extends Seeder
                 ['key' => $key],
                 [
                     'value' => $value,
-                    'is_visible' => 0,
+                    'updated_at' => now(),
+                    'created_at' => now(),
                 ]
             );
         }
