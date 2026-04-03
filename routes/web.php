@@ -10,7 +10,11 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffMessageController;
+use App\Http\Controllers\Admin\StudentTeacherMessageController;
 use App\Http\Controllers\AdmissionController;
+use App\Exports\DefaultersExport;
+use App\Http\Controllers\Admin\ReportController;
+use Maatwebsite\Excel\Facades\Excel;
 
 Route::get('/', function () {
     return view('home');
@@ -51,6 +55,81 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])
             ->name('dashboard');
+        Route::get('/profile', [DashboardController::class, 'profile'])
+            ->name('profile');
+
+        Route::get('reports/fee',[ReportController::class,'fees'])
+            ->name('reports.fee');
+
+        Route::get('reports/fee/export',
+            [ReportController::class,'exportFee']
+        )->name('reports.fee.export');
+
+        Route::get('reports/fee-collection', [ReportController::class,'feeCollection'])
+            ->name('reports.fee.collection');
+
+        Route::get('reports/fee-collection/export', [ReportController::class,'exportFeeCollection'])
+            ->name('reports.fee.collection.export');
+
+        Route::get('reports/finance-expense', [ReportController::class, 'financeExpense'])
+            ->name('reports.finance.expense');
+
+
+
+        Route::get('reports/teacher-salary', [ReportController::class,'teacherSalary'])
+            ->name('reports.teacher.salary');
+
+        Route::get('reports/teacher-salary/export', [ReportController::class,'exportTeacherSalary'])
+            ->name('reports.teacher.salary.export');
+
+        Route::get('/reports/teachers/leads', [ReportController::class, 'teacherLeadReport'])
+            ->name('reports.teacher-leads');
+
+        Route::get('/reports/teachers/leads/export', [ReportController::class, 'exportTeacherLeads'])
+            ->name('reports.teacher-leads.export');
+
+        Route::get('/reports/teachers', [ReportController::class, 'teacherReport'])
+            ->name('reports.teachers');
+
+        Route::get('/reports/teachers/export', [ReportController::class, 'exportTeachers'])
+            ->name('reports.teachers.export');
+
+        Route::get('reports/teachers/{id}', [ReportController::class,'showTeacher'])
+            ->name('reports.teachers.show');
+
+        Route::get('/reports/students/leads', [ReportController::class, 'studentLeadReport'])
+            ->name('reports.student-leads');
+
+        Route::get('/reports/students/leads/export', [ReportController::class, 'exportStudentLeads'])
+            ->name('reports.student-leads.export');
+
+        Route::get('reports/students/attendance', [ReportController::class,'attendance'])
+            ->name('reports.attendance');
+
+        Route::get('reports/students/attendance/export', [ReportController::class,'exportAttendance'])
+            ->name('reports.attendance.export');
+
+        Route::get('/reports/students', [ReportController::class, 'studentReport'])
+        ->name('reports.students');
+
+        Route::get('/reports/students/export', [ReportController::class, 'exportStudents'])
+        ->name('reports.students.export');
+
+        Route::get('/reports/staffs', [ReportController::class, 'staffReport'])
+        ->name('reports.staffs');
+
+        Route::get('/reports/staffs/export', [ReportController::class, 'exportStaffs'])
+        ->name('reports.staffs.export');
+
+        Route::get('/reports/staff-salary', [ReportController::class, 'staffSalaryReport'])
+        ->name('reports.staff.salary');
+
+        Route::get('/reports/staff-salary/export', [ReportController::class, 'exportStaffSalary'])
+        ->name('reports.staff.salary.export');
+
+        Route::get('reports/students/{id}', [ReportController::class,'showStudent'])
+            ->name('reports.students.show');
+
 
         Route::controller(StaffController::class)
         ->prefix('staffs')
@@ -64,9 +143,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
 
+            // Show
+            Route::get('/show/{id}', 'show')->name('show');
+
             // Edit
             Route::get('/edit/{id}', 'edit')->name('edit');
             Route::put('/update', 'update')->name('update');
+
+            // Salary
+            Route::post('/salary/store', 'storeSalary')->name('salary.store');
+            Route::put('/salary/update', 'updateSalary')->name('salary.update');
+            Route::post('/salary/pay-balance', 'payBalance')->name('salary.pay-balance');
+            Route::put('/salary/amount/update', 'updateSalaryAmount')->name('salary.amount.update');
 
             // Delete
             Route::delete('/delete/{id}', 'destroy')->name('destroy');
@@ -114,10 +202,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::get('/edit/{id}','edit')->name('edit');
             Route::put('/update','update')->name('update');
+            Route::get('/show/{id}','show')->name('show');
 
             Route::delete('/delete/{id}','destroy')->name('destroy');
 
             Route::get('/status/{id}','changeStatus')->name('changeStatus');
+
+            Route::post(
+                '/class-rooms/assign-teacher','assignTeacher'
+                )->name('assign.teacher');
+
+            Route::post(
+            '/class-rooms/remove-teacher','removeTeacher'
+            )->name('remove.teacher');
+
+            Route::post(
+            '/class-rooms/assign-students','assignStudents'
+            )->name('assign.students');
+
+            Route::post(
+            '/class-rooms/remove-student','removeStudent'
+            )->name('remove.student');
         });
 
         Route::controller(StaffMessageController::class)
@@ -130,6 +235,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/store','store')->name('store');
             Route::get('/show/{id}','show')->name('show');
             Route::post('/reply/{id}','reply')->name('reply');
+
+        });
+
+        Route::controller(StudentTeacherMessageController::class)
+        ->prefix('student-teacher-messages')
+        ->name('st-messages.')
+        ->group(function () {
+
+            Route::get('/','index')->name('index');
+            Route::get('/show/{id}','show')->name('show');
 
         });
 
@@ -148,6 +263,9 @@ use App\Http\Controllers\Staff\Administration\TeacherLeadController;
 use App\Http\Controllers\Staff\Administration\TeacherController;
 use App\Http\Controllers\Staff\Administration\TeacherAssignmentController;
 use App\Http\Controllers\Staff\Administration\TeacherSalaryController;
+use App\Http\Controllers\Staff\Finance\FeeController;
+use App\Http\Controllers\Staff\Finance\SalaryController;
+use App\Http\Controllers\Staff\Finance\ExpenseController;
 
 Route::prefix('departments')->name('staff.')->group(function () {
 
@@ -164,10 +282,16 @@ Route::prefix('departments')->name('staff.')->group(function () {
     Route::post('logout', [StaffLoginController::class, 'logout'])
         ->name('logout');
 
-    Route::middleware(['auth:staff'])->group(function () {
+    // Route::middleware(['auth:staff'])->group(function () {
+    Route::middleware([
+        'auth:staff',
+        \App\Http\Middleware\DailySalaryRunner::class
+    ])->group(function () {
 
         Route::get('/dashboard', [StaffDashboardController::class, 'dashboard'])
             ->name('dashboard');
+        Route::get('/profile', [StaffDashboardController::class, 'profile'])
+            ->name('profile');
 
 
 
@@ -250,8 +374,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
     Route::middleware('role:id_administrator_dept')
             ->group(function () {
 
-
-
             Route::resource('teacher-leads', TeacherLeadController::class);
             Route::post(
                 'teacher-leads/{lead}/notes',
@@ -307,6 +429,10 @@ Route::prefix('departments')->name('staff.')->group(function () {
             [TeacherAssignmentController::class,'updateWage']
             )->name('teachers.update.wage');
 
+            Route::put('/teachers/salaries/{salary}',
+                    [TeacherSalaryController::class,'update'])
+                    ->name('teacher-salaries.update');
+
             Route::resource('teachers', TeacherController::class)
             ->names('teachers');
 
@@ -320,27 +446,88 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [TeacherAssignmentController::class,'destroy']
                 )->name('teachers.classrooms.destroy');
 
-            Route::get(
-                '/{teacher}/salary/create',
-                [TeacherSalaryController::class,'create']
-            )->name('teacher-salaries.create');
+                Route::get(
+                '/teacher-salaries',
+                [SalaryController::class,'index']
+                )->name('salaries.index');
 
-            Route::post(
-                '/{teacher}/salary',
-                [TeacherSalaryController::class,'store']
-            )->name('teacher-salaries.store');
+                Route::post(
+                '/teacher-salaries/pay',
+                [SalaryController::class,'pay']
+                )->name('salaries.pay');
 
-            Route::put('/teacher-salaries/{salary}',
-                [TeacherSalaryController::class,'update'])
-                ->name('teacher-salaries.update');
+                // Route::get(
+                //     '/{teacher}/salary/create',
+                //     [TeacherSalaryController::class,'create']
+                // )->name('teacher-salaries.create');
 
-                Route::delete('/teacher-salaries/{salary}',
-                    [TeacherSalaryController::class,'destroy'])
-                    ->name('teacher-salaries.destroy');
+                // Route::post(
+                //     '/{teacher}/salary',
+                //     [TeacherSalaryController::class,'store']
+                // )->name('teacher-salaries.store');
+
+
+
+                    // Route::delete('/teacher-salaries/{salary}',
+                    //     [TeacherSalaryController::class,'destroy'])
+                    //     ->name('teacher-salaries.destroy');
 
 
         });
 
+         Route::middleware('role:id_finance_dept')
+            ->group(function () {
+                Route::get(
+                '/fees',[FeeController::class,'index']
+                )->name('fees.index');
+
+                Route::post(
+                '/fees/pay',[FeeController::class,'pay']
+                )->name('fees.pay');
+
+                Route::get(
+                '/fees/{id}/invoice',
+                [FeeController::class,'invoice']
+                )->name('fees.invoice');
+
+                Route::get(
+                '/fees/{id}/invoice/download',
+                [FeeController::class,'downloadInvoice']
+                )->name('fees.invoice.download');
+
+                Route::get(
+                '/fees/{id}/payments',
+                [FeeController::class,'getPayments']
+                )->name('fees.payments');
+
+                Route::post(
+                '/fees/send-notification',
+                [FeeController::class,'sendNotification']
+                )->name('fees.send-notification');
+
+                Route::post(
+                '/fees/send-bulk-notifications',
+                [FeeController::class,'sendBulkNotifications']
+                )->name('fees.send-bulk-notifications');
+
+                Route::controller(ExpenseController::class)
+                ->prefix('expenses')
+                ->name('expenses.')
+                ->group(function () {
+                    Route::get('/', 'index')->name('index');
+                    Route::get('/create', 'create')->name('create');
+                    Route::post('/store', 'store')->name('store');
+                    Route::get('/edit/{id}', 'edit')->name('edit');
+                    Route::put('/update/{id}', 'update')->name('update');
+                    Route::delete('/delete/{id}', 'destroy')->name('destroy');
+                });
+
+                Route::get(
+                '/process/teacher/{id}/salary',
+                [TeacherSalaryController::class,'processTeacherSalary']
+                )->name('process.teacher.salary');
+
+        });
 
     });
 
@@ -351,6 +538,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
 use App\Http\Controllers\Teacher\Auth\LoginController as TeacherLoginController;
 use App\Http\Controllers\Teacher\ClassNoteController;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboardController;
+use App\Http\Controllers\Teacher\MessageController as TeacherMessageController;
 use App\Http\Controllers\Teacher\TeacherController as TeacherServiceController;
 
 Route::prefix('teacher')->name('teacher.')->group(function () {
@@ -371,6 +559,8 @@ Route::prefix('teacher')
         Route::post('/logout', [TeacherLoginController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [TeacherDashboardController::class, 'dashboard'])
             ->name('dashboard');
+        Route::get('/profile', [TeacherDashboardController::class, 'profile'])
+            ->name('profile');
 
         Route::get('classes',
             [TeacherServiceController::class,'classes']
@@ -389,11 +579,6 @@ Route::prefix('teacher')
         [TeacherServiceController::class,'updateClassHour']
         )->name('class-hours.update');
 
-        // Route::put(
-        // '/class-hours/{id}/complete',
-        // [TeacherServiceController::class,'markClassHourCompleted']
-        // )->name('class-hours.complete');
-
         // Get students
         Route::get(
         '/class-hours/{id}/students',
@@ -406,12 +591,35 @@ Route::prefix('teacher')
         [TeacherServiceController::class,'markClassHourCompleted']
         )->name('class-hours.complete');
 
-        Route::resource('class-notes',ClassNoteController::class);
+        Route::controller(ClassNoteController::class)
+        ->prefix('notes')
+        ->name('notes.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::delete('/destroy', 'destroy')->name('destroy');
+            Route::get('/show/{id}', 'show')->name('show');
+        });
+
+        Route::controller(TeacherMessageController::class)
+        ->prefix('messages')
+        ->name('messages.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/create', 'create')->name('create');
+            Route::post('/store', 'store')->name('store');
+            Route::get('/show/{id}', 'show')->name('show');
+            Route::post('/reply/{id}', 'reply')->name('reply');
+        });
     });
 
 
 use App\Http\Controllers\Student\Auth\LoginController as StudentLoginController;
+use App\Http\Controllers\Student\ClassController as StudentClassController;
+use App\Http\Controllers\Student\ClassNoteController as StudentClassNoteController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\MessageController as StudentMessageController;
 
 Route::prefix('student')->name('student.')->group(function () {
 Route::get('/', function () {
@@ -430,6 +638,35 @@ Route::post('/login', [StudentLoginController::class,'login'])->name('login.subm
         Route::post('/logout', [StudentLoginController::class, 'logout'])->name('logout');
         Route::get('/dashboard', [StudentDashboardController::class, 'dashboard'])
             ->name('dashboard');
+        Route::get('/profile', [StudentDashboardController::class, 'profile'])
+            ->name('profile');
+
+        Route::controller(StudentClassNoteController::class)
+        ->prefix('notes')
+        ->name('notes.')
+        ->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/show/{id}', 'show')->name('show');
+        });
+
+        Route::controller(StudentClassController::class)
+            ->prefix('classes')
+            ->name('classes.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/{id}', 'show')->name('show');
+            });
+
+        Route::controller(StudentMessageController::class)
+            ->prefix('messages')
+            ->name('messages.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+                Route::get('/show/{id}', 'show')->name('show');
+                Route::post('/reply/{id}', 'reply')->name('reply');
+            });
 
     });
 

@@ -19,7 +19,7 @@ a.btn-close {
 }
 
 button.btn-close {
-    background: none;
+    /* background: none; */
     cursor: pointer;
     color: rgb(243, 18, 18) !important;
     font-size: 18px;

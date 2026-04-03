@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 
 use App\Models\ClassRoom;
 use App\Models\ClassHour;
+use App\Models\Fee;
 use App\Models\StudentAttendance;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -47,6 +49,7 @@ public function classShow($id)
         'course',
         'classType',
         'students',
+        'notes.files',
         'classHours' => function ($query) {
             $query->latest()->limit(10);
         }
@@ -162,23 +165,32 @@ public function startClass(Request $request)
         ]);
     }
 
-        public function markClassHourCompleted(Request $request, $id)
-    {
-        $classHour = ClassHour::with('classRoom.students')->findOrFail($id);
 
-        // Prevent re-submission
-        if ($classHour->status === 'completed') {
-            return back()->with('error','Already marked as completed.');
-        }
+public function markClassHourCompleted(Request $request, $id)
+{
+    $classHour = ClassHour::with('classRoom.students','classRoom.teachers','classRoom.classType')
+        ->findOrFail($id);
 
-        $students = $classHour->classRoom->students;
+    if ($classHour->status === 'completed') {
+        return back()->with('error','Already marked as completed.');
+    }
 
-        DB::transaction(function () use ($students, $classHour, $request) {
+    $class = $classHour->classRoom;
+    $students = $class->students;
+    $teacher = $class->teachers->first();
 
+    try {
+
+        DB::transaction(function () use ($students, $classHour, $request, $teacher, $class) {
+
+            // duplicate attendance
             if (StudentAttendance::where('class_hour_id',$classHour->id)->exists()) {
                 throw new \Exception('Attendance already recorded');
             }
 
+            // =========================
+            // Insert Attendance (Bulk)
+            // =========================
             $data = [];
 
             foreach ($students as $student) {
@@ -193,18 +205,162 @@ public function startClass(Request $request)
 
             StudentAttendance::insert($data);
 
+            // =========================
+            // Salary Cycle Init
+            // =========================
+            if ($teacher && is_null($teacher->salary_cycle_day)) {
+
+                $hasPreviousCompletedClass = ClassHour::whereHas('classRoom.teachers', function ($q) use ($teacher) {
+                        $q->where('teacher_id', $teacher->id);
+                    })
+                    ->where('status','completed')
+                    ->exists();
+
+                if (!$hasPreviousCompletedClass) {
+                    $teacher->update([
+                        'salary_cycle_day' => now()->day
+                    ]);
+                }
+            }
+
+            // =========================
+            // Mark class completed
+            // =========================
             $classHour->update([
                 'status' => 'completed'
             ]);
 
+            // =========================
+            // Update Class Starting Date (First Class Hour)
+            // =========================
+            $previousClassHours = ClassHour::where('class_room_id', $class->id)
+                ->where('id', '!=', $classHour->id)
+                ->exists();
+
+            if (!$previousClassHours && is_null($class->starting_date)) {
+                $class->update([
+                    'starting_date' => now()->toDateString()
+                ]);
+            }
+
+            // =========================
+            // MONTHLY FEE LOGIC 🔥
+            // =========================
+
+            // Only create fees for 'individual' class types
+            if ($class->classType && strtolower($class->classType->name) === 'individual') {
+
+                $requiredClasses = $class->classes_per_week * 4;
+
+                // Get unprocessed completed class hours
+                $completedClassHours = ClassHour::where('class_room_id', $class->id)
+                    ->where('status','completed')
+                    ->where('has_fee_calculated', false)
+                    ->orderBy('class_started_at')
+                    ->get();
+
+                if ($completedClassHours->count() >= $requiredClasses) {
+
+                    // Take only required cycle
+                    $cycleClassHours = $completedClassHours->take($requiredClasses);
+
+                    // Generate fees for each student
+                    foreach ($students as $student) {
+
+                        // 🔒 Avoid duplicate monthly fee for same cycle
+                        Fee::create([
+                            'student_id' => $student->id,
+                            'class_room_id' => $class->id,
+                            'type' => 'monthly',
+                            'amount' => $class->monthly_fee,
+                            'due_date' => now()->addDays(7),
+                            'status' => 'unpaid'
+                        ]);
+
+                    }
+
+                    // Mark class hours as calculated
+                    ClassHour::whereIn('id', $cycleClassHours->pluck('id'))
+                        ->update([
+                            'has_fee_calculated' => true
+                        ]);
+                }
+            }
+
         });
 
-        // Mark class as completed
-        $classHour->update([
-            'status' => 'completed'
-        ]);
+    } catch (\Exception $e) {
 
-        return back()->with('success','Attendance saved and class completed.');
+        return back()->with('error', $e->getMessage());
     }
+
+    return back()->with('success','Attendance saved and class completed.');
+}
+
+
+
+// public function classHourDetails($id)
+// {
+//     $classHour = ClassHour::with('classRoom','teacher','studentAttendances.student')
+//         ->findOrFail($id);
+
+//     return view('teacher.class_hours.show', compact('classHour'));
+
+// }
+// public function classHourStudents($id)
+// {
+//     $classHour = ClassHour::with('classRoom.students')->findOrFail($id);
+
+//     return response()->json([
+//         'students' => $classHour->classRoom->students
+//     ]);
+// }
+// public function updateClassHourLink(Request $request, $id)
+// {
+//     $request->validate([
+//         'google_meet_link' => 'required|url'
+//     ]);
+
+//     $classHour = ClassHour::findOrFail($id);
+
+//     $classHour->update([
+//         'google_meet_link' => $request->google_meet_link
+//     ]);
+
+//     return back()->with('success','Google Meet link updated successfully');
+// }
+
+// public function classHourStudentsJson($id)
+// {
+//     $classHour = ClassHour::with('classRoom.students')->findOrFail($id);
+
+//     return response()->json([
+//         'students' => $classHour->classRoom->students
+//     ]);
+
+// }
+// public function classHourDetailsJson($id)
+// {
+//     $classHour = ClassHour::with('classRoom','teacher','studentAttendances.student')
+//         ->findOrFail($id);
+
+//     return response()->json([
+//         'classHour' => $classHour
+//     ]);
+
+// }
+// public function markClassHourCompletedJson(Request $request, $id)
+// {
+//     $classHour = ClassHour::with('classRoom.students','classRoom.teachers','classRoom.classType')
+//         ->findOrFail($id);
+
+//     if ($classHour->status === 'completed') {
+//         return response()->json(['error' => 'Already marked as completed.'], 400);
+//     }
+
+//     $class = $classHour->classRoom;
+//     $students = $class->students;
+
+// }
 
 }

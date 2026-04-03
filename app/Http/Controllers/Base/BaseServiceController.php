@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\ClassService;
 use App\Services\FeeService;
 use App\Services\AttendanceService;
+use App\Services\SalaryService;
 
 class BaseServiceController extends Controller
 {
@@ -17,11 +18,13 @@ class BaseServiceController extends Controller
     protected $classService;
     protected $feeService;
     protected $attendanceService;
+    protected $salaryService;
 
     public function __construct(
         ClassService $classService,
         FeeService $feeService,
-        AttendanceService $attendanceService
+        AttendanceService $attendanceService,
+        SalaryService $salaryService
     )
     {
         /*
@@ -44,6 +47,7 @@ class BaseServiceController extends Controller
         $this->classService = $classService;
         $this->feeService = $feeService;
         $this->attendanceService = $attendanceService;
+        $this->salaryService = $salaryService;
     }
 
     /*

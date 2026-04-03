@@ -42,13 +42,13 @@ class CourseController extends Controller
         $request->validate([
             'category_id' => 'required|exists:course_categories,id',
             'name'        => 'required|string|max:255',
-            'course_fee'  => 'nullable|numeric'
+            // 'course_fee'  => 'nullable|numeric'
         ]);
 
         Course::create([
             'category_id' => $request->category_id,
             'name'        => $request->name,
-            'course_fee'  => $request->course_fee ?? 0,
+            // 'course_fee'  => $request->course_fee ?? 0,
         ]);
 
         return redirect()
@@ -75,14 +75,14 @@ class CourseController extends Controller
         $request->validate([
             'category_id' => 'required|exists:course_categories,id',
             'name'        => 'required|string|max:255',
-            'course_fee'  => 'nullable|numeric'
+            // 'course_fee'  => 'nullable|numeric'
         ]);
 
         // Update fields safely
         $course->update([
             'category_id' => $request->category_id,
             'name'        => $request->name,
-            'course_fee'  => $request->course_fee ?? 0,
+            // 'course_fee'  => $request->course_fee ?? 0,
         ]);
 
         return redirect()

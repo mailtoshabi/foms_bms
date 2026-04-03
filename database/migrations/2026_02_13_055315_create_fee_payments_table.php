@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('fee_id')->constrained()->cascadeOnDelete();
             $table->decimal('paid_amount',10,2);
+            $table->enum('payment_method', ['cash', 'card', 'upi', 'bank_transfer']);
+            $table->text('notes')->nullable();
             $table->date('paid_date');
             $table->timestamps();
         });

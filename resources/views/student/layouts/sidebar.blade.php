@@ -12,46 +12,24 @@
                     </a>
                 </li>
 
-                {{-- <li class="{{ set_active(['admin.staffs.*']) }}">
-                    <a href="javascript:void(0);" class="has-arrow">
-                        <i class="fas fa-user-tie"></i>
-                        <span>Staff Management</span>
-                    </a>
-                    <ul class="sub-menu">
-                        <li><a href="{{ route('admin.staffs.index') }}">List Staff</a></li>
-                        <li><a href="{{ route('admin.staffs.create') }}">Add Staff</a></li>
-                        <li><a href="{{ route('admin.roles.index') }}">Roles</a></li>
-                    </ul>
-                </li> --}}
-
-                {{-- <li class="{{ set_active(['admin.courses.*']) }}">
-                    <a href="javascript:void(0);" class="has-arrow">
-                        <i class="fas fa-book"></i>
-                        <span>Course Management</span>
-                    </a>
-                    <ul class="sub-menu">
-                        <li>
-                            <a href="{{ route('admin.courses.index') }}">Course List</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.courses.create') }}">Add Course</a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="{{ set_active(['admin.class_rooms.*']) }}">
-                    <a href="javascript:void(0);" class="has-arrow">
+                {{-- ================= Classes ================= --}}
+                <li class="{{ set_active('student.classes.*') }}">
+                    <a href="{{ route('student.classes.index') }}">
                         <i class="fas fa-chalkboard"></i>
                         <span>Classes</span>
                     </a>
-                    <ul class="sub-menu">
-                        <li><a href="{{ route('admin.class_rooms.index') }}">List Classes</a></li>
-                        <li><a href="{{ route('admin.class_rooms.create') }}">Add Class</a></li>
-                    </ul>
-                </li> --}}
+                </li>
+
+                {{-- ================= Class Notes ================= --}}
+                <li class="{{ set_active('student.notes.*') }}">
+                    <a href="{{ route('student.notes.index') }}">
+                        <i class="fas fa-sticky-note"></i>
+                        <span>Class Notes</span>
+                    </a>
+                </li>
 
                 {{-- ================= Messages ================= --}}
-                <li class="{{ set_active(['admin.messages.*','staff.messages.*']) }}">
+                <li class="{{ set_active(['student.messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-envelope"></i>
                         <span>Messages </span>
@@ -60,15 +38,15 @@
                     <ul class="sub-menu" aria-expanded="false">
 
                         {{-- Inbox --}}
-                        <li class="{{ set_active(['admin.messages.index']) }}">
-                            <a href="{{ route('admin.messages.index') }}">
+                        <li class="{{ set_active(['student.messages.index']) }}">
+                            <a href="{{ route('student.messages.index') }}">
                                 Inbox
                             </a>
                         </li>
 
                         {{-- New Message --}}
-                        <li class="{{ set_active(['admin.messages.create']) }}">
-                            <a href="{{ route('admin.messages.create') }}">
+                        <li class="{{ set_active(['student.messages.create']) }}">
+                            <a href="{{ route('student.messages.create') }}">
                                 New Message
                             </a>
                         </li>

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            // admission, coordinator, finance, attendance, operation
+            // Enrolment, Administrator, Finance, HR, Operation
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

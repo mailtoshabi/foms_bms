@@ -68,7 +68,8 @@
 <p class="text-danger">{{ $message }}</p>
 @enderror
 </div>
-
+</div>
+<div class="col-sm-6">
 
 {{-- ================= Course Name ================= --}}
 <div class="mb-3 required">
@@ -86,7 +87,7 @@
 
 
 {{-- ================= Course Fee ================= --}}
-<div class="mb-3">
+{{-- <div class="mb-3">
 <label>Course Fee</label>
 <input type="number"
        step="0.01"
@@ -98,7 +99,7 @@
 @error('course_fee')
 <p class="text-danger">{{ $message }}</p>
 @enderror
-</div>
+</div> --}}
 
 </div>
 

@@ -9,27 +9,69 @@ use App\Models\Teacher;
 use App\Models\FeePayment;
 use App\Models\Expense;
 
+use App\Models\StaffSalary;
+use App\Models\TeacherSalary;
+use Carbon\Carbon;
+
 class DashboardController extends Controller
 {
     public function dashboard()
     {
 
-        // dd(auth()->guard('staff')->user());
+        $now = Carbon::now();
 
-        // 💰 Finance totals (query ONCE)
-        $totalFee     = FeePayment::sum('paid_amount');
-        $totalExpense = Expense::sum('amount');
+    /*
+    |--------------------------------------------------------------------------
+    | 💰 Current Month Finance
+    |--------------------------------------------------------------------------
+    */
 
-        // 📊 Stats array
-        $stats = [
-            'students'     => Student::count(),
-            'staffs'        => Staff::count(),
-            'teachers'     => Teacher::count(),
-            'fee'          => $totalFee,
-            'expense'      => $totalExpense,
-            'balanceSheet' => $totalFee - $totalExpense,
-        ];
+    $totalFee = FeePayment::whereMonth('paid_date', $now->month)
+        ->whereYear('paid_date', $now->year)
+        ->sum('paid_amount');
 
-        return view('staff.dashboard.index', compact('stats'));
+    $totalExpense =
+        Expense::whereMonth('expense_date', $now->month)
+            ->whereYear('expense_date', $now->year)
+            ->sum('amount')
+
+        +
+
+        TeacherSalary::where('status','paid')
+            ->whereMonth('payment_date', $now->month)
+            ->whereYear('payment_date', $now->year)
+            ->sum('total_amount')
+
+        +
+
+        StaffSalary::where('status','paid')
+            ->whereMonth('paid_date', $now->month)
+            ->whereYear('paid_date', $now->year)
+            ->sum('salary_amount');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | 📊 Stats
+    |--------------------------------------------------------------------------
+    */
+
+    $stats = [
+        'students'     => Student::count(),
+        'teachers'     => Teacher::count(),
+        'fee'          => $totalFee,
+    ];
+
+    $topTeachers = topTeachers();
+
+        return view('staff.dashboard.index', compact('stats','topTeachers'));
+    }
+
+    public function profile()
+    {
+        $staff = auth()->guard('staff')->user();
+        $staff->load('roles');
+
+        return view('staff.profile', compact('staff'));
     }
 }

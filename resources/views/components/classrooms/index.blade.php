@@ -5,7 +5,8 @@
     'createRoute',
     'indexRoute',
     'editRoute',
-    'deleteRoute'
+    'deleteRoute',
+    'showRoute'
 ])
 <div class="card">
 
@@ -141,10 +142,10 @@ Reset
 
 @if($class->selected_days)
 
-<small>
+
 
 {{ implode(', ', $class->selected_days ?? []) }}
-
+<small>
 <br>
 
 {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
@@ -180,11 +181,12 @@ Monthly: ₹{{ number_format($class->monthly_fee,2) }}
 
 <div class="d-flex gap-2">
 
-<a href="{{ route('staff.class_rooms.show', encrypt($class->id)) }}"
-class="">
-
+{{-- <a href="{{ route('staff.class_rooms.show', encrypt($class->id)) }}">
 <i class="fas fa-eye"></i>
+</a> --}}
 
+<a href="{{ $showRoute(encrypt($class->id)) }}">
+<i class="fas fa-eye"></i>
 </a>
 
 <a href="{{ $editRoute(encrypt($class->id)) }}">

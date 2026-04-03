@@ -242,8 +242,11 @@
             </div> --}}
 
             <div class="dropdown d-inline-block">
-                <button type="submit" onclick="goLink('')" class="btn header-item  me-2"> {{-- right-bar-toggle href="{{ route('admin.settings.index') }}"  --}}
-                    <i data-feather="settings" class="icon-lg"></i>
+                <button type="button" class="btn header-item noti-icon me-2 right-bar-toggle">
+                    <i data-feather="clock" class="icon-lg"></i>
+                    @if(isset($pendingClassHoursCount) && $pendingClassHoursCount > 0)
+                        <span class="badge bg-danger rounded-pill">{{ $pendingClassHoursCount }}</span>
+                    @endif
                 </button>
             </div>
 

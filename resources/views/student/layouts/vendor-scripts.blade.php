@@ -11,4 +11,6 @@
 <script src="{{ URL::asset('assets/js/global.js') }}"></script>
 @yield('script')
 @yield('script-bottom')
+<!-- PWA -->
+<script src="{{ URL::asset('assets/js/pwa.js') }}" defer></script>
 

@@ -7,8 +7,93 @@ use App\Models\Teacher;
 use App\Models\TeacherSalary;
 use Illuminate\Http\Request;
 
+use Carbon\Carbon;
+use App\Models\ClassHour;
+use Illuminate\Support\Facades\DB;
+
 class TeacherSalaryController extends Controller
 {
+    public function processTeacherSalary($teacherId)
+    {
+        $teacherId = decrypt($teacherId);
+
+        $teacher = Teacher::findOrFail($teacherId);
+
+        if (!$teacher->salary_cycle_day) {
+            return;
+        }
+
+        $today = now();
+
+        // Determine cycle end
+        $cycleDay = $teacher->salary_cycle_day;
+
+        if ($today->day >= $cycleDay) {
+            $cycleEnd = Carbon::create($today->year, $today->month, $cycleDay);
+        } else {
+            $cycleEnd = Carbon::create($today->year, $today->month, $cycleDay)->subMonth();
+        }
+
+        $cycleStart = $cycleEnd->copy()->subMonth()->addDay();
+
+        // Get class hours in cycle
+        $classHours = ClassHour::with('classRoom')
+            ->where('teacher_id', $teacher->id)
+            ->where('status','completed')
+            ->where('has_salary_calculated', false)
+            ->whereBetween('class_started_at', [
+                $cycleStart->startOfDay(),
+                $cycleEnd->endOfDay()
+            ])
+            ->get();
+
+
+
+            // return  $cycleEnd->endOfDay();
+
+        if ($classHours->isEmpty()) {
+            return;
+        }
+
+        $totalAmount = 0;
+        $totalHours = 0;
+
+        foreach ($classHours as $hour) {
+
+            // Get wage from pivot
+            $pivot = $hour->classRoom->teachers()
+                ->where('teacher_id', $teacher->id)
+                ->first()
+                ->pivot;
+
+            $wage = $pivot->hourly_wage ?? 0;
+
+            $duration = $hour->duration ?? 0; // minutes
+
+            $hours = $duration / 60;
+
+            $totalHours += $hours;
+            $totalAmount += $hours * $wage;
+        }
+
+        DB::transaction(function () use ($teacher, $cycleStart, $cycleEnd, $totalHours, $totalAmount, $classHours) {
+
+            TeacherSalary::create([
+                'teacher_id' => $teacher->id,
+                'cycle_start' => $cycleStart,
+                'cycle_end' => $cycleEnd,
+                'total_hours' => $totalHours,
+                'total_amount' => $totalAmount,
+            ]);
+
+            // Mark processed
+            ClassHour::whereIn('id', $classHours->pluck('id'))
+                ->update(['has_salary_calculated' => true]);
+
+        });
+
+        return back()->with('success','Salary Updated successfully');
+    }
 
     public function create(Teacher $teacher)
     {
@@ -40,9 +125,10 @@ class TeacherSalaryController extends Controller
     {
 
     $salary->update($request->only(
-    'amount',
+    'total_amount',
     'payment_method',
     'payment_date',
+    'status',
     'notes'
     ));
 

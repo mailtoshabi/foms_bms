@@ -51,7 +51,10 @@ return new class extends Migration
             $table->enum('status',[
                 'active',
                 'inactive',
-                'suspended'
+                'suspended',
+                'retired',
+                'terminated',
+                'resigned',
             ])->default('active');
             $table->index(['name','contact_number']);
 

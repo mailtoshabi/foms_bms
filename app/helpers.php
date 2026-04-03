@@ -74,6 +74,148 @@ if (!function_exists('teacherWhatsappMessage')) {
 }
 
 
+use App\Models\Teacher;
+use App\Services\SalaryService;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
+if (!function_exists('runDailySalaryProcess')) {
+
+    function runDailySalaryProcess()
+    {
+        $today = Carbon::today()->toDateString();
+
+        $utility = Utility::firstOrCreate(
+            ['key' => 'daily_process_last_run'],
+            ['value' => null]
+        );
+
+        // ✅ Already ran today
+        if ($utility->value === $today) {
+            return;
+        }
+
+        DB::transaction(function () use ($utility, $today) {
+
+            $utility->refresh();
+
+            if ($utility->value === $today) {
+                return;
+            }
+
+            // ============================
+            // 🔹 1. Teacher Salary
+            // ============================
+            foreach (Teacher::cursor() as $teacher) {
+                app(\App\Services\SalaryService::class)
+                    ->processTeacherSalary($teacher->id);
+            }
+
+            // ============================
+            // 🔹 2. Group Class Fees
+            // ============================
+            app(\App\Services\FeeService::class)
+                ->generateGroupFeesForToday();
+
+            // ✅ Mark completed
+            $utility->update([
+                'value' => $today
+            ]);
+        });
+    }
+}
+
+use App\Models\ClassHour;
+use App\Models\StudentAttendance;
+
+if (!function_exists('topTeachers')) {
+    function topTeachers()
+    {
+        $teachers = Teacher::all();
+
+        $data = [];
+
+        foreach ($teachers as $teacher) {
+
+            // Total completed classes
+            $totalClasses = ClassHour::where('teacher_id',$teacher->id)
+                ->where('status','completed')
+                ->count();
+
+            // Total hours
+            $totalMinutes = ClassHour::where('teacher_id',$teacher->id)
+                ->where('status','completed')
+                ->sum('duration');
+
+            $totalHours = $totalMinutes / 60;
+
+            // =========================
+            // Student Attendance %
+            // =========================
+
+            $attendanceStats = StudentAttendance::whereHas('classHour', function ($q) use ($teacher) {
+                $q->where('teacher_id',$teacher->id)
+                ->where('status','completed');
+            })
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(is_present = 1) as present
+            ")
+            ->first();
+
+            $attendancePercent = $attendanceStats->total
+                ? ($attendanceStats->present / $attendanceStats->total) * 100
+                : 0;
+
+            // =========================
+            // Earnings
+            // =========================
+
+            $classHours = ClassHour::with([
+                'classRoom.teachers' => function ($q) use ($teacher) {
+                    $q->where('teacher_id',$teacher->id);
+                }
+            ])
+            ->where('teacher_id',$teacher->id)
+            ->where('status','completed')
+            ->get();
+
+            $earnings = 0;
+
+            foreach ($classHours as $hour) {
+
+                if (!$hour->duration) continue;
+
+                $pivot = optional($hour->classRoom->teachers->first())->pivot;
+                $wage = $pivot->hourly_wage ?? 0;
+
+                $earnings += ($hour->duration / 60) * $wage;
+            }
+
+            // 🎯 Score
+            $score =
+                ($totalClasses * 0.4) +
+                ($totalHours * 0.3) +
+                ($attendancePercent * 0.2) +
+                (($earnings / 100) * 0.1);
+
+            $data[] = [
+                'teacher' => $teacher,
+                'classes' => $totalClasses,
+                'hours' => round($totalHours,2),
+                'attendance' => round($attendancePercent,2),
+                'earnings' => round($earnings,2),
+                'score' => round($score,2),
+            ];
+        }
+
+        usort($data, fn($a,$b) => $b['score'] <=> $a['score']);
+
+        return array_slice($data, 0, 5);
+    }
+}
+
+
 
 
 

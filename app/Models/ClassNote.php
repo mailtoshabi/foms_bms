@@ -9,10 +9,9 @@ class ClassNote extends Model
     protected $fillable = [
         'class_room_id',
         'teacher_id',
-        'student_id',
         'title',
-        'note',
-        'attachment'
+        'content',
+        'visibility'
     ];
 
     public function classRoom()
@@ -25,8 +24,8 @@ class ClassNote extends Model
         return $this->belongsTo(Teacher::class);
     }
 
-    public function student()
+    public function files()
     {
-        return $this->belongsTo(Student::class);
+        return $this->hasMany(ClassNoteFile::class);
     }
 }

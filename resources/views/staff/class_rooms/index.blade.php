@@ -24,6 +24,7 @@
     indexRoute="{{ route('staff.class_rooms.index') }}"
     :editRoute="fn($id)=>route('staff.class_rooms.edit',$id)"
     :deleteRoute="fn($id)=>route('staff.class_rooms.destroy',$id)"
+    :showRoute="fn($id)=>route('staff.class_rooms.show',$id)"
 />
 
 @endsection

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->enum('category',['room_rent','internet','electricity','stationary','tea_snacks']);
+            $table->foreignId('category_id')->constrained('expense_categories');
             $table->decimal('amount',10,2);
             $table->date('expense_date');
             $table->text('remarks')->nullable();

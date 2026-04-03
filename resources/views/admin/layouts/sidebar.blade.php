@@ -51,7 +51,7 @@
                 </li>
 
                 {{-- ================= Messages ================= --}}
-                <li class="{{ set_active(['admin.messages.*','staff.messages.*']) }}">
+                <li class="{{ set_active(['admin.messages.*','staff.messages.*','admin.st-messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-envelope"></i>
                         <span>Messages </span>
@@ -62,17 +62,133 @@
                         {{-- Inbox --}}
                         <li class="{{ set_active(['admin.messages.index']) }}">
                             <a href="{{ route('admin.messages.index') }}">
-                                Inbox
+                                Staff Messages
                             </a>
                         </li>
 
                         {{-- New Message --}}
-                        <li class="{{ set_active(['admin.messages.create']) }}">
+                        {{-- <li class="{{ set_active(['admin.messages.create']) }}">
                             <a href="{{ route('admin.messages.create') }}">
                                 New Message
                             </a>
+                        </li> --}}
+
+                        {{-- Student-Teacher Messages --}}
+                        <li class="{{ set_active(['admin.st-messages.*']) }}">
+                            <a href="{{ route('admin.st-messages.index') }}">
+                                Student-Teacher
+                            </a>
                         </li>
 
+                    </ul>
+                </li>
+
+                <li class="menu-title">Reports</li>
+                <li class="{{ set_active(['admin.reports.fee.*', 'admin.reports.finance.expense']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="mdi mdi-cash-check"></i>
+                        <span>Finance</span>
+                    </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li>
+                            <a href="{{ route('admin.reports.fee.collection') }}">
+                                <span>Fee Collection</span>
+                            </a>
+                        </li>
+                        <li class="">
+                            <a href="{{ route('admin.reports.fee') }}"
+                                class="">
+                                <span>Pending Fee</span>
+                            </a>
+                        </li>
+                        <li class="{{ set_active(['admin.reports.finance.expense']) }}">
+                            <a href="{{ route('admin.reports.finance.expense') }}">
+                                <span>Expense Report</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher.salary']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="mdi mdi-account-tie"></i>
+                        <span>Teachers</span>
+                    </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+
+                        <li class="{{ set_active(['admin.reports.teacher-leads']) }}">
+                            <a href="{{ route('admin.reports.teacher-leads') }}">
+                                Leads
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.reports.teachers']) }}">
+                            <a href="{{ route('admin.reports.teachers') }}">
+                                Teachers
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.reports.teacher.salary']) }}">
+                            <a href="{{ route('admin.reports.teacher.salary') }}">
+                                Salary
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="{{ set_active(['admin.reports.students.*']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="mdi mdi-school"></i>
+                        <span>Students</span>
+                    </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+
+                        {{-- Inbox --}}
+                        <li class="{{ set_active(['admin.reports.student-leads']) }}">
+                            <a href="{{ route('admin.reports.student-leads') }}">
+                                Leads
+                            </a>
+                        </li>
+
+                        {{-- New Message --}}
+                        <li class="{{ set_active(['admin.reports.students']) }}">
+                            <a href="{{ route('admin.reports.students') }}">
+                                Students
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('admin.reports.attendance') }}">
+                            {{-- <i class="mdi mdi-calendar-check"></i> --}}
+                            <span>Attendance</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </li>
+
+                <li class="{{ set_active(['admin.reports.staffs', 'admin.reports.staff.salary']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="mdi mdi-account-group"></i>
+                        <span>Staff</span>
+                    </a>
+
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li class="{{ set_active(['admin.reports.staffs']) }}">
+                            <a href="{{ route('admin.reports.staffs') }}">
+                                Staff List
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.reports.staff.salary']) }}">
+                            <a href="{{ route('admin.reports.staff.salary') }}">
+                                Salary
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

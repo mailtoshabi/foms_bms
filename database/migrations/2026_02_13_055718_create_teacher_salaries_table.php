@@ -19,17 +19,22 @@ return new class extends Migration
                 ->constrained()
                 ->cascadeOnDelete();
 
-            $table->decimal('amount',10,2);
+            $table->date('cycle_start');
+            $table->date('cycle_end');
 
-            $table->date('payment_date');
+            $table->decimal('total_hours', 10, 2)->default(0);
+            $table->decimal('total_amount', 10, 2)->default(0);
 
-            $table->string('payment_method')->nullable();
+            $table->date('payment_date')->nullable();
+
+            $table->enum('payment_method', ['cash', 'card', 'upi', 'bank_transfer'])->nullable();
             // cash | bank | upi etc
 
             $table->string('reference_number')->nullable();
             // bank txn id / upi ref
 
             $table->text('notes')->nullable();
+            $table->enum('status',['paid','unpaid','partial'])->default('unpaid');
 
             $table->timestamps();
 

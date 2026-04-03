@@ -97,7 +97,26 @@
 
                 @endif
 
+                <li>
+                    <a href="{{ route('staff.fees.index') }}">
+                    <i class="fas fa-money-bill"></i>
+                    <span>Fees</span>
+                    </a>
+                </li>
 
+                <li>
+                    <a href="{{ route('staff.salaries.index') }}">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Salaries</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{{ route('staff.expenses.index') }}">
+                    <i class="fas fa-receipt"></i>
+                    <span>Expenses</span>
+                    </a>
+                </li>
 
                 <li class="{{ set_active(['staff.class_rooms.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">

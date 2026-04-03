@@ -32,5 +32,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SourceSeeder::class,
         ]);
+
+        $this->call([
+            ExpenseCategorySeeder::class,
+        ]);
     }
 }

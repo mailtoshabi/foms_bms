@@ -14,7 +14,7 @@
 @slot('li_1') Academics @endslot
 @slot('li_2') Classes @endslot
 @slot('title')
-@if(isset($class)) Edit Class @else Add Class @endif
+@if(isset($class)) Edit Class @else Add Classsss @endif
 @endslot
 @endcomponent
 
@@ -26,6 +26,7 @@
     indexRoute="{{ route('admin.class_rooms.index') }}"
     :editRoute="fn($id)=>route('admin.class_rooms.edit',$id)"
     :deleteRoute="fn($id)=>route('admin.class_rooms.destroy',$id)"
+    :showRoute="fn($id)=>route('admin.class_rooms.show',$id)"
 />
 
 @endsection

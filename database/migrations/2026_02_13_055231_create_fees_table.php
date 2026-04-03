@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('due_date');
             $table->enum('status',['paid','unpaid','partial'])->default('unpaid');
             $table->timestamps();
+            $table->unique(['student_id', 'class_room_id', 'due_date', 'type']);
         });
     }
 

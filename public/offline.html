@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ec1d23">
+    <title>Offline – FOMS BMS</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+            color: #374151;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+        }
+
+        .brand {
+            display: inline-block;
+            background: #ec1d23;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4px 14px;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .icon-wrap {
+            width: 88px;
+            height: 88px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .icon-wrap svg {
+            width: 48px;
+            height: 48px;
+            color: #ec1d23;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            color: #6b7280;
+            line-height: 1.65;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-retry {
+            display: inline-block;
+            background: #ec1d23;
+            color: #fff;
+            padding: 0.8rem 2.25rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-retry:hover { background: #c41920; }
+
+        .status {
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #f87171;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="brand">FOMS BMS</div>
+
+        <div class="icon-wrap">
+            <svg viewBox="0 0 24 24">
+                <path d="M1 6l5 5m0 0l5-5M6 11V2"/>
+                <path d="M23 14a9 9 0 01-15.32 6.46"/>
+                <path d="M1 3l22 18"/>
+            </svg>
+        </div>
+
+        <h1>You're Offline</h1>
+        <p>
+            No internet connection detected. Please check your network
+            settings and try again.
+        </p>
+
+        <button class="btn-retry" onclick="tryReload()">
+            Try Again
+        </button>
+
+        <p class="status">
+            <span class="dot"></span>Not connected to the internet
+        </p>
+    </div>
+
+    <script>
+        function tryReload() {
+            window.location.reload();
+        }
+
+        // Auto-reload when connection is restored
+        window.addEventListener('online', function () {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

@@ -15,6 +15,11 @@ class StudentAttendance extends Model
     protected $casts = [
         'is_present' => 'boolean',
     ];
+
+    public function classHour()
+    {
+        return $this->belongsTo(\App\Models\ClassHour::class);
+    }
 }
 
 

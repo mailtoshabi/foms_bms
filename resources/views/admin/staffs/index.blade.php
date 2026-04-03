@@ -122,6 +122,11 @@
 
 <div class="d-flex align-items-center gap-2">
 
+<a href="{{ route('admin.staffs.show',encrypt($staff->id)) }}"
+   data-bs-toggle="tooltip" title="View Details">
+    <i class="mdi mdi-eye text-info"></i>
+</a>
+
 <a href="{{ route('admin.staffs.edit',encrypt($staff->id)) }}"
    data-bs-toggle="tooltip" title="Edit">
     <i class="mdi mdi-pencil text-success"></i>

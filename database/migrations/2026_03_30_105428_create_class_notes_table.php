@@ -6,33 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     */
     public function up(): void
     {
         Schema::create('class_notes', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('class_room_id')
-                ->constrained('class_rooms')
-                ->cascadeOnDelete();
+            // Relations
+            $table->foreignId('teacher_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('class_room_id')->constrained()->cascadeOnDelete();
 
-            $table->foreignId('teacher_id')
-                ->constrained('teachers')
-                ->cascadeOnDelete();
-
-            $table->foreignId('student_id')
-                ->constrained('students')
-                ->cascadeOnDelete();
-
+            // Note info
             $table->string('title');
+            $table->longText('content')->nullable(); // optional text note
 
-            $table->text('note')->nullable();
-
-            $table->string('attachment')->nullable();
+            // Visibility
+            $table->enum('visibility', ['public', 'private'])->default('public');
 
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('class_notes');

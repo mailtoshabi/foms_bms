@@ -11,8 +11,17 @@ class ClassHour extends Model
         'teacher_id',
         'duration',
         'google_meet_link',
-        'status'
+        'status',
+        'has_fee_calculated',
+        'has_salary_calculated',
+        'class_started_at'
     ];
+
+    protected $casts = [
+        'has_fee_calculated'  => 'boolean',
+        'has_salary_calculated'  => 'boolean',
+        'class_started_at'  => 'date'
+        ];
 
     public function classRoom()
     {

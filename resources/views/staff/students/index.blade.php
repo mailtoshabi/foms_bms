@@ -60,7 +60,7 @@ placeholder="Search name or contact">
 
 <td>{{ $student->name }}<br>
     @isset($student->dob)
-        <small>DOB: {{ $student->dob_formatted }}</small>
+        <br><small>DOB: {{ $student->dob_formatted }}</small>
     @endisset
 </td>
 <td>{{ $student->contact_number }}</td>

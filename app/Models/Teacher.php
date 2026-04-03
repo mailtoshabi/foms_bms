@@ -34,7 +34,8 @@ class Teacher extends Authenticatable
 
         'status',
 
-        'salary_cycle_day'
+        'salary_cycle_day',
+        'salary_amount'
     ];
 
     protected $hidden = [
@@ -53,10 +54,10 @@ class Teacher extends Authenticatable
             ->latest('payment_date');
     }
 
-    public function attendances()
-    {
-        return $this->hasMany(TeacherAttendance::class);
-    }
+    // public function attendances()
+    // {
+    //     return $this->hasMany(TeacherAttendance::class);
+    // }
 
 
     public function getDobFormattedAttribute()
@@ -94,6 +95,16 @@ class Teacher extends Authenticatable
         ->withTimestamps();
     }
 
+    public function completedClassRooms()
+    {
+        return $this->belongsToMany(
+            ClassRoom::class,
+            'teacher_class_room'
+        )
+        ->withPivot('hourly_wage','assigned_at')
+        ->withTimestamps();
+    }
+
 public function lead()
 {
     return $this->belongsTo(TeacherLead::class,'teacher_lead_id');
@@ -112,5 +123,20 @@ public function getSalaryCreditDayAttribute()
     );
 
     return $date->addDays(10)->day;
+}
+
+public function getSalaryCreditDateAttribute()
+{
+    if (!$this->salary_cycle_day) {
+        return null;
+    }
+
+    $date = Carbon::create(
+        now()->year,
+        now()->month,
+        min($this->salary_cycle_day, now()->daysInMonth)
+    );
+
+    return $date->addDays(10)->format('d M Y');
 }
 }

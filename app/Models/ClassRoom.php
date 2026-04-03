@@ -40,9 +40,9 @@ class ClassRoom extends Model
     }
 
     public function notes()
-{
-    return $this->hasMany(ClassNote::class);
-}
+    {
+        return $this->hasMany(ClassNote::class);
+    }
 
 public function students()
 {

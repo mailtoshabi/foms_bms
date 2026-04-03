@@ -36,15 +36,17 @@
 
 <td>{{ $class->name }}</td>
 
-<td>{{ $class->classType->name }}</td>
+<td>{{ ucfirst($class->classType->name ?? '-') }}</td>
 
 <td>
 
-{{ implode(', ',$class->selected_days ?? []) }}
-
+{{ implode(', ', $class->selected_days ?? []) }}
+<small>
 <br>
 
-{{ $class->time_slot }}
+{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
+
+</small>
 
 </td>
 

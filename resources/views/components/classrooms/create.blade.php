@@ -208,7 +208,7 @@ value="{{ $class->slot_duration ?? '' }}">
 </div>
 
 
-<div class="col-md-3 mb-3">
+{{-- <div class="col-md-3 mb-3">
 
 <label>Starting Date</label>
 
@@ -217,7 +217,7 @@ name="starting_date"
 class="form-control"
 value="{{ old('starting_date', isset($class) && $class->starting_date ? $class->starting_date->format('Y-m-d') : '') }}">
 
-</div>
+</div> --}}
 
 
 </div>

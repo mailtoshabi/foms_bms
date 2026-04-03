@@ -70,7 +70,7 @@ Reset
 <tr>
 <th>Category</th>
 <th>Name</th>
-<th>Fee</th>
+{{-- <th>Fee</th> --}}
 <th>Created</th>
 <th>Action</th>
 </tr>
@@ -86,7 +86,7 @@ Reset
 
 <td>{{ $course->name }}</td>
 
-<td>{{ number_format($course->course_fee,2) }}</td>
+{{-- <td>{{ number_format($course->course_fee,2) }}</td> --}}
 
 <td>{{ $course->created_at->format('d M Y') }}</td>
 

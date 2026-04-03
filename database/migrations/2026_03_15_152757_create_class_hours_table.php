@@ -29,6 +29,9 @@ return new class extends Migration
             $table->enum('status',['pending','completed'])
                 ->default('pending');
 
+            $table->boolean('has_fee_calculated')->default(false);
+            $table->boolean('has_salary_calculated')->default(false);
+
             $table->timestamps();
 
         });

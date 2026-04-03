@@ -1,0 +1,39 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('class_note_files', function (Blueprint $table) {
+            $table->id();
+
+            // Relation to note
+            $table->foreignId('class_note_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            // File details
+            $table->string('file_name');   // original name
+            $table->string('file_path');   // storage path
+            $table->string('file_type');   // pdf, docx, jpg, png
+            $table->integer('file_size')->nullable(); // optional (in KB/bytes)
+
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('class_note_files');
+    }
+};

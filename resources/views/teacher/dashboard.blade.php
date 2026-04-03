@@ -11,7 +11,7 @@
 <div class="col-md-4">
 <div class="card text-center">
 <div class="card-body">
-<h5>Assigned Classes</h5>
+<h5>Active Class Rooms</h5>
 <h2>{{ $classes->count() }}</h2>
 </div>
 </div>
@@ -20,8 +20,8 @@
 <div class="col-md-4">
 <div class="card text-center">
 <div class="card-body">
-<h5>Attendance</h5>
-<h2>{{ $attendancePercent }}%</h2>
+<h5>Completed Sessions</h5>
+<h2>{{ $completedClasses }}</h2>
 </div>
 </div>
 </div>
@@ -32,7 +32,7 @@
 <h5>Latest Salary</h5>
 <h2>
 @if($salaries->first())
-₹ {{ number_format($salaries->first()->amount,2) }}
+₹ {{ number_format($salaries->first()->total_amount,2) }}
 @else
 -
 @endif
@@ -41,6 +41,54 @@
 </div>
 </div>
 
+{{-- Total Hours --}}
+<div class="col-md-3">
+<div class="card text-center">
+<div class="card-body">
+<h6>Total Hours</h6>
+<h3 class="text-primary">
+{{ $totalHours }} hrs
+</h3>
+</div>
+</div>
+</div>
+
+{{-- This Month Classes --}}
+<div class="col-md-3">
+<div class="card text-center">
+<div class="card-body">
+<h6>This Month Classes</h6>
+<h3 class="text-info">
+{{ $thisMonthClasses }}
+</h3>
+</div>
+</div>
+</div>
+
+{{-- Earnings This Month --}}
+<div class="col-md-3">
+<div class="card text-center">
+<div class="card-body">
+<h6>Earnings This Month</h6>
+<h3 class="text-success">
+₹ {{ number_format($earningsThisMonth,2) }}
+</h3>
+</div>
+</div>
+</div>
+
+<div class="col-md-3">
+    <div class="card text-center">
+    <div class="card-body">
+    <h6>Pending Salary</h6>
+    <h3 class="text-danger">
+    ₹ {{ number_format($pendingSalary,2) }}
+    </h3>
+    </div>
+    </div>
+</div>
+
+<canvas id="teacherChart"></canvas>
 
 {{-- ASSIGNED CLASSES --}}
 
@@ -61,7 +109,7 @@
 <th>Class</th>
 <th>Type</th>
 <th>Days</th>
-<th>Time</th>
+<th>Hourly Wage</th>
 </tr>
 </thead>
 
@@ -72,8 +120,11 @@
 <tr>
 
 <td>{{ $class->course->name ?? '-' }}</td>
+
 <td>{{ $class->name }}</td>
-<td>{{ $class->classType->name ?? '-' }}</td>
+
+<td>{{ ucfirst($class->classType->name ?? '-') }}</td>
+
 <td>
     @if($class->selected_days)
 
@@ -81,13 +132,18 @@
 
     {{ implode(', ', $class->selected_days ?? []) }}
 
+    <br>
+
+    {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
 
     </small>
 
     @endif
 </td>
 
-<td>{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</td>
+<td>
+{{ $class->pivot->hourly_wage }}
+</td>
 
 </tr>
 
@@ -114,25 +170,64 @@
 
 <div class="card-body">
 
-@forelse($notes as $note)
-
-<div class="border p-3 mb-2">
-
-<strong>{{ $note->title }}</strong>
-
-<p class="text-muted small">
-{{ $note->created_at->format('d M Y') }}
-</p>
-
-<p>{{ Str::limit($note->content,100) }}</p>
-
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Class</th>
+                <th>Files</th>
+                <th>Created</th>
+                <th width="100">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($notes as $note)
+                <tr>
+                    <td>
+                        <strong>{{ $note->title }}</strong>
+                    </td>
+                    <td>
+                        {{ $note->classRoom?->name ?? '-' }}
+                    </td>
+                    <td>
+                        @if($note->files->count() > 0)
+                            <span class="badge bg-primary">{{ $note->files->count() }} file(s)</span>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
+                    <td>
+                        {{ $note->created_at->format('d M Y') }}
+                    </td>
+                    <td>
+                        <a href="{{ route('teacher.notes.show', encrypt($note->id)) }}"
+                            class="btn btn-sm btn-info"
+                            title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <form action="{{ route('teacher.notes.destroy', encrypt($note->id)) }}"
+                                method="POST"
+                                style="display:inline;"
+                                onsubmit="return confirm('Delete this note?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No notes uploaded yet
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
 </div>
-
-@empty
-
-<p class="text-muted">No notes available</p>
-
-@endforelse
 
 </div>
 </div>
@@ -156,9 +251,10 @@
 
 <thead>
 <tr>
-<th>Month</th>
-<th>Amount</th>
-<th>Paid Date</th>
+<th>Cycle</th>
+<th>Total Hours</th>
+<th>Total Amount</th>
+<th>Status</th>
 </tr>
 </thead>
 
@@ -168,11 +264,35 @@
 
 <tr>
 
-<td>{{ $salary->month }} {{ $salary->year }}</td>
+<td>
+{{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
+-
+{{ \Carbon\Carbon::parse($salary->cycle_end)->format('d M Y') }}
+</td>
 
-<td>₹ {{ number_format($salary->amount,2) }}</td>
+<td>
+<span class="badge bg-info">
+{{ number_format($salary->total_hours,2) }} hrs
+</span>
+</td>
 
-<td>{{ $salary->paid_date }}</td>
+<td>
+<strong class="text-success">
+₹ {{ number_format($salary->total_amount,2) }}
+</strong>
+@if($salary->status == 'paid')
+<br><small class="text-muted">
+Paid on {{ optional($salary->payment_date)->format('d M Y') }}
+</small>
+@endif
+</td>
+
+<td>
+<span class="badge
+    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
+    {{ ucfirst($salary->status) }}
+</span>
+</td>
 
 </tr>
 
@@ -191,4 +311,29 @@
 
 </div>
 
+@endsection
+
+@section('script')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    const ctx = document.getElementById('teacherChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: @json($chartLabels),
+            datasets: [
+                {
+                    label: 'Classes',
+                    data: @json($classCounts)
+                },
+                {
+                    label: 'Earnings',
+                    data: @json($earnings)
+                }
+            ]
+        }
+    });
+    </script>
 @endsection

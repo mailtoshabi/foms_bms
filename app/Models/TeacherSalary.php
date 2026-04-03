@@ -8,15 +8,21 @@ class TeacherSalary extends Model
 {
     protected $fillable = [
         'teacher_id',
-        'amount',
+        'cycle_start',
+        'cycle_end',
+        'total_hours',
+        'total_amount',
         'payment_date',
         'payment_method',
         'reference_number',
-        'notes'
+        'notes',
+        'status'
     ];
 
     protected $casts = [
-        'payment_date' => 'date'
+        'payment_date' => 'date',
+        'cycle_start' => 'date',
+        'cycle_end' => 'date'
     ];
 
     public function teacher()

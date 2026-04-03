@@ -76,7 +76,7 @@ class BaseClassRoomController extends BaseServiceController
             'admission_fee'    => 'nullable|numeric|min:0',
             'monthly_fee'      => 'nullable|numeric|min:0',
 
-            'starting_date'    => 'nullable|date',
+            // 'starting_date'    => 'nullable|date',
             'is_completed'     => 'nullable|boolean',
         ]);
 
@@ -119,7 +119,7 @@ class BaseClassRoomController extends BaseServiceController
             'admission_fee'    => 'nullable|numeric|min:0',
             'monthly_fee'      => 'nullable|numeric|min:0',
 
-            'starting_date'    => 'nullable|date',
+            // 'starting_date'    => 'nullable|date',
             'is_completed'     => 'nullable|boolean',
         ]);
 
