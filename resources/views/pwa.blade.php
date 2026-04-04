@@ -1,4 +1,5 @@
-/**
+<script>
+    /**
  * FOMS BMS – PWA Handler
  * Responsibilities:
  *   1. Register /sw.js service worker
@@ -13,7 +14,7 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
             navigator.serviceWorker
-                .register(window.swUrl || '/sw.js', { scope: '/' })
+                .register('{{ url('sw.js') }}', { scope: '/' })
                 .then(function (registration) {
                     // Listen for an updated SW being installed in the background
                     registration.addEventListener('updatefound', function () {
@@ -130,3 +131,5 @@
     });
 
 })();
+
+</script>

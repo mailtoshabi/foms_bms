@@ -29,7 +29,7 @@
     <meta name="theme-color" content="#ec1d23">
 
     <!-- PWA -->
-    <link rel="manifest" href="/manifest-student.json">
+    <link rel="manifest" href="{{ asset('manifest-student.json') }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">

@@ -12,5 +12,6 @@
 @yield('script')
 @yield('script-bottom')
 <!-- PWA -->
-<script src="{{ URL::asset('assets/js/pwa.js') }}" defer></script>
-
+{{-- <script>window.swUrl = '{{ asset('sw.js') }}';</script>
+<script src="{{ URL::asset('assets/js/pwa.js') }}" defer></script> --}}
+@include('pwa')

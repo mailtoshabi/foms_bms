@@ -147,7 +147,8 @@ self.addEventListener('fetch', (event) => {
                 if (cached) return cached;
                 return fetch(req).then((response) => {
                     if (response.ok) {
-                        caches.open(STATIC_CACHE).then(c => c.put(req, response.clone()));
+                        const clone = response.clone();
+                        caches.open(STATIC_CACHE).then(c => c.put(req, clone));
                     }
                     return response;
                 }).catch(() => caches.match('/offline.html'));
@@ -166,7 +167,8 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             fetch(req).then((response) => {
                 if (response.ok) {
-                    caches.open(DYNAMIC_CACHE).then(c => c.put(req, response.clone()));
+                    const clone = response.clone();
+                    caches.open(DYNAMIC_CACHE).then(c => c.put(req, clone));
                 }
                 return response;
             }).catch(() => caches.match(req).then(c => c || caches.match('/offline.html')))
