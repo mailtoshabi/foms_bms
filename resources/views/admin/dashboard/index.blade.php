@@ -70,7 +70,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Fee Collected</span>
-                        <h4 class="mb-0">â‚¹ {{ number_format($stats['fee'],2) }}</h4>
+                        <h4 class="mb-0">{{ number_format($stats['fee'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-rupee-sign fa-2x text-info"></i>
@@ -87,7 +87,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Expense</span>
-                        <h4 class="mb-0">â‚¹ {{ number_format($stats['expense'],2) }}</h4>
+                        <h4 class="mb-0">{{ number_format($stats['expense'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-file-invoice-dollar fa-2x text-danger"></i>
@@ -104,7 +104,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Balance Sheet</span>
-                        <h4 class="mb-0">â‚¹ {{ number_format($stats['balanceSheet'],2) }}</h4>
+                        <h4 class="mb-0">{{ number_format($stats['balanceSheet'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-chart-line fa-2x text-dark"></i>
