@@ -1,4 +1,4 @@
-@extends('staff.layouts.master')
+﻿@extends('staff.layouts.master')
 
 @section('title','Teacher Salaries')
 
@@ -112,6 +112,7 @@ Reset
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -147,7 +148,7 @@ Reset
 
 <td>
 <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
-₹ {{ number_format($salary->total_amount,2) }}
+â‚¹ {{ number_format($salary->total_amount,2) }}
 </strong>
 @if($salary->status == 'paid')
 <br><small class="text-muted">
@@ -195,6 +196,7 @@ data-notes="{{ $salary->notes }}">
 </tbody>
 
 </table>
+</div>
 
 <div class="mt-3">
 {{ $salaries->links() }}
@@ -281,7 +283,7 @@ data-notes="{{ $salary->notes }}">
 
         $('#salary_id').val(btn.data('id'));
 
-        $('#salary_amount').val('₹ ' + parseFloat(btn.data('amount')).toFixed(2));
+        $('#salary_amount').val('â‚¹ ' + parseFloat(btn.data('amount')).toFixed(2));
 
         // Prefill
         $('#payment_date').val(btn.data('date') || new Date().toISOString().split('T')[0]);

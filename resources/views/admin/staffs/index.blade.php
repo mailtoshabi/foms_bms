@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+﻿@extends('admin.layouts.master')
 
 @section('title') Staff List @endsection
 
@@ -79,6 +79,7 @@
 </div>
 </form>
 
+<div class="table-responsive">
 <table class="table table-bordered">
 <thead>
 <tr>
@@ -155,6 +156,7 @@
 </tbody>
 
 </table>
+</div>
 
 {{ $staffs->links() }}
 

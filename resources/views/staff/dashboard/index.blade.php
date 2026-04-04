@@ -1,4 +1,4 @@
-@extends('staff.layouts.master')
+﻿@extends('staff.layouts.master')
 @section('title') Dashboard @endsection
 @section('css')
 
@@ -52,7 +52,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Fee Collected</span>
-                        <h4 class="mb-0">₹ {{ number_format($stats['fee'],2) }}</h4>
+                        <h4 class="mb-0">â‚¹ {{ number_format($stats['fee'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-rupee-sign fa-2x text-info"></i>
@@ -69,6 +69,7 @@
 
         <div class="card-body">
 
+        <div class="table-responsive">
         <table class="table table-bordered">
 
         <thead>
@@ -89,9 +90,9 @@
         <tr>
 
         <td>
-        @if($index == 0) 🥇
-        @elseif($index == 1) 🥈
-        @elseif($index == 2) 🥉
+        @if($index == 0) ðŸ¥‡
+        @elseif($index == 1) ðŸ¥ˆ
+        @elseif($index == 2) ðŸ¥‰
         @else {{ $index+1 }}
         @endif
         </td>
@@ -117,6 +118,7 @@
         </tbody>
 
         </table>
+        </div>
 
         </div>
     </div>

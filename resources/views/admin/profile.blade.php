@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+﻿@extends('admin.layouts.master')
 
 @section('title', 'My Profile')
 
@@ -23,6 +23,7 @@
                 <h5 class="mb-0">Personal Information</h5>
             </div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-borderless mb-0">
                     <tbody>
                         <tr>
@@ -39,6 +40,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

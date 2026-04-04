@@ -1,4 +1,4 @@
-@extends('teacher.layouts.master')
+﻿@extends('teacher.layouts.master')
 
 @section('title','Class Details')
 
@@ -33,13 +33,14 @@ Create New Session
 
 <p><strong>Duration:</strong> {{ $class->slot_duration }} minutes</p>
 <p><strong>Monthly Sessions:</strong> {{ $class->classes_per_week * 4 }} </p>
-<p><strong>Hourly Wage:</strong>  ₹{{ $class->teachers()->find(Auth::guard('teacher')->user()->id)->pivot->hourly_wage }} </p>
+<p><strong>Hourly Wage:</strong>  â‚¹{{ $class->teachers()->find(Auth::guard('teacher')->user()->id)->pivot->hourly_wage }} </p>
 
 
 <hr>
 
 <h5>Students</h5>
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -87,11 +88,13 @@ $percentage = round(($present / $total) * 100);
 </tbody>
 
 </table>
+</div>
 
 <hr>
 
 <h5>Sessions</h5>
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -178,6 +181,7 @@ No Sessions created
 </tbody>
 
 </table>
+</div>
 
 <hr>
 <h5>Class Notes</h5>
@@ -194,7 +198,7 @@ No Sessions created
                             </span>
                         </h6>
                         <small class="text-muted">
-                            By {{ $note->teacher->name }} • {{ $note->created_at->format('M d, Y H:i') }}
+                            By {{ $note->teacher->name }} â€¢ {{ $note->created_at->format('M d, Y H:i') }}
                         </small>
                         @if($note->content)
                             <p class="text-muted mt-2 mb-0">{{ Str::limit($note->content, 100) }}</p>

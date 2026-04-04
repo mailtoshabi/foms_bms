@@ -1,4 +1,4 @@
-
+﻿
 @section('title','Teacher Details')
 
 @section('content')
@@ -45,7 +45,7 @@ width="120">
 </div>
 <div class="mb-1">
     @for($s = 1; $s <= 5; $s++)
-        <span style="font-size:1.2rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">★</span>
+        <span style="font-size:1.2rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">â˜…</span>
     @endfor
 </div>
 <small class="text-muted">Score: {{ $rank['score'] }}</small>
@@ -99,6 +99,7 @@ data-bs-target="#salaryModal">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered table-sm">
 
 <thead>
@@ -119,7 +120,7 @@ data-bs-target="#salaryModal">
 
 <td>{{ $teacher->SalaryCreditDate }}</td>
 
-<td>₹ {{ number_format($salary->total_amount,2) }}</td>
+<td>â‚¹ {{ number_format($salary->total_amount,2) }}</td>
 
 <td>{{ ucfirst($salary->payment_method ?? '-') }}</td>
 
@@ -155,6 +156,7 @@ No salary payments yet
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -185,6 +187,7 @@ data-bs-target="#assignClassModal">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -284,6 +287,7 @@ No classes assigned
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -409,7 +413,7 @@ class="btn btn-success">
 {{-- Hourly Wage --}}
 <div class="mb-3">
 
-<label class="form-label">Wage Per Hour (₹)</label>
+<label class="form-label">Wage Per Hour (â‚¹)</label>
 
 <input type="number"
 step="0.01"
@@ -619,7 +623,7 @@ class="form-control"
 placeholder="https://meet.google.com/...">
 
 <small class="text-muted">
-Optional – for online classes
+Optional â€“ for online classes
 </small>
 
 </div>

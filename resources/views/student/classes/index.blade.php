@@ -1,4 +1,4 @@
-@extends('student.layouts.master-layouts-noleft')
+﻿@extends('student.layouts.master-layouts-noleft')
 
 @section('title', 'My Classes')
 
@@ -13,6 +13,7 @@
                 @if($classes->isEmpty())
                     <p class="text-muted">No classes assigned yet.</p>
                 @else
+                    <div class="table-responsive">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
@@ -51,6 +52,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </div>
         </div>

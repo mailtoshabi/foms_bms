@@ -1,4 +1,4 @@
-@extends('staff.layouts.master')
+﻿@extends('staff.layouts.master')
 
 @section('title', 'Expenses')
 
@@ -20,7 +20,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h6 class="text-muted">Total Expenses</h6>
-                        <h3 class="text-primary">₹ {{ number_format($totalExpense, 2) }}</h3>
+                        <h3 class="text-primary">â‚¹ {{ number_format($totalExpense, 2) }}</h3>
                     </div>
                     <div class="col-md-6">
                         <h6 class="text-muted">Total Records</h6>
@@ -101,6 +101,7 @@
             </div>
 
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
@@ -126,7 +127,7 @@
 
                                 <td>
                                     <strong class="text-danger">
-                                        ₹ {{ number_format($expense->amount, 2) }}
+                                        â‚¹ {{ number_format($expense->amount, 2) }}
                                     </strong>
                                 </td>
 
@@ -168,6 +169,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
 
                 {{-- Pagination --}}
                 <div class="mt-3">

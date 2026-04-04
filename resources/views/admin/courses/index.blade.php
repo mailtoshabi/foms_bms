@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+﻿@extends('admin.layouts.master')
 @section('title') Course List @endsection
 
 @section('content')
@@ -65,6 +65,7 @@ Reset
 </div>
 </form>
 
+<div class="table-responsive">
 <table class="table table-bordered">
 <thead>
 <tr>
@@ -117,6 +118,7 @@ action="{{ route('admin.courses.destroy',encrypt($course->id)) }}">
 @endforeach
 </tbody>
 </table>
+</div>
 
 {{ $courses->links() }}
 

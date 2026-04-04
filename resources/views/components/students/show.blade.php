@@ -1,4 +1,4 @@
-
+﻿
 @section('title','Student Details')
 
 @section('content')
@@ -83,6 +83,7 @@ width="120">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -129,6 +130,7 @@ width="120">
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -150,6 +152,7 @@ width="120">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -177,6 +180,7 @@ width="120">
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -234,6 +238,7 @@ width="120">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -260,14 +265,14 @@ $remaining = $fee->amount - $paid;
 <td>{{ ucfirst($fee->type) . ' Fee' }}</td>
 
 <td>
-    <strong>₹ {{ number_format($fee->amount,2) }}</strong><br>
+    <strong>â‚¹ {{ number_format($fee->amount,2) }}</strong><br>
 
     <small class="text-success">
-        Paid: ₹ {{ number_format($paid,2) }}
+        Paid: â‚¹ {{ number_format($paid,2) }}
     </small><br>
 
     <small class="text-danger">
-        Remaining: ₹ {{ number_format($remaining,2) }}
+        Remaining: â‚¹ {{ number_format($remaining,2) }}
     </small>
     @php
         $percentage = $fee->amount > 0 ? ($paid / $fee->amount) * 100 : 0;
@@ -300,6 +305,7 @@ $remaining = $fee->amount - $paid;
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -450,7 +456,7 @@ class="btn btn-success">
         <strong>Admission Fee Discount:</strong>
         @if($student->admission_fee_discount > 0)
             <span class="badge bg-warning text-dark ms-2">
-                <i class="fas fa-tag"></i> ₹ {{ number_format($student->admission_fee_discount, 2) }}
+                <i class="fas fa-tag"></i> â‚¹ {{ number_format($student->admission_fee_discount, 2) }}
             </span>
         @else
             <span class="text-muted ms-2">No Discount</span>
@@ -461,7 +467,7 @@ class="btn btn-success">
         <strong>Monthly Fee Discount:</strong>
         @if($student->monthly_fee_discount > 0)
             <span class="badge bg-warning text-dark ms-2">
-                <i class="fas fa-tag"></i> ₹ {{ number_format($student->monthly_fee_discount, 2) }}
+                <i class="fas fa-tag"></i> â‚¹ {{ number_format($student->monthly_fee_discount, 2) }}
             </span>
         @else
             <span class="text-muted ms-2">No Discount</span>
@@ -574,7 +580,7 @@ action="{{ route('staff.students.discount') }}">
 <div class="modal-body">
 
 <div class="mb-3">
-<label class="form-label">Admission Fee Discount (₹)</label>
+<label class="form-label">Admission Fee Discount (â‚¹)</label>
 <input type="number"
 name="admission_fee_discount"
 class="form-control"
@@ -584,7 +590,7 @@ step="0.01">
 </div>
 
 <div class="mb-3">
-<label class="form-label">Monthly Fee Discount (₹)</label>
+<label class="form-label">Monthly Fee Discount (â‚¹)</label>
 <input type="number"
 name="monthly_fee_discount"
 class="form-control"

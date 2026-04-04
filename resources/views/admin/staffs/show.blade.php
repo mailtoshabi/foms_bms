@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+﻿@extends('admin.layouts.master')
 
 @section('title','Staff Details')
 
@@ -67,7 +67,7 @@ width="120">
 
 <hr>
 
-<p><strong>Default Salary Amount (₹):</strong></p>
+<p><strong>Default Salary Amount (â‚¹):</strong></p>
 <div class="input-group input-group-sm mb-2">
 <input type="number"
        step="0.01"
@@ -110,6 +110,7 @@ data-bs-target="#salaryModal">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered table-sm">
 
 <thead>
@@ -131,9 +132,9 @@ data-bs-target="#salaryModal">
 
 <td>{{ $salary->salary_month_formatted }}</td>
 
-<td>₹ {{ number_format($salary->salary_amount, 2) }}</td>
+<td>â‚¹ {{ number_format($salary->salary_amount, 2) }}</td>
 
-<td>₹ {{ number_format($salary->paid_amount, 2) }}</td>
+<td>â‚¹ {{ number_format($salary->paid_amount, 2) }}</td>
 
 <td>
 <span class="badge
@@ -203,6 +204,7 @@ No salary payments recorded
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -280,7 +282,7 @@ required>
 
 <div class="mb-3">
 
-<label class="form-label">Payment Amount (₹)</label>
+<label class="form-label">Payment Amount (â‚¹)</label>
 
 <input type="number"
 step="0.01"
@@ -406,7 +408,7 @@ disabled>
 
 <div class="mb-3">
 
-<label class="form-label">Salary Amount (₹)</label>
+<label class="form-label">Salary Amount (â‚¹)</label>
 
 <input type="number"
 step="0.01"
@@ -418,7 +420,7 @@ disabled>
 
 <div class="mb-3">
 
-<label class="form-label">Already Paid (₹)</label>
+<label class="form-label">Already Paid (â‚¹)</label>
 
 <input type="number"
 step="0.01"
@@ -430,7 +432,7 @@ disabled>
 
 <div class="mb-3">
 
-<label class="form-label text-danger"><strong>Balance Due (₹)</strong></label>
+<label class="form-label text-danger"><strong>Balance Due (â‚¹)</strong></label>
 
 <input type="number"
 step="0.01"
@@ -442,7 +444,7 @@ disabled>
 
 <div class="mb-3">
 
-<label class="form-label">Payment Amount (₹)</label>
+<label class="form-label">Payment Amount (â‚¹)</label>
 
 <input type="number"
 step="0.01"
@@ -548,13 +550,14 @@ data-bs-dismiss="modal"></button>
 <div class="modal-body">
 
 <div class="mb-3">
-<strong>Total Salary:</strong> ₹<span id="historyTotalSalary">0.00</span>
+<strong>Total Salary:</strong> â‚¹<span id="historyTotalSalary">0.00</span>
 &nbsp;&nbsp;&nbsp;
-<strong>Total Paid:</strong> ₹<span id="historyTotalPaid">0.00</span>
+<strong>Total Paid:</strong> â‚¹<span id="historyTotalPaid">0.00</span>
 &nbsp;&nbsp;&nbsp;
-<strong>Balance Due:</strong> ₹<span id="historyBalanceDue">0.00</span>
+<strong>Balance Due:</strong> â‚¹<span id="historyBalanceDue">0.00</span>
 </div>
 
+<div class="table-responsive">
 <table class="table table-bordered table-sm">
 
 <thead class="table-light">
@@ -573,6 +576,7 @@ data-bs-dismiss="modal"></button>
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -730,7 +734,7 @@ $('.viewPaymentHistory').click(function(){
         let html = '';
         payments.forEach(function(payment) {
             html += '<tr>';
-            html += '<td>₹ ' + parseFloat(payment.amount).toFixed(2) + '</td>';
+            html += '<td>â‚¹ ' + parseFloat(payment.amount).toFixed(2) + '</td>';
             html += '<td><span class="badge bg-secondary">' + (payment.method ? payment.method.charAt(0).toUpperCase() + payment.method.slice(1).replace('_', ' ') : 'N/A') + '</span></td>';
             html += '<td>' + (payment.date || '-') + '</td>';
             html += '<td>' + (payment.notes || '-') + '</td>';
@@ -750,7 +754,7 @@ $('#balancePaymentAmount').on('change keyup', function(){
     if (paymentAmount > balanceDue) {
         $(this).addClass('is-invalid');
         $('.balance-error').remove();
-        $(this).after('<div class="invalid-feedback d-block balance-error">Payment cannot exceed balance due (₹' + balanceDue.toFixed(2) + ')</div>');
+        $(this).after('<div class="invalid-feedback d-block balance-error">Payment cannot exceed balance due (â‚¹' + balanceDue.toFixed(2) + ')</div>');
     } else {
         $(this).removeClass('is-invalid');
         $('.balance-error').remove();
@@ -764,7 +768,7 @@ $('#balancePaymentForm').on('submit', function(e){
 
     if (paymentAmount > balanceDue) {
         e.preventDefault();
-        alert('Payment amount cannot exceed balance due (₹' + balanceDue.toFixed(2) + ')');
+        alert('Payment amount cannot exceed balance due (â‚¹' + balanceDue.toFixed(2) + ')');
         return false;
     }
 

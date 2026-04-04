@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+﻿@extends('admin.layouts.master')
 @section('title') Dashboard @endsection
 @section('css')
 
@@ -70,7 +70,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Fee Collected</span>
-                        <h4 class="mb-0">₹ {{ number_format($stats['fee'],2) }}</h4>
+                        <h4 class="mb-0">â‚¹ {{ number_format($stats['fee'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-rupee-sign fa-2x text-info"></i>
@@ -87,7 +87,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Expense</span>
-                        <h4 class="mb-0">₹ {{ number_format($stats['expense'],2) }}</h4>
+                        <h4 class="mb-0">â‚¹ {{ number_format($stats['expense'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-file-invoice-dollar fa-2x text-danger"></i>
@@ -104,7 +104,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Balance Sheet</span>
-                        <h4 class="mb-0">₹ {{ number_format($stats['balanceSheet'],2) }}</h4>
+                        <h4 class="mb-0">â‚¹ {{ number_format($stats['balanceSheet'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-chart-line fa-2x text-dark"></i>
@@ -122,6 +122,7 @@
 
         <div class="card-body">
 
+        <div class="table-responsive">
         <table class="table table-bordered align-middle">
 
         <thead>
@@ -152,9 +153,9 @@
         <tr>
 
         <td>
-        @if($index == 0) 🥇
-        @elseif($index == 1) 🥈
-        @elseif($index == 2) 🥉
+        @if($index == 0) ðŸ¥‡
+        @elseif($index == 1) ðŸ¥ˆ
+        @elseif($index == 2) ðŸ¥‰
         @else {{ $index+1 }}
         @endif
         </td>
@@ -164,9 +165,9 @@
             <small>
                 @for($s = 1; $s <= 5; $s++)
                     @if($s <= $stars)
-                        <span class="text-warning">★</span>
+                        <span class="text-warning">â˜…</span>
                     @else
-                        <span class="text-muted">★</span>
+                        <span class="text-muted">â˜…</span>
                     @endif
                 @endfor
             </small>
@@ -193,6 +194,7 @@
         </tbody>
 
         </table>
+        </div>
 
         </div>
     </div>

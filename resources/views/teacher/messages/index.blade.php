@@ -1,4 +1,4 @@
-@extends('teacher.layouts.master')
+﻿@extends('teacher.layouts.master')
 
 @section('title', 'Messages - Inbox')
 
@@ -19,6 +19,7 @@
         @if($messages->isEmpty())
             <p class="text-muted text-center">No messages found.</p>
         @else
+            <div class="table-responsive">
             <table class="table table-bordered">
                 <thead>
                     <tr>
@@ -68,6 +69,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
     </div>
 </div>

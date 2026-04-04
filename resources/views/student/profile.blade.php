@@ -1,4 +1,4 @@
-@extends('student.layouts.master-layouts-noleft')
+﻿@extends('student.layouts.master-layouts-noleft')
 
 @section('title', 'My Profile')
 
@@ -24,6 +24,7 @@
                 <h5 class="mb-0">Personal Information</h5>
             </div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-borderless mb-0">
                     <tbody>
                         <tr>
@@ -60,6 +61,7 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
 
@@ -69,6 +71,7 @@
             </div>
             <div class="card-body">
                 @if($student->class_rooms->count() > 0)
+                    <div class="table-responsive">
                     <table class="table table-bordered mb-0">
                         <thead>
                             <tr>
@@ -96,6 +99,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @else
                     <p class="text-muted mb-0">No classes enrolled.</p>
                 @endif

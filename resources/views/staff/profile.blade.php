@@ -1,4 +1,4 @@
-@extends('staff.layouts.master')
+﻿@extends('staff.layouts.master')
 
 @section('title', 'My Profile')
 
@@ -25,6 +25,7 @@
                 <h5 class="mb-0">Personal Information</h5>
             </div>
             <div class="card-body">
+                <div class="table-responsive">
                 <table class="table table-borderless mb-0">
                     <tbody>
                         <tr>
@@ -49,10 +50,11 @@
                         </tr>
                         <tr>
                             <th>Salary Amount</th>
-                            <td>{{ $staff->salary_amount ? '₹' . number_format($staff->salary_amount, 2) : '-' }}</td>
+                            <td>{{ $staff->salary_amount ? 'â‚¹' . number_format($staff->salary_amount, 2) : '-' }}</td>
                         </tr>
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     </div>

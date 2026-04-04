@@ -1,4 +1,4 @@
-@if(session('success'))
+﻿@if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
@@ -26,8 +26,8 @@
 <p><strong>Course:</strong> {{ $class->course->name }}</p>
 <p><strong>Type:</strong> {{ ucfirst($class->classType->name) }}</p>
 
-<p><strong>Admission Fee:</strong> ₹ {{ number_format($class->admission_fee,2) }}</p>
-<p><strong>Monthly Fee:</strong> ₹ {{ number_format($class->monthly_fee,2) }}</p>
+<p><strong>Admission Fee:</strong> â‚¹ {{ number_format($class->admission_fee,2) }}</p>
+<p><strong>Monthly Fee:</strong> â‚¹ {{ number_format($class->monthly_fee,2) }}</p>
 
 <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
 
@@ -62,6 +62,7 @@ data-bs-target="#assignTeacherModal"
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -82,7 +83,7 @@ data-bs-target="#assignTeacherModal"
 <td>{{ $teacher->name }}</td>
 <td>{{ $teacher->phone }}</td>
 <td>
-₹ {{ number_format($teacher->pivot->hourly_wage,2) }}
+â‚¹ {{ number_format($teacher->pivot->hourly_wage,2) }}
 </td>
 
 <td>
@@ -119,6 +120,7 @@ No teachers assigned
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -144,6 +146,7 @@ data-bs-target="#assignStudentModal">
 
 <div class="card-body">
 
+<div class="table-responsive">
 <table class="table table-bordered">
 
 <thead>
@@ -196,6 +199,7 @@ No students added
 </tbody>
 
 </table>
+</div>
 
 </div>
 
@@ -239,7 +243,7 @@ No students added
 
 <div class="mb-3">
 
-<label>Wage Per Hour (₹)</label>
+<label>Wage Per Hour (â‚¹)</label>
 
 <input type="number"
 step="0.01"

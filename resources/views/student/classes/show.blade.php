@@ -1,4 +1,4 @@
-@extends('student.layouts.master-layouts-noleft')
+﻿@extends('student.layouts.master-layouts-noleft')
 
 @section('title', 'Class Details')
 
@@ -49,6 +49,7 @@
         {{-- Sessions --}}
         <hr>
         <h5>Sessions</h5>
+        <div class="table-responsive">
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -87,6 +88,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
 
         {{-- Class Notes --}}
         <hr>
