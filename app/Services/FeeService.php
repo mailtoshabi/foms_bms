@@ -52,7 +52,7 @@ class FeeService
                     continue;
                 }
 
-                $amount = $classRoom->monthly_fee ?? 0;
+                $amount = max(0, ($classRoom->monthly_fee ?? 0) - ($student->monthly_fee_discount ?? 0));
 
                 if ($amount > 0) {
                     Fee::create([

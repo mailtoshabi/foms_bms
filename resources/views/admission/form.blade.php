@@ -149,26 +149,7 @@ class="form-control"></textarea>
 {{-- ================= STUDENT CLASS DETAILS ================= --}}
 @if($type=='student')
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="number"
-class="form-control"
-name="classes_per_week">
-<label>Classes Per Week</label>
-</div>
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="time"
-class="form-control"
-name="time_slot">
-<label>Preferred Time Slot</label>
-</div>
-
-<div class="form-floating form-floating-custom mb-4">
-<input type="date"
-class="form-control"
-name="starting_date">
-<label>Preferred Starting Date</label>
-</div>
 
 <div class="mb-4">
 <label class="form-label">Preferred Days</label>
@@ -185,7 +166,7 @@ $days = ['mon'=>'Mon','tue'=>'Tue','wed'=>'Wed','thu'=>'Thu','fri'=>'Fri','sat'=
 <input type="checkbox"
 name="selected_days[]"
 value="{{ $key }}"
-class="form-check-input">
+class="form-check-input class-day">
 
 <span class="form-check-label">
 {{ $day }}
@@ -196,6 +177,30 @@ class="form-check-input">
 @endforeach
 
 </div>
+</div>
+
+<div class="form-floating form-floating-custom mb-4">
+<input type="number"
+class="form-control"
+name="classes_per_week"
+id="classes_per_week"
+readonly>
+<label>Classes Per Week</label>
+</div>
+
+<div class="form-floating form-floating-custom mb-4">
+<input type="text"
+class="form-control"
+name="time_slot"
+id="time_slot">
+<label>Preferred Time Slot</label>
+</div>
+
+<div class="form-floating form-floating-custom mb-4">
+<input type="date"
+class="form-control"
+name="starting_date">
+<label>Preferred Starting Date</label>
 </div>
 
 @endif
@@ -350,8 +355,18 @@ FOMS ACADEMY
 
 
 @section('script')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
+
+flatpickr("#time_slot", {
+    enableTime: true,
+    noCalendar: true,
+    dateFormat: "H:i",
+    altInput: true,
+    altFormat: "h:i K"
+});
 
 $('input[name="contact_number"]').on('keyup change', function(){
 
@@ -359,6 +374,15 @@ let number = $(this).val();
 
 $('input[name="whatsapp_number"]').val(number);
 
+});
+
+function updateClassesPerWeek() {
+    let count = $('.class-day:checked').length;
+    $('#classes_per_week').val(count);
+}
+
+$('.class-day').on('change', function () {
+    updateClassesPerWeek();
 });
 
 </script>

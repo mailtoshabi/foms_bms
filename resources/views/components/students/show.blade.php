@@ -383,15 +383,24 @@ class="btn btn-success">
 
     <div class="card-header d-flex justify-content-between align-items-center">
 
-    <h5 class="mb-0">Fee Exemption</h5>
+    <h5 class="mb-0">Fee Exemption & Discount</h5>
     @if($showButtons=='true')
+        <div class="d-flex gap-2">
         <button class="btn btn-sm btn-primary"
         data-bs-toggle="modal"
         data-bs-target="#feeExemptionModal">
 
-        <i class="fas fa-plus"></i> Add Fee Exemption
+        <i class="fas fa-ban"></i> Exemption
 
         </button>
+        <button class="btn btn-sm btn-warning"
+        data-bs-toggle="modal"
+        data-bs-target="#discountModal">
+
+        <i class="fas fa-tag"></i> Discount
+
+        </button>
+        </div>
     @endif
     </div>
 
@@ -435,6 +444,28 @@ class="btn btn-success">
             </span>
         @endif
 
+        </div>
+
+        <div class="col-md-6 mb-2">
+        <strong>Admission Fee Discount:</strong>
+        @if($student->admission_fee_discount > 0)
+            <span class="badge bg-warning text-dark ms-2">
+                <i class="fas fa-tag"></i> ₹ {{ number_format($student->admission_fee_discount, 2) }}
+            </span>
+        @else
+            <span class="text-muted ms-2">No Discount</span>
+        @endif
+        </div>
+
+        <div class="col-md-6 mb-2">
+        <strong>Monthly Fee Discount:</strong>
+        @if($student->monthly_fee_discount > 0)
+            <span class="badge bg-warning text-dark ms-2">
+                <i class="fas fa-tag"></i> ₹ {{ number_format($student->monthly_fee_discount, 2) }}
+            </span>
+        @else
+            <span class="text-muted ms-2">No Discount</span>
+        @endif
         </div>
 
     </div>
@@ -520,6 +551,72 @@ Assign Class
 </div>
 
 </div>
+
+{{-- Discount Modal --}}
+
+<div class="modal fade" id="discountModal">
+
+<div class="modal-dialog">
+<div class="modal-content">
+
+<form method="POST"
+action="{{ route('staff.students.discount') }}">
+
+@csrf
+
+<input type="hidden" name="student_id" value="{{ $student->id }}">
+
+<div class="modal-header">
+<h5 class="modal-title">Fee Discount</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<div class="mb-3">
+<label class="form-label">Admission Fee Discount (₹)</label>
+<input type="number"
+name="admission_fee_discount"
+class="form-control"
+value="{{ $student->admission_fee_discount ?? 0 }}"
+min="0"
+step="0.01">
+</div>
+
+<div class="mb-3">
+<label class="form-label">Monthly Fee Discount (₹)</label>
+<input type="number"
+name="monthly_fee_discount"
+class="form-control"
+value="{{ $student->monthly_fee_discount ?? 0 }}"
+min="0"
+step="0.01">
+</div>
+
+</div>
+
+<div class="modal-footer">
+
+<button type="button"
+class="btn btn-secondary"
+data-bs-dismiss="modal">
+Cancel
+</button>
+
+<button class="btn btn-warning">
+<i class="fas fa-save"></i> Save Discount
+</button>
+
+</div>
+
+</form>
+
+</div>
+</div>
+
+</div>
+
+{{-- Discount Modal End --}}
 
 {{-- Fee exemption Modal --}}
 

@@ -13,7 +13,7 @@
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
             navigator.serviceWorker
-                .register('/sw.js', { scope: '/' })
+                .register('{{ asset("sw.js") }}', { scope: '/' })
                 .then(function (registration) {
                     // Listen for an updated SW being installed in the background
                     registration.addEventListener('updatefound', function () {

@@ -30,7 +30,7 @@ public function dashboard()
     | 💰 Current Month Finance
     |--------------------------------------------------------------------------
     */
-
+    // session()->forget('salary_checked'); // --- FOR TESTING ONLY ---
     $totalFee = FeePayment::whereMonth('paid_date', $now->month)
         ->whereYear('paid_date', $now->year)
         ->sum('paid_amount');

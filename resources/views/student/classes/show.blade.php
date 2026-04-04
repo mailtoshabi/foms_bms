@@ -22,7 +22,7 @@
                 @endif
                 <p><strong>Time:</strong> {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</p>
                 <p><strong>Duration:</strong> {{ $class->slot_duration }} minutes</p>
-                <p><strong>Monthly Classes:</strong> {{ $class->classes_per_week * 4 }}</p>
+                <p><strong>Monthly Sessions:</strong> {{ $class->classes_per_week * 4 }}</p>
             </div>
         </div>
 
@@ -46,14 +46,14 @@
 
 
 
-        {{-- Class Hours --}}
+        {{-- Sessions --}}
         <hr>
-        <h5>Class Hours</h5>
+        <h5>Sessions</h5>
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Meet Link</th>
+                    <th>Session Link</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -82,7 +82,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" class="text-center text-muted">No class hours yet</td>
+                    <td colspan="3" class="text-center text-muted">No Sessions yet</td>
                 </tr>
                 @endforelse
             </tbody>

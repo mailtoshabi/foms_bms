@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 
-class DailySalaryRunner
+class DailySalaryFeeRunner
 {
     public function handle($request, Closure $next)
     {
@@ -12,7 +12,7 @@ class DailySalaryRunner
 
             if (!session()->has('salary_checked')) {
 
-                runDailySalaryProcess();
+                runDailySalaryFeeProcess();
 
                 session(['salary_checked' => true]);
             }

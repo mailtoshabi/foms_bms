@@ -51,6 +51,15 @@
                 </li>
 
                 {{-- ================= Messages ================= --}}
+                <li class="{{ set_active(['admin.salaries.*']) }}">
+                    <a href="{{ route('admin.salaries.index', ['tab' => 'unpaid']) }}" >
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Teacher Salaries</span>
+                    </a>
+
+                </li>
+
+                {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['admin.messages.*','staff.messages.*','admin.st-messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-envelope"></i>
@@ -110,7 +119,7 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher.salary']) }}">
+                <li class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher-lead-notes', 'admin.reports.teacher.salary']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-account-tie"></i>
                         <span>Teachers</span>
@@ -121,6 +130,12 @@
                         <li class="{{ set_active(['admin.reports.teacher-leads']) }}">
                             <a href="{{ route('admin.reports.teacher-leads') }}">
                                 Leads
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.reports.teacher-lead-notes']) }}">
+                            <a href="{{ route('admin.reports.teacher-lead-notes') }}">
+                                Lead Notes
                             </a>
                         </li>
 
@@ -139,7 +154,7 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.reports.students.*']) }}">
+                <li class="{{ set_active(['admin.reports.students.*', 'admin.reports.student-leads', 'admin.reports.student-lead-notes']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-school"></i>
                         <span>Students</span>
@@ -151,6 +166,12 @@
                         <li class="{{ set_active(['admin.reports.student-leads']) }}">
                             <a href="{{ route('admin.reports.student-leads') }}">
                                 Leads
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.reports.student-lead-notes']) }}">
+                            <a href="{{ route('admin.reports.student-lead-notes') }}">
+                                Lead Notes
                             </a>
                         </li>
 

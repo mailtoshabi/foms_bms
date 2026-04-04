@@ -12,13 +12,14 @@
                     </a>
                 </li>
 
-                <li class="{{ set_active(['teacher.classes.*']) }}">
+                <li class="{{ set_active(['teacher.classes.*','teacher.sessions.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-chalkboard"></i>
                         <span>Classes</span>
                     </a>
                     <ul class="sub-menu">
-                        <li><a href="{{ route('teacher.classes.index') }}">List Classes</a></li>
+                        <li><a href="{{ route('teacher.classes.index') }}">Classes</a></li>
+                        <li><a href="{{ route('teacher.sessions.index') }}">Sessions</a></li>
                     </ul>
                 </li>
 

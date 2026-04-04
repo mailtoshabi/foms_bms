@@ -38,6 +38,18 @@ width="120">
 {{ ucfirst($teacher->status) }}
 </span>
 
+@php $rank = teacherRankData($teacher->id); @endphp
+
+<div class="mt-2 mb-1">
+    <span class="badge bg-{{ $rank['color'] }} fs-6 px-3 py-2">{{ $rank['label'] }}</span>
+</div>
+<div class="mb-1">
+    @for($s = 1; $s <= 5; $s++)
+        <span style="font-size:1.2rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">★</span>
+    @endfor
+</div>
+<small class="text-muted">Score: {{ $rank['score'] }}</small>
+
 <hr>
 
 <p><strong>Qualification:</strong></p>
@@ -596,10 +608,10 @@ required>
 </div>
 
 
-{{-- Google Meet Link --}}
+{{-- Session Link --}}
 <div class="mb-3">
 
-<label class="form-label">Google Meet Link</label>
+<label class="form-label">Session Link</label>
 
 <input type="url"
 name="google_meet_link"

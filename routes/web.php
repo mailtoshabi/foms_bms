@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\StaffMessageController;
+use App\Http\Controllers\Admin\SalaryController as AdminSalaryController;
 use App\Http\Controllers\Admin\StudentTeacherMessageController;
 use App\Http\Controllers\AdmissionController;
 use App\Exports\DefaultersExport;
@@ -28,7 +29,15 @@ Route::get('/all_cache', function() {
     Artisan::call('route:clear');
     Artisan::call('view:clear');
     Artisan::call('config:cache');
-    return '<h1>All cache cleared</h1>';
+
+    try {
+        Artisan::call('storage:link');
+        $storageMsg = 'Storage linked.';
+    } catch (\Exception $e) {
+        $storageMsg = 'Storage link already exists.';
+    }
+
+    return '<h1>All cache cleared</h1><p>' . $storageMsg . '</p>';
 });
 
 
@@ -94,6 +103,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reports/teachers/export', [ReportController::class, 'exportTeachers'])
             ->name('reports.teachers.export');
 
+        Route::get('/reports/teachers/leads/notes', [ReportController::class, 'teacherLeadNotes'])
+            ->name('reports.teacher-lead-notes');
+
         Route::get('reports/teachers/{id}', [ReportController::class,'showTeacher'])
             ->name('reports.teachers.show');
 
@@ -126,6 +138,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/reports/staff-salary/export', [ReportController::class, 'exportStaffSalary'])
         ->name('reports.staff.salary.export');
+
+        Route::get('/reports/students/leads/notes', [ReportController::class, 'studentLeadNotes'])
+            ->name('reports.student-lead-notes');
 
         Route::get('reports/students/{id}', [ReportController::class,'showStudent'])
             ->name('reports.students.show');
@@ -248,6 +263,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
+        Route::controller(AdminSalaryController::class)
+        ->prefix('salaries')
+        ->name('salaries.')
+        ->group(function () {
+
+            Route::get('/', 'index')->name('index');
+            Route::post('/pay', 'pay')->name('pay');
+
+        });
+
     });
 
 });
@@ -285,7 +310,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
     // Route::middleware(['auth:staff'])->group(function () {
     Route::middleware([
         'auth:staff',
-        \App\Http\Middleware\DailySalaryRunner::class
+        \App\Http\Middleware\DailySalaryFeeRunner::class
     ])->group(function () {
 
         Route::get('/dashboard', [StaffDashboardController::class, 'dashboard'])
@@ -318,6 +343,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
             '/students/fee-exemption',
             [StudentController::class,'saveFeeExemption']
             )->name('students.fee.exemption');
+
+            Route::post(
+            '/students/discount',
+            [StudentController::class,'saveDiscount']
+            )->name('students.discount');
 
             Route::resource('students', StudentController::class)
             ->names('students');
@@ -565,6 +595,10 @@ Route::prefix('teacher')
         Route::get('classes',
             [TeacherServiceController::class,'classes']
         )->name('classes.index');
+
+        Route::get('sessions',
+            [TeacherServiceController::class,'sessions']
+        )->name('sessions.index');
 
         Route::get('classes/{id}',
             [TeacherServiceController::class,'classShow']

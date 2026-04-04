@@ -74,6 +74,7 @@ Reset
 <th>Name</th>
 <th>Contact</th>
 <th>Email</th>
+<th>Salary Day</th>
 <th>Status</th>
 <th>Action</th>
 </tr>
@@ -101,6 +102,14 @@ Reset
 
 <td>{{ $teacher->email ?? '-' }}</td>
 
+<td>
+    @if($teacher->salary_cycle_day)
+        <small class="text-muted d-block">Cycle: {{ $teacher->salary_cycle_day }}{{ in_array($teacher->salary_cycle_day,[1,21,31])?'st':(in_array($teacher->salary_cycle_day,[2,22])?'nd':(in_array($teacher->salary_cycle_day,[3,23])?'rd':'th')) }} of month</small>
+        <small class="text-success d-block">Credit: {{ $teacher->salary_credit_date }}</small>
+    @else
+        <span class="text-muted">-</span>
+    @endif
+</td>
 
 <td>
 

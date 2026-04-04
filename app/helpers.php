@@ -79,9 +79,9 @@ use App\Services\SalaryService;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-if (!function_exists('runDailySalaryProcess')) {
+if (!function_exists('runDailySalaryFeeProcess')) {
 
-    function runDailySalaryProcess()
+    function runDailySalaryFeeProcess()
     {
         $today = Carbon::today()->toDateString();
 
@@ -127,96 +127,133 @@ if (!function_exists('runDailySalaryProcess')) {
 
 use App\Models\ClassHour;
 use App\Models\StudentAttendance;
+use Illuminate\Support\Facades\Cache;
 
 if (!function_exists('topTeachers')) {
     function topTeachers()
     {
-        $teachers = Teacher::all();
+        return Cache::remember('top_teachers', 300, function () {
 
-        $data = [];
+            // ── Query 1: classes count + total minutes per teacher ────────────
+            // Replaces: N separate COUNT + SUM queries
+            $classStats = ClassHour::where('status', 'completed')
+                ->selectRaw('teacher_id, COUNT(*) as total_classes, SUM(duration) as total_minutes')
+                ->groupBy('teacher_id')
+                ->get()
+                ->keyBy('teacher_id');
 
-        foreach ($teachers as $teacher) {
+            // ── Query 2: attendance totals per teacher ────────────────────────
+            // Replaces: N whereHas subqueries
+            $attendanceStats = DB::table('student_attendance')
+                ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
+                ->where('class_hours.status', 'completed')
+                ->selectRaw('class_hours.teacher_id, COUNT(*) as total, SUM(student_attendance.is_present = 1) as present')
+                ->groupBy('class_hours.teacher_id')
+                ->get()
+                ->keyBy('teacher_id');
 
-            // Total completed classes
-            $totalClasses = ClassHour::where('teacher_id',$teacher->id)
-                ->where('status','completed')
-                ->count();
+            // ── Query 3: earnings per teacher ─────────────────────────────────
+            // Replaces: N ::with([...])->get() + PHP loops loading thousands of rows
+            $earningsStats = DB::table('class_hours')
+                ->join('teacher_class_room', function ($join) {
+                    $join->on('class_hours.class_room_id', '=', 'teacher_class_room.class_room_id')
+                         ->on('class_hours.teacher_id',   '=', 'teacher_class_room.teacher_id');
+                })
+                ->where('class_hours.status', 'completed')
+                ->whereNotNull('class_hours.duration')
+                ->selectRaw('class_hours.teacher_id, SUM((class_hours.duration / 60) * teacher_class_room.hourly_wage) as total_earnings')
+                ->groupBy('class_hours.teacher_id')
+                ->get()
+                ->keyBy('teacher_id');
 
-            // Total hours
-            $totalMinutes = ClassHour::where('teacher_id',$teacher->id)
-                ->where('status','completed')
-                ->sum('duration');
+            // ── Query 4: only teachers who have conducted at least one class ──
+            // Replaces: Teacher::all() loading every teacher regardless
+            $teacherIds = $classStats->keys()->all();
+            $teachers   = Teacher::whereIn('id', $teacherIds)->get()->keyBy('id');
 
-            $totalHours = $totalMinutes / 60;
+            $data = [];
 
-            // =========================
-            // Student Attendance %
-            // =========================
+            foreach ($teachers as $teacher) {
+                $cs = $classStats->get($teacher->id);
+                $as = $attendanceStats->get($teacher->id);
+                $es = $earningsStats->get($teacher->id);
 
-            $attendanceStats = StudentAttendance::whereHas('classHour', function ($q) use ($teacher) {
-                $q->where('teacher_id',$teacher->id)
-                ->where('status','completed');
-            })
-            ->selectRaw("
-                COUNT(*) as total,
-                SUM(is_present = 1) as present
-            ")
-            ->first();
+                $totalClasses      = $cs->total_classes  ?? 0;
+                $totalHours        = ($cs->total_minutes ?? 0) / 60;
+                $attendancePercent = ($as && $as->total)
+                    ? ($as->present / $as->total) * 100
+                    : 0;
+                $earnings          = $es->total_earnings ?? 0;
 
-            $attendancePercent = $attendanceStats->total
-                ? ($attendanceStats->present / $attendanceStats->total) * 100
-                : 0;
+                $score =
+                    ($totalClasses      * 0.4) +
+                    ($totalHours        * 0.3) +
+                    ($attendancePercent * 0.2) +
+                    (($earnings / 100)  * 0.1);
 
-            // =========================
-            // Earnings
-            // =========================
-
-            $classHours = ClassHour::with([
-                'classRoom.teachers' => function ($q) use ($teacher) {
-                    $q->where('teacher_id',$teacher->id);
-                }
-            ])
-            ->where('teacher_id',$teacher->id)
-            ->where('status','completed')
-            ->get();
-
-            $earnings = 0;
-
-            foreach ($classHours as $hour) {
-
-                if (!$hour->duration) continue;
-
-                $pivot = optional($hour->classRoom->teachers->first())->pivot;
-                $wage = $pivot->hourly_wage ?? 0;
-
-                $earnings += ($hour->duration / 60) * $wage;
+                $data[] = [
+                    'teacher'    => $teacher,
+                    'classes'    => $totalClasses,
+                    'hours'      => round($totalHours, 2),
+                    'attendance' => round($attendancePercent, 2),
+                    'earnings'   => round($earnings, 2),
+                    'score'      => round($score, 2),
+                ];
             }
 
-            // 🎯 Score
-            $score =
-                ($totalClasses * 0.4) +
-                ($totalHours * 0.3) +
-                ($attendancePercent * 0.2) +
-                (($earnings / 100) * 0.1);
+            usort($data, fn($a, $b) => $b['score'] <=> $a['score']);
 
-            $data[] = [
-                'teacher' => $teacher,
-                'classes' => $totalClasses,
-                'hours' => round($totalHours,2),
-                'attendance' => round($attendancePercent,2),
-                'earnings' => round($earnings,2),
-                'score' => round($score,2),
-            ];
-        }
-
-        usort($data, fn($a,$b) => $b['score'] <=> $a['score']);
-
-        return array_slice($data, 0, 5);
+            return array_slice($data, 0, 5);
+        });
     }
 }
 
+if (!function_exists('teacherRankData')) {
+    function teacherRankData($teacherId)
+    {
+        $totalClasses = ClassHour::where('teacher_id', $teacherId)
+            ->where('status', 'completed')
+            ->count();
 
+        $totalHours = ClassHour::where('teacher_id', $teacherId)
+            ->where('status', 'completed')
+            ->sum('duration') / 60;
 
+        $attendanceStats = DB::table('student_attendance')
+            ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
+            ->where('class_hours.teacher_id', $teacherId)
+            ->where('class_hours.status', 'completed')
+            ->selectRaw('COUNT(*) as total, SUM(student_attendance.is_present = 1) as present')
+            ->first();
 
+        $attendancePercent = ($attendanceStats->total)
+            ? ($attendanceStats->present / $attendanceStats->total) * 100
+            : 0;
+
+        $earningsRow = DB::table('class_hours')
+            ->join('teacher_class_room', function ($join) {
+                $join->on('class_hours.class_room_id', '=', 'teacher_class_room.class_room_id')
+                     ->on('class_hours.teacher_id',   '=', 'teacher_class_room.teacher_id');
+            })
+            ->where('class_hours.teacher_id', $teacherId)
+            ->where('class_hours.status', 'completed')
+            ->whereNotNull('class_hours.duration')
+            ->selectRaw('SUM((class_hours.duration / 60) * teacher_class_room.hourly_wage) as total_earnings')
+            ->first();
+
+        $earnings = $earningsRow->total_earnings ?? 0;
+
+        $score = ($totalClasses * 0.4) + ($totalHours * 0.3) + ($attendancePercent * 0.2) + (($earnings / 100) * 0.1);
+        $score = round($score, 2);
+
+        if      ($score >= 70) { $stars = 5; $label = 'Elite';        $color = 'warning';   }
+        elseif  ($score >= 50) { $stars = 4; $label = 'Expert';       $color = 'primary';   }
+        elseif  ($score >= 30) { $stars = 3; $label = 'Advanced';     $color = 'info';      }
+        elseif  ($score >= 15) { $stars = 2; $label = 'Intermediate'; $color = 'secondary'; }
+        else                   { $stars = 1; $label = 'Beginner';     $color = 'light';     }
+
+        return compact('score', 'stars', 'label', 'color', 'totalClasses', 'totalHours', 'attendancePercent');
+    }
+}
 
 

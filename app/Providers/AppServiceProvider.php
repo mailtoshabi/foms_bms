@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use App\Models\ClassHour;
 
@@ -23,6 +24,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS on production so PWA / service worker works correctly
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
+        }
+
         // Student right-sidebar: pass upcoming class hours
         View::composer(['student.layouts.right-sidebar', 'student.layouts.topbar', 'student.layouts.horizontal'], function ($view) {
             $classHours = collect();

@@ -105,6 +105,11 @@ public function startClass(Request $request)
 
     $class = ClassRoom::findOrFail($request->class_room_id);
 
+    $hourlyWage = DB::table('teacher_class_room')
+        ->where('class_room_id', $class->id)
+        ->where('teacher_id', $teacher->id)
+        ->value('hourly_wage');
+
     $classHour = ClassHour::create([
 
         'class_room_id' => $class->id,
@@ -116,6 +121,9 @@ public function startClass(Request $request)
         'google_meet_link' => $request->google_meet_link,
 
         'class_started_at' => now(),
+
+        'hourly_wage' => $hourlyWage,
+
         'status' => 'pending'
     ]);
 
@@ -163,6 +171,41 @@ public function startClass(Request $request)
         return response()->json([
             'students' => $classHour->classRoom->students
         ]);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sessions – All class hours for the logged-in teacher
+    |--------------------------------------------------------------------------
+    */
+    public function sessions(Request $request)
+    {
+        $teacher = Auth::guard('teacher')->user();
+
+        $query = ClassHour::with('classRoom.course')
+            ->where('teacher_id', $teacher->id);
+
+        if ($request->filled('filter')) {
+            match ($request->filter) {
+                'status_pending'   => $query->where('status', 'pending'),
+                'status_completed' => $query->where('status', 'completed'),
+                'salary_0'         => $query->where('status', 'completed')->where('has_salary_calculated', false),
+                'salary_1'         => $query->where('has_salary_calculated', true),
+                default            => null,
+            };
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('class_started_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('class_started_at', '<=', $request->date_to);
+        }
+
+        $sessions = $query->latest()->paginate(15)->withQueryString();
+
+        return view('teacher.classes.sessions', compact('sessions'));
     }
 
 
@@ -267,12 +310,16 @@ public function markClassHourCompleted(Request $request, $id)
                     // Generate fees for each student
                     foreach ($students as $student) {
 
+                        $amount = max(0, $class->monthly_fee - ($student->monthly_fee_discount ?? 0));
+
+                        if ($amount <= 0) continue;
+
                         // 🔒 Avoid duplicate monthly fee for same cycle
                         Fee::create([
                             'student_id' => $student->id,
                             'class_room_id' => $class->id,
                             'type' => 'monthly',
-                            'amount' => $class->monthly_fee,
+                            'amount' => $amount,
                             'due_date' => now()->addDays(7),
                             'status' => 'unpaid'
                         ]);
@@ -327,7 +374,7 @@ public function markClassHourCompleted(Request $request, $id)
 //         'google_meet_link' => $request->google_meet_link
 //     ]);
 
-//     return back()->with('success','Google Meet link updated successfully');
+//     return back()->with('success','Session Link updated successfully');
 // }
 
 // public function classHourStudentsJson($id)

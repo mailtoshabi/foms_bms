@@ -51,31 +51,10 @@ public function dashboard()
     // EARNINGS (THIS MONTH)
     // =========================
 
-    $thisMonthHours = ClassHour::with([
-        'classRoom.teachers' => function ($q) use ($teacher) {
-            $q->where('teacher_id',$teacher->id);
-        }
-    ])
-    ->where('teacher_id',$teacher->id)
-    ->where('status','completed')
-    ->whereMonth('class_started_at', now()->month)
-    ->whereYear('class_started_at', now()->year)
-    ->get();
-
-    $earningsThisMonth = 0;
-
-    foreach ($thisMonthHours as $hour) {
-
-        if (!$hour->duration) continue;
-
-        $pivot = optional($hour->classRoom->teachers->first())->pivot;
-
-        $wage = $pivot->hourly_wage ?? 0;
-
-        $hours = $hour->duration / 60;
-
-        $earningsThisMonth += $hours * $wage;
-    }
+    // Latest Earnings
+    $latestEarnings = TeacherSalary::where('teacher_id', $teacher->id)
+        ->latest('cycle_start')
+        ->value('total_amount') ?? 0;
 
     // Salary history
     $salaries = TeacherSalary::where('teacher_id',$teacher->id)
@@ -89,37 +68,22 @@ public function dashboard()
         ->take(5)
         ->get();
 
+    //Upcoming Salary (unprocessed completed class hours)
+    $upcomingSalary = ClassHour::where('teacher_id', $teacher->id)
+        ->where('status', 'completed')
+        ->where('has_salary_calculated', false)
+        ->whereNotNull('duration')
+        ->selectRaw('SUM((duration / 60) * hourly_wage) as total')
+        ->value('total') ?? 0;
+
+    // $pendingSalary = round($upcomingSalary, 2);
     //Pending Salary
-    $pendingHours = ClassHour::with([
-        'classRoom.teachers' => function ($q) use ($teacher) {
-            $q->where('teacher_id',$teacher->id);
-        }
-    ])
-    ->where('teacher_id',$teacher->id)
-    ->where('status','completed')
-    ->where('has_salary_calculated', false)
-    ->get();
-
-    $pendingSalary = 0;
-
-    foreach ($pendingHours as $hour) {
-
-        if (!$hour->duration) continue;
-
-        $pivot = optional($hour->classRoom->teachers->first())->pivot;
-
-        $wage = $pivot->hourly_wage ?? 0;
-
-        $pendingSalary += ($hour->duration / 60) * $wage;
-    }
+    $pendingSalary = TeacherSalary::where('teacher_id', $teacher->id)
+        ->where('status', 'unpaid')
+        ->sum('total_amount');
 
     // Earnings Graph
-    $monthlyData = ClassHour::with([
-        'classRoom.teachers' => function ($q) use ($teacher) {
-            $q->where('teacher_id',$teacher->id);
-        }
-    ])
-    ->where('teacher_id',$teacher->id)
+    $monthlyData = ClassHour::where('teacher_id',$teacher->id)
     ->where('status','completed')
     ->whereYear('class_started_at', now()->year)
     ->get()
@@ -143,8 +107,7 @@ public function dashboard()
 
             if (!$hour->duration) continue;
 
-            $pivot = optional($hour->classRoom->teachers->first())->pivot;
-            $wage = $pivot->hourly_wage ?? 0;
+            $wage = $hour->hourly_wage ?? 0;
 
             $total += ($hour->duration / 60) * $wage;
         }
@@ -153,12 +116,13 @@ public function dashboard()
     }
 
     return view('teacher.dashboard',compact(
-        'teacher',
+
         'classes',
         'completedClasses',
         'totalHours',
         'thisMonthClasses',
-        'earningsThisMonth',
+        'latestEarnings',
+        'upcomingSalary',
         'salaries',
         'notes',
         'pendingSalary',

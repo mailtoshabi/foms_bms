@@ -15,7 +15,7 @@ class="btn btn-success"
 data-bs-toggle="modal"
 data-bs-target="#startClassModal">
 
-Create New Class Hour
+Create New Session
 
 </button>
 
@@ -32,7 +32,7 @@ Create New Class Hour
 <p><strong>Time:</strong> {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</p>
 
 <p><strong>Duration:</strong> {{ $class->slot_duration }} minutes</p>
-<p><strong>Monthly Classes:</strong> {{ $class->classes_per_week * 4 }} </p>
+<p><strong>Monthly Sessions:</strong> {{ $class->classes_per_week * 4 }} </p>
 <p><strong>Hourly Wage:</strong>  ₹{{ $class->teachers()->find(Auth::guard('teacher')->user()->id)->pivot->hourly_wage }} </p>
 
 
@@ -90,14 +90,14 @@ $percentage = round(($present / $total) * 100);
 
 <hr>
 
-<h5>Class Hours</h5>
+<h5>Sessions</h5>
 
 <table class="table table-bordered">
 
 <thead>
 <tr>
 <th>Date</th>
-<th>Meet Link</th>
+<th>Session Link</th>
 <th>Status</th>
 <th width="150">Action</th>
 </tr>
@@ -169,7 +169,7 @@ data-id="{{ $hour->id }}">
 
 <tr>
 <td colspan="3" class="text-center text-muted">
-No class hours created
+No Sessions created
 </td>
 </tr>
 
@@ -250,7 +250,7 @@ No class hours created
 </div>
 
 
-{{-- START CLASS MODAL --}}
+{{-- Create Session MODAL --}}
 
 <div class="modal fade" id="startClassModal">
 
@@ -268,14 +268,14 @@ name="class_room_id"
 value="{{ $class->id }}">
 
 <div class="modal-header">
-<h5>Start Class</h5>
+<h5>Create A Session</h5>
 </div>
 
 <div class="modal-body">
 
 <div class="mb-3">
 
-<label>Google Meet Link</label>
+<label>Session Link</label>
 
 <input type="url"
 name="google_meet_link"
@@ -290,7 +290,7 @@ required>
 
 <button class="btn btn-success">
 
-Start
+Create
 
 </button>
 
@@ -323,7 +323,7 @@ Start
 
 <div class="mb-3">
 
-<label>Google Meet Link</label>
+<label>Session Link</label>
 
 <input type="url"
 name="google_meet_link"

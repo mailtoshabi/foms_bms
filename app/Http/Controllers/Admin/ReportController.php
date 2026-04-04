@@ -22,11 +22,13 @@ use App\Exports\TeacherExport;
 use App\Models\ClassNote;
 use App\Models\ClassRoom;
 use App\Models\Fee;
+use App\Models\LeadNote;
 use App\Models\Staff;
 use App\Models\StudentLead;
 use App\Models\Student;
 use App\Models\StaffSalary;
 use App\Models\TeacherLead;
+use App\Models\TeacherLeadNote;
 use App\Models\Teacher;
 
 class ReportController extends Controller
@@ -79,7 +81,7 @@ public function fees(Request $request)
     $sort = $request->get('sort', 'latest');
 
     if ($sort === 'due_date') {
-        $query->orderBy('due_date');
+        $query->orderBy('due_date','desc');
     } elseif ($sort === 'amount') {
         $query->orderBy('amount','desc');
     } else {
@@ -267,8 +269,12 @@ public function attendance(Request $request)
         });
     }
 
-    if ($request->filled('date')) {
-        $query->whereDate('class_hours.class_started_at',$request->date);
+    if ($request->filled('from_date')) {
+        $query->whereDate('class_hours.class_started_at', '>=', $request->from_date);
+    }
+
+    if ($request->filled('to_date')) {
+        $query->whereDate('class_hours.class_started_at', '<=', $request->to_date);
     }
 
     if ($request->filled('status')) {
@@ -762,5 +768,63 @@ public function showTeacher($id)
 
     return view('admin.reports.show_teacher', compact('teacher','notes','classRooms'));
 
+}
+
+public function studentLeadNotes(Request $request)
+{
+    $query = LeadNote::with(['lead', 'staff']);
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->whereHas('lead', function ($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('contact_number', 'like', "%$search%");
+        });
+    }
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('from_date')) {
+        $query->whereDate('created_at', '>=', $request->from_date);
+    }
+
+    if ($request->filled('to_date')) {
+        $query->whereDate('created_at', '<=', $request->to_date);
+    }
+
+    $data = $query->latest()->paginate(15)->withQueryString();
+
+    return view('admin.reports.student_lead_notes', compact('data'));
+}
+
+public function teacherLeadNotes(Request $request)
+{
+    $query = TeacherLeadNote::with(['lead', 'staff']);
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->whereHas('lead', function ($q) use ($search) {
+            $q->where('name', 'like', "%$search%")
+              ->orWhere('contact_number', 'like', "%$search%");
+        });
+    }
+
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
+    }
+
+    if ($request->filled('from_date')) {
+        $query->whereDate('created_at', '>=', $request->from_date);
+    }
+
+    if ($request->filled('to_date')) {
+        $query->whereDate('created_at', '<=', $request->to_date);
+    }
+
+    $data = $query->latest()->paginate(15)->withQueryString();
+
+    return view('admin.reports.teacher_lead_notes', compact('data'));
 }
 }

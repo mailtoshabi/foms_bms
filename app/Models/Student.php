@@ -35,7 +35,9 @@ class Student extends Authenticatable
         'time_slot',
         'starting_date',
         'is_admission_fee_exempted',
+        'admission_fee_discount',
         'is_monthly_fee_exempted',
+        'monthly_fee_discount',
 
         'status'
     ];
@@ -68,7 +70,7 @@ class Student extends Authenticatable
 
     public function fees()
     {
-        return $this->hasMany(Fee::class);
+        return $this->hasMany(Fee::class)->latest();
     }
 
     public function attendances()

@@ -18,6 +18,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Students</span>
+                        {{-- {{ session('salary_checked') }} --}}
                         <h4 class="mb-0">{{ $stats['students'] }}</h4>
                     </div>
                     <div class="flex-shrink-0">
@@ -121,22 +122,32 @@
 
         <div class="card-body">
 
-        <table class="table table-bordered">
+        <table class="table table-bordered align-middle">
 
         <thead>
         <tr>
         <th>#</th>
+        <th>Rank</th>
         <th>Name</th>
         <th>Classes</th>
         <th>Hours</th>
-        <th>Attendance</th>
-        <th>Score</th>
+        {{-- <th>Attendance</th> --}}
+        {{-- <th>Score</th> --}}
         </tr>
         </thead>
 
         <tbody>
 
         @foreach($topTeachers as $index => $t)
+
+        @php
+            $score = $t['score'];
+            if      ($score >= 70) { $stars = 5; $rankLabel = 'Elite';        $rankColor = 'warning'; }
+            elseif  ($score >= 50) { $stars = 4; $rankLabel = 'Expert';       $rankColor = 'primary'; }
+            elseif  ($score >= 30) { $stars = 3; $rankLabel = 'Advanced';     $rankColor = 'info';    }
+            elseif  ($score >= 15) { $stars = 2; $rankLabel = 'Intermediate'; $rankColor = 'secondary'; }
+            else                   { $stars = 1; $rankLabel = 'Beginner';     $rankColor = 'light';   }
+        @endphp
 
         <tr>
 
@@ -148,19 +159,32 @@
         @endif
         </td>
 
+        <td>
+            <span class="badge bg-{{ $rankColor }} me-1">{{ $rankLabel }}</span><br>
+            <small>
+                @for($s = 1; $s <= 5; $s++)
+                    @if($s <= $stars)
+                        <span class="text-warning">★</span>
+                    @else
+                        <span class="text-muted">★</span>
+                    @endif
+                @endfor
+            </small>
+        </td>
+
         <td>{{ $t['teacher']->name }}</td>
 
         <td>{{ $t['classes'] }}</td>
 
         <td>{{ $t['hours'] }}</td>
 
-        <td>{{ $t['attendance'] }}%</td>
+        {{-- <td>{{ $t['attendance'] }}%</td> --}}
 
-        <td>
+        {{-- <td>
         <span class="badge bg-success">
         {{ $t['score'] }}
         </span>
-        </td>
+        </td> --}}
 
         </tr>
 

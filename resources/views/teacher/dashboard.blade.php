@@ -29,13 +29,9 @@
 <div class="col-md-4">
 <div class="card text-center">
 <div class="card-body">
-<h5>Latest Salary</h5>
+<h5>Salary On the way</h5>
 <h2>
-@if($salaries->first())
-₹ {{ number_format($salaries->first()->total_amount,2) }}
-@else
--
-@endif
+{{ $pendingSalary }}
 </h2>
 </div>
 </div>
@@ -69,9 +65,9 @@
 <div class="col-md-3">
 <div class="card text-center">
 <div class="card-body">
-<h6>Earnings This Month</h6>
+<h6>Latest Earnings</h6>
 <h3 class="text-success">
-₹ {{ number_format($earningsThisMonth,2) }}
+₹ {{ number_format($latestEarnings,2) }}
 </h3>
 </div>
 </div>
@@ -80,9 +76,9 @@
 <div class="col-md-3">
     <div class="card text-center">
     <div class="card-body">
-    <h6>Pending Salary</h6>
+    <h6>Upcoming Salary</h6>
     <h3 class="text-danger">
-    ₹ {{ number_format($pendingSalary,2) }}
+    ₹ {{ number_format($upcomingSalary,2) }}
     </h3>
     </div>
     </div>

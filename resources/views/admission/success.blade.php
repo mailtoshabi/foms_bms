@@ -54,7 +54,7 @@ Your teacher application has been submitted successfully.
 
 
 
-@if($whatsappUrl)
+{{-- @if($whatsappUrl)
 
 <a href="{{ $whatsappUrl }}"
 target="_blank"
@@ -62,10 +62,9 @@ class="btn btn-success">
 
 <i class="fab fa-whatsapp"></i>
 Send Login via WhatsApp
-
 </a>
 
-@endif
+@endif --}}
 
 
 

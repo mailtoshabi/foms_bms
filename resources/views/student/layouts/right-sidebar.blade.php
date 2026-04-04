@@ -3,7 +3,7 @@
 <div class="right-bar">
     <div data-simplebar class="h-100">
         <div class="rightbar-title d-flex align-items-center bg-dark p-3">
-            <h5 class="m-0 me-2 text-white">Class Hours</h5>
+            <h5 class="m-0 me-2 text-white">Sessions</h5>
             <a href="javascript:void(0);" class="right-bar-toggle ms-auto">
                 <i class="mdi mdi-close noti-icon"></i>
             </a>
@@ -30,7 +30,7 @@
                     </div>
                 @endforeach
             @else
-                <p class="text-muted text-center mt-3">No class hours found.</p>
+                <p class="text-muted text-center mt-3">No Sessions found.</p>
             @endif
         </div>
     </div>

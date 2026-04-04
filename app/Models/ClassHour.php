@@ -9,6 +9,7 @@ class ClassHour extends Model
     protected $fillable = [
         'class_room_id',
         'teacher_id',
+        'hourly_wage',
         'duration',
         'google_meet_link',
         'status',

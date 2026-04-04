@@ -57,13 +57,8 @@ class SalaryService
             return;
         }
 
-        // ✅ Load class hours with pivot (NO N+1)
-        $classHours = ClassHour::with([
-            'classRoom.teachers' => function ($q) use ($teacherId) {
-                $q->where('teacher_id', $teacherId);
-            }
-        ])
-        ->where('teacher_id', $teacher->id)
+        // ✅ Load class hours (hourly_wage stored directly on class_hours)
+        $classHours = ClassHour::where('teacher_id', $teacher->id)
         ->where('status','completed')
         ->where('has_salary_calculated', false)
         ->whereBetween('class_started_at', [
@@ -83,9 +78,7 @@ class SalaryService
 
             if (!$hour->duration) continue;
 
-            $pivot = optional($hour->classRoom->teachers->first())->pivot;
-
-            $wage = $pivot->hourly_wage ?? 0;
+            $wage = $hour->hourly_wage ?? 0;
 
             $hours = $hour->duration / 60;
 

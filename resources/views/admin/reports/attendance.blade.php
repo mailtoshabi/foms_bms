@@ -21,7 +21,7 @@ class="form-control"
 placeholder="Search name or contact">
 </div>
 
-<div class="col-md-3">
+<div class="col-md-2">
 <select name="status" class="form-control">
 <option value="">All</option>
 <option value="1" {{ request('status')==='1'?'selected':'' }}>Present</option>
@@ -29,14 +29,23 @@ placeholder="Search name or contact">
 </select>
 </div>
 
-<div class="col-md-3">
+<div class="col-md-2">
 <input type="date"
-name="date"
-value="{{ request('date') }}"
-class="form-control">
+name="from_date"
+value="{{ request('from_date') }}"
+class="form-control"
+placeholder="From Date">
 </div>
 
-<div class="col-md-3 d-flex gap-2">
+<div class="col-md-2">
+<input type="date"
+name="to_date"
+value="{{ request('to_date') }}"
+class="form-control"
+placeholder="To Date">
+</div>
+
+<div class="col-md-2 d-flex gap-2">
 <button class="btn btn-primary">Filter</button>
 
 <a href="{{ route('admin.reports.attendance') }}"

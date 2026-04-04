@@ -260,14 +260,14 @@ public function update(Request $request, $id)
     if ($isAdmissionExempted && !$isMonthlyExempted) {
 
         $type = 'monthly';
-        $amount = $class->monthly_fee;
+        $amount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
 
     }
     // Case 3: Monthly exempted → admission fee
     elseif (!$isAdmissionExempted && $isMonthlyExempted) {
 
         $type = 'admission';
-        $amount = $class->admission_fee;
+        $amount = max(0, $class->admission_fee - $student->admission_fee_discount);
 
     }
     // Case 4: No exemption
@@ -275,10 +275,10 @@ public function update(Request $request, $id)
 
         if ($class->admission_fee > 0) {
             $type = 'admission';
-            $amount = $class->admission_fee;
+            $amount = max(0, $class->admission_fee - $student->admission_fee_discount);
         } else {
             $type = 'monthly';
-            $amount = $class->monthly_fee;
+            $amount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
         }
 
     }
@@ -322,5 +322,23 @@ public function update(Request $request, $id)
         ]);
 
         return back()->with('success','Fee exemption updated successfully');
+    }
+
+    public function saveDiscount(Request $request)
+    {
+        $request->validate([
+            'student_id'             => 'required|exists:students,id',
+            'admission_fee_discount' => 'nullable|numeric|min:0',
+            'monthly_fee_discount'   => 'nullable|numeric|min:0',
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+
+        $student->update([
+            'admission_fee_discount' => $request->admission_fee_discount ?? 0,
+            'monthly_fee_discount'   => $request->monthly_fee_discount ?? 0,
+        ]);
+
+        return back()->with('success', 'Discount updated successfully');
     }
 }
