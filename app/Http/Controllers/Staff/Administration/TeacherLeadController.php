@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\TeacherLead;
 use App\Models\Teacher;
 use App\Models\TeacherLeadNote;
+use App\Models\Source;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -33,25 +34,26 @@ public function index(Request $request)
 
 public function create()
 {
-    return view('staff.teacher_leads.create');
+    $sources = Source::where('is_active', true)->get();
+    return view('staff.teacher_leads.create', compact('sources'));
 }
 
 
 public function store(Request $request)
 {
     $request->validate([
-        'name'=>'required',
-        'contact_number'=>'required',
-        'email'=>'nullable|email',
-        'source'=>'nullable'
+        'name'           => 'required',
+        'contact_number' => 'required',
+        'email'          => 'nullable|email',
+        'source_id'      => 'nullable|exists:sources,id',
     ]);
 
     TeacherLead::create([
-        'name'=>$request->name,
-        'contact_number'=>$request->contact_number,
-        'email'=>$request->email,
-        'source'=>$request->source,
-        'status'=>'pending'
+        'name'           => $request->name,
+        'contact_number' => $request->contact_number,
+        'email'          => $request->email,
+        'source_id'      => $request->source_id,
+        'status'         => 'pending',
     ]);
 
     return redirect()
@@ -63,8 +65,9 @@ public function store(Request $request)
 public function edit($id)
 {
     $lead = TeacherLead::findOrFail(decrypt($id));
+    $sources = Source::where('is_active', true)->get();
 
-    return view('staff.teacher_leads.create',compact('lead'));
+    return view('staff.teacher_leads.create', compact('lead', 'sources'));
 }
 
 
@@ -79,8 +82,12 @@ public function update(Request $request,$id)
         'status'=>'required|in:pending,approved,not_interested'
     ]);
 
+    $request->validate([
+        'source_id' => 'nullable|exists:sources,id',
+    ]);
+
     $lead->update($request->only(
-        'name','contact_number','email','source','status'
+        'name', 'contact_number', 'email', 'source_id', 'status'
     ));
 
     return redirect()

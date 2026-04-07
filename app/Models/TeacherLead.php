@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\Source;
 
 class TeacherLead extends Model
 {
@@ -11,7 +12,7 @@ class TeacherLead extends Model
         'name',
         'contact_number',
         'email',
-        'source',
+        'source_id',
         'status',
         'form_token',
         'form_expires_at',
@@ -24,6 +25,11 @@ class TeacherLead extends Model
         'form_opened_at' => 'datetime',
         'form_disabled' => 'boolean',
     ];
+
+    public function source()
+    {
+        return $this->belongsTo(Source::class);
+    }
 
     public function notes()
     {

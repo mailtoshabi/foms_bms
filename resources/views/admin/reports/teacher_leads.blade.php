@@ -89,6 +89,7 @@
             <th>Name</th>
             <th>Phone</th>
             <th>Email</th>
+            <th>Source</th>
             <th>Status</th>
             <th>Date</th>
         </tr>
@@ -99,6 +100,7 @@
                 <td>{{ $lead->name }}</td>
                 <td>{{ $lead->contact_number }}</td>
                 <td>{{ $lead->email ?? 'N/A' }}</td>
+                <td>{{ $lead->source->name ?? '-' }}</td>
                 <td>
                     <span class="badge bg-{{ $lead->status == 'approved' ? 'success' : 'warning' }}">
                         {{ ucfirst($lead->status) }}

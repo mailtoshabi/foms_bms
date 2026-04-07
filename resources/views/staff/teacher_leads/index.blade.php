@@ -84,7 +84,7 @@ Reset
 <td>{{ $lead->name }}</td>
 <td>{{ $lead->contact_number }}</td>
 <td>{{ $lead->email ?? '-' }}</td>
-<td>{{ $lead->source ?? '-' }}</td>
+<td>{{ $lead->source->name ?? '-' }}</td>
 
 <td>
 

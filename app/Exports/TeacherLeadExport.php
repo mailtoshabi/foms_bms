@@ -18,10 +18,11 @@ class TeacherLeadExport implements FromCollection
     {
         return $this->leads->map(function ($lead) {
             return [
-                'Name' => $lead->name,
-                'Phone' => $lead->contact_number,
-                'Email' => $lead->email,
-                'Status' => ucfirst($lead->status),
+                'Name'         => $lead->name,
+                'Phone'        => $lead->contact_number,
+                'Email'        => $lead->email,
+                'Source'       => $lead->source->name ?? '-',
+                'Status'       => ucfirst($lead->status),
                 'Created Date' => $lead->created_at->format('Y-m-d'),
             ];
         });

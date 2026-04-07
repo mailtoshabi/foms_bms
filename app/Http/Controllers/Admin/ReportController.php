@@ -639,9 +639,7 @@ public function showStudent($id)
 
 public function teacherLeadReport(Request $request)
 {
-    $query = TeacherLead::query();
-
-    // Date range filter (same as salary)
+    $query = TeacherLead::with('source');
     if ($request->filled('from_date') && $request->filled('to_date')) {
         $query->whereBetween('created_at', [
             $request->from_date . ' 00:00:00',
@@ -671,7 +669,7 @@ public function teacherLeadReport(Request $request)
 
 public function exportTeacherLeads(Request $request)
 {
-    $query = TeacherLead::query();
+    $query = TeacherLead::with('source');
 
     // Date range filter (same as report)
     if ($request->filled('from_date') && $request->filled('to_date')) {

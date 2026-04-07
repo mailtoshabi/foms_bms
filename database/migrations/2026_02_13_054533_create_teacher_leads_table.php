@@ -20,7 +20,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('contact_number');
             $table->string('email')->nullable();
-            $table->string('source')->nullable();
+            $table->foreignId('source_id')
+                ->nullable()
+                ->constrained('sources')
+                ->nullOnDelete();
             $table->enum('status',['pending','approved','not_interested'])->default('pending');
             $table->timestamps();
         });

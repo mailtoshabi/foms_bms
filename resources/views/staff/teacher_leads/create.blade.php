@@ -56,10 +56,15 @@ value="{{ old('email',$lead->email ?? '') }}">
 
 <div class="col-md-6 mb-3">
 <label>Source</label>
-<input type="text"
-name="source"
-class="form-control"
-value="{{ old('source',$lead->source ?? '') }}">
+<select name="source_id" class="form-control select2">
+    <option value="">Select Source</option>
+    @foreach($sources as $source)
+        <option value="{{ $source->id }}"
+            {{ old('source_id', $lead->source_id ?? '') == $source->id ? 'selected' : '' }}>
+            {{ $source->name }}
+        </option>
+    @endforeach
+</select>
 </div>
 
 
