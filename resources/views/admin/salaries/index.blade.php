@@ -128,7 +128,7 @@ Reset
 
 <tr>
 
-<td>{{ $salary->teacher->name }}</td>
+<td>{{ $salary->teacher->name ?? '-' }}</td>
 
 <td>
 {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}

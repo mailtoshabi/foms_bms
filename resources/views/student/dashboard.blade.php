@@ -28,7 +28,7 @@
                 <h6 class="text-muted">Latest Class</h6>
                 @if($currentClass)
                     <strong>{{ $currentClass->name }}</strong> |
-                    <span class="mb-0">{{ $currentClass->course->name }}</span>
+                    <span class="mb-0">{{ $currentClass->course->name ?? '-' }}</span>
                     <br><a href="{{ route('student.classes.show', encrypt($currentClass->id)) }}"
                         class="btn btn-sm btn-primary mt-2">
                         <i class="fas fa-sign-in-alt"></i> Enter
@@ -306,8 +306,8 @@
                         @foreach($student->class_rooms->take(10) as $class)
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
-                                <td>{{ $class->name }} <br><small class="badge bg-soft-primary text-primary">{{ ucwords($class->classType->name) }} Class</small></td>
-                                <td>{{ $class->course->name }}</td>
+                                <td>{{ $class->name }} <br><small class="badge bg-soft-primary text-primary">{{ ucwords($class->classType->name ?? '-') }} Class</small></td>
+                                <td>{{ $class->course->name ?? '-' }}</td>
                                 <td>{{ $class->teachers->pluck('name')->join(', ') ?: '-' }}</td>
                                 <td>
                                     {{ implode(', ', $class->selected_days ?? []) }}

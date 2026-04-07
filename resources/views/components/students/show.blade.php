@@ -261,7 +261,7 @@ $remaining = $fee->amount - $paid;
 <tr>
 
 <td>{{ $fee->created_at->format('d M Y') }}</td>
-<td>{{ $fee->classRoom->name }}</td>
+<td>{{ $fee->classRoom->name ?? '-' }}</td>
 <td>{{ ucfirst($fee->type) . ' Fee' }}</td>
 
 <td>

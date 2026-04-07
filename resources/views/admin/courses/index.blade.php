@@ -82,7 +82,7 @@ Reset
 <tr>
 
 <td>
-<span class="badge bg-info">{{ ucfirst($course->category->name) }}</span>
+<span class="badge bg-info">{{ ucfirst($course->category->name ?? '-') }}</span>
 </td>
 
 <td>{{ $course->name }}</td>

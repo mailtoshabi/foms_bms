@@ -93,7 +93,7 @@
             <tr>
                 <td>{{ $lead->name }}</td>
                 <td>{{ $lead->contact_number }}</td>
-                <td>{{ $lead->source->name }}</td>
+                <td>{{ $lead->source->name ?? '-' }}</td>
                 <td>{{ ucfirst($lead->status) }}</td>
                 <td>{{ $lead->created_at->format('d M Y') }}</td>
             </tr>

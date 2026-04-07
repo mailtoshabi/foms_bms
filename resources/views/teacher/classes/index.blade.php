@@ -32,7 +32,7 @@
 
 <tr>
 
-<td>{{ $class->course->name }}</td>
+<td>{{ $class->course->name ?? '-' }}</td>
 
 <td>{{ $class->name }}</td>
 

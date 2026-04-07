@@ -29,8 +29,8 @@
                             @foreach($classes as $class)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $class->name }} <br><small class="badge bg-soft-primary text-primary">{{ ucwords($class->classType->name) }} Class</small></td>
-                                    <td>{{ $class->course->name }}</td>
+                                    <td>{{ $class->name }} <br><small class="badge bg-soft-primary text-primary">{{ ucwords($class->classType->name ?? '-') }} Class</small></td>
+                                    <td>{{ $class->course->name ?? '-' }}</td>
                                     <td>{{ $class->teachers->pluck('name')->join(', ') ?: '-' }}</td>
                                     <td>
                                         {{ implode(', ', $class->selected_days ?? []) }}

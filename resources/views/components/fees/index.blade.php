@@ -200,7 +200,7 @@ Full Paid
 
 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">
 
-<td>{{ $fee->student->name }}</td>
+<td>{{ $fee->student->name ?? '-' }}</td>
 
 <td>{{ $fee->classRoom->name ?? '-' }}</td>
 

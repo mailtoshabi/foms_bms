@@ -23,8 +23,8 @@
 
 <div class="card-body">
 
-<p><strong>Course:</strong> {{ $class->course->name }}</p>
-<p><strong>Type:</strong> {{ ucfirst($class->classType->name) }}</p>
+<p><strong>Course:</strong> {{ $class->course->name ?? '-' }}</p>
+<p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') }}</p>
 
 <p><strong>Admission Fee:</strong> &#8377; {{ number_format($class->admission_fee,2) }}</p>
 <p><strong>Monthly Fee:</strong> &#8377; {{ number_format($class->monthly_fee,2) }}</p>
@@ -286,7 +286,7 @@ required>
 
 <div class="row">
 
-    @if($class->classType->name === 'individual')
+    @if(($class->classType->name ?? '') === 'individual')
         <small class="text-danger">
             Only one student allowed for this class
         </small>
@@ -331,7 +331,7 @@ required>
 
 @section('script')
     <script>
-        @if($class->classType->name === 'individual')
+        @if(($class->classType->name ?? '') === 'individual')
 
         $('input[name="student_ids[]"]').on('change', function() {
             $('input[name="student_ids[]"]').not(this).prop('checked', false);

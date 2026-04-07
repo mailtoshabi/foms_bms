@@ -12,8 +12,8 @@
 
 <div class="card-body">
 
-<p><strong>Student:</strong> {{ $fee->student->name }}</p>
-<p><strong>Class:</strong> {{ $fee->classRoom->name }}</p>
+<p><strong>Student:</strong> {{ $fee->student->name ?? '-' }}</p>
+<p><strong>Class:</strong> {{ $fee->classRoom->name ?? '-' }}</p>
 
 <hr>
 

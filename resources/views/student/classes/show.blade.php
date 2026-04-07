@@ -12,8 +12,8 @@
 
         <div class="row">
             <div class="col-md-6">
-                <p><strong>Course:</strong> {{ $class->course->name }}</p>
-                <p><strong>Type:</strong> {{ ucfirst($class->classType->name) . ' Class' }}</p>
+                <p><strong>Course:</strong> {{ $class->course->name ?? '-' }}</p>
+                <p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') . ' Class' }}</p>
                 <p><strong>Teacher:</strong> {{ $class->teachers->pluck('name')->join(', ') ?: 'Not Assigned' }}</p>
             </div>
             <div class="col-md-6">

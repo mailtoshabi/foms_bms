@@ -270,7 +270,7 @@
             <table>
                 <tr>
                     <td>Name</td>
-                    <td>{{ $fee->student->name }}</td>
+                    <td>{{ $fee->student->name ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td>Admission No.</td>

@@ -23,9 +23,9 @@ Create New Session
 
 <div class="card-body">
 
-<p><strong>Course:</strong> {{ $class->course->name }}</p>
+<p><strong>Course:</strong> {{ $class->course->name ?? '-' }}</p>
 
-<p><strong>Type:</strong> {{ ucfirst($class->classType->name). ' Class' }}</p>
+<p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') . ' Class' }}</p>
 
 <p><strong>Days:</strong> {{ implode(', ',$class->selected_days ?? []) }}</p>
 
@@ -198,7 +198,7 @@ No Sessions created
                             </span>
                         </h6>
                         <small class="text-muted">
-                            By {{ $note->teacher->name }} â€¢ {{ $note->created_at->format('M d, Y H:i') }}
+                            By {{ $note->teacher->name ?? '-' }} • {{ $note->created_at->format('M d, Y H:i') }}
                         </small>
                         @if($note->content)
                             <p class="text-muted mt-2 mb-0">{{ Str::limit($note->content, 100) }}</p>

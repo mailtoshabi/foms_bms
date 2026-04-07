@@ -121,7 +121,7 @@
 
                                 <td>
                                     <span class="badge bg-info">
-                                        {{ ucfirst($expense->category->name) }}
+                                        {{ ucfirst($expense->category->name ?? '-') }}
                                     </span>
                                 </td>
 
