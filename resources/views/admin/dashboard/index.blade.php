@@ -8,17 +8,16 @@
 @section('content')
 
 
-
+{{-- ===== Row 1: People ===== --}}
 <div class="row">
 
-    <!-- Total Students -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
+        <a href="{{ route('admin.reports.students') }}" class="text-decoration-none">
         <div class="card card-h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Students</span>
-                        {{-- {{ session('salary_checked') }} --}}
                         <h4 class="mb-0">{{ $stats['students'] }}</h4>
                     </div>
                     <div class="flex-shrink-0">
@@ -27,27 +26,11 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
 
-    <!-- Total Staff -->
-    <div class="col-xl-3 col-md-6">
-        <div class="card card-h-100">
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    <div class="flex-grow-1">
-                        <span class="text-muted d-block">Staff</span>
-                        <h4 class="mb-0">{{ $stats['staffs'] }}</h4>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-users fa-2x text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Teachers -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
+        <a href="{{ route('admin.reports.teachers') }}" class="text-decoration-none">
         <div class="card card-h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
@@ -61,16 +44,40 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
 
-    <!-- Total Fee -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
+        <a href="{{ route('admin.staffs.index') }}" class="text-decoration-none">
         <div class="card card-h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <span class="text-muted d-block">Fee Collected</span>
-                        <h4 class="mb-0">{{ number_format($stats['fee'],2) }}</h4>
+                        <span class="text-muted d-block">Staff</span>
+                        <h4 class="mb-0">{{ $stats['staffs'] }}</h4>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-users fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </a>
+    </div>
+
+</div>
+
+{{-- ===== Row 2: Finance ===== --}}
+<div class="row">
+
+    <div class="col-xl-4 col-md-6">
+        <a href="{{ route('admin.reports.fee.collection') }}" class="text-decoration-none">
+        <div class="card card-h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <span class="text-muted d-block">Fee Collected <small>(this month)</small></span>
+                        <h4 class="mb-0">&#8377;{{ number_format($stats['fee'], 2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-rupee-sign fa-2x text-info"></i>
@@ -78,16 +85,17 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
 
-    <!-- Total Expense -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
+        <a href="{{ route('admin.reports.finance.expense') }}" class="text-decoration-none">
         <div class="card card-h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <span class="text-muted d-block">Expense</span>
-                        <h4 class="mb-0">&#8377; {{ number_format($stats['expense'],2) }}</h4>
+                        <span class="text-muted d-block">Expenses <small>(this month)</small></span>
+                        <h4 class="mb-0">&#8377;{{ number_format($stats['expense'], 2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-file-invoice-dollar fa-2x text-danger"></i>
@@ -95,16 +103,18 @@
                 </div>
             </div>
         </div>
+        </a>
     </div>
 
-    <!-- Balance Sheet -->
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
         <div class="card card-h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
-                        <span class="text-muted d-block">Balance Sheet</span>
-                        <h4 class="mb-0">&#8377; {{ number_format($stats['balanceSheet'],2) }}</h4>
+                        <span class="text-muted d-block">Balance Sheet <small>(this month)</small></span>
+                        <h4 class="mb-0 {{ $stats['balanceSheet'] >= 0 ? 'text-success' : 'text-danger' }}">
+                            &#8377;{{ number_format($stats['balanceSheet'], 2) }}
+                        </h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-chart-line fa-2x text-dark"></i>
@@ -114,6 +124,86 @@
         </div>
     </div>
 
+</div>
+
+{{-- ===== Row 3: Action Alerts ===== --}}
+<div class="row">
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.reports.student-leads') }}" class="text-decoration-none">
+            <div class="card card-h-100 border-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted d-block">Pending Student Leads</span>
+                            <h4 class="mb-0">{{ $pendingStudentLeads }}</h4>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-clock fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.reports.teacher-leads') }}" class="text-decoration-none">
+            <div class="card card-h-100 border-warning">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted d-block">Pending Teacher Leads</span>
+                            <h4 class="mb-0">{{ $pendingTeacherLeads }}</h4>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="mdi mdi-account-clock text-warning" style="font-size:2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.reports.fee') }}" class="text-decoration-none">
+            <div class="card card-h-100 border-danger">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted d-block">Unpaid Fees</span>
+                            <h4 class="mb-0">{{ $unpaidFeesCount }} <small class="fs-6 text-danger">&#8377;{{ number_format($unpaidFeesAmount, 2) }}</small></h4>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{{ route('admin.reports.teacher.salary') }}" class="text-decoration-none">
+            <div class="card card-h-100 border-danger">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <span class="text-muted d-block">Unpaid Teacher Salaries</span>
+                            <h4 class="mb-0">{{ $unpaidTeacherSalariesCount }} <small class="fs-6 text-danger">&#8377;{{ number_format($unpaidTeacherSalariesAmount, 2) }}</small></h4>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-money-bill-wave fa-2x text-danger"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+<div class="row">
 
     <div class="card">
         <div class="card-header">

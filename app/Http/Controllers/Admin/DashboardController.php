@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Staff;
 use App\Models\Teacher;
+use App\Models\Fee;
 use App\Models\FeePayment;
 use App\Models\Expense;
-
+use App\Models\StudentLead;
+use App\Models\TeacherLead;
 use App\Models\StaffSalary;
 use App\Models\TeacherSalary;
 use Carbon\Carbon;
@@ -157,6 +159,13 @@ public function dashboard()
 
     $pendingAmount = max($totalFees - $totalPaidAgainstFees, 0);
 
+    $pendingStudentLeads         = StudentLead::where('status', 'pending')->count();
+    $pendingTeacherLeads         = TeacherLead::where('status', 'pending')->count();
+    $unpaidFeesCount             = Fee::whereIn('status', ['unpaid', 'partial'])->count();
+    $unpaidFeesAmount            = Fee::whereIn('status', ['unpaid', 'partial'])->sum('amount');
+    $unpaidTeacherSalariesCount  = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->count();
+    $unpaidTeacherSalariesAmount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->sum('total_amount');
+
     $topTeachers = topTeachers();
 
     return view('admin.dashboard.index', compact(
@@ -166,7 +175,13 @@ public function dashboard()
         'fees',
         'expenses',
         'paidAmount',
-        'pendingAmount'
+        'pendingAmount',
+        'pendingStudentLeads',
+        'pendingTeacherLeads',
+        'unpaidFeesCount',
+        'unpaidFeesAmount',
+        'unpaidTeacherSalariesCount',
+        'unpaidTeacherSalariesAmount'
     ));
 }
 
