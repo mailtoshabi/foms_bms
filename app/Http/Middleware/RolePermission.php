@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class RolePermission
 {
-    public function handle($request, Closure $next, $roleKey)
+    public function handle($request, Closure $next, string ...$roleKeys)
     {
         $staff = Auth::guard('staff')->user();
 
@@ -22,16 +22,19 @@ class RolePermission
             return $next($request);
         }
 
-        $requiredRoleId = utility($roleKey);
+        // Allow access if staff has ANY of the specified roles (OR logic)
+        foreach ($roleKeys as $roleKey) {
+            $requiredRoleId = utility($roleKey);
 
-        if (!$requiredRoleId) {
-            abort(500, 'Role not configured in utilities.');
+            if (!$requiredRoleId) {
+                abort(500, 'Role not configured in utilities: ' . $roleKey);
+            }
+
+            if ($staff->hasRoleId($requiredRoleId)) {
+                return $next($request);
+            }
         }
 
-        if (!$staff->hasRoleId($requiredRoleId)) {
-            abort(403, 'Unauthorized Department Access');
-        }
-
-        return $next($request);
+        abort(403, 'Unauthorized Department Access');
     }
 }

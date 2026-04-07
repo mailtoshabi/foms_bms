@@ -165,9 +165,9 @@
             <small>
                 @for($s = 1; $s <= 5; $s++)
                     @if($s <= $stars)
-                        <span class="text-warning">â˜…</span>
+                        <span class="text-warning">&#9733;</span>
                     @else
-                        <span class="text-muted">â˜…</span>
+                        <span class="text-muted">&#9733;</span>
                     @endif
                 @endfor
             </small>

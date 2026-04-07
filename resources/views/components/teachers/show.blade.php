@@ -45,7 +45,7 @@ width="120">
 </div>
 <div class="mb-1">
     @for($s = 1; $s <= 5; $s++)
-        <span style="font-size:1.2rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">â˜…</span>
+        <span style="font-size:1.2rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">&#9733;</span>
     @endfor
 </div>
 <small class="text-muted">Score: {{ $rank['score'] }}</small>

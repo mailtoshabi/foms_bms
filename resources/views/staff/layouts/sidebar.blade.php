@@ -13,21 +13,24 @@
                 </li>
 
                 @php
-                    $enrolmentRoleId = utility('id_enrolment_dept');
-                    $operationRoleId = utility('id_operation_dept');
+                    $enrolmentRoleId   = utility('id_enrolment_dept');
+                    $administratorRoleId = utility('id_administrator_dept');
+                    $financeRoleId     = utility('id_finance_dept');
+                    $hrRoleId          = utility('id_hr_dept');
+                    $operationRoleId   = utility('id_operation_dept');
                     $staff = auth('staff')->user();
-                    $pendingCount = \App\Models\StudentLead::where('status','pending')->count();
+                    $pendingCount   = \App\Models\StudentLead::where('status','pending')->count();
                     $pendingCount_t = \App\Models\TeacherLead::where('status','pending')->count();
                 @endphp
 
-                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
-
+                {{-- Students: enrolment | administrator | operation --}}
+                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
                 <li class="{{ set_active(['staff.student-leads.*','staff.students.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-user-graduate text-primary"></i>
                         <span>Students</span>
 
-                        @if($pendingCount > 0)
+                        @if($pendingCount > 0 && ($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId)))
                             <span class="badge bg-warning float-end">
                                 {{ $pendingCount }}
                             </span>
@@ -36,6 +39,8 @@
 
                     <ul class="sub-menu" aria-expanded="false">
 
+                        {{-- Student Leads: enrolment | operation only --}}
+                        @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
                         <li class="{{ set_active(['staff.student-leads.*']) }}">
                             <a href="{{ route('staff.student-leads.index') }}">
                                 Student Leads
@@ -47,6 +52,7 @@
                                 @endif
                             </a>
                         </li>
+                        @endif
 
                         <li class="{{ set_active(['staff.students.*']) }}">
                             <a href="{{ route('staff.students.index') }}">
@@ -56,9 +62,10 @@
 
                     </ul>
                 </li>
+                @endif
 
-
-
+                {{-- Teachers: administrator | operation --}}
+                @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
                 <li class="{{ set_active(['staff.teacher-leads.*','staff.teachers.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-teach text-primary"></i>
@@ -94,16 +101,34 @@
 
                     </ul>
                 </li>
-
                 @endif
 
+                {{-- Classes: enrolment | administrator | operation --}}
+                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                <li class="{{ set_active(['staff.class_rooms.*']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="fas fa-chalkboard"></i>
+                        <span>Classes</span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="{{ route('staff.class_rooms.index') }}">List Classes</a></li>
+                        <li><a href="{{ route('staff.class_rooms.create') }}">Add Class</a></li>
+                    </ul>
+                </li>
+                @endif
+
+                {{-- Fees: finance | operation --}}
+                @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                 <li>
                     <a href="{{ route('staff.fees.index') }}">
                     <i class="fas fa-money-bill"></i>
                     <span>Fees</span>
                     </a>
                 </li>
+                @endif
 
+                {{-- Salaries + Expenses: hr | operation --}}
+                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
                 <li>
                     <a href="{{ route('staff.salaries.index') }}">
                     <i class="fas fa-money-bill-wave"></i>
@@ -117,17 +142,7 @@
                     <span>Expenses</span>
                     </a>
                 </li>
-
-                <li class="{{ set_active(['staff.class_rooms.*']) }}">
-                    <a href="javascript:void(0);" class="has-arrow">
-                        <i class="fas fa-chalkboard"></i>
-                        <span>Classes</span>
-                    </a>
-                    <ul class="sub-menu">
-                        <li><a href="{{ route('staff.class_rooms.index') }}">List Classes</a></li>
-                        <li><a href="{{ route('staff.class_rooms.create') }}">Add Class</a></li>
-                    </ul>
-                </li>
+                @endif
 
                 {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['staff.messages.*']) }}">

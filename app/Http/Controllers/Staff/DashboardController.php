@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Student;
 use App\Models\Staff;
 use App\Models\Teacher;
+use App\Models\Fee;
 use App\Models\FeePayment;
 use App\Models\Expense;
-
+use App\Models\StudentLead;
+use App\Models\TeacherLead;
 use App\Models\StaffSalary;
 use App\Models\TeacherSalary;
 use Carbon\Carbon;
@@ -56,15 +58,32 @@ class DashboardController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    $stats = [
-        'students'     => Student::count(),
-        'teachers'     => Teacher::count(),
-        'fee'          => $totalFee,
-    ];
+        $stats = [
+            'students' => Student::count(),
+            'teachers' => Teacher::count(),
+            'fee'      => $totalFee,
+            'expense'  => $totalExpense,
+        ];
 
-    $topTeachers = topTeachers();
+        $pendingStudentLeads         = StudentLead::where('status', 'pending')->count();
+        $pendingTeacherLeads         = TeacherLead::where('status', 'pending')->count();
+        $unpaidFeesCount             = Fee::whereIn('status', ['unpaid', 'partial'])->count();
+        $unpaidFeesAmount            = Fee::whereIn('status', ['unpaid', 'partial'])->sum('amount');
+        $unpaidTeacherSalariesCount  = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->count();
+        $unpaidTeacherSalariesAmount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->sum('total_amount');
 
-        return view('staff.dashboard.index', compact('stats','topTeachers'));
+        $topTeachers = topTeachers();
+
+        return view('staff.dashboard.index', compact(
+            'stats',
+            'topTeachers',
+            'pendingStudentLeads',
+            'pendingTeacherLeads',
+            'unpaidFeesCount',
+            'unpaidFeesAmount',
+            'unpaidTeacherSalariesCount',
+            'unpaidTeacherSalariesAmount'
+        ));
     }
 
     public function profile()
