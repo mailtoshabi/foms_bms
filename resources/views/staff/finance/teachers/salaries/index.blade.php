@@ -148,7 +148,7 @@ Reset
 
 <td>
 <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
-â‚¹ {{ number_format($salary->total_amount,2) }}
+&#8377; {{ number_format($salary->total_amount,2) }}
 </strong>
 @if($salary->status == 'paid')
 <br><small class="text-muted">
@@ -283,7 +283,7 @@ data-notes="{{ $salary->notes }}">
 
         $('#salary_id').val(btn.data('id'));
 
-        $('#salary_amount').val('â‚¹ ' + parseFloat(btn.data('amount')).toFixed(2));
+        $('#salary_amount').val('&#8377; ' + parseFloat(btn.data('amount')).toFixed(2));
 
         // Prefill
         $('#payment_date').val(btn.data('date') || new Date().toISOString().split('T')[0]);

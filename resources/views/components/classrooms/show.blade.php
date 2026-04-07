@@ -26,8 +26,8 @@
 <p><strong>Course:</strong> {{ $class->course->name }}</p>
 <p><strong>Type:</strong> {{ ucfirst($class->classType->name) }}</p>
 
-<p><strong>Admission Fee:</strong> â‚¹ {{ number_format($class->admission_fee,2) }}</p>
-<p><strong>Monthly Fee:</strong> â‚¹ {{ number_format($class->monthly_fee,2) }}</p>
+<p><strong>Admission Fee:</strong> &#8377; {{ number_format($class->admission_fee,2) }}</p>
+<p><strong>Monthly Fee:</strong> &#8377; {{ number_format($class->monthly_fee,2) }}</p>
 
 <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
 
@@ -83,7 +83,7 @@ data-bs-target="#assignTeacherModal"
 <td>{{ $teacher->name }}</td>
 <td>{{ $teacher->phone }}</td>
 <td>
-â‚¹ {{ number_format($teacher->pivot->hourly_wage,2) }}
+&#8377; {{ number_format($teacher->pivot->hourly_wage,2) }}
 </td>
 
 <td>
@@ -243,7 +243,7 @@ No students added
 
 <div class="mb-3">
 
-<label>Wage Per Hour (â‚¹)</label>
+<label>Wage Per Hour (&#8377;)</label>
 
 <input type="number"
 step="0.01"

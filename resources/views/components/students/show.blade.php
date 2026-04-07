@@ -265,14 +265,14 @@ $remaining = $fee->amount - $paid;
 <td>{{ ucfirst($fee->type) . ' Fee' }}</td>
 
 <td>
-    <strong>â‚¹ {{ number_format($fee->amount,2) }}</strong><br>
+    <strong>&#8377; {{ number_format($fee->amount,2) }}</strong><br>
 
     <small class="text-success">
-        Paid: â‚¹ {{ number_format($paid,2) }}
+        Paid: &#8377; {{ number_format($paid,2) }}
     </small><br>
 
     <small class="text-danger">
-        Remaining: â‚¹ {{ number_format($remaining,2) }}
+        Remaining: &#8377; {{ number_format($remaining,2) }}
     </small>
     @php
         $percentage = $fee->amount > 0 ? ($paid / $fee->amount) * 100 : 0;
@@ -456,7 +456,7 @@ class="btn btn-success">
         <strong>Admission Fee Discount:</strong>
         @if($student->admission_fee_discount > 0)
             <span class="badge bg-warning text-dark ms-2">
-                <i class="fas fa-tag"></i> â‚¹ {{ number_format($student->admission_fee_discount, 2) }}
+                <i class="fas fa-tag"></i> &#8377; {{ number_format($student->admission_fee_discount, 2) }}
             </span>
         @else
             <span class="text-muted ms-2">No Discount</span>
@@ -467,7 +467,7 @@ class="btn btn-success">
         <strong>Monthly Fee Discount:</strong>
         @if($student->monthly_fee_discount > 0)
             <span class="badge bg-warning text-dark ms-2">
-                <i class="fas fa-tag"></i> â‚¹ {{ number_format($student->monthly_fee_discount, 2) }}
+                <i class="fas fa-tag"></i> &#8377; {{ number_format($student->monthly_fee_discount, 2) }}
             </span>
         @else
             <span class="text-muted ms-2">No Discount</span>
@@ -580,7 +580,7 @@ action="{{ route('staff.students.discount') }}">
 <div class="modal-body">
 
 <div class="mb-3">
-<label class="form-label">Admission Fee Discount (â‚¹)</label>
+<label class="form-label">Admission Fee Discount (&#8377;)</label>
 <input type="number"
 name="admission_fee_discount"
 class="form-control"
@@ -590,7 +590,7 @@ step="0.01">
 </div>
 
 <div class="mb-3">
-<label class="form-label">Monthly Fee Discount (â‚¹)</label>
+<label class="form-label">Monthly Fee Discount (&#8377;)</label>
 <input type="number"
 name="monthly_fee_discount"
 class="form-control"

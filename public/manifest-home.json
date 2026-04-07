@@ -1,13 +1,12 @@
 {
-    "id": "/teacher/",
-    "name": "FOMS Teacher",
-    "short_name": "FOMS Teacher",
-    "description": "FOMS ACADEMY – Teacher Portal",
-    "start_url": "/teacher/dashboard",
-    "scope": "/teacher/",
+    "name": "FOMS Academy",
+    "short_name": "FOMS",
+    "description": "FOMS ACADEMY Business Management System",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "orientation": "portrait-primary",
-    "background_color": "#34ab6b",
+    "background_color": "#1a1a2e",
     "theme_color": "#ec1d23",
     "lang": "en",
     "categories": ["business", "education", "productivity"],
@@ -69,11 +68,15 @@
     ],
     "shortcuts": [
         {
-            "name": "Teacher Login",
+            "name": "Student Portal",
+            "url": "/student/login",
+            "description": "Student Login"
+        },
+        {
+            "name": "Teacher Portal",
             "url": "/teacher/login",
             "description": "Teacher Login"
         }
     ],
-    "screenshots": [],
     "prefer_related_applications": false
 }

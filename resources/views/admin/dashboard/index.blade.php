@@ -87,7 +87,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Expense</span>
-                        <h4 class="mb-0">{{ number_format($stats['expense'],2) }}</h4>
+                        <h4 class="mb-0">&#8377; {{ number_format($stats['expense'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-file-invoice-dollar fa-2x text-danger"></i>
@@ -104,7 +104,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Balance Sheet</span>
-                        <h4 class="mb-0">{{ number_format($stats['balanceSheet'],2) }}</h4>
+                        <h4 class="mb-0">&#8377; {{ number_format($stats['balanceSheet'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-chart-line fa-2x text-dark"></i>
@@ -153,9 +153,9 @@
         <tr>
 
         <td>
-        @if($index == 0) ðŸ¥‡
-        @elseif($index == 1) ðŸ¥ˆ
-        @elseif($index == 2) ðŸ¥‰
+        @if($index == 0) &#x1F947;
+        @elseif($index == 1) &#x1F948;
+        @elseif($index == 2) &#x1F949;
         @else {{ $index+1 }}
         @endif
         </td>

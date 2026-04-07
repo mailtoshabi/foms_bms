@@ -401,8 +401,8 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
         });
 
-    Route::middleware('role:id_administrator_dept')
-            ->group(function () {
+        Route::middleware('role:id_administrator_dept')
+        ->group(function () {
 
             Route::resource('teacher-leads', TeacherLeadController::class);
             Route::post(
@@ -414,10 +414,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 'teacher-leads/{lead}/convert',
                 [TeacherLeadController::class, 'convertToTeacher']
             )->name('teacher-leads.convert');
-
-
-
-
 
             Route::controller(EnrolmentClassRoomController::class)
             ->prefix('class_rooms')
@@ -466,96 +462,74 @@ Route::prefix('departments')->name('staff.')->group(function () {
             Route::resource('teachers', TeacherController::class)
             ->names('teachers');
 
-            // Route::delete(
-            //     '/teachers/remove-class',
-            //     [TeacherAssignmentController::class,'destroy']
-            //     )->name('teachers.remove.class');
+            Route::delete(
+                '/teachers/{teacher}/classrooms/{class_room}',
+                [TeacherAssignmentController::class,'destroy']
+            )->name('teachers.classrooms.destroy');
 
-                Route::delete(
-                    '/teachers/{teacher}/classrooms/{class_room}',
-                    [TeacherAssignmentController::class,'destroy']
-                )->name('teachers.classrooms.destroy');
+            Route::get(
+            '/teacher-salaries',
+            [SalaryController::class,'index']
+            )->name('salaries.index');
 
-                Route::get(
-                '/teacher-salaries',
-                [SalaryController::class,'index']
-                )->name('salaries.index');
-
-                Route::post(
-                '/teacher-salaries/pay',
-                [SalaryController::class,'pay']
-                )->name('salaries.pay');
-
-                // Route::get(
-                //     '/{teacher}/salary/create',
-                //     [TeacherSalaryController::class,'create']
-                // )->name('teacher-salaries.create');
-
-                // Route::post(
-                //     '/{teacher}/salary',
-                //     [TeacherSalaryController::class,'store']
-                // )->name('teacher-salaries.store');
-
-
-
-                    // Route::delete('/teacher-salaries/{salary}',
-                    //     [TeacherSalaryController::class,'destroy'])
-                    //     ->name('teacher-salaries.destroy');
-
+            Route::post(
+            '/teacher-salaries/pay',
+            [SalaryController::class,'pay']
+            )->name('salaries.pay');
 
         });
 
-         Route::middleware('role:id_finance_dept')
+        Route::middleware('role:id_finance_dept')
+        ->group(function () {
+            Route::get(
+            '/fees',[FeeController::class,'index']
+            )->name('fees.index');
+
+            Route::post(
+            '/fees/pay',[FeeController::class,'pay']
+            )->name('fees.pay');
+
+            Route::get(
+            '/fees/{id}/invoice',
+            [FeeController::class,'invoice']
+            )->name('fees.invoice');
+
+            Route::get(
+            '/fees/{id}/invoice/download',
+            [FeeController::class,'downloadInvoice']
+            )->name('fees.invoice.download');
+
+            Route::get(
+            '/fees/{id}/payments',
+            [FeeController::class,'getPayments']
+            )->name('fees.payments');
+
+            Route::post(
+            '/fees/send-notification',
+            [FeeController::class,'sendNotification']
+            )->name('fees.send-notification');
+
+            Route::post(
+            '/fees/send-bulk-notifications',
+            [FeeController::class,'sendBulkNotifications']
+            )->name('fees.send-bulk-notifications');
+
+            Route::controller(ExpenseController::class)
+            ->prefix('expenses')
+            ->name('expenses.')
             ->group(function () {
-                Route::get(
-                '/fees',[FeeController::class,'index']
-                )->name('fees.index');
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+                Route::get('/edit/{id}', 'edit')->name('edit');
+                Route::put('/update/{id}', 'update')->name('update');
+                Route::delete('/delete/{id}', 'destroy')->name('destroy');
+            });
 
-                Route::post(
-                '/fees/pay',[FeeController::class,'pay']
-                )->name('fees.pay');
-
-                Route::get(
-                '/fees/{id}/invoice',
-                [FeeController::class,'invoice']
-                )->name('fees.invoice');
-
-                Route::get(
-                '/fees/{id}/invoice/download',
-                [FeeController::class,'downloadInvoice']
-                )->name('fees.invoice.download');
-
-                Route::get(
-                '/fees/{id}/payments',
-                [FeeController::class,'getPayments']
-                )->name('fees.payments');
-
-                Route::post(
-                '/fees/send-notification',
-                [FeeController::class,'sendNotification']
-                )->name('fees.send-notification');
-
-                Route::post(
-                '/fees/send-bulk-notifications',
-                [FeeController::class,'sendBulkNotifications']
-                )->name('fees.send-bulk-notifications');
-
-                Route::controller(ExpenseController::class)
-                ->prefix('expenses')
-                ->name('expenses.')
-                ->group(function () {
-                    Route::get('/', 'index')->name('index');
-                    Route::get('/create', 'create')->name('create');
-                    Route::post('/store', 'store')->name('store');
-                    Route::get('/edit/{id}', 'edit')->name('edit');
-                    Route::put('/update/{id}', 'update')->name('update');
-                    Route::delete('/delete/{id}', 'destroy')->name('destroy');
-                });
-
-                Route::get(
-                '/process/teacher/{id}/salary',
-                [TeacherSalaryController::class,'processTeacherSalary']
-                )->name('process.teacher.salary');
+            Route::get(
+            '/process/teacher/{id}/salary',
+            [TeacherSalaryController::class,'processTeacherSalary']
+            )->name('process.teacher.salary');
 
         });
 

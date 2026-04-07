@@ -97,7 +97,7 @@
             <div class="card-body">
                 <h6 class="text-muted">Fee Due</h6>
                 <h4 class="{{ $feeDue > 0 ? 'text-danger' : 'text-success' }}">
-                    â‚¹ {{ number_format($feeDue, 2) }}
+                    &#8377; {{ number_format($feeDue, 2) }}
                 </h4>
                 @if($feeDue > 0)
                     <span class="badge bg-danger">Pending</span>
@@ -219,9 +219,9 @@
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $fee->classRoom->name ?? '-' }}</td>
                                     <td>{{ ucfirst($fee->type) }}</td>
-                                    <td>â‚¹ {{ number_format($fee->amount, 2) }}</td>
-                                    <td class="text-success">â‚¹ {{ number_format($paid, 2) }}</td>
-                                    <td class="{{ $balance > 0 ? 'text-danger' : 'text-success' }}">â‚¹ {{ number_format($balance, 2) }}</td>
+                                    <td>&#8377; {{ number_format($fee->amount, 2) }}</td>
+                                    <td class="text-success">&#8377; {{ number_format($paid, 2) }}</td>
+                                    <td class="{{ $balance > 0 ? 'text-danger' : 'text-success' }}">&#8377; {{ number_format($balance, 2) }}</td>
                                     <td>{{ $fee->due_date ? \Carbon\Carbon::parse($fee->due_date)->format('d M Y') : '-' }}</td>
                                     <td>
                                         @if($fee->status == 'paid')
@@ -238,9 +238,9 @@
                         <tfoot>
                             <tr class="fw-bold">
                                 <td colspan="3" class="text-end">Total:</td>
-                                <td>â‚¹ {{ number_format($feeDetails->sum('amount'), 2) }}</td>
-                                <td class="text-success">â‚¹ {{ number_format($feeDetails->sum('paid_amount'), 2) }}</td>
-                                <td class="text-danger">â‚¹ {{ number_format($feeDetails->sum('amount') - $feeDetails->sum('paid_amount'), 2) }}</td>
+                                <td>&#8377; {{ number_format($feeDetails->sum('amount'), 2) }}</td>
+                                <td class="text-success">&#8377; {{ number_format($feeDetails->sum('paid_amount'), 2) }}</td>
+                                <td class="text-danger">&#8377; {{ number_format($feeDetails->sum('amount') - $feeDetails->sum('paid_amount'), 2) }}</td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>

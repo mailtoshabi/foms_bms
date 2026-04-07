@@ -50,7 +50,7 @@
                         </tr>
                         <tr>
                             <th>Salary Amount</th>
-                            <td>{{ $staff->salary_amount ? 'â‚¹' . number_format($staff->salary_amount, 2) : '-' }}</td>
+                            <td>{{ $staff->salary_amount ? '&#8377;' . number_format($staff->salary_amount, 2) : '-' }}</td>
                         </tr>
                     </tbody>
                 </table>

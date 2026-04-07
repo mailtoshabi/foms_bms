@@ -33,7 +33,7 @@ Create New Session
 
 <p><strong>Duration:</strong> {{ $class->slot_duration }} minutes</p>
 <p><strong>Monthly Sessions:</strong> {{ $class->classes_per_week * 4 }} </p>
-<p><strong>Hourly Wage:</strong>  â‚¹{{ $class->teachers()->find(Auth::guard('teacher')->user()->id)->pivot->hourly_wage }} </p>
+<p><strong>Hourly Wage:</strong>  &#8377;{{ $class->teachers()->find(Auth::guard('teacher')->user()->id)->pivot->hourly_wage }} </p>
 
 
 <hr>

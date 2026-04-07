@@ -120,7 +120,7 @@ data-bs-target="#salaryModal">
 
 <td>{{ $teacher->SalaryCreditDate }}</td>
 
-<td>â‚¹ {{ number_format($salary->total_amount,2) }}</td>
+<td>&#8377; {{ number_format($salary->total_amount,2) }}</td>
 
 <td>{{ ucfirst($salary->payment_method ?? '-') }}</td>
 
@@ -413,7 +413,7 @@ class="btn btn-success">
 {{-- Hourly Wage --}}
 <div class="mb-3">
 
-<label class="form-label">Wage Per Hour (â‚¹)</label>
+<label class="form-label">Wage Per Hour (&#8377;)</label>
 
 <input type="number"
 step="0.01"

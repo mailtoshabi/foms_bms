@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FOMS Academy - Business Management System</title>
+    <link rel="manifest" href="{{ url('manifest-home.json') }}">
+    <meta name="theme-color" content="#ec1d23">
     <style>
         * {
             margin: 0;
@@ -106,20 +108,30 @@
             background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 12px;
-            padding: 1.25rem 1rem;
+            padding: 1.25rem 1rem 1rem;
             backdrop-filter: blur(10px);
             transition: transform 0.2s, background 0.2s;
             width: 180px;
-            text-decoration: none;
-            color: inherit;
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
         }
 
         .feature:hover {
             transform: translateY(-4px);
             background: rgba(255, 255, 255, 0.12);
-            color: inherit;
         }
+
+        .feature-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .feature-link:hover { color: inherit; }
 
         .feature-icon {
             font-size: 1.6rem;
@@ -135,7 +147,41 @@
         .feature p {
             font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 0;
         }
+
+        .card-install-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            margin-top: 0.85rem;
+            width: 100%;
+            padding: 0.4rem 0;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .card-install-btn:hover {
+            background: rgba(255,255,255,0.18);
+            border-color: rgba(255,255,255,0.55);
+        }
+
+        .ios-hint {
+            display: none;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.55);
+            line-height: 1.7;
+            margin-top: 0.75rem;
+        }
+
+        .ios-hint svg { vertical-align: middle; margin: 0 2px; }
 
         .footer {
             color: rgba(255, 255, 255, 0.35);
@@ -166,26 +212,126 @@
     </ul>
 
     <div class="container">
-        <div class="logo-icon"><img src="{{ asset('images/icon.png') }}" alt="FOMS Academy"></div>
+        <div class="logo-icon"><img src="{{ url('images/icon.png') }}" alt="FOMS Academy"></div>
         <h1>FOMS Academy</h1>
         <p class="subtitle">Business Management System
             {{-- <br>Manage your academy with confidence — from daily updates to big insights. --}}
         </p>
 
         <div class="features">
-            <a href="{{ route('student.login') }}" class="feature">
-                <div class="feature-icon">&#x1F393;</div>
-                <h3>Students</h3>
-                <p>Classes &amp; Notes</p>
-            </a>
-            <a href="{{ route('teacher.login') }}" class="feature">
-                <div class="feature-icon">&#x1F468;&#x200D;&#x1F3EB;</div>
-                <h3>Teachers</h3>
-                <p>Classes &amp; Students</p>
-            </a>
+            {{-- Student Card --}}
+            <div class="feature">
+                <a href="{{ route('student.login') }}" class="feature-link">
+                    <div class="feature-icon">&#x1F393;</div>
+                    <h3>Students</h3>
+                    <p>Classes &amp; Notes</p>
+                </a>
+                <button class="card-install-btn" id="install-student" type="button">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v13M8 11l4 4 4-4"/>
+                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                    </svg>
+                    Install App
+                </button>
+                <p class="ios-hint" id="ios-hint-student">
+                    Tap
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                        <polyline points="16 6 12 2 8 6"/>
+                        <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                    → <strong style="color:#93c5fd;">Add to Home Screen</strong>
+                </p>
+            </div>
+
+            {{-- Teacher Card --}}
+            <div class="feature">
+                <a href="{{ route('teacher.login') }}" class="feature-link">
+                    <div class="feature-icon">&#x1F468;&#x200D;&#x1F3EB;</div>
+                    <h3>Teachers</h3>
+                    <p>Classes &amp; Students</p>
+                </a>
+                <button class="card-install-btn" id="install-teacher" type="button">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v13M8 11l4 4 4-4"/>
+                        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+                    </svg>
+                    Install App
+                </button>
+                <p class="ios-hint" id="ios-hint-teacher">
+                    Tap
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                        <polyline points="16 6 12 2 8 6"/>
+                        <line x1="12" y1="2" x2="12" y2="15"/>
+                    </svg>
+                    → <strong style="color:#93c5fd;">Add to Home Screen</strong>
+                </p>
+            </div>
         </div>
 
         <p class="footer">&copy; {{ date('Y') }} FOMS Academy Business Management System. Crafted by <a href="https://webmahal.com" target="_blank" rel="noopener">Web Mahal</a></p>
     </div>
 </body>
+<script>
+(function () {
+    'use strict';
+
+    var isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+    var installBtns  = document.querySelectorAll('.card-install-btn');
+    var deferredPrompt = null;
+
+    // ── Service Worker Registration ──────────────────────────────────────────
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register('{{ url('sw.js') }}', { scope: '/' })
+            .catch(function (err) {
+                console.error('[PWA] SW registration failed:', err);
+            });
+    }
+
+    if (isStandalone) return;
+
+    // ── Android / Chrome ─────────────────────────────────────────────────────
+    window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtns.forEach(function (btn) {
+            btn.style.display = 'inline-flex';
+        });
+    });
+
+    installBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function () {
+                deferredPrompt = null;
+                installBtns.forEach(function (b) { b.style.display = 'none'; });
+            });
+        });
+    });
+
+    window.addEventListener('appinstalled', function () {
+        deferredPrompt = null;
+        installBtns.forEach(function (btn) { btn.style.display = 'none'; });
+    });
+
+    // ── iOS Safari ───────────────────────────────────────────────────────────
+    var isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS && !sessionStorage.getItem('pwa_home_ios_dismissed')) {
+        document.querySelectorAll('.ios-hint').forEach(function (el) {
+            el.style.display = 'block';
+        });
+    }
+
+})();
+</script>
 </html>

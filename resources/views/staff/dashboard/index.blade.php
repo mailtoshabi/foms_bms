@@ -52,7 +52,7 @@
                 <div class="d-flex align-items-center">
                     <div class="flex-grow-1">
                         <span class="text-muted d-block">Fee Collected</span>
-                        <h4 class="mb-0">â‚¹ {{ number_format($stats['fee'],2) }}</h4>
+                        <h4 class="mb-0">&#8377;{{ number_format($stats['fee'],2) }}</h4>
                     </div>
                     <div class="flex-shrink-0">
                         <i class="fas fa-rupee-sign fa-2x text-info"></i>
@@ -90,9 +90,9 @@
         <tr>
 
         <td>
-        @if($index == 0) ðŸ¥‡
-        @elseif($index == 1) ðŸ¥ˆ
-        @elseif($index == 2) ðŸ¥‰
+        @if($index == 0) &#x1F947;
+        @elseif($index == 1) &#x1F948;
+        @elseif($index == 2) &#x1F949;
         @else {{ $index+1 }}
         @endif
         </td>
