@@ -209,7 +209,7 @@ data-target-form="#delete_{{ $class->id }}">
 
 <form id="delete_{{ $class->id }}"
 method="POST"
-action="{{ $deleteRoute($class->id) }}">
+action="{{ $deleteRoute(encrypt($class->id)) }}">
 
 @csrf
 @method('DELETE')
