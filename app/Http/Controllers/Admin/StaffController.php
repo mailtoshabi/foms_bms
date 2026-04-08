@@ -371,9 +371,9 @@ class StaffController extends Controller
             $staff = Staff::findOrFail($request->staff_id);
             $staff->update(['salary_amount' => $request->salary_amount]);
 
-            return back()->with('success', 'Salary amount updated successfully');
+            return response()->json(['message' => 'Salary amount updated successfully']);
         } catch (\Exception $e) {
-            return back()->with('error', 'Error updating salary amount: ' . $e->getMessage());
+            return response()->json(['message' => 'Error updating salary amount: ' . $e->getMessage()], 500);
         }
     }
 

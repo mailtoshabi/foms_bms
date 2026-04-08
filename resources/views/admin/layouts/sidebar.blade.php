@@ -20,7 +20,7 @@
                     <ul class="sub-menu">
                         <li><a href="{{ route('admin.staffs.index') }}">List Staff</a></li>
                         <li><a href="{{ route('admin.staffs.create') }}">Add Staff</a></li>
-                        <li><a href="{{ route('admin.roles.index') }}">Roles</a></li>
+                        {{-- <li><a href="{{ route('admin.roles.index') }}">Roles</a></li> --}}
                     </ul>
                 </li>
 

@@ -248,12 +248,21 @@ width="120">
 <th>Type</th>
 <th>Amount</th>
 <th>Status</th>
+@if($showButtons=='true')
+<th>Actions</th>
+@endif
 </tr>
 </thead>
 
 <tbody>
 
-@foreach($student->fees as $fee)
+@php
+    $staffUser = auth('staff')->user();
+    $isEnrolmentOnly = $staffUser && $staffUser->hasRoleId(utility('id_enrolment_dept'));
+    $displayFees = $isEnrolmentOnly ? $student->fees->where('type', 'admission') : $student->fees;
+@endphp
+
+@foreach($displayFees as $fee)
 @php
 $paid = $fee->paid_amount ?? 0;
 $remaining = $fee->amount - $paid;
@@ -297,6 +306,46 @@ $remaining = $fee->amount - $paid;
 {{ ucfirst($fee->status ?? '-') }}
 </span>
 </td>
+
+@if($showButtons=='true')
+@php
+    $feePaid = $fee->paid_amount ?? 0;
+    $feeRemaining = $fee->amount - $feePaid;
+@endphp
+<td>
+    @if($fee->status !== 'paid')
+    <button class="btn btn-sm btn-success studentFeeMarkPaidBtn"
+    data-id="{{ $fee->id }}"
+    data-amount="{{ $fee->amount }}"
+    data-remaining="{{ $feeRemaining }}"
+    {{ $feeRemaining <= 0 ? 'disabled' : '' }}>
+    <i class="fas fa-check"></i>
+    </button>
+    @endif
+
+    <button class="btn btn-sm btn-info studentFeeViewPaymentsBtn"
+    data-url="{{ route('staff.fees.payments', $fee->id) }}">
+    <i class="fas fa-eye"></i>
+    </button>
+
+    @if($fee->status === 'paid')
+    <a href="{{ route('staff.fees.invoice.download', $fee->id) }}"
+       class="btn btn-sm btn-danger"
+       title="Download Invoice PDF"
+       target="_blank">
+        <i class="mdi mdi-file-pdf-box"></i>
+    </a>
+    @endif
+
+    @if($fee->status !== 'paid')
+    <button class="btn btn-sm btn-warning studentFeeSendNotificationBtn"
+    data-id="{{ $fee->id }}"
+    title="Send notification">
+    <i class="fas fa-bell"></i>
+    </button>
+    @endif
+</td>
+@endif
 
 </tr>
 
@@ -624,6 +673,82 @@ Cancel
 
 {{-- Discount Modal End --}}
 
+{{-- Student Fee Payment Modal --}}
+@if($showButtons=='true')
+<div class="modal fade" id="studentFeePaymentModal">
+<div class="modal-dialog">
+<div class="modal-content">
+<form method="POST" action="{{ route('staff.fees.pay') }}">
+@csrf
+<input type="hidden" name="fee_id" id="studentFeeId">
+<div class="modal-header">
+<h5>Mark Payment</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+<div class="mb-3">
+<label>Total Fee</label>
+<input type="text" id="studentFeeTotalFee" class="form-control" readonly>
+</div>
+<div class="mb-3">
+<label>Amount Paying</label>
+<input type="number" step="0.01" name="paid_amount" class="form-control" required>
+</div>
+<div class="mb-3">
+<label>Payment Method</label>
+<select name="payment_method" class="form-control" required>
+<option value="cash">Cash</option>
+<option value="card">Card</option>
+<option value="upi">UPI</option>
+<option value="bank_transfer">Bank Transfer</option>
+</select>
+</div>
+<div class="mb-3">
+<label>Paid Date</label>
+<input type="date" name="paid_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+</div>
+<div class="mb-3">
+<label>Notes</label>
+<textarea name="notes" class="form-control"></textarea>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-success">Save Payment</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+
+{{-- Student Fee Payment History Modal --}}
+<div class="modal fade" id="studentFeePaymentsModal">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header">
+<h5>Payment History</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<div class="modal-body">
+<p><strong>Total Paid:</strong> &#8377; <span id="studentFeeTotalPaid"></span></p>
+<table class="table table-bordered">
+<thead>
+<tr>
+<th>Date</th>
+<th>Amount</th>
+<th>Method</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody id="studentFeePaymentsTableBody">
+<tr><td colspan="4" class="text-center text-muted">Loading...</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+@endif
+
 {{-- Fee exemption Modal --}}
 
 <div class="modal fade" id="feeExemptionModal">
@@ -699,5 +824,75 @@ Save
 </div>
 
 </div>
+
+@if($showButtons=='true')
+@section('script')
+<script>
+$('.studentFeeMarkPaidBtn').click(function(){
+    let feeId = $(this).data('id');
+    let amount = $(this).data('amount');
+    $('#studentFeeId').val(feeId);
+    $('#studentFeeTotalFee').val(amount);
+    $('#studentFeePaymentModal').modal('show');
+});
+
+$('.studentFeeViewPaymentsBtn').click(function(){
+    let url = $(this).data('url');
+    $('#studentFeePaymentsTableBody').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+    $('#studentFeeTotalPaid').text('0.00');
+    $.get(url, function(res){
+        let rows = '';
+        let total = 0;
+        if(res.payments.length === 0){
+            rows = '<tr><td colspan="4" class="text-center text-muted">No payments found</td></tr>';
+        } else {
+            res.payments.forEach(p => {
+                let amt = parseFloat(p.paid_amount);
+                total += amt;
+                let d = new Date(p.paid_date);
+                let dateStr = d.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'});
+                let method = p.payment_method.replace('_',' ').replace(/\b\w/g, l => l.toUpperCase());
+                rows += '<tr><td>'+dateStr+'</td><td>&#8377; '+amt.toFixed(2)+'</td><td>'+method+'</td><td>'+(p.notes ?? '-')+'</td></tr>';
+            });
+        }
+        $('#studentFeePaymentsTableBody').html(rows);
+        $('#studentFeeTotalPaid').text(total.toFixed(2));
+        $('#studentFeePaymentsModal').modal('show');
+    });
+});
+
+$('.studentFeeSendNotificationBtn').click(function(e){
+    e.preventDefault();
+    let feeId = $(this).data('id');
+    let button = $(this);
+    if(confirm('Send notification to student?')) {
+        button.prop('disabled', true);
+        button.html('<i class="fas fa-spinner fa-spin"></i>');
+        $.ajax({
+            type: 'POST',
+            url: '{{ route("staff.fees.send-notification") }}',
+            data: { _token: '{{ csrf_token() }}', fee_id: feeId },
+            success: function(response) {
+                if(response.success) {
+                    alert(response.message);
+                    button.html('<i class="fas fa-check text-success"></i>');
+                } else {
+                    alert('Error: ' + response.message);
+                    button.prop('disabled', false);
+                    button.html('<i class="fas fa-bell"></i>');
+                }
+            },
+            error: function(xhr) {
+                let errorMsg = xhr.responseJSON?.message ?? 'An error occurred';
+                alert('Error: ' + errorMsg);
+                button.prop('disabled', false);
+                button.html('<i class="fas fa-bell"></i>');
+            }
+        });
+    }
+});
+</script>
+@endsection
+@endif
 
 @endsection

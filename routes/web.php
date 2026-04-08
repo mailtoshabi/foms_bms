@@ -454,7 +454,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
         });
 
-        Route::middleware('role:id_finance_dept,id_operation_dept')
+        Route::middleware('role:id_finance_dept,id_operation_dept,id_enrolment_dept')
         ->group(function () {
 
             Route::get(
