@@ -15,6 +15,9 @@
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
         @if($messages->isEmpty())
             <p class="text-muted text-center">No messages found.</p>

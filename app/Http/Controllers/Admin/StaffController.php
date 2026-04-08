@@ -62,7 +62,9 @@ class StaffController extends Controller
             'password'      => 'required|min:4',
             'photo'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'id_proof'      => 'nullable|file|max:4096',
-            'roles'         => 'nullable|array'
+            'roles'         => 'nullable|array',
+            'address'       => 'nullable|string|max:500',
+            'gpay_number'   => 'nullable|string|max:20',
         ]);
 
         DB::beginTransaction();
@@ -134,7 +136,9 @@ class StaffController extends Controller
             'password'  => 'nullable|min:4',
             'photo'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'id_proof'  => 'nullable|file|max:4096',
-            'roles'     => 'nullable|array'
+            'roles'     => 'nullable|array',
+            'address'   => 'nullable|string|max:500',
+            'gpay_number' => 'nullable|string|max:20',
         ]);
 
         DB::beginTransaction();

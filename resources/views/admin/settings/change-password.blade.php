@@ -11,8 +11,12 @@
 @slot('title') @lang('translation.Change_Password') @endslot
 @endcomponent
 <div class="row">
-    @if(session()->has('success')) <p class="text-success">{{ session()->get('success') }} @endif</p>
-    @if(session()->has('error')) <p class="text-danger">{{ session()->get('error') }} @endif</p>
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
     <form method="POST" action="{{ route('admin.settings.update.password')  }}">
         @csrf
         <input type="hidden" name="_method" value="PUT" />

@@ -14,10 +14,11 @@
     @slot('title') @lang('translation.UserList') @endslot
 @endcomponent
 
-@if(session()->has('success'))
-<div class="alert alert-success alert-top-border alert-dismissible fade show">
-    <strong>Success</strong> - {{ session('success') }}
-</div>
+@if(session('success'))
+<div class="alert alert-success">{{ session('success') }}</div>
+@endif
+@if(session('error'))
+<div class="alert alert-danger">{{ session('error') }}</div>
 @endif
 
 <div class="row">

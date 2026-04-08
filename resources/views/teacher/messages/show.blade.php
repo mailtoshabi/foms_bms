@@ -15,6 +15,9 @@
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
         {{-- Original Message --}}
         <div class="border rounded p-3 mb-3 {{ $message->sender_type == 'App\Models\Teacher' && $message->sender_id == $teacher->id ? 'bg-light' : 'bg-soft-success' }}">

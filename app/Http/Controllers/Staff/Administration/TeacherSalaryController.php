@@ -123,6 +123,13 @@ class TeacherSalaryController extends Controller
 
     public function update(Request $request, TeacherSalary $salary)
     {
+    $request->validate([
+        'total_amount'   => 'nullable|numeric|min:0',
+        'payment_method' => 'nullable|string|max:50',
+        'payment_date'   => 'nullable|date',
+        'status'         => 'nullable|in:unpaid,paid',
+        'notes'          => 'nullable|string|max:1000',
+    ]);
 
     $salary->update($request->only(
     'total_amount',

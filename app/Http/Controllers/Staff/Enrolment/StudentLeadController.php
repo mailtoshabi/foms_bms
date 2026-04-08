@@ -66,7 +66,7 @@ class StudentLeadController extends Controller
     {
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
-            'contact_number' => ['required', 'string', 'max:15'],
+            'contact_number' => ['required', 'string', 'digits_between:7,15'],
             'email'          => ['nullable', 'email'],
             'source_id'      => ['nullable', 'exists:sources,id'],
         ]);
@@ -108,7 +108,7 @@ class StudentLeadController extends Controller
 
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
-            'contact_number' => ['required', 'string', 'max:15'],
+            'contact_number' => ['required', 'string', 'digits_between:7,15'],
             'email'          => ['nullable', 'email'],
             'source_id'      => ['nullable', 'exists:sources,id'],
             'status'         => ['required', 'in:pending,admitted'],
@@ -171,12 +171,12 @@ public function convertToStudent(Request $request, $id)
     }
 
     $request->validate([
-        'name' => 'required|string|max:255',
-        'contact_number' => 'required|string|max:20',
-        'email' => 'nullable|email',
+        'name'           => 'required|string|max:255',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'email'          => 'nullable|email',
         'classes_per_week' => 'nullable|integer',
-        'selected_days' => 'nullable|array',
-        'starting_date' => 'nullable|date',
+        'selected_days'    => 'nullable|array',
+        'starting_date'    => 'nullable|date',
     ]);
 
     DB::transaction(function () use ($request, $lead) {

@@ -41,6 +41,7 @@
                     <input type="text"
                            name="contact_number"
                            class="form-control @error('contact_number') is-invalid @enderror"
+                           maxlength="15"
                            value="{{ old('contact_number', $lead->contact_number ?? '') }}">
                     @error('contact_number')
                         <div class="invalid-feedback">{{ $message }}</div>

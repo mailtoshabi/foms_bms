@@ -40,8 +40,12 @@ value="{{ old('name',$lead->name ?? '') }}">
 <label>Contact Number</label>
 <input type="text"
 name="contact_number"
-class="form-control"
+class="form-control @error('contact_number') is-invalid @enderror"
+maxlength="15"
 value="{{ old('contact_number',$lead->contact_number ?? '') }}">
+@error('contact_number')
+    <div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 
@@ -70,7 +74,7 @@ value="{{ old('email',$lead->email ?? '') }}">
 
 @if($isEdit)
 
-<div class="col-md-6 mb-3">
+{{-- <div class="col-md-6 mb-3">
 <label>Status</label>
 
 <select name="status" class="form-control">
@@ -92,7 +96,7 @@ Not Interested
 
 </select>
 
-</div>
+</div> --}}
 
 @endif
 

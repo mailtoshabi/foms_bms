@@ -49,8 +49,12 @@ value="{{ old('name',$teacher->name ?? '') }}">
 <input type="text"
 name="contact_number"
 id="contact_number"
-class="form-control"
+class="form-control @error('contact_number') is-invalid @enderror"
+maxlength="15"
 value="{{ old('contact_number',$teacher->contact_number ?? '') }}">
+@error('contact_number')
+    <div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 

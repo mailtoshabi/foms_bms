@@ -43,7 +43,7 @@ public function store(Request $request)
 {
     $request->validate([
         'name'           => 'required',
-        'contact_number' => 'required',
+        'contact_number' => 'required|string|digits_between:7,15',
         'email'          => 'nullable|email',
         'source_id'      => 'nullable|exists:sources,id',
     ]);
@@ -76,18 +76,14 @@ public function update(Request $request,$id)
     $lead = TeacherLead::findOrFail(decrypt($id));
 
     $request->validate([
-        'name'=>'required',
-        'contact_number'=>'required',
-        'email'=>'nullable|email',
-        'status'=>'required|in:pending,approved,not_interested'
-    ]);
-
-    $request->validate([
-        'source_id' => 'nullable|exists:sources,id',
+        'name'           => 'required',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'email'          => 'nullable|email',
+        'source_id'      => 'nullable|exists:sources,id',
     ]);
 
     $lead->update($request->only(
-        'name', 'contact_number', 'email', 'source_id', 'status'
+        'name', 'contact_number', 'email', 'source_id'
     ));
 
     return redirect()
@@ -130,9 +126,9 @@ public function convertToTeacher(Request $request,$id)
     }
 
     $request->validate([
-        'name'=>'required',
-        'contact_number'=>'required',
-        'email'=>'nullable|email'
+        'name'           => 'required',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'email'          => 'nullable|email'
     ]);
 
     DB::transaction(function() use ($request,$lead){

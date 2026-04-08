@@ -36,6 +36,11 @@ class RoleController extends Controller
 
     public function updateName(Request $request)
     {
+        $request->validate([
+            'id'   => 'required',
+            'name' => 'required|string|max:255',
+        ]);
+
         $role = Role::findOrFail(decrypt($request->id));
         $role->update([
             'name'=>strtolower($request->name)

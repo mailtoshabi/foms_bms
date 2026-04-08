@@ -39,10 +39,10 @@ public function create()
 public function store(Request $request)
 {
     $request->validate([
-        'name'=>'required',
-        'contact_number'=>'required',
-        'phone'=>'required|unique:teachers,phone',
-        'password'=>'required|min:6'
+        'name'           => 'required',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'phone'          => 'required|unique:teachers,phone',
+        'password'       => 'required|min:6'
     ]);
 
     $photo=null;
@@ -98,13 +98,32 @@ public function update(Request $request,$id)
 {
     $teacher = Teacher::findOrFail(decrypt($id));
 
-    $teacher->update($request->except('password'));
+    $request->validate([
+        'name'           => 'required|string|max:255',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'phone'          => 'required|unique:teachers,phone,' . $teacher->id,
+        'email'          => 'nullable|email|max:255',
+        'dob'            => 'nullable|date',
+        'qualification'  => 'nullable|string|max:255',
+        'experience'     => 'nullable|string|max:255',
+        'address'        => 'nullable|string|max:500',
+        'upi_number'     => 'nullable|string|max:20',
+        'whatsapp_number'=> 'nullable|string|digits_between:7,15',
+        'photo'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        'id_proof'       => 'nullable|file|max:4096',
+        'password'       => 'nullable|min:6',
+    ]);
 
-    if($request->filled('password')){
-        $teacher->update([
-            'password'=>Hash::make($request->password)
-        ]);
+    $data = $request->only([
+        'name', 'dob', 'email', 'contact_number', 'whatsapp_number',
+        'upi_number', 'address', 'qualification', 'experience', 'phone', 'status',
+    ]);
+
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
     }
+
+    $teacher->update($data);
 
     return redirect()
         ->route('staff.teachers.index')

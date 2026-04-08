@@ -49,12 +49,12 @@ class StudentController extends Controller
 public function store(Request $request)
 {
     $request->validate([
-        'name' => 'required',
-        'contact_number' => 'required',
-        'phone' => 'required|unique:students,phone',
-        'email' => 'nullable|email',
-        'password' => 'required|min:6',
-        'selected_days' => 'required|array|min:1'
+        'name'           => 'required',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'phone'          => 'required|unique:students,phone',
+        'email'          => 'nullable|email',
+        'password'       => 'required|min:6',
+        'selected_days'  => 'required|array|min:1'
     ]);
 
     // Enforce consistency
@@ -119,11 +119,11 @@ public function update(Request $request, $id)
     $student = Student::findOrFail(decrypt($id));
 
     $request->validate([
-        'name' => 'required',
-        'contact_number' => 'required',
-        'phone' => 'required|unique:students,phone,' . $student->id,
-        'email' => 'nullable|email',
-        'selected_days' => 'required|array|min:1'
+        'name'           => 'required',
+        'contact_number' => 'required|string|digits_between:7,15',
+        'phone'          => 'required|unique:students,phone,' . $student->id,
+        'email'          => 'nullable|email',
+        'selected_days'  => 'required|array|min:1'
     ]);
 
     // Enforce consistency

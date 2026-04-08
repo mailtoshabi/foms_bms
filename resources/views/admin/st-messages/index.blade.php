@@ -16,6 +16,9 @@
         @if(session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
+        @if(session('error'))
+            <div class="alert alert-danger">{{ session('error') }}</div>
+        @endif
 
         {{-- Filters --}}
         <form method="GET" action="{{ route('admin.st-messages.index') }}" class="mb-3">
