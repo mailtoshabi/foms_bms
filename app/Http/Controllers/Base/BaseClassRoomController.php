@@ -129,6 +129,22 @@ class BaseClassRoomController extends BaseServiceController
             ->with('success','Class updated successfully');
     }
 
+    public function search(Request $request)
+    {
+        $term = $request->input('q', '');
+        $results = ClassRoom::with('course')
+            ->where('name', 'like', "%{$term}%")
+            ->orWhereHas('course', fn($q) => $q->where('name', 'like', "%{$term}%"))
+            ->limit(30)
+            ->get()
+            ->map(fn($c) => [
+                'id'   => $c->id,
+                'text' => $c->name . ($c->course ? ' (' . $c->course->name . ')' : ''),
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
+
     public function show($id)
     {
         $class = ClassRoom::with([

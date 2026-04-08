@@ -25,9 +25,25 @@ class ClassNoteController extends Controller
 
     public function create()
     {
-        $class_rooms = Auth::guard('teacher')->user()->classRooms;
+        return view('teacher.class_notes.create');
+    }
 
-        return view('teacher.class_notes.create', compact('class_rooms'));
+    public function searchClassRooms(Request $request)
+    {
+        $term = $request->input('q', '');
+        $teacher = Auth::guard('teacher')->user();
+
+        $results = $teacher->classRooms()
+            ->with('course')
+            ->where('class_rooms.name', 'like', "%{$term}%")
+            ->limit(30)
+            ->get()
+            ->map(fn($c) => [
+                'id'   => $c->id,
+                'text' => $c->name . ($c->course ? ' (' . $c->course->name . ')' : ''),
+            ]);
+
+        return response()->json(['results' => $results]);
     }
 
 

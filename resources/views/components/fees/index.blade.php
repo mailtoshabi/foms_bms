@@ -83,16 +83,13 @@ Full Paid
 
     {{-- 📚 Class --}}
     <div class="col-md-2 mb-2">
-    <select name="class_room_id" class="form-control select2">
-    <option value="">All Classes</option>
-
-    @foreach($classRooms as $id => $name)
-    <option value="{{ $id }}"
-    {{ request('class_room_id') == $id ? 'selected' : '' }}>
-    {{ $name }}
-    </option>
-    @endforeach
-
+    <select name="class_room_id" class="form-control select2-class-ajax"
+        data-ajax-url="{{ $classRoomSearchUrl }}"
+        data-selected-id="{{ request('class_room_id') }}"
+        data-selected-text="{{ $selectedClassName ?? '' }}">
+    @if(request('class_room_id') && isset($selectedClassName))
+    <option value="{{ request('class_room_id') }}" selected>{{ $selectedClassName }}</option>
+    @endif
     </select>
     </div>
 

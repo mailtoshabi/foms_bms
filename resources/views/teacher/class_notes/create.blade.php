@@ -33,15 +33,10 @@
                     <div class="mb-3">
                         <label class="form-label">Class *</label>
                         <select name="class_room_id"
-                                class="form-control @error('class_room_id') is-invalid @enderror"
+                                class="form-control select2-class-ajax @error('class_room_id') is-invalid @enderror"
+                                data-ajax-url="{{ route('teacher.notes.class_rooms.search') }}"
                                 required>
-                            <option value="">- Select Class -</option>
-                            @foreach($class_rooms as $classroom)
-                                <option value="{{ $classroom->id }}"
-                                    {{ old('class_room_id') == $classroom->id ? 'selected' : '' }}>
-                                    {{ $classroom->name }}
-                                </option>
-                            @endforeach
+                            <option value="">Search class...</option>
                         </select>
                         @error('class_room_id')
                             <div class="invalid-feedback">{{ $message }}</div>

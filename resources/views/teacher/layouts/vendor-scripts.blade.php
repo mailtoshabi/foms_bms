@@ -9,8 +9,47 @@
 <script src="{{ URL::asset('assets/libs/pace-js/pace-js.min.js') }}"></script>
 <script src="{{ URL::asset('assets/libs/sweetalert2/sweetalert2.min.js') }}"></script>
 <script src="{{ URL::asset('assets/js/global.js') }}"></script>
+<script src="{{ URL::asset('assets/libs/select2/select2.min.js') }}"></script>
 @yield('script')
 @yield('script-bottom')
+<script>
+$(document).ready(function() {
+    function initSelect2(context) {
+        var parent = context || document;
+        $(parent).find('.select2').not('[data-select2-id]').select2({ placeholder: 'Search...', allowClear: true, width: '100%' });
+        $(parent).find('.select2-class-ajax').not('[data-select2-id]').each(function() {
+            var $el = $(this);
+            var ajaxUrl = $el.data('ajax-url');
+            $el.select2({
+                placeholder: 'Search class...', allowClear: true, width: '100%',
+                minimumInputLength: 0,
+                ajax: { url: ajaxUrl, dataType: 'json', delay: 250,
+                    data: function(p) { return { q: p.term || '' }; },
+                    processResults: function(d) { return { results: d.results }; },
+                    cache: true
+                }
+            });
+        });
+    }
+    initSelect2();
+    $(document).on('show.bs.modal', '.modal', function() {
+        var $modal = $(this);
+        $modal.find('.select2').not('[data-select2-id]').select2({ placeholder: 'Search...', allowClear: true, width: '100%', dropdownParent: $modal });
+        $modal.find('.select2-class-ajax').not('[data-select2-id]').each(function() {
+            var $el = $(this);
+            $el.select2({
+                placeholder: 'Search class...', allowClear: true, width: '100%',
+                minimumInputLength: 0, dropdownParent: $modal,
+                ajax: { url: $el.data('ajax-url'), dataType: 'json', delay: 250,
+                    data: function(p) { return { q: p.term || '' }; },
+                    processResults: function(d) { return { results: d.results }; },
+                    cache: true
+                }
+            });
+        });
+    });
+});
+</script>
 <!-- PWA -->
 {{-- <script>window.swUrl = '{{ asset('sw.js') }}';</script>
 <script src="{{ URL::asset('assets/js/pwa.js') }}" defer></script> --}}

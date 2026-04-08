@@ -563,18 +563,11 @@ data-bs-dismiss="modal"></button>
 <label class="form-label">Select Class</label>
 
 <select name="class_room_id"
-class="form-control select2"
+class="form-control select2-class-ajax"
+data-ajax-url="{{ route('staff.class_rooms.search') }}"
 required>
 
-<option value="">Select Class</option>
-
-@foreach($classRooms as $class)
-
-<option value="{{ $class->id }}">
-{{ $class->name }} ({{ $class->course->name ?? '' }})
-</option>
-
-@endforeach
+<option value="">Search class...</option>
 
 </select>
 

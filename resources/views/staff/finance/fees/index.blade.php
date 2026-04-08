@@ -3,7 +3,8 @@
 <x-fees.index
     :fees="$fees"
     :tab="$tab"
-    :classRooms="$classRooms"
+    :classRoomSearchUrl="$classRoomSearchUrl"
+    :selectedClassName="$selectedClassName"
     isExport="false"
     isAction="true"
     :filterRoute="route('staff.fees.index')"

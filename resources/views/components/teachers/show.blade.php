@@ -392,19 +392,11 @@ class="btn btn-success">
 
 <label class="form-label">Class Room</label>
 
-<select name="class_room_id" class="form-control select2" required>
+<select name="class_room_id" class="form-control select2-class-ajax"
+    data-ajax-url="{{ route('staff.class_rooms.search') }}"
+    required>
 
-<option value="">Select Class</option>
-
-@foreach($classRooms as $class)
-
-<option value="{{ $class->id }}">
-
-{{ $class->name }} ({{ $class->course->name ?? '-' }})
-
-</option>
-
-@endforeach
+<option value="">Search class...</option>
 
 </select>
 

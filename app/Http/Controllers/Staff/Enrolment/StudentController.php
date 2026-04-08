@@ -205,10 +205,8 @@ public function update(Request $request, $id)
             $student->class_rooms->pluck('id')
         )->latest()->get();
 
-        $classRooms = ClassRoom::with('course')->get();
-
         return view('staff.students.show', compact(
-            'student','teachers','attendance','notes','classRooms'
+            'student','teachers','attendance','notes'
         ));
     }
 

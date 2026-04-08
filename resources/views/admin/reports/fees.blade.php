@@ -3,7 +3,8 @@
 <x-fees.index
     :fees="$fees"
     :tab="$tab"
-    :classRooms="$classRooms"
+    :classRoomSearchUrl="$classRoomSearchUrl"
+    :selectedClassName="$selectedClassName"
     isExport="true"
     isAction="false"
     :filterRoute="route('admin.reports.fee')"

@@ -138,15 +138,12 @@ public function show($id)
     'salaries'
     ])->findOrFail(decrypt($id));
 
-    $classRooms = ClassRoom::with('course')->get();
-
     $assignedClasses = $teacher->classRooms->pluck('id')->toArray();
 
     $notes = ClassNote::where('teacher_id',$teacher->id)->latest()->get();
 
     return view('staff.teachers.show',[
         'teacher'=>$teacher,
-        'classRooms'=>$classRooms,
         'assignedClasses'=>$assignedClasses,
         'notes'=>$notes
     ]);

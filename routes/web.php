@@ -238,6 +238,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post(
             '/class-rooms/remove-student','removeStudent'
             )->name('remove.student');
+
+            Route::get('/search','search')->name('search');
         });
 
         Route::controller(StaffMessageController::class)
@@ -398,6 +400,8 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::post(
                 '/class-rooms/remove-student','removeStudent'
                 )->name('remove.student');
+
+                Route::get('/search','search')->name('search');
             });
 
             Route::resource('teacher-leads', TeacherLeadController::class);
@@ -633,6 +637,7 @@ Route::prefix('teacher')
             Route::post('/store', 'store')->name('store');
             Route::delete('/destroy', 'destroy')->name('destroy');
             Route::get('/show/{id}', 'show')->name('show');
+            Route::get('/class-rooms/search', 'searchClassRooms')->name('class_rooms.search');
         });
 
         Route::controller(TeacherMessageController::class)

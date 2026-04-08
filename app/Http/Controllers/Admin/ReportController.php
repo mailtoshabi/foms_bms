@@ -90,9 +90,12 @@ public function fees(Request $request)
 
     $fees = $query->paginate(10)->withQueryString();
 
-    $classRooms = \App\Models\ClassRoom::pluck('name','id');
+    $classRoomSearchUrl = route('admin.class_rooms.search');
+    $selectedClassName = $request->filled('class_room_id')
+        ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+        : null;
 
-    return view('admin.reports.fees', compact('fees', 'classRooms' ,'tab'));
+    return view('admin.reports.fees', compact('fees', 'classRoomSearchUrl', 'selectedClassName', 'tab'));
 }
 
 public function exportFee(Request $request)
@@ -152,9 +155,11 @@ public function feeCollection(Request $request)
     // Get course categories for dropdown
     $categories = \App\Models\CourseCategory::pluck('name','id');
 
-    $classRooms = \App\Models\ClassRoom::pluck('name','id');
+    $selectedClassName = $request->filled('class_room_id')
+        ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+        : null;
 
-    return view('admin.reports.fee_collection', compact('data','categories','classRooms'));
+    return view('admin.reports.fee_collection', compact('data','categories','selectedClassName'));
 }
 
 public function exportFeeCollection(Request $request)
@@ -632,9 +637,7 @@ public function showStudent($id)
             $student->class_rooms->pluck('id')
         )->latest()->get();
 
-        $classRooms = ClassRoom::with('course')->get();
-
-    return view('admin.reports.show_student', compact('student','teachers','attendance','notes','classRooms'));
+    return view('admin.reports.show_student', compact('student','teachers','attendance','notes'));
 }
 
 public function teacherLeadReport(Request $request)
@@ -762,9 +765,7 @@ public function showTeacher($id)
         $teacher->classRooms->pluck('id')
     )->latest()->get();
 
-    $classRooms = ClassRoom::with('course')->get();
-
-    return view('admin.reports.show_teacher', compact('teacher','notes','classRooms'));
+    return view('admin.reports.show_teacher', compact('teacher','notes'));
 
 }
 

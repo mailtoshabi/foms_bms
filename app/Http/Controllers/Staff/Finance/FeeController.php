@@ -67,9 +67,12 @@ class FeeController extends Controller
 
     $fees = $query->paginate(10)->withQueryString();
 
-    $classRooms = \App\Models\ClassRoom::pluck('name','id');
+    $classRoomSearchUrl = route('staff.class_rooms.search');
+    $selectedClassName = $request->filled('class_room_id')
+        ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+        : null;
 
-    return view('staff.finance.fees.index', compact('fees','classRooms','tab'));
+    return view('staff.finance.fees.index', compact('fees','classRoomSearchUrl','selectedClassName','tab'));
 }
 
     public function pay(Request $request)
