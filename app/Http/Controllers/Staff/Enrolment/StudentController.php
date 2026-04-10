@@ -213,9 +213,10 @@ public function update(Request $request, $id)
 
     public function destroy($id)
     {
-        Student::findOrFail(decrypt($id))->delete();
+        $student = Student::findOrFail(decrypt($id));
+        $student->delete(); // soft delete
 
-        return back()->with('success','Student deleted.');
+        return back()->with('success', "Student \"{$student->name}\" deleted successfully.");
     }
 
     public function assignClass(Request $request)

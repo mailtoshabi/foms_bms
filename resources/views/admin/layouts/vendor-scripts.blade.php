@@ -34,9 +34,13 @@ $(document).ready(function() {
     initSelect2();
     $(document).on('show.bs.modal', '.modal', function() {
         var $modal = $(this);
-        $modal.find('.select2').not('[data-select2-id]').select2({ placeholder: 'Search...', allowClear: true, width: '100%', dropdownParent: $modal });
-        $modal.find('.select2-class-ajax').not('[data-select2-id]').each(function() {
+        $modal.find('select.select2').each(function() {
+            if ($(this).hasClass('select2-hidden-accessible')) { $(this).select2('destroy'); }
+            $(this).select2({ placeholder: 'Search...', allowClear: true, width: '100%', dropdownParent: $modal });
+        });
+        $modal.find('select.select2-class-ajax').each(function() {
             var $el = $(this);
+            if ($el.hasClass('select2-hidden-accessible')) { $el.select2('destroy'); }
             $el.select2({
                 placeholder: 'Search class...', allowClear: true, width: '100%',
                 minimumInputLength: 0, dropdownParent: $modal,

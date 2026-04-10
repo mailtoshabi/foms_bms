@@ -152,9 +152,10 @@ public function show($id)
 
 public function destroy($id)
 {
-    Teacher::findOrFail(decrypt($id))->delete();
+    $teacher = Teacher::findOrFail(decrypt($id));
+    $teacher->delete(); // soft delete
 
-    return back()->with('success','Teacher deleted.');
+    return back()->with('success', "Teacher \"{$teacher->name}\" deleted successfully.");
 }
 
 }

@@ -4,6 +4,5 @@
 :teachers="$teachers"
 :attendance="$attendance"
 :notes="$notes"
-:classRooms="$classRooms"
 showButtons="true"
 />

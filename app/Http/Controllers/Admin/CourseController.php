@@ -92,8 +92,10 @@ class CourseController extends Controller
 
     public function destroy($id)
     {
-        Course::findOrFail(decrypt($id))->delete();
+        $course = Course::findOrFail(decrypt($id));
 
-        return back()->with('success','Course deleted');
+        $course->delete(); // soft delete — sets deleted_at, class_rooms FK remains intact
+
+        return back()->with('success', "Course \"{$course->name}\" deleted successfully.");
     }
 }

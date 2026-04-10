@@ -2,6 +2,5 @@
 <x-teachers.show
 :teacher="$teacher ?? null"
 :notes="$notes"
-:classRooms="$classRooms"
 showButtons="false"
 />

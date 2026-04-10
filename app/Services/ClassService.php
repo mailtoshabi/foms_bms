@@ -22,7 +22,10 @@ class ClassService
 
     public function delete(int $classId)
     {
-        return ClassRoom::findOrFail($classId)->delete();
+        $class = ClassRoom::findOrFail($classId);
+        $class->delete(); // soft delete — sets deleted_at
+
+        return $class;
     }
 
     public function toggleStatus(int $classId)

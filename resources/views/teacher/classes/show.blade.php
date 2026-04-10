@@ -46,7 +46,7 @@ Create New Session
 <thead>
 <tr>
 <th>Name</th>
-<th>Contact</th>
+{{-- <th>Contact</th> --}}
 <th>Attendance %</th>
 </tr>
 </thead>
@@ -68,7 +68,7 @@ $percentage = round(($present / $total) * 100);
 
 <td>{{ $student->name }}</td>
 
-<td>{{ $student->contact_number }}</td>
+{{-- <td>{{ $student->contact_number }}</td> --}}
 
 <td>
 

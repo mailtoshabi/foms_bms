@@ -212,9 +212,9 @@
     </ul>
 
     <div class="container">
-        <div class="logo-icon"><img src="{{ url('images/icon.png') }}" alt="FOMS Academy"></div>
+        <div class="logo-icon"><img src="{{ url('images/logo.png') }}" alt="FOMS Academy"></div>
         <h1>FOMS Academy</h1>
-        <p class="subtitle">Business Management System
+        <p class="subtitle">Education Management System
             {{-- <br>Manage your academy with confidence — from daily updates to big insights. --}}
         </p>
 
@@ -274,7 +274,7 @@
             </div>
         </div>
 
-        <p class="footer">&copy; {{ date('Y') }} FOMS Academy Business Management System. Crafted by <a href="https://webmahal.com" target="_blank" rel="noopener">Web Mahal</a></p>
+        <p class="footer">&copy; {{ date('Y') }} FOMS Academy. All rights reserved. Crafted by <a href="https://webmahal.com" target="_blank" rel="noopener">Web Mahal</a></p>
     </div>
 </body>
 <script>

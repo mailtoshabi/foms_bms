@@ -110,14 +110,26 @@
                                 <i class="fas fa-video"></i> Join
                             </a>
                         @else
-                            <span class="text-muted">-</span>
+                            {{-- <span class="text-muted">-</span> --}}
+                        @endif
+
+                        @if($session->status == 'pending')
+                            <button class="btn btn-sm btn-warning editClassHour"
+                                data-id="{{ $session->id }}"
+                                data-link="{{ $session->google_meet_link }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        @else
+                            <button class="btn btn-sm btn-secondary" disabled>
+                                <i class="fas fa-lock"></i>
+                            </button>
                         @endif
                     </td>
 
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="text-center text-muted">No sessions found</td>
+                    <td colspan="8" class="text-center text-muted">No sessions found</td>
                 </tr>
             @endforelse
 
@@ -130,4 +142,46 @@
     </div>
 </div>
 
+{{-- Edit Session Modal --}}
+<div class="modal fade" id="editClassHourModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="editClassHourForm">
+                @csrf
+                @method('PUT')
+                <div class="modal-header">
+                    <h5>Edit Session Link</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Session Link</label>
+                        <input type="url"
+                               name="google_meet_link"
+                               id="edit_meet_link"
+                               class="form-control"
+                               required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Update</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@endsection
+
+@section('script')
+<script>
+    $('.editClassHour').click(function () {
+        let id   = $(this).data('id');
+        let link = $(this).data('link');
+
+        $('#edit_meet_link').val(link);
+        $('#editClassHourForm').attr('action', '/teacher/class-hours/' + id);
+        $('#editClassHourModal').modal('show');
+    });
+</script>
 @endsection

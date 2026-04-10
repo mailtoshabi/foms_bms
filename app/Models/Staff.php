@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Staff extends Authenticatable
 {
+    use SoftDeletes;
     protected $table = 'staffs';
     protected $fillable = [
         'name','email','phone','password', 'address', 'gpay_number', 'salary_amount', 'id_proof', 'photo'

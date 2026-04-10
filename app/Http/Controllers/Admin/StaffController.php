@@ -431,8 +431,10 @@ class StaffController extends Controller
 
     public function destroy($id)
     {
-        Staff::findOrFail(decrypt($id))->delete();
-        return back()->with('success','Deleted');
+        $staff = Staff::findOrFail(decrypt($id));
+        $staff->delete(); // soft delete
+
+        return back()->with('success', "Staff \"{$staff->name}\" deleted successfully.");
     }
 
     public function toggleBlock($id)

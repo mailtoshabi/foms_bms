@@ -227,9 +227,9 @@ class BaseClassRoomController extends BaseServiceController
 
     public function destroy($id)
     {
-        $this->classService->delete(decrypt($id));
+        $class = $this->classService->delete(decrypt($id));
 
-        return back()->with('success','Class deleted');
+        return back()->with('success', "Class \"{$class->name}\" deleted successfully.");
     }
 
 

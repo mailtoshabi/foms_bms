@@ -333,6 +333,13 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
             });
 
+        Route::controller(EnrolmentClassRoomController::class)
+            ->prefix('class_rooms')
+            ->name('class_rooms.')
+            ->group(function () {
+                Route::get('/search','search')->name('search');
+            });
+
         Route::middleware('role:id_enrolment_dept,id_operation_dept')
             ->group(function () {
 
@@ -401,7 +408,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 '/class-rooms/remove-student','removeStudent'
                 )->name('remove.student');
 
-                Route::get('/search','search')->name('search');
+                // Route::get('/search','search')->name('search');
             });
 
             Route::resource('teacher-leads', TeacherLeadController::class);
