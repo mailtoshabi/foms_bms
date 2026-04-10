@@ -41,7 +41,7 @@ class CourseController extends Controller
     {
         $request->validate([
             'category_id' => 'required|exists:course_categories,id',
-            'name'        => 'required|string|max:255',
+            'name'        => 'required|string|max:255|unique:courses,name',
             // 'course_fee'  => 'nullable|numeric'
         ]);
 
@@ -74,7 +74,7 @@ class CourseController extends Controller
         // Validation based on new migration
         $request->validate([
             'category_id' => 'required|exists:course_categories,id',
-            'name'        => 'required|string|max:255',
+            'name'        => 'required|string|max:255|unique:courses,name,' . $courseId,
             // 'course_fee'  => 'nullable|numeric'
         ]);
 

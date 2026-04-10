@@ -52,7 +52,7 @@
 <button class="btn btn-sm btn-primary"
 data-bs-toggle="modal"
 data-bs-target="#assignTeacherModal"
-{{ $class->teachers->count() ? 'disabled' : '' }}>
+{{ $class->teachers->count() ? 'disabled' : '' }} >
 
 <i class="fas fa-plus"></i> Assign Teacher
 
@@ -256,7 +256,7 @@ required>
 </div>
 
 <div class="modal-footer">
-<button class="btn btn-primary">Save</button>
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
 </div>
 
 </form>
@@ -318,7 +318,7 @@ required>
 </div>
 
 <div class="modal-footer">
-<button class="btn btn-primary">Save</button>
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
 </div>
 
 </form>

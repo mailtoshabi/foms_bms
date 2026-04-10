@@ -105,7 +105,7 @@ Not Interested
 
 <div class="d-flex align-items-center mt-3">
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 {{ $isEdit?'Update':'Save' }}
 </button>
 
@@ -433,7 +433,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-success">
+<button class="btn btn-success" type="submit" onclick="this.disabled=true; this.innerText='Converting...'; this.form.submit();">
 
 Create Teacher
 

@@ -90,7 +90,7 @@ required>{{ old('message') }}</textarea>
 
 <div class="mt-3">
 
-<button type="submit" class="btn btn-primary">
+<button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerText='Sending...'; this.form.submit();">
 <i class="fas fa-paper-plane"></i> Send Message
 </button>
 

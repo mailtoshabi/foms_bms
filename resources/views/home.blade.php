@@ -226,7 +226,7 @@
                     <h3>Students</h3>
                     <p>Classes &amp; Notes</p>
                 </a>
-                <button class="card-install-btn" id="install-student" type="button">
+                <button class="card-install-btn" id="install-student" type="button" onclick="this.disabled=true; this.innerText='Installing...';">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v13M8 11l4 4 4-4"/>
@@ -253,7 +253,7 @@
                     <h3>Teachers</h3>
                     <p>Classes &amp; Students</p>
                 </a>
-                <button class="card-install-btn" id="install-teacher" type="button">
+                <button class="card-install-btn" id="install-teacher" type="button" onclick="this.disabled=true; this.innerText='Installing...';">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v13M8 11l4 4 4-4"/>

@@ -270,7 +270,7 @@ Leave blank to keep existing password
 
 <div class="card-header">
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 {{ $isEdit?'Update Student':'Save Student' }}
 </button>
 

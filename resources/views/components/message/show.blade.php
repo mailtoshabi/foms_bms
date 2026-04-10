@@ -76,7 +76,7 @@
 </div>
 
 <div class="col-md-2 d-grid">
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Sending...'; this.form.submit();">
 <i class="fas fa-paper-plane"></i> Send
 </button>
 </div>

@@ -101,13 +101,13 @@
 
             <div class="d-flex align-items-center mt-3">
 
-    <button type="submit" class="btn btn-primary">
+    <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
         {{ $isEdit ? 'Update' : 'Save' }}
     </button>
 
     @if($isEdit && !$lead->hasStudent())
 
-    <button type="button"
+    <button type="button" onclick="this.disabled=true; this.innerText='Converting...';"
             class="btn btn-success ms-2"
             data-bs-toggle="modal"
             data-bs-target="#convertStudentModal"
@@ -238,7 +238,7 @@
 
             </div>
 
-            <button class="btn btn-sm btn-primary">
+            <button class="btn btn-sm btn-primary" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
                 Add Note
             </button>
         </form>
@@ -369,7 +369,7 @@ value="{{ $lead->email }}">
 Cancel
 </button>
 
-<button type="submit" class="btn btn-success">
+<button type="submit" class="btn btn-success" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
 Create Student
 </button>
 

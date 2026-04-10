@@ -80,7 +80,7 @@
 
                     {{-- Buttons --}}
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
                             <i class="fas fa-save"></i>
                             {{ isset($expense) ? 'Update Expense' : 'Create Expense' }}
                         </button>

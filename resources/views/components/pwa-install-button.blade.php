@@ -27,7 +27,7 @@
         </div>
 
         <div class="d-flex align-items-center gap-2">
-            <button id="pwa-install-btn"
+            <button id="pwa-install-btn" 
                     type="button"
                     class="btn btn-light btn-sm fw-semibold"
                     style="min-width: 72px;">

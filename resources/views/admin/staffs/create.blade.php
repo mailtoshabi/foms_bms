@@ -131,7 +131,7 @@ value="{{ $staff->phone ?? old('phone') }}">
 {{-- ================= Actions ================= --}}
 <div class="card">
 <div class="card-header">
-<button class="btn btn-primary">Save Changes</button>
+<button class="btn btn-primary" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save Changes</button>
 <a href="{{ route('admin.staffs.index') }}" class="btn btn-secondary">Cancel</a>
 </div>
 </div>

@@ -248,7 +248,7 @@ value="{{ $class->pivot->hourly_wage }}"
 class="form-control form-control-sm me-2"
 style="width:120px">
 
-<button class="btn btn-sm btn-success">
+<button class="btn btn-sm btn-success" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 <i class="fas fa-save"></i>
 </button>
 
@@ -427,7 +427,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Assigning...'; this.form.submit();">
 
 Assign Class
 
@@ -532,7 +532,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 
 Save Payment
 
@@ -645,7 +645,7 @@ data-bs-dismiss="modal">
 Cancel
 </button>
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 Save Attendance
 </button>
 

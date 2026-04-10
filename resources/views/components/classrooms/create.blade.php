@@ -238,7 +238,7 @@ value="{{ old('starting_date', isset($class) && $class->starting_date ? $class->
 
 <div class="card-header">
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 
 {{ isset($class) ? 'Update' : 'Save' }}
 

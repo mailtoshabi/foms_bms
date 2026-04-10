@@ -43,7 +43,7 @@ public function store(Request $request)
 {
     $request->validate([
         'name'           => 'required',
-        'contact_number' => 'required|string|digits_between:7,15',
+        'contact_number' => 'required|string|digits_between:7,15|unique:teacher_leads,contact_number',
         'email'          => 'nullable|email',
         'source_id'      => 'nullable|exists:sources,id',
     ]);
@@ -77,7 +77,7 @@ public function update(Request $request,$id)
 
     $request->validate([
         'name'           => 'required',
-        'contact_number' => 'required|string|digits_between:7,15',
+        'contact_number' => 'required|string|digits_between:7,15|unique:teacher_leads,contact_number,' . $lead->id,
         'email'          => 'nullable|email',
         'source_id'      => 'nullable|exists:sources,id',
     ]);

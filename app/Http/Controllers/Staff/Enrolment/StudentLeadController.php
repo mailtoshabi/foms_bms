@@ -66,7 +66,7 @@ class StudentLeadController extends Controller
     {
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
-            'contact_number' => ['required', 'string', 'digits_between:7,15'],
+            'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number'],
             'email'          => ['nullable', 'email'],
             'source_id'      => ['nullable', 'exists:sources,id'],
         ]);
@@ -108,7 +108,7 @@ class StudentLeadController extends Controller
 
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
-            'contact_number' => ['required', 'string', 'digits_between:7,15'],
+            'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number,' . $lead->id],
             'email'          => ['nullable', 'email'],
             'source_id'      => ['nullable', 'exists:sources,id'],
             'status'         => ['required', 'in:pending,admitted'],

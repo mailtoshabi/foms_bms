@@ -20,7 +20,7 @@
         @endif
 
         {{-- Original Message --}}
-        <div class="border rounded p-3 mb-3 {{ $message->sender_type == 'App\Models\Teacher' && $message->sender_id == $teacher->id ? 'bg-light' : 'bg-soft-success' }}">
+        <div class="border rounded p-3 mb-3 bg-light">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <strong>
                     @if($message->sender_type == 'App\Models\Teacher' && $message->sender_id == $teacher->id)
@@ -29,7 +29,14 @@
                         {{ $message->sender->name ?? '-' }}
                     @endif
                 </strong>
-                <small class="text-muted">{{ $message->created_at->format('d M Y, h:i A') }}</small>
+                <div class="d-flex align-items-center gap-2">
+                    @if($isClassMessage)
+                        <span class="badge bg-warning text-dark">
+                            <i class="fas fa-users"></i> Class: {{ $message->receiver->name ?? '-' }}
+                        </span>
+                    @endif
+                    <small class="text-muted">{{ $message->created_at->format('d M Y, h:i A') }}</small>
+                </div>
             </div>
             <p class="mb-0">{{ $message->message }}</p>
         </div>
@@ -62,7 +69,7 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-            <button type="submit" class="btn btn-success">
+            <button type="submit" class="btn btn-success" onclick="this.disabled=true; this.innerText='Sending...'; this.form.submit();">
                 <i class="fas fa-reply"></i> Send Reply
             </button>
         </form>

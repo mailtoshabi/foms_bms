@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\ClassHour;
 use App\Models\ClassNote;
+use App\Models\ClassRoom;
 use App\Models\Message;
 use App\Models\Student;
 use App\Models\Teacher;
@@ -72,12 +73,18 @@ class DashboardController extends Controller
             ->latest()
             ->get();
 
-        // Get messages sent or received by student
+        // Get messages sent/received by student + class broadcasts for enrolled classes
         $studentType = Student::class;
-        $allMessages = Message::where(function ($q) use ($id, $studentType) {
-                $q->where('sender_type', $studentType)->where('sender_id', $id);
-            })->orWhere(function ($q) use ($id, $studentType) {
-                $q->where('receiver_type', $studentType)->where('receiver_id', $id);
+        $allMessages = Message::whereNull('reply_to_id')
+            ->where(function ($q) use ($id, $studentType, $classRoomIds) {
+                $q->where(function ($q2) use ($id, $studentType) {
+                    $q2->where('sender_type', $studentType)->where('sender_id', $id);
+                })->orWhere(function ($q2) use ($id, $studentType) {
+                    $q2->where('receiver_type', $studentType)->where('receiver_id', $id);
+                })->orWhere(function ($q2) use ($classRoomIds) {
+                    $q2->where('receiver_type', ClassRoom::class)
+                       ->whereIn('receiver_id', $classRoomIds);
+                });
             })
             ->with(['sender', 'receiver'])
             ->latest()

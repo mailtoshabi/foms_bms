@@ -92,7 +92,12 @@ $percentage = round(($present / $total) * 100);
 
 <hr>
 
-<h5>Sessions</h5>
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h5 class="mb-0">Sessions</h5>
+<a href="{{ route('teacher.sessions.index') }}" class="btn btn-sm btn-outline-primary">
+    <i class="fas fa-list"></i> View All
+</a>
+</div>
 
 <div class="table-responsive">
 <table class="table table-bordered">
@@ -108,7 +113,7 @@ $percentage = round(($present / $total) * 100);
 
 <tbody>
 
-@forelse($class->classHours as $hour)
+@forelse($class->classHours->take(5) as $hour)
 
 <tr>
 
@@ -184,9 +189,14 @@ No Sessions created
 </div>
 
 <hr>
-<h5>Class Notes</h5>
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h5 class="mb-0">Class Notes</h5>
+<a href="{{ route('teacher.notes.index') }}" class="btn btn-sm btn-outline-primary">
+    <i class="fas fa-list"></i> View All
+</a>
+</div>
 <div id="classNotesList">
-    @forelse($class->notes as $note)
+    @forelse($class->notes->take(5) as $note)
         <div class="card mb-3">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
@@ -292,7 +302,7 @@ required>
 
 <div class="modal-footer">
 
-<button class="btn btn-success">
+<button class="btn btn-success" type="submit" onclick="this.disabled=true; this.innerText='Creating...'; this.form.submit();">
 
 Create
 
@@ -341,7 +351,7 @@ required>
 
 <div class="modal-footer">
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Updating...'; this.form.submit();">
 Update
 </button>
 
@@ -386,7 +396,7 @@ Update
 
 <div class="modal-footer">
 
-<button class="btn btn-success">
+<button class="btn btn-success" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 Save & Complete Class
 </button>
 

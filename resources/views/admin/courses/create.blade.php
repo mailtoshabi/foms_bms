@@ -112,7 +112,7 @@
 <div class="card">
 <div class="card-header">
 <div class="d-flex flex-wrap gap-2">
-<button type="submit" class="btn btn-primary waves-effect waves-light">
+<button type="submit" class="btn btn-primary waves-effect waves-light" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 Save Changes
 </button>
 

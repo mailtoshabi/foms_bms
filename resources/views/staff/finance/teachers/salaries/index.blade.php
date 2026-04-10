@@ -267,7 +267,7 @@ data-notes="{{ $salary->notes }}">
 </div>
 
 <div class="modal-footer">
-<button class="btn btn-success">Save Payment</button>
+<button class="btn btn-success" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save Payment</button>
 </div>
 
 </form>

@@ -42,12 +42,17 @@
                             <td>
                                 @if($msg->sender_type == 'App\Models\Student' && $msg->sender_id == $student->id)
                                     <span class="badge bg-primary">Sent</span>
+                                @elseif($msg->receiver_type == 'App\Models\ClassRoom')
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-users"></i> Class</span>
                                 @else
                                     <span class="badge bg-success">Received</span>
                                 @endif
                             </td>
                             <td>
-                                @if($msg->sender_type == 'App\Models\Student')
+                                @if($msg->receiver_type == 'App\Models\ClassRoom')
+                                    {{ $msg->sender->name ?? '-' }}
+                                    <small class="text-muted d-block">to: {{ $msg->receiver->name ?? '-' }}</small>
+                                @elseif($msg->sender_type == 'App\Models\Student')
                                     {{ $msg->receiver->name ?? '-' }}
                                 @else
                                     {{ $msg->sender->name ?? '-' }}

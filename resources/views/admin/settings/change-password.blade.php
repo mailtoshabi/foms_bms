@@ -63,7 +63,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex flex-wrap gap-2">
-                        <button type="submit" class="btn btn-primary waves-effect waves-light">Update</button>
+                        <button type="submit" class="btn btn-primary waves-effect waves-light" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Update</button>
                         <button type="reset" class="btn btn-secondary waves-effect waves-light">Cancel</button>
                     </div>
                 </div>

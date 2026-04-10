@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Base;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\ClassRoom;
 use App\Models\Course;
 use App\Models\ClassType;
@@ -64,7 +65,11 @@ class BaseClassRoomController extends BaseServiceController
         $validated = $request->validate([
             'course_id'        => 'required|exists:courses,id',
             'class_type_id'    => 'required|exists:class_types,id',
-            'name'             => 'required|string|max:255',
+            'name'             => [
+                'required', 'string', 'max:255',
+                Rule::unique('class_rooms', 'name')
+                    ->where('course_id', $request->course_id),
+            ],
 
             'classes_per_week' => 'nullable|integer|min:0',
             'selected_days'    => 'nullable|array',
@@ -107,7 +112,12 @@ class BaseClassRoomController extends BaseServiceController
         $validated = $request->validate([
             'course_id'        => 'required|exists:courses,id',
             'class_type_id'    => 'required|exists:class_types,id',
-            'name'             => 'required|string|max:255',
+            'name'             => [
+                'required', 'string', 'max:255',
+                Rule::unique('class_rooms', 'name')
+                    ->where('course_id', $request->course_id)
+                    ->ignore($classId),
+            ],
 
             'classes_per_week' => 'nullable|integer|min:0',
             'selected_days'    => 'nullable|array',

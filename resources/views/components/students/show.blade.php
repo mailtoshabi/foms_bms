@@ -585,7 +585,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Assigning...'; this.form.submit();">
 
 Assign Class
 
@@ -651,7 +651,7 @@ data-bs-dismiss="modal">
 Cancel
 </button>
 
-<button class="btn btn-warning">
+<button class="btn btn-warning" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 <i class="fas fa-save"></i> Save Discount
 </button>
 
@@ -706,7 +706,7 @@ Cancel
 </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-success">Save Payment</button>
+<button class="btn btn-success" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save Payment</button>
 </div>
 </form>
 </div>
@@ -803,7 +803,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 
 Save
 

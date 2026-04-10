@@ -28,7 +28,7 @@
                     <tr>
                         <th>#</th>
                         <th>Direction</th>
-                        <th>Student</th>
+                        <th>Reciever</th>
                         <th>Message</th>
                         <th>Replies</th>
                         <th>Date</th>
@@ -47,7 +47,10 @@
                                 @endif
                             </td>
                             <td>
-                                @if($msg->sender_type == 'App\Models\Teacher')
+                                @if($msg->receiver_type == 'App\Models\ClassRoom')
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-users"></i> Class</span>
+                                    {{ $msg->receiver->name ?? '-' }}
+                                @elseif($msg->sender_type == 'App\Models\Teacher')
                                     {{ $msg->receiver->name ?? '-' }}
                                 @else
                                     {{ $msg->sender->name ?? '-' }}

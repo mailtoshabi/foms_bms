@@ -116,7 +116,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="d-flex flex-wrap gap-2">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
                         Save Changes
                     </button>
                     <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">

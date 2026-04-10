@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.master')
+@extends('admin.layouts.master')
 
 @section('title','Staff Details')
 
@@ -75,7 +75,7 @@ width="120">
        class="form-control"
        value="{{ $staff->salary_amount ?? 0 }}"
        placeholder="0.00">
-<button class="btn btn-primary" type="button" id="updateSalaryBtn">
+<button class="btn btn-primary" type="button" id="updateSalaryBtn" onclick="this.disabled=true; this.innerText='Saving...';">
 <i class="fas fa-save"></i>
 </button>
 </div>
@@ -353,7 +353,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-primary">
+<button class="btn btn-primary" type="submit" id="saveSalaryBtn" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 
 Save Salary
 
@@ -514,7 +514,7 @@ Cancel
 
 </button>
 
-<button class="btn btn-success" type="submit">
+<button class="btn btn-success" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
 
 Pay Balance
 

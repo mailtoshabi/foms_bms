@@ -79,7 +79,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" onclick="this.disabled=true; this.innerText='Uploading...'; this.form.submit();">
                             <i class="fas fa-upload"></i> Upload Note
                         </button>
                         <a href="{{ route('teacher.notes.index') }}" class="btn btn-secondary ms-2">

@@ -164,7 +164,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary">Update</button>
+                    <button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Updating...'; this.form.submit();">Update</button>
                 </div>
             </form>
         </div>

@@ -255,7 +255,7 @@ name="id_proof">
 <div class="mb-3">
 
 <button class="btn btn-zopa w-100 waves-effect waves-light"
-type="submit">
+type="submit" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
 
 @if($type=='student')
 Submit Admission Form

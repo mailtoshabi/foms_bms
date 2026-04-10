@@ -54,7 +54,7 @@ Department Login
                                 </div>
 
                                 <div class="mb-3">
-                                    <button class="btn btn-zopa w-100" type="submit">
+                                    <button class="btn btn-zopa w-100" type="submit" onclick="this.disabled=true; this.innerText='Logging in...'; this.form.submit();">
                                         Log In
                                     </button>
                                 </div>

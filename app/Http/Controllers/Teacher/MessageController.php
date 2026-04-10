@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Teacher;
 
 use App\Http\Controllers\Controller;
+use App\Models\ClassRoom;
 use App\Models\Message;
 use App\Models\Student;
 use App\Models\Teacher;
@@ -15,13 +16,15 @@ class MessageController extends Controller
     {
         $teacher = Auth::guard('teacher')->user();
 
-        // Get only root messages (not replies) involving this teacher
         $messages = Message::whereNull('reply_to_id')
             ->where(function ($q) use ($teacher) {
+                // Direct messages sent/received by this teacher
                 $q->where(function ($q2) use ($teacher) {
-                    $q2->where('sender_type', Teacher::class)->where('sender_id', $teacher->id);
+                    $q2->where('sender_type', Teacher::class)
+                       ->where('sender_id', $teacher->id);
                 })->orWhere(function ($q2) use ($teacher) {
-                    $q2->where('receiver_type', Teacher::class)->where('receiver_id', $teacher->id);
+                    $q2->where('receiver_type', Teacher::class)
+                       ->where('receiver_id', $teacher->id);
                 });
             })
             ->with(['sender', 'receiver', 'replies'])
@@ -34,31 +37,54 @@ class MessageController extends Controller
     public function create()
     {
         $teacher = Auth::guard('teacher')->user();
+        $classRoomIds = $teacher->classRooms()->pluck('class_rooms.id');
 
-        // Get students from teacher's assigned class rooms
-        $students = Student::whereHas('class_rooms', function ($q) use ($teacher) {
-            $q->whereIn('class_rooms.id', $teacher->classRooms()->pluck('class_rooms.id'));
+        $students = Student::whereHas('class_rooms', function ($q) use ($classRoomIds) {
+            $q->whereIn('class_rooms.id', $classRoomIds);
         })->get();
 
-        return view('teacher.messages.create', compact('students'));
+        $classRooms = $teacher->classRooms()->with('course')->get();
+
+        return view('teacher.messages.create', compact('students', 'classRooms'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'student_id' => 'required|exists:students,id',
-            'message' => 'required|string|max:2000',
-        ]);
-
         $teacher = Auth::guard('teacher')->user();
 
-        Message::create([
-            'sender_type' => Teacher::class,
-            'sender_id' => $teacher->id,
-            'receiver_type' => Student::class,
-            'receiver_id' => $request->student_id,
-            'message' => $request->message,
-        ]);
+        if ($request->to_type === 'class') {
+            $request->validate([
+                'class_room_id' => 'required|exists:class_rooms,id',
+                'message'       => 'required|string|max:2000',
+            ]);
+
+            // Ensure this teacher belongs to the selected class
+            $allowed = $teacher->classRooms()->pluck('class_rooms.id');
+            if (!$allowed->contains($request->class_room_id)) {
+                abort(403);
+            }
+
+            Message::create([
+                'sender_type'   => Teacher::class,
+                'sender_id'     => $teacher->id,
+                'receiver_type' => ClassRoom::class,
+                'receiver_id'   => $request->class_room_id,
+                'message'       => $request->message,
+            ]);
+        } else {
+            $request->validate([
+                'student_id' => 'required|exists:students,id',
+                'message'    => 'required|string|max:2000',
+            ]);
+
+            Message::create([
+                'sender_type'   => Teacher::class,
+                'sender_id'     => $teacher->id,
+                'receiver_type' => Student::class,
+                'receiver_id'   => $request->student_id,
+                'message'       => $request->message,
+            ]);
+        }
 
         return redirect()->route('teacher.messages.index')->with('success', 'Message sent successfully!');
     }
@@ -68,15 +94,16 @@ class MessageController extends Controller
         $teacher = Auth::guard('teacher')->user();
         $message = Message::with(['sender', 'receiver', 'replies.sender'])->findOrFail(decrypt($id));
 
-        // Ensure this teacher is involved in the message
-        $isTeacherInvolved = ($message->sender_type == Teacher::class && $message->sender_id == $teacher->id)
+        $isInvolved = ($message->sender_type == Teacher::class && $message->sender_id == $teacher->id)
             || ($message->receiver_type == Teacher::class && $message->receiver_id == $teacher->id);
 
-        if (!$isTeacherInvolved) {
+        if (!$isInvolved) {
             abort(403);
         }
 
-        return view('teacher.messages.show', compact('message', 'teacher'));
+        $isClassMessage = $message->receiver_type === ClassRoom::class;
+
+        return view('teacher.messages.show', compact('message', 'teacher', 'isClassMessage'));
     }
 
     public function reply(Request $request, $id)
@@ -86,26 +113,28 @@ class MessageController extends Controller
         ]);
 
         $teacher = Auth::guard('teacher')->user();
-        $parent = Message::findOrFail(decrypt($id));
+        $parent  = Message::findOrFail(decrypt($id));
 
-        // Determine the receiver (the other party)
+        // For class message: teacher replies back to the class
+        // For direct message: reply to the other party
         if ($parent->sender_type == Teacher::class && $parent->sender_id == $teacher->id) {
             $receiverType = $parent->receiver_type;
-            $receiverId = $parent->receiver_id;
+            $receiverId   = $parent->receiver_id;
         } else {
             $receiverType = $parent->sender_type;
-            $receiverId = $parent->sender_id;
+            $receiverId   = $parent->sender_id;
         }
 
         Message::create([
-            'reply_to_id' => $parent->id,
-            'sender_type' => Teacher::class,
-            'sender_id' => $teacher->id,
+            'reply_to_id'   => $parent->id,
+            'sender_type'   => Teacher::class,
+            'sender_id'     => $teacher->id,
             'receiver_type' => $receiverType,
-            'receiver_id' => $receiverId,
-            'message' => $request->message,
+            'receiver_id'   => $receiverId,
+            'message'       => $request->message,
         ]);
 
         return back()->with('success', 'Reply sent successfully!');
     }
 }
+
