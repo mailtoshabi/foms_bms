@@ -405,9 +405,9 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 '/class-rooms/remove-teacher','removeTeacher'
                 )->name('remove.teacher');
 
-                Route::post(
-                '/class-rooms/assign-students','assignStudents'
-                )->name('assign.students');
+                // Route::post(
+                // '/class-rooms/assign-students','assignStudents'
+                // )->name('assign.students');
 
                 Route::post(
                 '/class-rooms/remove-student','removeStudent'
@@ -573,6 +573,10 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::get('/edit/{id}','edit')->name('edit');
                 Route::put('/update','update')->name('update');
                 Route::get('/show/{id}', 'show')->name('show');
+
+                Route::post(
+                '/class-rooms/assign-students','assignStudents'
+                )->name('assign.students');
 
             });
 

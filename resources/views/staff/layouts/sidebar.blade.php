@@ -117,8 +117,8 @@
                 </li>
                 @endif
 
-                {{-- Fees: finance | operation --}}
-                @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
+                {{-- Fees: enrolment | finance | operation --}}
+                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                 <li>
                     <a href="{{ route('staff.fees.index') }}">
                     <i class="fas fa-money-bill"></i>

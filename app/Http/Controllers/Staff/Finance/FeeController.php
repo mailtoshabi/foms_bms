@@ -17,8 +17,14 @@ class FeeController extends Controller
 {
     $tab = $request->get('tab', 'unpaid'); // default
 
-    $query = Fee::with(['student','classRoom']);
-        // ->withSum('payments as paid_amount', 'paid_amount');
+    $query = Fee::with(['student','classRoom'])
+        ->whereHas('student');
+
+    // Enrolment dept sees admission fees only
+    $staff = auth('staff')->user();
+    if ($staff->hasRoleId(utility('id_enrolment_dept'))) {
+        $query->where('type', 'admission');
+    }
 
     // Tab logic
     if ($tab === 'paid') {
@@ -85,41 +91,49 @@ class FeeController extends Controller
             'paid_date' => 'required|date'
         ]);
 
-        DB::transaction(function () use ($validated, $request) {
+        try {
+            DB::transaction(function () use ($validated, $request) {
 
-            $fee = Fee::findOrFail($validated['fee_id']);
+                $fee = Fee::with('student')->findOrFail($validated['fee_id']);
 
-            // Total paid so far
-            $totalPaid = FeePayment::where('fee_id',$fee->id)
-                ->sum('paid_amount');
+                if (!$fee->student || $fee->student->trashed()) {
+                    throw new \Exception('Payment cannot be recorded for a deleted student.');
+                }
 
-            $newTotal = $totalPaid + $validated['paid_amount'];
+                // Total paid so far
+                $totalPaid = FeePayment::where('fee_id',$fee->id)
+                    ->sum('paid_amount');
 
-            // Save payment
-            FeePayment::create([
-                'fee_id' => $fee->id,
-                'paid_amount' => $validated['paid_amount'],
-                'payment_method' => $validated['payment_method'],
-                'paid_date' => $validated['paid_date'],
-                'notes' => $request->notes
-            ]);
+                $newTotal = $totalPaid + $validated['paid_amount'];
 
-            // Update fee status
-            if ($newTotal >= $fee->amount) {
-
-                $fee->update([
-                    'status' => 'paid'
+                // Save payment
+                FeePayment::create([
+                    'fee_id' => $fee->id,
+                    'paid_amount' => $validated['paid_amount'],
+                    'payment_method' => $validated['payment_method'],
+                    'paid_date' => $validated['paid_date'],
+                    'notes' => $request->notes
                 ]);
 
-            } else {
+                // Update fee status
+                if ($newTotal >= $fee->amount) {
 
-                $fee->update([
-                    'status' => 'partial'
-                ]);
+                    $fee->update([
+                        'status' => 'paid'
+                    ]);
 
-            }
+                } else {
 
-        });
+                    $fee->update([
+                        'status' => 'partial'
+                    ]);
+
+                }
+
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
 
         return back()->with('success','Payment recorded successfully');
     }

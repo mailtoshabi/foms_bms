@@ -165,6 +165,13 @@ data-bs-target="#assignStudentModal">
 <td>{{ $student->name }}</td>
 <td>{{ $student->contact_number }}</td>
 
+@php
+    $administratorRoleId = utility('id_administrator_dept');
+    $operationRoleId   = utility('id_operation_dept');
+    $staff = auth('staff')->user();
+@endphp
+
+@if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
 <td>
 
 <form method="POST"
@@ -183,7 +190,7 @@ onsubmit="return confirm('Remove this student?')">
 </form>
 
 </td>
-
+@endif
 </tr>
 
 @empty
