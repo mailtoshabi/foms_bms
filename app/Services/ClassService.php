@@ -2,6 +2,9 @@
 namespace App\Services;
 
 use App\Models\ClassRoom;
+use App\Models\Fee;
+use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ClassService
@@ -134,6 +137,60 @@ class ClassService
 
             if (!empty($attachData)) {
                 $class->students()->attach($attachData);
+            }
+
+            // =========================
+            // Fee Generation per student
+            // =========================
+            foreach (array_keys($attachData) as $studentId) {
+
+                $student = Student::findOrFail($studentId);
+
+                $isAdmissionExempted = $student->is_admission_fee_exempted;
+                $isMonthlyExempted   = $student->is_monthly_fee_exempted;
+
+                // Both exempted → no fee
+                if ($isAdmissionExempted && $isMonthlyExempted) {
+                    continue;
+                }
+
+                $feeType   = null;
+                $feeAmount = 0;
+
+                if ($isAdmissionExempted && !$isMonthlyExempted) {
+                    $feeType   = 'monthly';
+                    $feeAmount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
+                } elseif (!$isAdmissionExempted && $isMonthlyExempted) {
+                    $feeType   = 'admission';
+                    $feeAmount = max(0, $class->admission_fee - $student->admission_fee_discount);
+                } else {
+                    if ($class->admission_fee > 0) {
+                        $feeType   = 'admission';
+                        $feeAmount = max(0, $class->admission_fee - $student->admission_fee_discount);
+                    } else {
+                        $feeType   = 'monthly';
+                        $feeAmount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
+                    }
+                }
+
+                // Skip if fee already exists for this student/class/type
+                if (Fee::where('student_id', $student->id)
+                        ->where('class_room_id', $class->id)
+                        ->where('type', $feeType)
+                        ->exists()) {
+                    continue;
+                }
+
+                if ($feeAmount > 0) {
+                    Fee::create([
+                        'student_id'   => $student->id,
+                        'class_room_id' => $class->id,
+                        'type'         => $feeType,
+                        'amount'       => $feeAmount,
+                        'due_date'     => Carbon::parse($class->starting_date)->addDays(7),
+                        'status'       => 'unpaid',
+                    ]);
+                }
             }
 
             return [

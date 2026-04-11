@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Fee;
 use App\Models\FeePayment;
 use App\Models\FeeNotification;
+use App\Models\Student;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -121,6 +122,26 @@ class FeeController extends Controller
         });
 
         return back()->with('success','Payment recorded successfully');
+    }
+
+    public function destroy($id)
+    {
+        $fee = Fee::with(['student', 'classRoom'])->findOrFail($id);
+
+        if ($fee->status !== 'unpaid' || $fee->type !== 'admission') {
+            return back()->with('error', 'Only unpaid admission fees can be deleted.');
+        }
+
+        DB::transaction(function () use ($fee) {
+            // Detach student from the class room
+            if ($fee->student && $fee->class_room_id) {
+                $fee->student->class_rooms()->detach($fee->class_room_id);
+            }
+
+            $fee->delete();
+        });
+
+        return back()->with('success', 'Fee deleted and student unassigned from class successfully.');
     }
 
     public function invoice($id)

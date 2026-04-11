@@ -366,6 +366,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
             [StudentController::class,'saveDiscount']
             )->name('students.discount');
 
+            Route::get(
+            '/students/{id}/check-related',
+            [StudentController::class,'checkRelated']
+            )->name('students.check_related');
+
             Route::resource('students', StudentController::class)
             ->names('students')
             ->except(['index','show']);
@@ -500,6 +505,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
             '/fees/send-bulk-notifications',
             [FeeController::class,'sendBulkNotifications']
             )->name('fees.send-bulk-notifications');
+
+            Route::delete(
+            '/fees/{id}',
+            [FeeController::class,'destroy']
+            )->name('fees.destroy');
 
         });
 

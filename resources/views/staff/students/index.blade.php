@@ -95,7 +95,8 @@ placeholder="Search name or contact">
 </a>
 
 <a href="#"
-data-plugin="delete-data"
+data-plugin="delete-student"
+data-check-url="{{ route('staff.students.check_related', encrypt($student->id)) }}"
 data-target-form="#delete_{{ $student->id }}">
 <i class="mdi mdi-trash-can text-danger"></i>
 </a>
@@ -135,5 +136,37 @@ action="{{ route('staff.students.destroy',encrypt($student->id)) }}">
 @section('script')
 <script>
 $('.select2').select2();
+
+$(document).on('click', '[data-plugin="delete-student"]', function(e) {
+    e.preventDefault();
+    var checkUrl   = $(this).data('check-url');
+    var targetForm = $(this).data('target-form');
+
+    $.get(checkUrl, function(data) {
+        var lines = [];
+        if (data.fees        > 0) lines.push('<li>' + data.fees        + ' fee record(s)</li>');
+        if (data.attendances > 0) lines.push('<li>' + data.attendances + ' attendance record(s)</li>');
+        if (data.class_rooms > 0) lines.push('<li>' + data.class_rooms + ' class assignment(s)</li>');
+
+        var html = lines.length
+            ? '<p>The following related data will also be affected:</p><ul>' + lines.join('') + '</ul>'
+            : '<p>No related records found.</p>';
+
+        Swal.fire({
+            title: 'Delete ' + data.name + '?',
+            html: html,
+            icon: lines.length ? 'warning' : 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel'
+        }).then(function(result) {
+            if (result.isConfirmed) {
+                $(targetForm).submit();
+            }
+        });
+    });
+});
 </script>
 @endsection

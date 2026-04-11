@@ -287,6 +287,23 @@ Full Paid
         </button>
         @endif
 
+        @if($fee->status === 'unpaid' && $fee->type === 'admission')
+        <button class="btn btn-sm btn-danger deleteFeeBtn"
+            data-id="{{ $fee->id }}"
+            data-student="{{ $fee->student->name ?? '-' }}"
+            data-class="{{ $fee->classRoom->name ?? '-' }}"
+            data-amount="{{ number_format($fee->amount, 2) }}"
+            title="Delete fee & unassign from class">
+            <i class="mdi mdi-trash-can"></i>
+        </button>
+        <form id="delete_fee_{{ $fee->id }}"
+            method="POST"
+            action="{{ route('staff.fees.destroy', $fee->id) }}">
+            @csrf
+            @method('DELETE')
+        </form>
+        @endif
+
     </td>
 @endif
 
@@ -532,6 +549,34 @@ function formatDate(dateStr){
 function formatMethod(method){
     return method.replace('_',' ').replace(/\b\w/g, l => l.toUpperCase());
 }
+
+// Delete Fee Handler
+$(document).on('click', '.deleteFeeBtn', function(e) {
+    e.preventDefault();
+    var feeId      = $(this).data('id');
+    var studentName = $(this).data('student');
+    var className  = $(this).data('class');
+    var amount     = $(this).data('amount');
+
+    Swal.fire({
+        title: 'Delete Admission Fee?',
+        html: '<p>You are about to delete the admission fee for <strong>' + studentName + '</strong>.</p>' +
+              '<ul>' +
+              '<li>Fee amount: ₹ ' + amount + '</li>' +
+              '<li>Student will be <strong>unassigned</strong> from class: <strong>' + className + '</strong></li>' +
+              '</ul>',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete',
+        cancelButtonText: 'Cancel'
+    }).then(function(result) {
+        if (result.isConfirmed) {
+            $('#delete_fee_' + feeId).submit();
+        }
+    });
+});
 
 // Send Notification Handler
 $('.sendNotificationBtn').click(function(e){

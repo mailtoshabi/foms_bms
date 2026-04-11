@@ -11,7 +11,7 @@ $isEdit = isset($student);
 <div class="row">
 
 <form method="POST"
-action="{{ $isEdit ? route('staff.students.update',$student->id) : route('staff.students.store') }}"
+action="{{ $isEdit ? route('staff.students.update',encrypt($student->id)) : route('staff.students.store') }}"
 enctype="multipart/form-data">
 
 @csrf

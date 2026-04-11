@@ -211,6 +211,22 @@ public function update(Request $request, $id)
     }
 
 
+    public function checkRelated($id)
+    {
+        $student = Student::withCount([
+            'fees',
+            'attendances',
+            'class_rooms',
+        ])->findOrFail(decrypt($id));
+
+        return response()->json([
+            'name'        => $student->name,
+            'fees'        => $student->fees_count,
+            'attendances' => $student->attendances_count,
+            'class_rooms' => $student->class_rooms_count,
+        ]);
+    }
+
     public function destroy($id)
     {
         $student = Student::findOrFail(decrypt($id));

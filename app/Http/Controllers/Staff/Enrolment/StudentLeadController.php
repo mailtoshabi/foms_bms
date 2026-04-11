@@ -134,7 +134,12 @@ class StudentLeadController extends Controller
     */
     public function destroy($id)
     {
-        $lead = StudentLead::findOrFail(decrypt($id));
+        $lead = StudentLead::withCount('notes')->with('student')->findOrFail(decrypt($id));
+
+        if ($lead->student) {
+            return back()->with('error', "Cannot delete \"{$lead->name}\" — a student record is linked to this lead.");
+        }
+
         $lead->delete();
 
         return back()->with('success', 'Lead deleted successfully.');
