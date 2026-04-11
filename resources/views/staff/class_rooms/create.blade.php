@@ -100,4 +100,10 @@ if(count === 0){
 
 </script>
 
+<script>
+$('select[name="class_type_id"]').on('change', function () {
+    $('#admission-fee-label').text($(this).val() == '1' ? 'First Month Fee' : 'Admission Fee');
+}).trigger('change');
+</script>
+
 @endsection

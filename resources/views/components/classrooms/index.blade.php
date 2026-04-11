@@ -167,7 +167,7 @@ Reset
 
 <td>
 
-Admission: ₹{{ number_format($class->admission_fee,2) }} <br>
+{{ $class->classType->id == 1 ? 'First Month Fee' : 'Admission Fee' }}: ₹{{ number_format($class->admission_fee,2) }} <br>
 
 Monthly: ₹{{ number_format($class->monthly_fee,2) }}
 

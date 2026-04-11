@@ -25,7 +25,7 @@
 <label>Course</label>
 
 <select name="course_id" class="form-control select2">
-
+<option value="">Select Course</option>
 @foreach($courses as $c)
 
 <option value="{{ $c->id }}"
@@ -47,10 +47,11 @@
 <label>Class Type</label>
 
 <select name="class_type_id" class="form-control select2">
-
+<option value="">Select Class Type</option>
 @foreach($types as $t)
 
 <option value="{{ $t->id }}"
+data-name="{{ strtolower($t->name) }}"
 {{ isset($class) && $class->class_type_id==$t->id ? 'selected':'' }}>
 
 {{ ucfirst($t->name) }}
@@ -78,7 +79,9 @@ value="{{ $class->name ?? old('name') }}">
 
 <div class="col-sm-6 mb-3">
 
-<label>Admission Fee</label>
+<label id="admission-fee-label">
+{{ (isset($class) && $class->class_type_id == 1) ? 'First Month Fee' : 'Admission Fee' }}
+</label>
 
 <input type="number"
 step="0.01"
@@ -208,17 +211,6 @@ value="{{ $class->slot_duration ?? '' }}">
 </div>
 
 
-{{-- <div class="col-md-3 mb-3">
-
-<label>Starting Date</label>
-
-<input type="date"
-name="starting_date"
-class="form-control"
-value="{{ old('starting_date', isset($class) && $class->starting_date ? $class->starting_date->format('Y-m-d') : '') }}">
-
-</div> --}}
-
 
 </div>
 
@@ -258,3 +250,5 @@ Cancel
 </form>
 
 </div>
+
+

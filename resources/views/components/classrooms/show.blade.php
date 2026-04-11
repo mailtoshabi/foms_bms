@@ -26,7 +26,7 @@
 <p><strong>Course:</strong> {{ $class->course->name ?? '-' }}</p>
 <p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') }}</p>
 
-<p><strong>Admission Fee:</strong> &#8377; {{ number_format($class->admission_fee,2) }}</p>
+<p><strong>{{ $class->classType->id == 1 ? 'First Month Fee' : 'Admission Fee' }}:</strong> &#8377; {{ number_format($class->admission_fee,2) }}</p>
 <p><strong>Monthly Fee:</strong> &#8377; {{ number_format($class->monthly_fee,2) }}</p>
 
 <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
