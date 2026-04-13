@@ -148,7 +148,7 @@
                 @php
                 $phone = preg_replace('/[^0-9]/','',$lead->contact_number);
                 $message = "Dear {$lead->name}, please complete your admission form using the following link: ".$link;
-                $waLink = "https://wa.me/91{$phone}?text=".urlencode($message);
+                $waLink = "https://wa.me/{$phone}?text=".urlencode($message);
                 @endphp
 
                 <div class="input-group">
