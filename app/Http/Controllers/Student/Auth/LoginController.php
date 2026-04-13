@@ -16,7 +16,7 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'phone'    => 'required|digits:10',
+            'phone'    => 'required|string|min:7|max:15',
             'password' => 'required'
         ]);
 

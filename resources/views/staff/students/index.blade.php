@@ -83,13 +83,21 @@ placeholder="Search name or contact">
 </td>
 
 <td>
+@php
+    $enrolmentRoleId   = utility('id_enrolment_dept');
+    $administratorRoleId = utility('id_administrator_dept');
+    $financeRoleId     = utility('id_finance_dept');
+    $hrRoleId          = utility('id_hr_dept');
+    $operationRoleId   = utility('id_operation_dept');
+    $staff = auth('staff')->user();
+@endphp
 
 <div class="d-flex gap-2">
 
 <a href="{{ route('staff.students.show',encrypt($student->id)) }}">
 <i class="mdi mdi-eye text-primary"></i>
 </a>
-
+@if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
 <a href="{{ route('staff.students.edit',encrypt($student->id)) }}">
 <i class="mdi mdi-pencil text-success"></i>
 </a>
@@ -107,8 +115,9 @@ action="{{ route('staff.students.destroy',encrypt($student->id)) }}">
 @csrf
 @method('DELETE')
 </form>
-
+@endif
 </div>
+
 
 </td>
 

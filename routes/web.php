@@ -385,14 +385,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
             ->name('class_rooms.')
             ->group(function () {
 
-                // Route::get('/','index')->name('index');6
-                // Route::get('/create','create')->name('create');
-                // Route::post('/store','store')->name('store');
-
-                // Route::get('/edit/{id}','edit')->name('edit');
-                // Route::put('/update','update')->name('update');
-                // Route::get('/show/{id}', 'show')->name('show');
-
                 Route::delete('/delete/{id}','destroy')->name('destroy');
 
                 Route::get('/status/{id}','changeStatus')->name('changeStatus');
@@ -405,15 +397,10 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 '/class-rooms/remove-teacher','removeTeacher'
                 )->name('remove.teacher');
 
-                // Route::post(
-                // '/class-rooms/assign-students','assignStudents'
-                // )->name('assign.students');
-
                 Route::post(
                 '/class-rooms/remove-student','removeStudent'
                 )->name('remove.student');
 
-                // Route::get('/search','search')->name('search');
             });
 
             Route::resource('teacher-leads', TeacherLeadController::class);
@@ -426,24 +413,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 'teacher-leads/{lead}/convert',
                 [TeacherLeadController::class, 'convertToTeacher']
             )->name('teacher-leads.convert');
-
-            // Route::controller(EnrolmentClassRoomController::class)
-            // ->prefix('class_rooms')
-            // ->name('class_rooms.')
-            // ->group(function () {
-
-            //     Route::get('/','index')->name('index');
-            //     Route::get('/create','create')->name('create');
-            //     Route::post('/store','store')->name('store');
-
-            //     Route::get('/edit/{id}','edit')->name('edit');
-            //     Route::put('/update','update')->name('update');
-
-            //     Route::delete('/delete/{id}','destroy')->name('destroy');
-
-            //     Route::get('/status/{id}','changeStatus')->name('changeStatus');
-            // });
-
 
 
             Route::post(
@@ -459,9 +428,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
             Route::put('/teachers/salaries/{salary}',
                     [TeacherSalaryController::class,'update'])
                     ->name('teacher-salaries.update');
-
-            Route::resource('teachers', TeacherController::class)
-            ->names('teachers');
 
             Route::delete(
                 '/teachers/{teacher}/classrooms/{class_room}',
@@ -513,17 +479,8 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
         });
 
-        Route::middleware('role:id_hr_dept,id_operation_dept')
+        Route::middleware('role:id_finance_dept,id_operation_dept')
         ->group(function () {
-            Route::get(
-            '/teacher-salaries',
-            [SalaryController::class,'index']
-            )->name('salaries.index');
-
-            Route::post(
-            '/teacher-salaries/pay',
-            [SalaryController::class,'pay']
-            )->name('salaries.pay');
 
             Route::controller(ExpenseController::class)
             ->prefix('expenses')
@@ -536,6 +493,19 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::put('/update/{id}', 'update')->name('update');
                 Route::delete('/delete/{id}', 'destroy')->name('destroy');
             });
+        });
+
+        Route::middleware('role:id_hr_dept,id_operation_dept')
+        ->group(function () {
+            Route::get(
+            '/teacher-salaries',
+            [SalaryController::class,'index']
+            )->name('salaries.index');
+
+            Route::post(
+            '/teacher-salaries/pay',
+            [SalaryController::class,'pay']
+            )->name('salaries.pay');
 
             Route::get(
             '/process/teacher/{id}/salary',
@@ -545,21 +515,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
         Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_operation_dept')
         ->group(function () {
-
-            Route::get(
-            '/students',
-            [StudentController::class,'index']
-            )->name('students.index');
-
-            Route::get(
-            '/students/{id}',
-            [StudentController::class,'show']
-            )->name('students.show');
-
-            Route::post(
-            '/students/assign-class',
-            [StudentController::class,'assignClass']
-            )->name('students.assign.class');
 
             Route::controller(EnrolmentClassRoomController::class)
             ->prefix('class_rooms')
@@ -580,6 +535,32 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
             });
 
+        });
+
+        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_hr_dept,id_operation_dept')
+        ->group(function () {
+            Route::get(
+            '/students',
+            [StudentController::class,'index']
+            )->name('students.index');
+
+            Route::get(
+            '/students/{id}',
+            [StudentController::class,'show']
+            )->name('students.show');
+
+            Route::post(
+            '/students/assign-class',
+            [StudentController::class,'assignClass']
+            )->name('students.assign.class');
+
+
+        });
+
+        Route::middleware('role:id_administrator_dept,id_hr_dept,id_operation_dept')
+        ->group(function () {
+            Route::resource('teachers', TeacherController::class)
+            ->names('teachers');
         });
 
 

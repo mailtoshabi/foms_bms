@@ -24,7 +24,7 @@
                 @endphp
 
                 {{-- Students: enrolment | administrator | operation --}}
-                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
                 <li class="{{ set_active(['staff.student-leads.*','staff.students.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-user-graduate text-primary"></i>
@@ -64,8 +64,8 @@
                 </li>
                 @endif
 
-                {{-- Teachers: administrator | operation --}}
-                @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                {{-- Teachers: administrator | hr | operation --}}
+                @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
                 <li class="{{ set_active(['staff.teacher-leads.*','staff.teachers.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-teach text-primary"></i>
@@ -135,7 +135,9 @@
                     <span>Salaries</span>
                     </a>
                 </li>
+                @endif
 
+                @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                 <li>
                     <a href="{{ route('staff.expenses.index') }}">
                     <i class="fas fa-receipt"></i>
