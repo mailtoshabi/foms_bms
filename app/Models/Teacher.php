@@ -48,6 +48,7 @@ class Teacher extends Authenticatable
     protected $casts = [
         'dob' => 'date',
         'last_login_at' => 'datetime',
+        'salary_cycle_day' => 'integer',
     ];
 
     public function salaries()

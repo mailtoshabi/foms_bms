@@ -637,7 +637,7 @@ Route::prefix('teacher')
             Route::get('/', 'index')->name('index');
             Route::get('/create', 'create')->name('create');
             Route::post('/store', 'store')->name('store');
-            Route::delete('/destroy', 'destroy')->name('destroy');
+            Route::delete('/destroy/{id}', 'destroy')->name('destroy');
             Route::get('/show/{id}', 'show')->name('show');
             Route::get('/class-rooms/search', 'searchClassRooms')->name('class_rooms.search');
         });
