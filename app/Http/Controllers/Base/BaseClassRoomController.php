@@ -237,6 +237,14 @@ class BaseClassRoomController extends BaseServiceController
 
     public function destroy($id)
     {
+        $staff = auth('staff')->user();
+        $isAdmin = auth('admin')->check();
+        $isOperation = $staff && $staff->hasRoleId(utility('id_operation_dept'));
+
+        if (!$isAdmin && !$isOperation) {
+            abort(403, 'Unauthorized access: Only Administrators or Operations department can delete classes.');
+        }
+
         $class = $this->classService->delete(decrypt($id));
 
         return back()->with('success', "Class \"{$class->name}\" deleted successfully.");

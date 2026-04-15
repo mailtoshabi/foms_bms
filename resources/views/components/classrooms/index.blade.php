@@ -201,6 +201,19 @@ Monthly: ₹{{ number_format($class->monthly_fee,2) }}
 <i class="mdi mdi-pencil text-success"></i>
 </a>
 
+@php
+    $canDelete = false;
+    if (auth('admin')->check()) {
+        $canDelete = true;
+    } elseif (auth('staff')->check()) {
+        $staff = auth('staff')->user();
+        if ($staff->hasRoleId(utility('id_operation_dept'))) {
+            $canDelete = true;
+        }
+    }
+@endphp
+
+@if($canDelete)
 <a href="#"
 data-plugin="delete-data"
 data-target-form="#delete_{{ $class->id }}">
@@ -215,6 +228,7 @@ action="{{ $deleteRoute(encrypt($class->id)) }}">
 @method('DELETE')
 
 </form>
+@endif
 
 </div>
 
