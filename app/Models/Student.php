@@ -57,14 +57,14 @@ class Student extends Authenticatable
     ];
 
     public function class_rooms()
-{
-    return $this->belongsToMany(
-        ClassRoom::class,
-        'student_class_room',   // pivot table
-        'student_id',
-        'class_room_id'
-    )->withPivot('assigned_date')->withTimestamps();
-}
+    {
+        return $this->belongsToMany(
+            ClassRoom::class,
+            'student_class_room',   // pivot table
+            'student_id',
+            'class_room_id'
+        )->withPivot('assigned_date')->withTimestamps();
+    }
     public function lead()
     {
         return $this->belongsTo(StudentLead::class, 'student_lead_id');
@@ -90,17 +90,25 @@ class Student extends Authenticatable
         return $this->dob?->format('d M Y');
     }
 
+
     protected static function booted()
     {
         static::creating(function ($student) {
 
-            $lastStudent = Student::latest('id')->first();
+            $now = now();
+            $year = $now->format('y');  // 2-digit year  e.g. "26"
+            $month = $now->format('m');  // 2-digit month e.g. "04"
 
-            $nextNumber = $lastStudent ? $lastStudent->id + 1 : 1;
+            // Serial: total students admitted in the same month + 1
+            $countThisMonth = Student::whereYear('created_at', $now->year)
+                ->whereMonth('created_at', $now->month)
+                ->count();
 
-            $year = now()->year;
+            $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
 
-            $student->admission_no = 'FOMS-'.$year.'-' . str_pad($nextNumber,4,'0',STR_PAD_LEFT);
+            // Format: FA/{YY}/{MM}/{serial}
+            // Example: FA/26/04/27
+            $student->admission_no = 'FA/' . $year . '/' . $month . '/' . $serial;
 
         });
     }

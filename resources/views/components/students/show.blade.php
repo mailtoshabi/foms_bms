@@ -27,6 +27,10 @@ width="120">
 <h5>{{ $student->name }}</h5>
 
 <p class="text-muted mb-1">
+{{ $student->admission_no }}
+</p>
+
+<p class="text-muted mb-1">
 {{ $student->contact_number }}
 </p>
 

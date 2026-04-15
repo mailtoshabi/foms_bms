@@ -52,6 +52,14 @@ $(document).ready(function() {
             });
         });
     });
+
+    // Auto prepend https:// to google meet link
+    $(document).on('blur', 'input[name="google_meet_link"]', function() {
+        var val = $(this).val().trim();
+        if (val && !/^https?:\/\//i.test(val)) {
+            $(this).val('https://' + val);
+        }
+    });
 });
 </script>
 <!-- PWA -->

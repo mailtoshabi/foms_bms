@@ -80,28 +80,28 @@ public function submitForm(Request $request,$type,$token)
 
         $model = Student::create([
 
-            'student_lead_id'=>$lead->id,
+            'student_lead_id'    => $lead->id,
 
-            'name'=>$request->name,
-            'dob'=>$request->dob,
-            'email'=>$request->email,
-            'contact_number'=>$request->contact_number,
-            'whatsapp_number'=>$request->whatsapp_number ?? $request->contact_number,
-            'parent_name'=>$request->parent_name,
-            'address'=>$request->address,
+            'name'           => $request->name,
+            'dob'            => $request->dob,
+            'email'          => $request->email,
+            'contact_number' => $request->contact_number,
+            'whatsapp_number'=> $request->whatsapp_number ?? $request->contact_number,
+            'parent_name'    => $request->parent_name,
+            'address'        => $request->address,
 
-            'phone'=>$phone,
-            'password'=>Hash::make($phone),
+            'phone'    => $phone,
+            'password' => Hash::make($phone),
 
-            'photo'=>$photo,
-            'id_proof'=>$idProof,
+            'photo'    => $photo,
+            'id_proof' => $idProof,
 
-            'classes_per_week'=>$request->classes_per_week,
-            'selected_days'=>$request->selected_days ?? [],
-            'time_slot'=>$request->time_slot,
-            'starting_date'=>$request->starting_date,
+            'classes_per_week' => $request->classes_per_week,
+            'selected_days'    => $request->selected_days ?? [],
+            'time_slot'        => $request->time_slot,
+            'starting_date'    => $request->starting_date,
 
-            'status'=>'active'
+            'status' => 'active'
         ]);
 
         $lead->update([
