@@ -1,181 +1,178 @@
 @extends('staff.layouts.master')
-@section('title','Students')
+@section('title', 'Students')
 
 @section('content')
 
-@if(session('success'))
-    <div class="alert alert-success">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="alert alert-danger">{{ session('error') }}</div>
-@endif
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
-<div class="card">
-<div class="card-header d-flex justify-content-between">
-<h4>Students ({{ $students->total() }})</h4>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between">
+            <h4>Students ({{ $students->total() }})</h4>
 
-<a href="{{ route('staff.students.create') }}" class="btn btn-primary">
-Add Student
-</a>
-</div>
+            <a href="{{ route('staff.students.create') }}" class="btn btn-primary">
+                Add Student
+            </a>
+        </div>
 
-<div class="card-body table-responsive">
+        <div class="card-body table-responsive">
 
-<form method="GET" class="row mb-3">
+            <form method="GET" class="row mb-3">
 
-<div class="col-md-4">
-<input type="text"
-name="search"
-value="{{ request('search') }}"
-class="form-control"
-placeholder="Search name or contact">
-</div>
+                <div class="col-md-4">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control"
+                        placeholder="Search name or contact">
+                </div>
 
-<div class="col-md-3">
-<select name="status" class="form-control select2">
-<option value="">All Status</option>
-<option value="active" {{ request('status')=='active'?'selected':'' }}>Active</option>
-<option value="passout" {{ request('status')=='passout'?'selected':'' }}>Passout</option>
-<option value="dropout" {{ request('status')=='dropout'?'selected':'' }}>Dropout</option>
-</select>
-</div>
+                <div class="col-md-3">
+                    <select name="status" class="form-control select2">
+                        <option value="">All Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="passout" {{ request('status') == 'passout' ? 'selected' : '' }}>Passout</option>
+                        <option value="dropout" {{ request('status') == 'dropout' ? 'selected' : '' }}>Dropout</option>
+                    </select>
+                </div>
 
-<div class="col-md-3 d-flex gap-2">
-<button class="btn btn-primary">Filter</button>
-<a href="{{ route('staff.students.index') }}" class="btn btn-light">Reset</a>
-</div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-primary">Filter</button>
+                    <a href="{{ route('staff.students.index') }}" class="btn btn-light">Reset</a>
+                </div>
 
-</form>
+            </form>
 
-<table class="table table-bordered align-middle">
+            <table class="table table-bordered align-middle">
 
-<thead>
-<tr>
-<th>Name</th>
-<th>Contact</th>
-<th>Email</th>
-<th>Status</th>
-<th>Action</th>
-</tr>
-</thead>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
 
-<tbody>
+                <tbody>
 
-@forelse($students as $student)
+                    @forelse($students as $student)
 
-<tr>
+                        <tr>
 
-<td>{{ $student->name }}<br>
-    @isset($student->dob)
-        <br><small>DOB: {{ $student->dob_formatted }}</small>
-    @endisset
-</td>
-<td>{{ $student->contact_number }}</td>
-<td>{{ $student->email ?? '-' }}</td>
+                            <td>{{ $student->name }}<br>
+                                @isset($student->dob)
+                                    <br><small>DOB: {{ $student->dob_formatted }}</small>
+                                @endisset
+                            </td>
+                            <td>{{ $student->contact_number }}</td>
+                            <td>{{ $student->email ?? '-' }}</td>
 
-<td>
-<span class="badge
-{{ $student->status=='active'?'bg-success':'' }}
-{{ $student->status=='passout'?'bg-info':'' }}
-{{ $student->status=='dropout'?'bg-danger':'' }}">
-{{ ucfirst($student->status) }}
-</span>
-</td>
+                            <td>
+                                <span class="badge
+                                            {{ $student->status == 'active' ? 'bg-success' : '' }}
+                                            {{ $student->status == 'passout' ? 'bg-info' : '' }}
+                                            {{ $student->status == 'dropout' ? 'bg-danger' : '' }}">
+                                    {{ ucfirst($student->status) }}
+                                </span>
+                            </td>
 
-<td>
-@php
-    $enrolmentRoleId   = utility('id_enrolment_dept');
-    $administratorRoleId = utility('id_administrator_dept');
-    $financeRoleId     = utility('id_finance_dept');
-    $hrRoleId          = utility('id_hr_dept');
-    $operationRoleId   = utility('id_operation_dept');
-    $staff = auth('staff')->user();
-@endphp
+                            <td>
+                                @php
+                                    $enrolmentRoleId = utility('id_enrolment_dept');
+                                    $administratorRoleId = utility('id_administrator_dept');
+                                    $financeRoleId = utility('id_finance_dept');
+                                    $hrRoleId = utility('id_hr_dept');
+                                    $operationRoleId = utility('id_operation_dept');
+                                    $staff = auth('staff')->user();
+                                @endphp
 
-<div class="d-flex gap-2">
+                                <div class="d-flex gap-2">
 
-<a href="{{ route('staff.students.show',encrypt($student->id)) }}">
-<i class="mdi mdi-eye text-primary"></i>
-</a>
-@if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
-<a href="{{ route('staff.students.edit',encrypt($student->id)) }}">
-<i class="mdi mdi-pencil text-success"></i>
-</a>
+                                    <a href="{{ route('staff.students.show', encrypt($student->id)) }}">
+                                        <i class="mdi mdi-eye text-primary"></i>
+                                    </a>
+                                    @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
+                                        <a href="{{ route('staff.students.edit', encrypt($student->id)) }}">
+                                            <i class="mdi mdi-pencil text-success"></i>
+                                        </a>
+                                    @endif
+                                    @if($staff->hasRoleId($operationRoleId))
+                                        <a href="#" data-plugin="delete-student"
+                                            data-check-url="{{ route('staff.students.check_related', encrypt($student->id)) }}"
+                                            data-target-form="#delete_{{ $student->id }}">
+                                            <i class="mdi mdi-trash-can text-danger"></i>
+                                        </a>
 
-<a href="#"
-data-plugin="delete-student"
-data-check-url="{{ route('staff.students.check_related', encrypt($student->id)) }}"
-data-target-form="#delete_{{ $student->id }}">
-<i class="mdi mdi-trash-can text-danger"></i>
-</a>
+                                        <form id="delete_{{ $student->id }}" method="POST"
+                                            action="{{ route('staff.students.destroy', encrypt($student->id)) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    @endif
 
-<form id="delete_{{ $student->id }}"
-method="POST"
-action="{{ route('staff.students.destroy',encrypt($student->id)) }}">
-@csrf
-@method('DELETE')
-</form>
-@endif
-</div>
+                                </div>
 
 
-</td>
+                            </td>
 
-</tr>
+                        </tr>
 
-@empty
+                    @empty
 
-<tr>
-<td colspan="5" class="text-center">No Students Found</td>
-</tr>
+                        <tr>
+                            <td colspan="5" class="text-center">No Students Found</td>
+                        </tr>
 
-@endforelse
+                    @endforelse
 
-</tbody>
+                </tbody>
 
-</table>
+            </table>
 
-{{ $students->links() }}
+            {{ $students->links() }}
 
-</div>
-</div>
+        </div>
+    </div>
 
 @endsection
 
 @section('script')
-<script>
-$('.select2').select2();
+    <script>
+        $('.select2').select2();
 
-$(document).on('click', '[data-plugin="delete-student"]', function(e) {
-    e.preventDefault();
-    var checkUrl   = $(this).data('check-url');
-    var targetForm = $(this).data('target-form');
+        $(document).on('click', '[data-plugin="delete-student"]', function (e) {
+            e.preventDefault();
+            var checkUrl = $(this).data('check-url');
+            var targetForm = $(this).data('target-form');
 
-    $.get(checkUrl, function(data) {
-        var lines = [];
-        if (data.fees        > 0) lines.push('<li>' + data.fees        + ' fee record(s)</li>');
-        if (data.attendances > 0) lines.push('<li>' + data.attendances + ' attendance record(s)</li>');
-        if (data.class_rooms > 0) lines.push('<li>' + data.class_rooms + ' class assignment(s)</li>');
+            $.get(checkUrl, function (data) {
+                var lines = [];
+                if (data.fees > 0) lines.push('<li>' + data.fees + ' fee record(s)</li>');
+                if (data.attendances > 0) lines.push('<li>' + data.attendances + ' attendance record(s)</li>');
+                if (data.class_rooms > 0) lines.push('<li>' + data.class_rooms + ' class assignment(s)</li>');
 
-        var html = lines.length
-            ? '<p>The following related data will also be affected:</p><ul>' + lines.join('') + '</ul>'
-            : '<p>No related records found.</p>';
+                var html = lines.length
+                    ? '<p>The following related data will also be affected:</p><ul>' + lines.join('') + '</ul>'
+                    : '<p>No related records found.</p>';
 
-        Swal.fire({
-            title: 'Delete ' + data.name + '?',
-            html: html,
-            icon: lines.length ? 'warning' : 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete',
-            cancelButtonText: 'Cancel'
-        }).then(function(result) {
-            if (result.isConfirmed) {
-                $(targetForm).submit();
-            }
+                Swal.fire({
+                    title: 'Delete ' + data.name + '?',
+                    html: html,
+                    icon: lines.length ? 'warning' : 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete',
+                    cancelButtonText: 'Cancel'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        $(targetForm).submit();
+                    }
+                });
+            });
         });
-    });
-});
-</script>
+    </script>
 @endsection
