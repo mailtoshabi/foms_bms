@@ -31,23 +31,27 @@ class SalaryService
 
         $today = now();
 
-        // ✅ Safe cycle day (handles Feb / short months)
+        // ✅ Safe cycle day
         $cycleDay = min($teacher->salary_cycle_day, $today->daysInMonth);
 
-        if ($today->day >= $cycleDay) {
-            $cycleEnd = $today->copy()->day($cycleDay);
-        } else {
-            $cycleEnd = $today->copy()->subMonth()->day($cycleDay);
-        }
-
-        $cycleStart = $cycleEnd->copy()->subMonth()->addDay();
-
-        // 🔴 IMPORTANT FIX: Ensure full cycle day completed
-        if (now()->lt($cycleEnd->copy()->endOfDay())) {
+        // ❗ ONLY RUN ON EXACT CYCLE DAY
+        if ($today->day != $cycleDay) {
             return;
         }
 
-        // ❗ Prevent duplicate salary for same cycle
+        // ✅ Current cycle start (this month)
+        $cycleStart = $today->copy()->day($cycleDay)->startOfDay();
+
+        // ✅ Previous cycle start
+        $previousCycleStart = $cycleStart->copy()->subMonth();
+
+        // ✅ Cycle end = one day before current cycle start
+        $cycleEnd = $cycleStart->copy()->subDay()->endOfDay();
+
+        // ✅ Actual cycle start = previous cycle start
+        $cycleStart = $previousCycleStart->startOfDay();
+
+        // ❗ Prevent duplicate salary
         $exists = TeacherSalary::where('teacher_id', $teacher->id)
             ->whereDate('cycle_start', $cycleStart)
             ->whereDate('cycle_end', $cycleEnd)
@@ -57,15 +61,15 @@ class SalaryService
             return;
         }
 
-        // ✅ Load class hours (hourly_wage stored directly on class_hours)
+        // ✅ Fetch class hours within cycle
         $classHours = ClassHour::where('teacher_id', $teacher->id)
-        ->where('status','completed')
-        ->where('has_salary_calculated', false)
-        ->whereBetween('class_started_at', [
-            $cycleStart->startOfDay(),
-            $cycleEnd->endOfDay()
-        ])
-        ->get();
+            ->where('status', 'completed')
+            ->where('has_salary_calculated', false)
+            ->whereBetween('class_started_at', [
+                $cycleStart,
+                $cycleEnd
+            ])
+            ->get();
 
         if ($classHours->isEmpty()) {
             return;
@@ -76,7 +80,8 @@ class SalaryService
 
         foreach ($classHours as $hour) {
 
-            if (!$hour->duration) continue;
+            if (!$hour->duration)
+                continue;
 
             $wage = $hour->hourly_wage ?? 0;
 
@@ -93,10 +98,9 @@ class SalaryService
                 'cycle_start' => $cycleStart,
                 'cycle_end' => $cycleEnd,
                 'total_hours' => $totalHours,
-                'total_amount' => $totalAmount,
+                'total_amount' => round($totalAmount, 2),
             ]);
 
-            // ✅ Mark processed class hours
             ClassHour::whereIn('id', $classHours->pluck('id'))
                 ->update(['has_salary_calculated' => true]);
 

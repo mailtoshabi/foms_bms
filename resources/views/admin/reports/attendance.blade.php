@@ -49,8 +49,7 @@
                                                         <i class="mdi mdi-filter"></i> Filter
                                                 </button>
 
-                                                <a href="{{ route('admin.reports.attendance') }}"
-                                                        class="btn btn-light px-3">
+                                                <a href="{{ route('admin.reports.attendance') }}" class="btn btn-light px-3">
                                                         <i class="mdi mdi-refresh"></i> Reset
                                                 </a>
 
