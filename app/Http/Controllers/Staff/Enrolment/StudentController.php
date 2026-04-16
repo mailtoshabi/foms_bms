@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Fee;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -390,5 +391,52 @@ class StudentController extends Controller
         ]);
 
         return back()->with('success', 'Discount updated successfully');
+    }
+
+    public function changeClass(Request $request)
+    {
+        $this->checkManagementRole();
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'from_class_id' => 'required|exists:class_rooms,id',
+            'to_class_id' => 'required|exists:class_rooms,id|different:from_class_id'
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+
+        // Check if student is actually in the from class
+        if (!$student->class_rooms()->where('class_room_id', $request->from_class_id)->exists()) {
+            return back()->with('error', 'Student is not assigned to the selected "From Class".');
+        }
+
+        // Check if student is already in the to class
+        if ($student->class_rooms()->where('class_room_id', $request->to_class_id)->exists()) {
+            return back()->with('error', 'Student is already assigned to the selected "To Class".');
+        }
+
+        DB::transaction(function () use ($student, $request) {
+            // 1. Log the change
+            DB::table('class_change_logs')->insert([
+                'student_id' => $student->id,
+                'class_room_id_from' => $request->from_class_id,
+                'class_room_id_to' => $request->to_class_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 2. Transfer unpaid fees
+            Fee::where('student_id', $student->id)
+                ->where('class_room_id', $request->from_class_id)
+                ->where('status', 'unpaid')
+                ->update(['class_room_id' => $request->to_class_id]);
+
+            // 3. Update class association
+            $student->class_rooms()->detach($request->from_class_id);
+            $student->class_rooms()->attach($request->to_class_id, [
+                'assigned_date' => now()
+            ]);
+        });
+
+        return back()->with('success', 'Class changed successfully. Unpaid fees have been transferred.');
     }
 }

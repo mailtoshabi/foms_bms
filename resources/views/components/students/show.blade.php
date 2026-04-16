@@ -1,4 +1,4 @@
-﻿@section('title', 'Student Details')
+@section('title', 'Student Details')
 
 @section('content')
 
@@ -71,11 +71,21 @@
 
                     <h5 class="mb-0">Course & Class Details</h5>
                     @if($showButtons == 'true')
-                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignClassModal">
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#assignClassModal">
 
-                            <i class="fas fa-plus"></i> Assign Class
+                                <i class="fas fa-plus"></i> Assign Class
 
-                        </button>
+                            </button>
+
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                data-bs-target="#changeClassModal">
+
+                                <i class="fas fa-exchange-alt"></i> Change Class
+
+                            </button>
+                        </div>
                     @endif
 
                 </div>
@@ -572,6 +582,90 @@
                             onclick="this.disabled=true; this.innerText='Assigning...'; this.form.submit();">
 
                             Assign Class
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+    {{-- Change Class Modal --}}
+
+    <div class="modal fade" id="changeClassModal">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <form method="POST" action="{{ route('staff.students.change.class') }}">
+
+                    @csrf
+
+                    <input type="hidden" name="student_id" value="{{ $student->id }}">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">Change Class</h5>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+
+                            <label class="form-label">From Class</label>
+
+                            <select name="from_class_id" class="form-control select2" required>
+
+                                <option value="">Select current class...</option>
+                                @foreach($student->class_rooms as $class)
+                                    @if($class->classType && $class->classType->name == 'group')
+                                        <option value="{{ $class->id }}">
+                                            {{ $class->course->name ?? 'No Course' }} - {{ $class->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">To Class</label>
+
+                            <select name="to_class_id" class="form-control select2-class-ajax"
+                                data-ajax-url="{{ route('staff.class_rooms.search') }}?type=group&exclude_student_id={{ $student->id }}" required>
+
+                                <option value="">Search new class...</option>
+
+                            </select>
+
+                            <small class="text-muted">Unpaid fees (Admission & Monthly) will be transferred to the new
+                                class.</small>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+
+                            Cancel
+
+                        </button>
+
+                        <button class="btn btn-info" type="submit"
+                            onclick="this.disabled=true; this.innerText='Changing...'; this.form.submit();">
+
+                            Change Class
 
                         </button>
 

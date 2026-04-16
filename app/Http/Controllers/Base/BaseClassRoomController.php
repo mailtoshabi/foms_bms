@@ -142,9 +142,26 @@ class BaseClassRoomController extends BaseServiceController
     public function search(Request $request)
     {
         $term = $request->input('q', '');
-        $results = ClassRoom::with('course')
-            ->where('name', 'like', "%{$term}%")
-            ->orWhereHas('course', fn($q) => $q->where('name', 'like', "%{$term}%"))
+        $query = ClassRoom::with('course');
+
+        // Filter by type name (e.g., 'group') if provided
+        if ($request->filled('type')) {
+            $query->whereHas('classType', function($q) use ($request) {
+                $q->where('name', $request->type);
+            });
+        }
+
+        // Exclude specific student's enrolled classes
+        if ($request->filled('exclude_student_id')) {
+            $query->whereDoesntHave('students', function($q) use ($request) {
+                $q->where('students.id', $request->exclude_student_id);
+            });
+        }
+
+        $results = $query->where(function($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                  ->orWhereHas('course', fn($c) => $c->where('name', 'like', "%{$term}%"));
+            })
             ->limit(30)
             ->get()
             ->map(fn($c) => [

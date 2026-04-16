@@ -554,6 +554,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
             [StudentController::class,'assignClass']
             )->name('students.assign.class');
 
+            Route::post(
+            '/students/change-class',
+            [StudentController::class,'changeClass']
+            )->name('students.change.class');
+
 
         });
 
