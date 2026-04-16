@@ -10,5 +10,5 @@
 <!-- App Css-->
 <link href="{{ URL::asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
 <link href="{{ URL::asset('assets/libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet">
-<link href="{{ URL::asset('assets/css/global.css') }}" id="gloabal-style" rel="stylesheet" type="text/css" />
 <link href="{{ URL::asset('assets/libs/select2/select2.min.css') }}" rel="stylesheet" type="text/css" />
+<link href="{{ URL::asset('assets/css/global.css') }}" id="gloabal-style" rel="stylesheet" type="text/css" />

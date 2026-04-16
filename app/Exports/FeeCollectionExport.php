@@ -48,8 +48,12 @@ class FeeCollectionExport implements FromCollection, WithHeadings
             $query->where('fee_payments.payment_method',$this->filters['payment_method']);
         }
 
-        if (!empty($this->filters['date'])) {
-            $query->whereDate('fee_payments.paid_date',$this->filters['date']);
+        if (!empty($this->filters['from_date'])) {
+            $query->whereDate('fee_payments.paid_date', '>=', $this->filters['from_date']);
+        }
+
+        if (!empty($this->filters['to_date'])) {
+            $query->whereDate('fee_payments.paid_date', '<=', $this->filters['to_date']);
         }
 
         if (!empty($this->filters['category_id'])) {

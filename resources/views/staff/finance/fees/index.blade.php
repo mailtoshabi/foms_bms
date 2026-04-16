@@ -11,4 +11,6 @@
     :routeTemplateUnPaid="route('staff.fees.index', array_merge(request()->except('page'), ['tab'=>'unpaid']))"
     :routeTemplateOverdue="route('staff.fees.index', array_merge(request()->except('page'), ['tab'=>'overdue']))"
     :routeTemplatePaid="route('staff.fees.index', array_merge(request()->except('page'), ['tab'=>'paid']))"
+    :totalAmount="$totalAmount"
+    :isFiltered="$isFiltered"
 />

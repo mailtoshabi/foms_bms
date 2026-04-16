@@ -37,6 +37,21 @@ class TeacherSalaryExport implements FromCollection, WithHeadings
                 'teacher_salaries.status'
             );
 
+        $tab = $this->filters['tab'] ?? 'unpaid';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Tab Logic
+        |--------------------------------------------------------------------------
+        */
+
+        if ($tab === 'paid') {
+            $query->where('teacher_salaries.status', 'paid');
+        } else {
+            // Unpaid or Partial
+            $query->where('teacher_salaries.status', '<>', 'paid');
+        }
+
         /*
         |--------------------------------------------------------------------------
         | Filters

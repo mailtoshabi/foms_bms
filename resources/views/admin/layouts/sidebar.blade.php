@@ -51,16 +51,16 @@
                 </li>
 
                 {{-- ================= Messages ================= --}}
-                <li class="{{ set_active(['admin.salaries.*']) }}">
+                <!-- <li class="{{ set_active(['admin.salaries.*']) }}">
                     <a href="{{ route('admin.salaries.index', ['tab' => 'unpaid']) }}" >
                         <i class="fas fa-money-bill-wave"></i>
                         <span>Teacher Salaries</span>
                     </a>
 
-                </li>
+                </li> -->
 
                 {{-- ================= Messages ================= --}}
-                <li class="{{ set_active(['admin.messages.*','staff.messages.*','admin.st-messages.*']) }}">
+                <li class="{{ set_active(['admin.messages.*', 'staff.messages.*', 'admin.st-messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-envelope"></i>
                         <span>Messages </span>
@@ -106,8 +106,7 @@
                             </a>
                         </li>
                         <li class="">
-                            <a href="{{ route('admin.reports.fee') }}"
-                                class="">
+                            <a href="{{ route('admin.reports.fee') }}" class="">
                                 <span>Pending Fee</span>
                             </a>
                         </li>
@@ -119,7 +118,8 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher-lead-notes', 'admin.reports.teacher.salary']) }}">
+                <li
+                    class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher-lead-notes', 'admin.reports.teacher.salary']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-account-tie"></i>
                         <span>Teachers</span>
@@ -154,7 +154,8 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.reports.students.*', 'admin.reports.student-leads', 'admin.reports.student-lead-notes']) }}">
+                <li
+                    class="{{ set_active(['admin.reports.students.*', 'admin.reports.student-leads', 'admin.reports.student-lead-notes']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-school"></i>
                         <span>Students</span>
@@ -184,8 +185,8 @@
 
                         <li>
                             <a href="{{ route('admin.reports.attendance') }}">
-                            {{-- <i class="mdi mdi-calendar-check"></i> --}}
-                            <span>Attendance</span>
+                                {{-- <i class="mdi mdi-calendar-check"></i> --}}
+                                <span>Attendance</span>
                             </a>
                         </li>
 
@@ -224,25 +225,25 @@
 
                         {{-- Employee --}}
                         {{-- @if(auth()->user() && auth()->user()->isEmployee())
-                            <li>
-                                <a href="{{ route('admin.reports.create') }}">
-                                    Create Report
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.reports.index') }}">
-                                    My Reports
-                                </a>
-                            </li>
+                        <li>
+                            <a href="{{ route('admin.reports.create') }}">
+                                Create Report
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.reports.index') }}">
+                                My Reports
+                            </a>
+                        </li>
                         @endif --}}
 
                         {{-- Super Admin --}}
                         {{-- @if(auth()->user() && auth()->user()->isSuperAdmin())
-                            <li>
-                                <a href="{{ route('admin.reports.index') }}">
-                                    All Reports
-                                </a>
-                            </li>
+                        <li>
+                            <a href="{{ route('admin.reports.index') }}">
+                                All Reports
+                            </a>
+                        </li>
                         @endif --}}
 
                     </ul>

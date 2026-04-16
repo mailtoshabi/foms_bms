@@ -1,4 +1,5 @@
-body[data-topbar=dark] #page-topbar, body[data-topbar=dark] .navbar-brand-box {
+body[data-topbar=dark] #page-topbar,
+body[data-topbar=dark] .navbar-brand-box {
     background-color: #1c84ee;
     border-color: #1c84ee;
 }
@@ -31,6 +32,33 @@ button.btn-close {
     width: 100% !important;
 }
 
+/* Match Select2 height with Bootstrap 5 form-control */
+.select2-container .select2-selection--single {
+    height: 38px !important;
+    display: flex !important;
+    align-items: center !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: normal !important;
+    padding-left: 12px !important;
+    color: #495057 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 100% !important;
+    top: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    margin-top: 0 !important;
+    top: 50% !important;
+}
+
 .avatar-title {
     background-color: #1c84ee !important;
 }
@@ -43,14 +71,17 @@ button.btn-close {
 .required label::after {
     content: " *";
     color: red;
-  }
-.branch_logo {
-/* line-height: 20px; */
 }
-img.branch_logo_list{
+
+.branch_logo {
+    /* line-height: 20px; */
+}
+
+img.branch_logo_list {
     background-color: black;
     height: 25px;
 }
+
 .branch_logo_text {
     font-family: 'Courier New', Courier, monospace;
 }
@@ -88,7 +119,8 @@ img.branch_logo_list{
 }
 
 .btn-zopa:hover {
-    background-color: #c4161b !important; /* Slightly darker red */
+    background-color: #c4161b !important;
+    /* Slightly darker red */
     border-color: #c4161b !important;
     color: white !important;
 }

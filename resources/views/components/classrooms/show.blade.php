@@ -12,207 +12,201 @@
 
 <div class="row">
 
-<div class="col-12">
+    <div class="col-12">
 
-{{-- ================= CLASS DETAILS ================= --}}
-<div class="card">
+        {{-- ================= CLASS DETAILS ================= --}}
+        <div class="card">
 
-<div class="card-header">
-<h4>{{ $class->name }}</h4>
-</div>
+            <div class="card-header">
+                <h4>{{ $class->name }}</h4>
+            </div>
 
-<div class="card-body">
+            <div class="card-body">
 
-<p><strong>Course:</strong> {{ $class->course->name ?? '-' }}</p>
-<p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') }}</p>
+                <p><strong>Course:</strong> {{ $class->course->name ?? '-' }}</p>
+                <p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') }}</p>
 
-<p><strong>{{ $class->classType->id == 1 ? 'First Month Fee' : 'Admission Fee' }}:</strong> &#8377; {{ number_format($class->admission_fee,2) }}</p>
-<p><strong>Monthly Fee:</strong> &#8377; {{ number_format($class->monthly_fee,2) }}</p>
+                <p><strong>{{ $class->classType->id == 1 ? 'First Month Fee' : 'Admission Fee' }}:</strong> ₹
+                    {{ number_format($class->admission_fee, 2) }}</p>
+                <p><strong>Monthly Fee:</strong> ₹ {{ number_format($class->monthly_fee, 2) }}</p>
 
-<p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
+                <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
 
-<p><strong>Time:</strong>
-{{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '-' }}
-</p>
+                <p><strong>Time:</strong>
+                    {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '-' }}
+                </p>
 
-<p><strong>Duration:</strong> {{ $class->slot_duration }} mins</p>
+                <p><strong>Duration:</strong> {{ $class->slot_duration }} mins</p>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
 
-{{-- ================= TEACHERS ================= --}}
-<div class="card">
+        {{-- ================= TEACHERS ================= --}}
+        <div class="card">
 
-<div class="card-header d-flex justify-content-between">
+            <div class="card-header d-flex justify-content-between">
 
-<h5>Teachers</h5>
+                <h5>Teachers</h5>
 
-<button class="btn btn-sm btn-primary"
-data-bs-toggle="modal"
-data-bs-target="#assignTeacherModal"
-{{ $class->teachers->count() ? 'disabled' : '' }} >
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignTeacherModal" {{ $class->teachers->count() ? 'disabled' : '' }}>
 
-<i class="fas fa-plus"></i> Assign Teacher
+                    <i class="fas fa-plus"></i> Assign Teacher
 
-</button>
+                </button>
 
-</div>
+            </div>
 
-<div class="card-body">
+            <div class="card-body">
 
-<div class="table-responsive">
-<table class="table table-bordered">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
 
-<thead>
-<tr>
-<th>Name</th>
-<th>Phone</th>
-<th>Wage/Hour</th>
-<th>Action</th>
-</tr>
-</thead>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Wage/Hour</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
 
-<tbody>
+                        <tbody>
 
-@forelse($class->teachers as $teacher)
+                            @forelse($class->teachers as $teacher)
 
-<tr>
+                                <tr>
 
-<td>{{ $teacher->name }}</td>
-<td>{{ $teacher->phone }}</td>
-<td>
-&#8377; {{ number_format($teacher->pivot->hourly_wage,2) }}
-</td>
+                                    <td>{{ $teacher->name }}</td>
+                                    <td>{{ $teacher->phone }}</td>
+                                    <td>
+                                        ₹ {{ number_format($teacher->pivot->hourly_wage, 2) }}
+                                    </td>
 
-<td>
+                                    <td>
 
-<form method="POST"
-action="{{ route('staff.class_rooms.remove.teacher') }}"
-onsubmit="return confirm('Remove this teacher?')">
+                                        <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
+                                            onsubmit="return confirm('Remove this teacher?')">
 
-@csrf
+                                            @csrf
 
-<input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
-<input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
+                                            <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                                            <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
 
-<button class="btn btn-sm btn-danger">
-<i class="fas fa-trash"></i>
-</button>
+                                            <button class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
 
-</form>
+                                        </form>
 
-</td>
+                                    </td>
 
-</tr>
+                                </tr>
 
-@empty
+                            @empty
 
-<tr>
-<td colspan="2" class="text-center text-muted">
-No teachers assigned
-</td>
-</tr>
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted">
+                                        No teachers assigned
+                                    </td>
+                                </tr>
 
-@endforelse
+                            @endforelse
 
-</tbody>
+                        </tbody>
 
-</table>
-</div>
+                    </table>
+                </div>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
 
-{{-- ================= STUDENTS ================= --}}
-<div class="card">
+        {{-- ================= STUDENTS ================= --}}
+        <div class="card">
 
-<div class="card-header d-flex justify-content-between">
+            <div class="card-header d-flex justify-content-between">
 
-<h5>Students</h5>
+                <h5>Students</h5>
 
-<button class="btn btn-sm btn-primary"
-data-bs-toggle="modal"
-data-bs-target="#assignStudentModal">
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignStudentModal">
 
-<i class="fas fa-user-plus"></i> Add
+                    <i class="fas fa-user-plus"></i> Add
 
-</button>
+                </button>
 
-</div>
+            </div>
 
-<div class="card-body">
+            <div class="card-body">
 
-<div class="table-responsive">
-<table class="table table-bordered">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
 
-<thead>
-<tr>
-<th>Name</th>
-<th>Contact</th>
-</tr>
-</thead>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                            </tr>
+                        </thead>
 
-<tbody>
+                        <tbody>
 
-@forelse($class->students as $student)
+                            @forelse($class->students as $student)
 
-<tr>
+                                <tr>
 
-<td>{{ $student->name }}</td>
-<td>{{ $student->contact_number }}</td>
+                                    <td>{{ $student->name }}</td>
+                                    <td>{{ $student->contact_number }}</td>
 
-@php
-    $administratorRoleId = utility('id_administrator_dept');
-    $operationRoleId   = utility('id_operation_dept');
-    $staff = auth('staff')->user();
-@endphp
+                                    @php
+                                        $administratorRoleId = utility('id_administrator_dept');
+                                        $operationRoleId = utility('id_operation_dept');
+                                        $staff = auth('staff')->user();
+                                    @endphp
 
-@if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
-<td>
+                                    @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                                        <td>
 
-<form method="POST"
-action="{{ route('staff.class_rooms.remove.student') }}"
-onsubmit="return confirm('Remove this student?')">
+                                            <form method="POST" action="{{ route('staff.class_rooms.remove.student') }}"
+                                                onsubmit="return confirm('Remove this student?')">
 
-@csrf
+                                                @csrf
 
-<input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
-<input type="hidden" name="student_id" value="{{ encrypt($student->id) }}">
+                                                <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                                                <input type="hidden" name="student_id" value="{{ encrypt($student->id) }}">
 
-<button class="btn btn-sm btn-danger">
-<i class="fas fa-trash"></i>
-</button>
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
 
-</form>
+                                            </form>
 
-</td>
-@endif
-</tr>
+                                        </td>
+                                    @endif
+                                </tr>
 
-@empty
+                            @empty
 
-<tr>
-<td colspan="2" class="text-center text-muted">
-No students added
-</td>
-</tr>
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted">
+                                        No students added
+                                    </td>
+                                </tr>
 
-@endforelse
+                            @endforelse
 
-</tbody>
+                        </tbody>
 
-</table>
-</div>
+                    </table>
+                </div>
 
-</div>
+            </div>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
 </div>
 
@@ -220,56 +214,53 @@ No students added
 {{-- ================= ASSIGN TEACHER MODAL ================= --}}
 <div class="modal fade" id="assignTeacherModal">
 
-<div class="modal-dialog">
-<div class="modal-content">
+    <div class="modal-dialog">
+        <div class="modal-content">
 
-<form method="POST" action="{{ $assignTeacherRoute }}">
-@csrf
+            <form method="POST" action="{{ $assignTeacherRoute }}">
+                @csrf
 
-<input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
 
-<div class="modal-header">
-<h5>Assign Teacher</h5>
-</div>
+                <div class="modal-header">
+                    <h5>Assign Teacher</h5>
+                </div>
 
-<div class="modal-body">
+                <div class="modal-body">
 
-<div class="mb-3">
+                    <div class="mb-3">
 
-<label>Teacher</label>
+                        <label>Teacher</label>
 
-<select name="teacher_id" class="form-control select2" required>
-@foreach($teachers as $teacher)
-<option value="{{ encrypt($teacher->id) }}">
-{{ $teacher->name }}
-</option>
-@endforeach
-</select>
+                        <select name="teacher_id" class="form-control select2" required>
+                            @foreach($teachers as $teacher)
+                                <option value="{{ encrypt($teacher->id) }}">
+                                    {{ $teacher->name }}
+                                </option>
+                            @endforeach
+                        </select>
 
-</div>
+                    </div>
 
-<div class="mb-3">
+                    <div class="mb-3">
 
-<label>Wage Per Hour (&#8377;)</label>
+                        <label>Wage Per Hour (₹)</label>
 
-<input type="number"
-step="0.01"
-name="hourly_wage"
-class="form-control"
-required>
+                        <input type="number" step="0.01" name="hourly_wage" class="form-control" required>
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
-<div class="modal-footer">
-<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
-</div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit"
+                        onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
+                </div>
 
-</form>
+            </form>
 
-</div>
-</div>
+        </div>
+    </div>
 
 </div>
 
@@ -277,61 +268,60 @@ required>
 {{-- ================= ASSIGN STUDENTS MODAL ================= --}}
 <div class="modal fade" id="assignStudentModal">
 
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
 
-<form method="POST" action="{{ $assignStudentRoute }}">
-@csrf
+            <form method="POST" action="{{ $assignStudentRoute }}">
+                @csrf
 
-<input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
 
-<div class="modal-header">
-<h5>Add Students</h5>
-</div>
+                <div class="modal-header">
+                    <h5>Add Students</h5>
+                </div>
 
-<div class="modal-body">
+                <div class="modal-body">
 
-<div class="row">
+                    <div class="row">
 
-    @if(($class->classType->name ?? '') === 'individual')
-        <small class="text-danger">
-            Only one student allowed for this class
-        </small>
-    @endif
+                        @if(($class->classType->name ?? '') === 'individual')
+                            <small class="text-danger">
+                                Only one student allowed for this class
+                            </small>
+                        @endif
 
-@foreach($allStudents as $student)
+                        @foreach($allStudents as $student)
 
-<div class="col-md-6 mb-2">
+                            <div class="col-md-6 mb-2">
 
-<label class="d-flex align-items-center border p-2 rounded">
+                                <label class="d-flex align-items-center border p-2 rounded">
 
-@if(!$class->students->contains($student->id))
-    <input type="checkbox"
-    name="student_ids[]"
-    value="{{ $student->id }}"
-    class="form-check-input me-2">
-@endif
+                                    @if(!$class->students->contains($student->id))
+                                        <input type="checkbox" name="student_ids[]" value="{{ $student->id }}"
+                                            class="form-check-input me-2">
+                                    @endif
 
-<span>{{ $student->name }}</span>
+                                    <span>{{ $student->name }}</span>
 
-</label>
+                                </label>
 
-</div>
+                            </div>
 
-@endforeach
+                        @endforeach
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
-<div class="modal-footer">
-<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
-</div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" type="submit"
+                        onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
+                </div>
 
-</form>
+            </form>
 
-</div>
-</div>
+        </div>
+    </div>
 
 </div>
 
@@ -340,9 +330,9 @@ required>
     <script>
         @if(($class->classType->name ?? '') === 'individual')
 
-        $('input[name="student_ids[]"]').on('change', function() {
-            $('input[name="student_ids[]"]').not(this).prop('checked', false);
-        });
+            $('input[name="student_ids[]"]').on('change', function () {
+                $('input[name="student_ids[]"]').not(this).prop('checked', false);
+            });
 
         @endif
     </script>

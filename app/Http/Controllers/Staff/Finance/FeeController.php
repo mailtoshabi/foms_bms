@@ -14,73 +14,89 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class FeeController extends Controller
 {
     public function index(Request $request)
-{
-    $tab = $request->get('tab', 'unpaid'); // default
+    {
+        $tab = $request->get('tab', 'unpaid'); // default
 
-    $query = Fee::with(['student','classRoom'])
-        ->whereHas('student');
+        $query = Fee::with(['student', 'classRoom'])
+            ->whereHas('student');
 
-    // Enrolment dept sees admission fees only
-    $staff = auth('staff')->user();
-    if ($staff->hasRoleId(utility('id_enrolment_dept'))) {
-        $query->where('type', 'admission');
+        // Enrolment dept sees admission fees only
+        $staff = auth('staff')->user();
+        if ($staff->hasRoleId(utility('id_enrolment_dept'))) {
+            $query->where('type', 'admission');
+        }
+
+        // Tab logic
+        if ($tab === 'paid') {
+            $query->where('status', 'paid');
+        } elseif ($tab === 'overdue') {
+            // Overdue: More than 4 days past due date AND not paid
+            $fourDaysAgo = now()->subDays(4)->endOfDay();
+            $query->where('status', '<>', 'paid')
+                ->whereDate('due_date', '<', $fourDaysAgo);
+        } else {
+            // Unpaid: Not paid AND within 4 days of due date
+            $fourDaysAgo = now()->subDays(4)->endOfDay();
+            $query->where('status', '<>', 'paid')
+                ->whereDate('due_date', '>=', $fourDaysAgo);
+        }
+
+        // Filters
+        if ($request->filled('class_room_id')) {
+            $query->where('class_room_id', $request->class_room_id);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        if ($request->filled('search')) {
+            $query->whereHas('student', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('contact_number', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('due_date', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('due_date', '<=', $request->to_date);
+        }
+
+        // Check if any filter is applied
+        $isFiltered = $request->anyFilled(['search', 'class_room_id', 'type', 'status', 'from_date', 'to_date']);
+
+        $totalAmount = 0;
+        if ($isFiltered) {
+            $totalAmount = (clone $query)->sum('amount');
+        }
+
+        // Sorting
+        $sort = $request->get('sort', 'latest');
+
+        if ($sort === 'due_date') {
+            $query->orderBy('due_date');
+        } elseif ($sort === 'amount') {
+            $query->orderBy('amount', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        $fees = $query->paginate(10)->withQueryString();
+
+        $classRoomSearchUrl = route('staff.class_rooms.search');
+        $selectedClassName = $request->filled('class_room_id')
+            ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+            : null;
+
+        return view('staff.finance.fees.index', compact('fees', 'classRoomSearchUrl', 'selectedClassName', 'tab', 'totalAmount', 'isFiltered'));
     }
-
-    // Tab logic
-    if ($tab === 'paid') {
-        $query->where('status', 'paid');
-    } elseif ($tab === 'overdue') {
-        // Overdue: More than 4 days past due date AND not paid
-        $fourDaysAgo = now()->subDays(4)->endOfDay();
-        $query->where('status', '<>', 'paid')
-              ->whereDate('due_date', '<', $fourDaysAgo);
-    } else {
-        // Unpaid: Not paid AND within 4 days of due date
-        $fourDaysAgo = now()->subDays(4)->endOfDay();
-        $query->where('status', '<>', 'paid')
-              ->whereDate('due_date', '>=', $fourDaysAgo);
-    }
-
-    // Filters
-    if ($request->filled('class_room_id')) {
-        $query->where('class_room_id', $request->class_room_id);
-    }
-
-    if ($request->filled('type')) {
-        $query->where('type', $request->type);
-    }
-
-    if ($request->filled('search')) {
-        $query->whereHas('student', function ($q) use ($request) {
-            $q->where('name', 'like', '%'.$request->search.'%')
-              ->orWhere('contact_number', 'like', '%'.$request->search.'%');
-        });
-    }
-
-    if ($request->filled('status')) {
-        $query->where('status', $request->status);
-    }
-
-    // Sorting
-    $sort = $request->get('sort', 'latest');
-
-    if ($sort === 'due_date') {
-        $query->orderBy('due_date');
-    } elseif ($sort === 'amount') {
-        $query->orderBy('amount','desc');
-    } else {
-        $query->latest();
-    }
-
-    $fees = $query->paginate(10)->withQueryString();
-
-    $classRoomSearchUrl = route('staff.class_rooms.search');
-    $selectedClassName = $request->filled('class_room_id')
-        ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
-        : null;
-
-    return view('staff.finance.fees.index', compact('fees','classRoomSearchUrl','selectedClassName','tab'));
-}
 
     public function pay(Request $request)
     {
@@ -101,7 +117,7 @@ class FeeController extends Controller
                 }
 
                 // Total paid so far
-                $totalPaid = FeePayment::where('fee_id',$fee->id)
+                $totalPaid = FeePayment::where('fee_id', $fee->id)
                     ->sum('paid_amount');
 
                 $newTotal = $totalPaid + $validated['paid_amount'];
@@ -135,7 +151,7 @@ class FeeController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success','Payment recorded successfully');
+        return back()->with('success', 'Payment recorded successfully');
     }
 
     public function destroy($id)
@@ -160,7 +176,7 @@ class FeeController extends Controller
 
     public function invoice($id)
     {
-        $fee = Fee::with(['student','classRoom','payments'])
+        $fee = Fee::with(['student', 'classRoom', 'payments'])
             ->findOrFail($id);
 
         return view('staff.finance.fees.invoice', compact('fee'));

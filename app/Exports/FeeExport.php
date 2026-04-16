@@ -94,6 +94,14 @@ class FeeExport implements FromCollection, WithHeadings
             $query->where('fees.status', $this->filters['status']);
         }
 
+        if (!empty($this->filters['from_date'])) {
+            $query->whereDate('fees.due_date', '>=', $this->filters['from_date']);
+        }
+
+        if (!empty($this->filters['to_date'])) {
+            $query->whereDate('fees.due_date', '<=', $this->filters['to_date']);
+        }
+
         /*
         |--------------------------------------------------------------------------
         | IMPORTANT: Keep or Remove this depending on requirement
