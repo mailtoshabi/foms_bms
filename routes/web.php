@@ -83,6 +83,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/finance-expense', [ReportController::class, 'financeExpense'])
             ->name('reports.finance.expense');
 
+        Route::post('reports/finance-expense', [ReportController::class, 'storeExpense'])
+            ->name('reports.finance.expense.store');
+
 
 
         Route::get('reports/teacher-salary', [ReportController::class,'teacherSalary'])
@@ -293,6 +296,7 @@ use App\Http\Controllers\Staff\Administration\TeacherSalaryController;
 use App\Http\Controllers\Staff\Finance\FeeController;
 use App\Http\Controllers\Staff\Finance\SalaryController;
 use App\Http\Controllers\Staff\Finance\ExpenseController;
+use App\Http\Controllers\Staff\Administration\OldDataController;
 
 Route::prefix('departments')->name('staff.')->group(function () {
 
@@ -566,6 +570,15 @@ Route::prefix('departments')->name('staff.')->group(function () {
         ->group(function () {
             Route::resource('teachers', TeacherController::class)
             ->names('teachers');
+        });
+
+        Route::middleware('role:id_operation_dept')->group(function () {
+            Route::get('/old-data', [OldDataController::class, 'index'])->name('old_data.index');
+            Route::post('/old-data/import', [OldDataController::class, 'importStartingDates'])->name('old_data.import');
+            Route::post('/old-data/students-import', [OldDataController::class, 'importStudentData'])->name('old_data.students_import');
+            Route::post('/old-data/student-assignments-import', [OldDataController::class, 'importStudentClassRoom'])->name('old_data.student_assignments_import');
+            Route::post('/old-data/teachers-import', [OldDataController::class, 'importTeacherData'])->name('old_data.teachers_import');
+            Route::post('/old-data/teacher-assignments-import', [OldDataController::class, 'importTeacherClassRoom'])->name('old_data.teacher_assignments_import');
         });
 
 

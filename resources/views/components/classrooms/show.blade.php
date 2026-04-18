@@ -1,4 +1,4 @@
-﻿@if(session('success'))
+@if(session('success'))
     <div class="alert alert-success">
         {{ session('success') }}
     </div>
@@ -27,7 +27,8 @@
                 <p><strong>Type:</strong> {{ ucfirst($class->classType->name ?? '-') }}</p>
 
                 <p><strong>{{ $class->classType->id == 1 ? 'First Month Fee' : 'Admission Fee' }}:</strong> ₹
-                    {{ number_format($class->admission_fee, 2) }}</p>
+                    {{ number_format($class->admission_fee, 2) }}
+                </p>
                 <p><strong>Monthly Fee:</strong> ₹ {{ number_format($class->monthly_fee, 2) }}</p>
 
                 <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
@@ -87,7 +88,7 @@
                                     <td>
 
                                         <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
-                                            onsubmit="return confirm('Remove this teacher?')">
+                                            onsubmit="return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.')">
 
                                             @csrf
 
@@ -170,7 +171,7 @@
                                         <td>
 
                                             <form method="POST" action="{{ route('staff.class_rooms.remove.student') }}"
-                                                onsubmit="return confirm('Remove this student?')">
+                                                onsubmit="return confirm('Are you sure you want to remove this student?\n\nThis will:\n1. Delete all UNPAID fees for this student in this class.\n2. Delete PENDING class sessions (if individual class or last student).')">
 
                                                 @csrf
 

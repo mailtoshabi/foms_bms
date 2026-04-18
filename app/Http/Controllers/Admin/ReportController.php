@@ -30,9 +30,16 @@ use App\Models\StaffSalary;
 use App\Models\TeacherLead;
 use App\Models\TeacherLeadNote;
 use App\Models\Teacher;
+use App\Services\ExpenseService;
 
 class ReportController extends Controller
 {
+    protected $expenseService;
+
+    public function __construct(ExpenseService $expenseService)
+    {
+        $this->expenseService = $expenseService;
+    }
 
     public function fees(Request $request)
     {
@@ -275,7 +282,23 @@ class ReportController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.reports.finance_expense', compact('data', 'totalAmount', 'sourceTotals'));
+        $categories = $this->expenseService->getCategories();
+
+        return view('admin.reports.finance_expense', compact('data', 'totalAmount', 'sourceTotals', 'categories'));
+    }
+
+    public function storeExpense(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id' => 'required|exists:expense_categories,id',
+            'amount' => 'required|numeric|min:0.01',
+            'expense_date' => 'required|date',
+            'remarks' => 'nullable|string'
+        ]);
+
+        $this->expenseService->createExpense($validated);
+
+        return redirect()->back()->with('success', 'Expense added successfully');
     }
 
     public function attendance(Request $request)

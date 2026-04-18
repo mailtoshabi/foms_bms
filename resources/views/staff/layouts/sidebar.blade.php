@@ -146,6 +146,16 @@
                 </li>
                 @endif
 
+                {{-- Old Data: operation only --}}
+                @if($staff->hasRoleId($operationRoleId))
+                <li class="{{ set_active(['staff.old_data.*']) }}">
+                    <a href="{{ route('staff.old_data.index') }}">
+                        <i class="fas fa-database text-warning"></i>
+                        <span>Old Data</span>
+                    </a>
+                </li>
+                @endif
+
                 {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['staff.messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">

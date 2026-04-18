@@ -3,6 +3,8 @@ namespace App\Services;
 
 use App\Models\ClassRoom;
 use App\Models\Fee;
+use App\Models\ClassHour;
+use App\Models\StudentAttendance;
 use App\Models\Student;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -78,8 +80,14 @@ class ClassService
     {
         return DB::transaction(function () use ($classId, $teacherId) {
 
-            $class = ClassRoom::findOrFail($classId);
+            // 1. Delete pending class hours for this teacher in this classroom
+            ClassHour::where('teacher_id', $teacherId)
+                ->where('class_room_id', $classId)
+                ->where('status', 'pending')
+                ->delete();
 
+            // 2. Detach teacher from classroom
+            $class = ClassRoom::findOrFail($classId);
             $class->teachers()->detach($teacherId);
 
         });
@@ -205,10 +213,41 @@ class ClassService
     {
         return DB::transaction(function () use ($classId, $studentId) {
 
-            $class = ClassRoom::findOrFail($classId);
+            $class = ClassRoom::with('classType', 'students')->findOrFail($classId);
 
+            // 1. Delete related unpaid fees for this student in this classroom
+            Fee::where('student_id', $studentId)
+                ->where('class_room_id', $classId)
+                ->where('status', 'unpaid')
+                ->delete();
+
+            // 2. Detach student from classroom
             $class->students()->detach($studentId);
 
+            // 3. Handle pending class hours based on classroom type and remaining students
+            $type = strtolower($class->classType->name ?? '');
+            $remainingStudentsCount = $class->students()->count();
+
+            $pendingClassHours = ClassHour::where('class_room_id', $classId)
+                ->where('status', 'pending');
+
+            if ($type === 'individual' || ($type === 'group' && $remainingStudentsCount === 0)) {
+                
+                // Case: Individual class OR group class with no students left -> Delete pending class hours
+                $pendingClassHours->delete();
+
+            } else {
+
+                // Case: Group class with other students -> Keep class hours, but remove this student's attendance records (if any)
+                $pendingIds = $pendingClassHours->pluck('id');
+                if ($pendingIds->isNotEmpty()) {
+                    StudentAttendance::whereIn('class_hour_id', $pendingIds)
+                        ->where('student_id', $studentId)
+                        ->delete();
+                }
+            }
+
+            return true;
         });
     }
 

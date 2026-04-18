@@ -9,13 +9,15 @@ use App\Models\ClassNoteFile;
 use App\Models\ClassRoom;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ClassNoteController extends Controller
 {
 
     public function index()
     {
-        $notes = ClassNote::with(['classRoom','teacher'])
+        $notes = auth('teacher')->user()->notes()
+            ->with(['classRoom', 'teacher'])
             ->latest()
             ->paginate(10);
 
@@ -39,7 +41,7 @@ class ClassNoteController extends Controller
             ->limit(30)
             ->get()
             ->map(fn($c) => [
-                'id'   => $c->id,
+                'id' => $c->id,
                 'text' => $c->name . ($c->course ? ' (' . $c->course->name . ')' : ''),
             ]);
 
@@ -50,8 +52,12 @@ class ClassNoteController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'=>'required',
-            'class_room_id'=>'required',
+            'title' => 'required',
+            'class_room_id' => [
+                'required',
+                Rule::exists('teacher_class_room', 'class_room_id')
+                    ->where('teacher_id', auth('teacher')->id())
+            ],
             'files' => 'nullable|array',
             'files.*' => 'file|max:10240' // 10MB per file
         ]);
@@ -59,10 +65,10 @@ class ClassNoteController extends Controller
         try {
             // Create the class note
             $classNote = ClassNote::create([
-                'title'=>$request->title,
-                'content'=>$request->note,
-                'class_room_id'=>$request->class_room_id,
-                'teacher_id'=>auth('teacher')->id(),
+                'title' => $request->title,
+                'content' => $request->note,
+                'class_room_id' => $request->class_room_id,
+                'teacher_id' => auth('teacher')->id(),
             ]);
 
             // Handle multiple file uploads
@@ -96,7 +102,8 @@ class ClassNoteController extends Controller
 
     public function show($id)
     {
-        $note = ClassNote::with(['classRoom','teacher'])
+        $note = auth('teacher')->user()->notes()
+            ->with(['classRoom', 'teacher'])
             ->findOrFail(decrypt($id));
 
         return view('teacher.class_notes.show', compact('note'));
@@ -105,7 +112,7 @@ class ClassNoteController extends Controller
 
     public function destroy($id)
     {
-        $note = ClassNote::findOrFail(decrypt($id));
+        $note = auth('teacher')->user()->notes()->findOrFail(decrypt($id));
 
         // Delete associated files
         foreach ($note->files as $file) {
@@ -117,6 +124,6 @@ class ClassNoteController extends Controller
 
         $note->delete();
 
-        return back()->with('success','Note deleted successfully');
+        return back()->with('success', 'Note deleted successfully');
     }
 }

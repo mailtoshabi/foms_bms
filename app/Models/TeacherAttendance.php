@@ -20,6 +20,16 @@ class TeacherAttendance extends Model
         'attendance_date' => 'date',
         'is_present' => 'boolean'
     ];
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class)->withTrashed();
+    }
+
+    public function classRoom()
+    {
+        return $this->belongsTo(ClassRoom::class)->withTrashed();
+    }
 }
 
 

@@ -20,6 +20,11 @@ class StudentAttendance extends Model
     {
         return $this->belongsTo(\App\Models\ClassHour::class);
     }
+
+    public function student()
+    {
+        return $this->belongsTo(\App\Models\Student::class)->withTrashed();
+    }
 }
 
 

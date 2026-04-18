@@ -29,13 +29,13 @@ class Fee extends Model
     // Optional: Student relation
     public function student()
     {
-        return $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class)->withTrashed();
     }
 
     // Optional: ClassRoom relation
     public function classRoom()
     {
-        return $this->belongsTo(ClassRoom::class);
+        return $this->belongsTo(ClassRoom::class)->withTrashed();
     }
 
     public function getPaidAmountAttribute()

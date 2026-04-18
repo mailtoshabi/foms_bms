@@ -209,9 +209,9 @@
 
                                 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">
 
-                                    <td>{{ $fee->student->name ?? '-' }}</td>
+                                    <td>{{ $fee->student->name ?? 'N/A' }}</td>
 
-                                    <td>{{ $fee->classRoom->name ?? '-' }}</td>
+                                    <td>{{ $fee->classRoom->name ?? 'N/A' }}</td>
 
                                     <td>
                                         <span class="badge bg-info">
@@ -288,8 +288,8 @@
 
                                             @if($fee->status === 'unpaid' && $fee->type === 'admission')
                                                 <button class="btn btn-sm btn-danger deleteFeeBtn" data-id="{{ $fee->id }}"
-                                                    data-student="{{ $fee->student->name ?? '-' }}"
-                                                    data-class="{{ $fee->classRoom->name ?? '-' }}"
+                                                    data-student="{{ $fee->student->name ?? 'N/A' }}"
+                                                    data-class="{{ $fee->classRoom->name ?? 'N/A' }}"
                                                     data-amount="{{ number_format($fee->amount, 2) }}"
                                                     title="Delete fee & unassign from class">
                                                     <i class="mdi mdi-trash-can"></i>
