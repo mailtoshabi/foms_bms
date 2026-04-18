@@ -3,19 +3,6 @@
 @section('title', 'Old Data Import')
 
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
 
     <div class="row g-4">
         {{-- 1. Classrooms Import --}}
@@ -28,6 +15,28 @@
                     </a>
                 </div>
                 <div class="card-body d-flex flex-column">
+                    @if ($errors->classrooms->any())
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->classrooms->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success_classrooms'))
+                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                            {{ session('success_classrooms') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error_classrooms'))
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            {{ session('error_classrooms') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('staff.old_data.import') }}" method="POST" enctype="multipart/form-data"
                         class="flex-grow-1">
                         @csrf
@@ -64,6 +73,28 @@
                     </a>
                 </div>
                 <div class="card-body d-flex flex-column">
+                    @if ($errors->students->any())
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->students->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success_students'))
+                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                            {{ session('success_students') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error_students'))
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            {{ session('error_students') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('staff.old_data.students_import') }}" method="POST" enctype="multipart/form-data"
                         class="flex-grow-1">
                         @csrf
@@ -101,6 +132,28 @@
                     </a>
                 </div>
                 <div class="card-body d-flex flex-column">
+                    @if ($errors->student_assignments->any())
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->student_assignments->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success_student_assignments'))
+                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                            {{ session('success_student_assignments') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error_student_assignments'))
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            {{ session('error_student_assignments') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('staff.old_data.student_assignments_import') }}" method="POST"
                         enctype="multipart/form-data" class="flex-grow-1">
                         @csrf
@@ -139,6 +192,28 @@
                     </a>
                 </div>
                 <div class="card-body d-flex flex-column">
+                    @if ($errors->teachers->any())
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->teachers->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success_teachers'))
+                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                            {{ session('success_teachers') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error_teachers'))
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            {{ session('error_teachers') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('staff.old_data.teachers_import') }}" method="POST" enctype="multipart/form-data"
                         class="flex-grow-1">
                         @csrf
@@ -176,6 +251,28 @@
                     </a>
                 </div>
                 <div class="card-body d-flex flex-column">
+                    @if ($errors->teacher_assignments->any())
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->teacher_assignments->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success_teacher_assignments'))
+                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                            {{ session('success_teacher_assignments') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error_teacher_assignments'))
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            {{ session('error_teacher_assignments') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
                     <form action="{{ route('staff.old_data.teacher_assignments_import') }}" method="POST"
                         enctype="multipart/form-data" class="flex-grow-1">
                         @csrf

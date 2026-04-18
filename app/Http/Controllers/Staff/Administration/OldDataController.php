@@ -20,71 +20,71 @@ class OldDataController extends Controller
 
     public function importStartingDates(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+        $request->validateWithBag('classrooms', [
+            'file' => 'required|extensions:xlsx,xls,csv'
         ]);
 
         try {
             Excel::import(new ClassRoomStartingDateImport, $request->file('file'));
-            return back()->with('success', 'Classroom dates updated successfully.');
+            return back()->with('success_classrooms', 'Classroom dates updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error during import: ' . $e->getMessage());
+            return back()->with('error_classrooms', 'Error during import: ' . $e->getMessage());
         }
     }
 
     public function importStudentData(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+        $request->validateWithBag('students', [
+            'file' => 'required|extensions:xlsx,xls,csv'
         ]);
 
         try {
             Excel::import(new StudentOldDataImport, $request->file('file'));
-            return back()->with('success', 'Student data updated successfully.');
+            return back()->with('success_students', 'Student data updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error during import: ' . $e->getMessage());
+            return back()->with('error_students', 'Error during import: ' . $e->getMessage());
         }
     }
 
     public function importStudentClassRoom(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+        $request->validateWithBag('student_assignments', [
+            'file' => 'required|extensions:xlsx,xls,csv'
         ]);
 
         try {
             Excel::import(new StudentClassRoomImport, $request->file('file'));
-            return back()->with('success', 'Student assignments updated successfully.');
+            return back()->with('success_student_assignments', 'Student assignments updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error during import: ' . $e->getMessage());
+            return back()->with('error_student_assignments', 'Error during import: ' . $e->getMessage());
         }
     }
 
     public function importTeacherData(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+        $request->validateWithBag('teachers', [
+            'file' => 'required|extensions:xlsx,xls,csv'
         ]);
 
         try {
             Excel::import(new TeacherOldDataImport, $request->file('file'));
-            return back()->with('success', 'Teacher details updated successfully.');
+            return back()->with('success_teachers', 'Teacher details updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error during import: ' . $e->getMessage());
+            return back()->with('error_teachers', 'Error during import: ' . $e->getMessage());
         }
     }
 
     public function importTeacherClassRoom(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls,csv'
+        $request->validateWithBag('teacher_assignments', [
+            'file' => 'required|extensions:xlsx,xls,csv'
         ]);
 
         try {
             Excel::import(new TeacherClassRoomImport, $request->file('file'));
-            return back()->with('success', 'Teacher assignments updated successfully.');
+            return back()->with('success_teacher_assignments', 'Teacher assignments updated successfully.');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error during import: ' . $e->getMessage());
+            return back()->with('error_teacher_assignments', 'Error during import: ' . $e->getMessage());
         }
     }
 }
