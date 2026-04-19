@@ -183,10 +183,15 @@
                             </a>
                         </li>
 
-                        <li>
+                        <li class="{{ set_active(['admin.reports.attendance']) }}">
                             <a href="{{ route('admin.reports.attendance') }}">
-                                {{-- <i class="mdi mdi-calendar-check"></i> --}}
                                 <span>Attendance</span>
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.reports.class-hours']) }}">
+                            <a href="{{ route('admin.reports.class-hours') }}">
+                                <span>Sessions</span>
                             </a>
                         </li>
 

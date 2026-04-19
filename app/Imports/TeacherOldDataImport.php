@@ -13,11 +13,18 @@ class TeacherOldDataImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            if (!isset($row['phone']) || !isset($row['salary_cycle_day']) || !isset($row['date'])) {
+            // Sanitize phone to handle Excel formatting
+            $phone = trim((string)$row['phone']);
+            if (is_numeric($phone) && str_contains($phone, '.')) {
+                 $phone = (string)intval($phone);
+            }
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+
+            if (empty($phone) || !isset($row['salary_cycle_day']) || !isset($row['date'])) {
                 continue;
             }
 
-            $teacher = Teacher::where('phone', $row['phone'])->first();
+            $teacher = Teacher::where('phone', $phone)->first();
 
             if ($teacher) {
                 $date = $this->transformDate($row['date']);

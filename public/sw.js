@@ -3,7 +3,7 @@
  * Cache version: bump CACHE_VER whenever you deploy new assets.
  */
 
-const CACHE_VER    = 'v1';
+const CACHE_VER = 'v2';
 const STATIC_CACHE = `foms-static-${CACHE_VER}`;
 const DYNAMIC_CACHE = `foms-dynamic-${CACHE_VER}`;
 
@@ -135,7 +135,12 @@ self.addEventListener('fetch', (event) => {
     // ── Sensitive authenticated routes → network only ─────────────────────
     if (isNeverCache(url.pathname)) {
         event.respondWith(
-            fetch(req).catch(() => caches.match('/offline.html'))
+            fetch(req).catch((error) => {
+                if (req.mode === 'navigate') {
+                    return caches.match('/offline.html');
+                }
+                throw error;
+            })
         );
         return;
     }
@@ -151,7 +156,7 @@ self.addEventListener('fetch', (event) => {
                         caches.open(STATIC_CACHE).then(c => c.put(req, clone));
                     }
                     return response;
-                }).catch(() => caches.match('/offline.html'));
+                });
             })
         );
         return;
@@ -171,14 +176,26 @@ self.addEventListener('fetch', (event) => {
                     caches.open(DYNAMIC_CACHE).then(c => c.put(req, clone));
                 }
                 return response;
-            }).catch(() => caches.match(req).then(c => c || caches.match('/offline.html')))
+            }).catch(() => {
+                return caches.match(req).then(c => {
+                    if (c) return c;
+                    if (req.mode === 'navigate') {
+                        return caches.match('/offline.html');
+                    }
+                });
+            })
         );
         return;
     }
 
     // ── Everything else → network-first, offline fallback ────────────────
     event.respondWith(
-        fetch(req).catch(() => caches.match('/offline.html'))
+        fetch(req).catch((error) => {
+            if (req.mode === 'navigate') {
+                return caches.match('/offline.html');
+            }
+            throw error;
+        })
     );
 });
 

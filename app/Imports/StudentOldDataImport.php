@@ -13,12 +13,19 @@ class StudentOldDataImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            // Identifier is 'phone'
-            if (!isset($row['phone']) || !isset($row['admission_no']) || !isset($row['date'])) {
+            // Identifier is 'phone' - Sanitize to handle Excel formatting
+            $phone = trim((string)$row['phone']);
+            // Remove non-numeric characters (handles potential spaces, dashes, or scientific notation dots)
+            if (is_numeric($phone) && str_contains($phone, '.')) {
+                 $phone = (string)intval($phone);
+            }
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+
+            if (empty($phone) || !isset($row['admission_no']) || !isset($row['date'])) {
                 continue;
             }
 
-            $student = Student::where('phone', $row['phone'])->first();
+            $student = Student::where('phone', $phone)->first();
 
             if ($student) {
                 $date = $this->transformDate($row['date']);

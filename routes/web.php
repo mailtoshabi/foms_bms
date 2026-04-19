@@ -148,6 +148,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/students/{id}', [ReportController::class,'showStudent'])
             ->name('reports.students.show');
 
+        Route::get('reports/class-hours', [ReportController::class, 'classHours'])
+            ->name('reports.class-hours');
+
+        Route::get('teachers/search', [ReportController::class, 'searchTeachers'])
+            ->name('teachers.search');
+
 
         Route::controller(StaffController::class)
         ->prefix('staffs')
@@ -515,6 +521,9 @@ Route::prefix('departments')->name('staff.')->group(function () {
             '/process/teacher/{id}/salary',
             [TeacherSalaryController::class,'processTeacherSalary']
             )->name('process.teacher.salary');
+
+            Route::get('/class-hours', [\App\Http\Controllers\Staff\Administration\ClassHourController::class, 'index'])
+                ->name('class-hours.index');
         });
 
         Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_operation_dept')
@@ -568,6 +577,9 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
         Route::middleware('role:id_administrator_dept,id_hr_dept,id_operation_dept')
         ->group(function () {
+            Route::get('teachers/search', [TeacherController::class, 'search'])
+                ->name('teachers.search');
+
             Route::resource('teachers', TeacherController::class)
             ->names('teachers');
         });

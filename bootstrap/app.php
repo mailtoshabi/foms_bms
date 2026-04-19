@@ -19,5 +19,22 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(\App\Http\Middleware\LastLoginTracker::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->respond(function ($view, $request) {
+            if ($view instanceof \Illuminate\Http\Response && $view->getStatusCode() === 419) {
+                $path = $request->path();
+                $loginRoute = 'admin.login'; // Default
+
+                if (str_starts_with($path, 'admin')) {
+                    $loginRoute = 'admin.login';
+                } elseif (str_starts_with($path, 'departments')) {
+                    $loginRoute = 'staff.login';
+                } elseif (str_starts_with($path, 'teacher')) {
+                    $loginRoute = 'teacher.login';
+                } elseif (str_starts_with($path, 'student')) {
+                    $loginRoute = 'student.login';
+                }
+
+                return redirect()->route($loginRoute)->with('error', 'Your session has expired. Please log in again.');
+            }
+        });
     })->create();

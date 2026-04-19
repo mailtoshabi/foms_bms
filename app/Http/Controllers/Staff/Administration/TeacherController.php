@@ -150,12 +150,26 @@ public function show($id)
 }
 
 
-public function destroy($id)
-{
-    $teacher = Teacher::findOrFail(decrypt($id));
-    $teacher->delete(); // soft delete
+    public function destroy($id)
+    {
+        $teacher = Teacher::findOrFail(decrypt($id));
+        $teacher->delete(); // soft delete
 
-    return back()->with('success', "Teacher \"{$teacher->name}\" deleted successfully.");
-}
+        return back()->with('success', "Teacher \"{$teacher->name}\" deleted successfully.");
+    }
 
+    public function search(Request $request)
+    {
+        $term = $request->input('q', '');
+        $results = Teacher::where('name', 'like', "%{$term}%")
+            ->orWhere('contact_number', 'like', "%{$term}%")
+            ->limit(30)
+            ->get()
+            ->map(fn($t) => [
+                'id'   => $t->id,
+                'text' => $t->name,
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
 }

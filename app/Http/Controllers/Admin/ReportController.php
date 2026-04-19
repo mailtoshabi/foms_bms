@@ -30,6 +30,7 @@ use App\Models\StaffSalary;
 use App\Models\TeacherLead;
 use App\Models\TeacherLeadNote;
 use App\Models\Teacher;
+use App\Models\ClassHour;
 use App\Services\ExpenseService;
 
 class ReportController extends Controller
@@ -901,5 +902,57 @@ class ReportController extends Controller
         $data = $query->latest()->paginate(15)->withQueryString();
 
         return view('admin.reports.teacher_lead_notes', compact('data'));
+    }
+
+    public function searchTeachers(Request $request)
+    {
+        $term = $request->input('q', '');
+        $results = Teacher::where('name', 'like', "%{$term}%")
+            ->orWhere('contact_number', 'like', "%{$term}%")
+            ->limit(30)
+            ->get()
+            ->map(fn($t) => [
+                'id'   => $t->id,
+                'text' => $t->name,
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
+
+    public function classHours(Request $request)
+    {
+        $query = ClassHour::with(['classRoom.course', 'teacher']);
+
+        if ($request->filled('class_room_id')) {
+            $query->where('class_room_id', $request->class_room_id);
+        }
+
+        if ($request->filled('teacher_id')) {
+            $query->where('teacher_id', $request->teacher_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('from_date')) {
+            $query->whereDate('class_started_at', '>=', $request->from_date);
+        }
+
+        if ($request->filled('to_date')) {
+            $query->whereDate('class_started_at', '<=', $request->to_date);
+        }
+
+        $data = $query->latest('class_started_at')->paginate(20)->withQueryString();
+
+        $selectedClassName = $request->filled('class_room_id')
+            ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+            : null;
+
+        $selectedTeacherName = $request->filled('teacher_id')
+            ? optional(\App\Models\Teacher::find($request->teacher_id))->name
+            : null;
+
+        return view('admin.reports.class_hours', compact('data', 'selectedClassName', 'selectedTeacherName'));
     }
 }

@@ -15,11 +15,18 @@ class StudentClassRoomImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $row) {
-            if (!isset($row['phone']) || !isset($row['classroom_name']) || !isset($row['date'])) {
+            // Sanitize phone to handle Excel formatting
+            $phone = trim((string)$row['phone']);
+            if (is_numeric($phone) && str_contains($phone, '.')) {
+                 $phone = (string)intval($phone);
+            }
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+
+            if (empty($phone) || !isset($row['classroom_name']) || !isset($row['date'])) {
                 continue;
             }
 
-            $student = Student::where('phone', $row['phone'])->first();
+            $student = Student::where('phone', $phone)->first();
             $classroom = ClassRoom::where('name', $row['classroom_name'])->first();
 
             if ($student && $classroom) {
