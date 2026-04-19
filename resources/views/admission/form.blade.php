@@ -68,6 +68,21 @@ enctype="multipart/form-data">
 
 {{-- ================= BASIC DETAILS ================= --}}
 
+@if($type=='student')
+<div class="mb-4">
+    <label class="form-label">Country <span class="text-danger">*</span></label>
+    <select name="country_id" class="form-control" disabled>
+        @foreach($countries as $country)
+            <option value="{{ $country->id }}" {{ ($lead->country_id ?? '') == $country->id ? 'selected' : '' }}>
+                {{ $country->name }} ({{ $country->code }})
+            </option>
+        @endforeach
+    </select>
+    <input type="hidden" name="country_id" value="{{ $lead->country_id }}">
+    <small class="text-muted">Country is pre-filled based on your application.</small>
+</div>
+@endif
+
 <div class="form-floating form-floating-custom mb-4">
 <input type="text"
 class="form-control"

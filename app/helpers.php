@@ -51,7 +51,8 @@ if (!function_exists('studentWhatsappMessage')) {
             "Password: {$password}\n\n" .
             "Login: " . route('student.login');
 
-        $phone = '91' . $student->phone;
+        $countryCode = $student->country ? preg_replace('/[^0-9]/', '', $student->country->code) : '91';
+        $phone = $countryCode . $student->phone;
 
         return "https://wa.me/" . $phone . "?text=" . urlencode($message);
     }

@@ -63,7 +63,8 @@ class StudentController extends Controller
     public function create()
     {
         $this->checkManagementRole();
-        return view('staff.students.create');
+        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        return view('staff.students.create', compact('countries'));
     }
 
 
@@ -74,8 +75,9 @@ class StudentController extends Controller
         $this->checkManagementRole();
         $request->validate([
             'name' => 'required',
+            'country_id' => 'required|exists:countries,id',
             'contact_number' => 'required|string|digits_between:7,15',
-            'phone' => 'required|unique:students,phone',
+            'phone' => 'required|unique:students,phone,NULL,id,country_id,' . $request->country_id,
             'email' => 'nullable|email',
             'password' => 'required|min:6',
             'selected_days' => 'required|array|min:1'
@@ -100,6 +102,7 @@ class StudentController extends Controller
         Student::create([
 
             'student_lead_id' => null,
+            'country_id' => $request->country_id,
 
             'name' => $request->name,
             'dob' => $request->dob,
@@ -134,8 +137,9 @@ class StudentController extends Controller
     {
         $this->checkManagementRole();
         $student = Student::findOrFail(decrypt($id));
+        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
 
-        return view('staff.students.create', compact('student'));
+        return view('staff.students.create', compact('student', 'countries'));
     }
 
 
@@ -146,8 +150,9 @@ class StudentController extends Controller
 
         $request->validate([
             'name' => 'required',
+            'country_id' => 'required|exists:countries,id',
             'contact_number' => 'required|string|digits_between:7,15',
-            'phone' => 'required|unique:students,phone,' . $student->id,
+            'phone' => 'required|unique:students,phone,' . $student->id . ',id,country_id,' . $request->country_id,
             'email' => 'nullable|email',
             'selected_days' => 'required|array|min:1'
         ]);
@@ -174,6 +179,7 @@ class StudentController extends Controller
 
         $student->update([
 
+            'country_id' => $request->country_id,
             'name' => $request->name,
             'dob' => $request->dob,
             'email' => $request->email,

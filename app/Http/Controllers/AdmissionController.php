@@ -41,7 +41,8 @@ public function showForm($type,$token)
         ]);
     }
 
-    return view('admission.form',compact('lead','type'));
+    $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+    return view('admission.form',compact('lead','type', 'countries'));
 }
 
 
@@ -81,6 +82,7 @@ public function submitForm(Request $request,$type,$token)
         $model = Student::create([
 
             'student_lead_id'    => $lead->id,
+            'country_id'         => $lead->country_id,
 
             'name'           => $request->name,
             'dob'            => $request->dob,

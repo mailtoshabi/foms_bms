@@ -25,6 +25,21 @@
 
             <div class="row">
 
+                <div class="col-md-12 mb-3">
+                    <label>Country <span class="text-danger">*</span></label>
+                    <select name="country_id" class="form-control @error('country_id') is-invalid @enderror" required>
+                        <option value="">Select Country</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country->id }}" {{ old('country_id', $lead->country_id ?? '') == $country->id || (!old('country_id') && !isset($lead) && $country->name == 'India') ? 'selected' : '' }}>
+                                {{ $country->name }} ({{ $country->code }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('country_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <div class="col-md-6 mb-3">
                     <label>Name</label>
                     <input type="text"
@@ -146,7 +161,8 @@
 
             <div class="mt-2">
                 @php
-                $phone = preg_replace('/[^0-9]/','',$lead->contact_number);
+                $countryCode = $lead->country ? preg_replace('/[^0-9]/', '', $lead->country->code) : '91';
+                $phone = $countryCode . preg_replace('/[^0-9]/','',$lead->contact_number);
                 $message = "Dear {$lead->name}, please complete your admission form using the following link: ".$link;
                 $waLink = "https://wa.me/{$phone}?text=".urlencode($message);
                 @endphp

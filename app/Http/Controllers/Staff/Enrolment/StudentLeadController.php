@@ -53,8 +53,9 @@ class StudentLeadController extends Controller
     public function create()
     {
         $sources = Source::where('is_active', true)->get();
+        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
 
-        return view('staff.student_leads.create', compact('sources'));
+        return view('staff.student_leads.create', compact('sources', 'countries'));
     }
 
     /*
@@ -66,6 +67,7 @@ class StudentLeadController extends Controller
     {
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
+            'country_id'     => ['required', 'exists:countries,id'],
             'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number'],
             'email'          => ['nullable', 'email'],
             'source_id'      => ['nullable', 'exists:sources,id'],
@@ -73,6 +75,7 @@ class StudentLeadController extends Controller
 
         StudentLead::create([
             'name'           => $request->name,
+            'country_id'     => $request->country_id,
             'contact_number' => $request->contact_number,
             'email'          => $request->email,
             'source_id'      => $request->source_id,
@@ -93,8 +96,9 @@ class StudentLeadController extends Controller
 {
     $lead = StudentLead::with('notes.staff')->findOrFail(decrypt($id));
     $sources = Source::where('is_active', true)->get();
+    $countries = \App\Models\Country::orderBy('name', 'asc')->get();
 
-    return view('staff.student_leads.create', compact('lead', 'sources'));
+    return view('staff.student_leads.create', compact('lead', 'sources', 'countries'));
 }
 
     /*
@@ -108,6 +112,7 @@ class StudentLeadController extends Controller
 
         $request->validate([
             'name'           => ['required', 'string', 'max:255'],
+            'country_id'     => ['required', 'exists:countries,id'],
             'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number,' . $lead->id],
             'email'          => ['nullable', 'email'],
             'source_id'      => ['nullable', 'exists:sources,id'],
@@ -116,6 +121,7 @@ class StudentLeadController extends Controller
 
         $lead->update([
             'name'           => $request->name,
+            'country_id'     => $request->country_id,
             'contact_number' => $request->contact_number,
             'email'          => $request->email,
             'source_id'      => $request->source_id,
@@ -204,6 +210,7 @@ public function convertToStudent(Request $request, $id)
         Student::create([
 
             'student_lead_id' => $lead->id,
+            'country_id' => $lead->country_id,
 
             'name' => $request->name,
             'dob' => $request->dob,

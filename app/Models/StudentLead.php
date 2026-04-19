@@ -9,6 +9,7 @@ class StudentLead extends Model
 {
     protected $fillable = [
         'name',
+        'country_id',
         'contact_number',
         'email',
         'source_id',
@@ -25,6 +26,11 @@ class StudentLead extends Model
         'form_expires_at' => 'datetime',
         'form_opened_at' => 'datetime',
     ];
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
 
     public function source()
     {

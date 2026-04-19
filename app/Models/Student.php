@@ -15,6 +15,7 @@ class Student extends Authenticatable
 
     protected $fillable = [
         'admission_no',
+        'country_id',
         'student_lead_id',
 
         'name',
@@ -55,6 +56,11 @@ class Student extends Authenticatable
         'last_login_at' => 'datetime',
         'selected_days' => 'array',
     ];
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
 
     public function class_rooms()
     {
