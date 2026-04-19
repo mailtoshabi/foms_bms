@@ -189,7 +189,7 @@ class ReportController extends Controller
         $data = $query->latest('fee_payments.paid_date')->paginate(10)->withQueryString();
 
         // Get course categories for dropdown
-        $categories = \App\Models\CourseCategory::pluck('name', 'id');
+        $categories = \App\Models\CourseCategory::orderBy('name', 'asc')->pluck('name', 'id');
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
@@ -912,7 +912,7 @@ class ReportController extends Controller
             ->limit(30)
             ->get()
             ->map(fn($t) => [
-                'id'   => $t->id,
+                'id' => $t->id,
                 'text' => $t->name,
             ]);
 

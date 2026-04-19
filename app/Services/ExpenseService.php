@@ -66,7 +66,7 @@ class ExpenseService
 
     public function getCategories()
     {
-        return ExpenseCategory::pluck('name', 'id');
+        return ExpenseCategory::orderBy('name', 'asc')->pluck('name', 'id');
     }
 
     public function getTotalExpenses($query = null)

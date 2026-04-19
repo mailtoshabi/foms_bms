@@ -34,7 +34,7 @@ Add Class
 {{-- ================= FILTER ================= --}}
 <form method="GET" class="row mb-3">
 
-<div class="col-md-3">
+<div class="col-md-2">
 
 <select name="course_id" class="form-control select2">
 
@@ -56,7 +56,7 @@ Add Class
 </div>
 
 
-<div class="col-md-3">
+<div class="col-md-2">
 
 <select name="class_type_id" class="form-control select2">
 
@@ -78,7 +78,7 @@ Add Class
 </div>
 
 
-<div class="col-md-3">
+<div class="col-md-2">
 
 <select name="status" class="form-control">
 
@@ -98,14 +98,20 @@ Completed
 
 </div>
 
+<div class="col-md-3">
+
+<input type="text" name="name" value="{{ request('name') }}" class="form-control" placeholder="Search Class Name...">
+
+</div>
+
 
 <div class="col-md-3 d-flex gap-2">
 
-<button class="btn btn-primary">
+<button class="btn btn-primary px-3">
 Filter
 </button>
 
-<a href="{{ $indexRoute }}" class="btn btn-light">
+<a href="{{ $indexRoute }}" class="btn btn-light px-3">
 Reset
 </a>
 

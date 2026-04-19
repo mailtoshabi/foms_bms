@@ -26,14 +26,14 @@ class CourseController extends Controller
         $courses = $query->latest()->paginate(10)->withQueryString();
 
         // needed for filter dropdown
-        $categories = CourseCategory::all();
+        $categories = CourseCategory::orderBy('name', 'asc')->get();
 
         return view('admin.courses.index', compact('courses','categories'));
     }
 
     public function create()
     {
-        $categories = CourseCategory::all();
+        $categories = CourseCategory::orderBy('name', 'asc')->get();
         return view('admin.courses.create',compact('categories'));
     }
 
@@ -59,7 +59,7 @@ class CourseController extends Controller
     public function edit($id)
     {
         $course = Course::findOrFail(decrypt($id));
-        $categories = CourseCategory::all();
+        $categories = CourseCategory::orderBy('name', 'asc')->get();
 
         return view('admin.courses.create',compact('course','categories'));
     }

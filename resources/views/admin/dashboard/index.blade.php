@@ -225,8 +225,8 @@
                                 <th>Name</th>
                                 <th>Classes</th>
                                 <th>Hours</th>
-                                {{-- <th>Attendance</th> --}}
-                                {{-- <th>Score</th> --}}
+                                <th>Attendance</th>
+                                <th>Score</th>
                             </tr>
                         </thead>
 
@@ -288,13 +288,13 @@
 
                                     <td>{{ $t['hours'] }}</td>
 
-                                    {{-- <td>{{ $t['attendance'] }}%</td> --}}
+                                    <td>{{ $t['attendance'] }}%</td>
 
-                                    {{-- <td>
+                                    <td>
                                         <span class="badge bg-success">
                                             {{ $t['score'] }}
                                         </span>
-                                    </td> --}}
+                                    </td>
 
                                 </tr>
 
@@ -415,7 +415,7 @@
 
                 datasets: [{
                     data: [
-                        {{ $paidAmount }},
+                                                {{ $paidAmount }},
                         {{ $pendingAmount }}
                     ],
                     borderWidth: 1

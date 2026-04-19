@@ -219,6 +219,7 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
+                                        <th>Rank</th>
                                         <th>Name</th>
                                         <th>Classes</th>
                                         <th>Hours</th>
@@ -228,6 +229,31 @@
                                 </thead>
                                 <tbody>
                                     @foreach($topTeachers as $index => $t)
+
+                                        @php
+                                            $score = $t['score'];
+                                            if ($score >= 70) {
+                                                $stars = 5;
+                                                $rankLabel = 'Elite';
+                                                $rankColor = 'warning';
+                                            } elseif ($score >= 50) {
+                                                $stars = 4;
+                                                $rankLabel = 'Expert';
+                                                $rankColor = 'primary';
+                                            } elseif ($score >= 30) {
+                                                $stars = 3;
+                                                $rankLabel = 'Advanced';
+                                                $rankColor = 'info';
+                                            } elseif ($score >= 15) {
+                                                $stars = 2;
+                                                $rankLabel = 'Intermediate';
+                                                $rankColor = 'secondary';
+                                            } else {
+                                                $stars = 1;
+                                                $rankLabel = 'Beginner';
+                                                $rankColor = 'light';
+                                            }
+                                        @endphp
                                         <tr>
                                             <td>
                                                 @if($index == 0) &#x1F947;
@@ -235,6 +261,18 @@
                                                 @elseif($index == 2) &#x1F949;
                                                 @else {{ $index + 1 }}
                                                 @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ $rankColor }} me-1">{{ $rankLabel }}</span><br>
+                                                <small>
+                                                    @for($s = 1; $s <= 5; $s++)
+                                                        @if($s <= $stars)
+                                                            <span class="text-warning">&#9733;</span>
+                                                        @else
+                                                            <span class="text-muted">&#9733;</span>
+                                                        @endif
+                                                    @endfor
+                                                </small>
                                             </td>
                                             <td>{{ $t['teacher']->name }}</td>
                                             <td>{{ $t['classes'] }}</td>

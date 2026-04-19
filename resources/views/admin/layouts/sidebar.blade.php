@@ -47,6 +47,11 @@
                     <ul class="sub-menu">
                         <li><a href="{{ route('admin.class_rooms.index') }}">List Classes</a></li>
                         <li><a href="{{ route('admin.class_rooms.create') }}">Add Class</a></li>
+                        <li class="{{ set_active(['admin.reports.class-hours']) }}">
+                            <a href="{{ route('admin.reports.class-hours') }}">
+                                <span>Sessions</span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -186,12 +191,6 @@
                         <li class="{{ set_active(['admin.reports.attendance']) }}">
                             <a href="{{ route('admin.reports.attendance') }}">
                                 <span>Attendance</span>
-                            </a>
-                        </li>
-
-                        <li class="{{ set_active(['admin.reports.class-hours']) }}">
-                            <a href="{{ route('admin.reports.class-hours') }}">
-                                <span>Sessions</span>
                             </a>
                         </li>
 
