@@ -146,6 +146,8 @@ class ReportController extends Controller
             ->select(
                 'students.name',
                 'students.contact_number',
+                'students.whatsapp_number',
+                'students.is_whatsapp_different',
                 'class_rooms.name as class_name',
                 'course_categories.name as category_name',
                 'fee_payments.paid_amount',
@@ -312,6 +314,8 @@ class ReportController extends Controller
             ->select(
                 'students.name',
                 'students.contact_number',
+                'students.whatsapp_number',
+                'students.is_whatsapp_different',
                 'class_rooms.name as class_name',
                 'class_hours.class_started_at',
                 'student_attendance.is_present'

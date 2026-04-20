@@ -7,6 +7,8 @@ use App\Models\ClassNote;
 use App\Models\ClassRoom;
 use Illuminate\Http\Request;
 use App\Models\Teacher;
+use App\Models\Country;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -15,7 +17,7 @@ class TeacherController extends Controller
 
 public function index(Request $request)
 {
-    $teachers = Teacher::query()->with('lead');
+    $teachers = Teacher::query()->with(['lead', 'country']);
 
     if ($request->filled('search')) {
         $teachers->where(function ($q) use ($request) {
@@ -32,16 +34,22 @@ public function index(Request $request)
 
 public function create()
 {
-    return view('staff.teachers.create');
+    $countries = Country::orderBy('name', 'asc')->get();
+    return view('staff.teachers.create', compact('countries'));
 }
 
 
 public function store(Request $request)
 {
+    $request->merge(['phone' => $request->contact_number]);
     $request->validate([
         'name'           => 'required',
+        'country_id'     => 'required|exists:countries,id',
         'contact_number' => 'required|string|digits_between:7,15',
-        'phone'          => 'required|unique:teachers,phone',
+        'phone'          => [
+            'required',
+            Rule::unique('teachers')->where('country_id', $request->country_id)
+        ],
         'password'       => 'required|min:6'
     ]);
 
@@ -56,15 +64,25 @@ public function store(Request $request)
         $idProof=$request->file('id_proof')->store('teachers/id_proofs','public');
     }
 
-    Teacher::create([
+    $country = Country::find($request->country_id);
+    $isWhatsappDifferent = $request->has('is_whatsapp_different');
+    if ($isWhatsappDifferent) {
+        $whatsapp_number = $request->whatsapp_number;
+    } else {
+        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+        $whatsapp_number = $countryCode . $request->contact_number;
+    }
 
+    Teacher::create([
         'teacher_lead_id'=>null,
+        'country_id'=>$request->country_id,
+        'is_whatsapp_different' => $isWhatsappDifferent,
 
         'name'=>$request->name,
         'dob'=>$request->dob,
         'email'=>$request->email,
         'contact_number'=>$request->contact_number,
-        'whatsapp_number'=>$request->whatsapp_number ?? $request->contact_number,
+        'whatsapp_number'=>$whatsapp_number,
         'upi_number'=>$request->upi_number,
         'address'=>$request->address,
 
@@ -89,8 +107,9 @@ public function store(Request $request)
 public function edit($id)
 {
     $teacher = Teacher::findOrFail(decrypt($id));
+    $countries = Country::orderBy('name', 'asc')->get();
 
-    return view('staff.teachers.create',compact('teacher'));
+    return view('staff.teachers.create',compact('teacher', 'countries'));
 }
 
 
@@ -98,10 +117,16 @@ public function update(Request $request,$id)
 {
     $teacher = Teacher::findOrFail(decrypt($id));
 
+    $request->merge(['phone' => $request->contact_number]);
+
     $request->validate([
         'name'           => 'required|string|max:255',
+        'country_id'     => 'required|exists:countries,id',
         'contact_number' => 'required|string|digits_between:7,15',
-        'phone'          => 'required|unique:teachers,phone,' . $teacher->id,
+        'phone'          => [
+            'required',
+            Rule::unique('teachers')->where('country_id', $request->country_id)->ignore($teacher->id)
+        ],
         'email'          => 'nullable|email|max:255',
         'dob'            => 'nullable|date',
         'qualification'  => 'nullable|string|max:255',
@@ -114,10 +139,22 @@ public function update(Request $request,$id)
         'password'       => 'nullable|min:6',
     ]);
 
+    $country = Country::find($request->country_id);
+    $isWhatsappDifferent = $request->has('is_whatsapp_different');
+    if ($isWhatsappDifferent) {
+        $whatsapp_number = $request->whatsapp_number;
+    } else {
+        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+        $whatsapp_number = $countryCode . $request->contact_number;
+    }
+
     $data = $request->only([
-        'name', 'dob', 'email', 'contact_number', 'whatsapp_number',
+        'name', 'country_id', 'dob', 'email', 'contact_number',
         'upi_number', 'address', 'qualification', 'experience', 'phone', 'status',
     ]);
+
+    $data['whatsapp_number'] = $whatsapp_number;
+    $data['is_whatsapp_different'] = $isWhatsappDifferent;
 
     if ($request->filled('password')) {
         $data['password'] = Hash::make($request->password);

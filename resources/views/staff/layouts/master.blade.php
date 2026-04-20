@@ -61,6 +61,7 @@
         <div class="main-content">
             <div class="page-content">
                 <div class="container-fluid">
+                    <x-alerts />
                     @yield('content')
                 </div>
                 <!-- container-fluid -->

@@ -94,7 +94,11 @@
             <tr>
                 <td>{{ $student->admission_no }}</td>
                 <td>{{ $student->name }}</td>
-                <td>{{ $student->contact_number }}</td>
+                <td>{{ $student->formatted_contact_number }}
+                    @if($student->is_whatsapp_different)
+                        <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $student->formatted_whatsapp_number }}</small>
+                    @endif
+                </td>
                 <td>{{ $student->email ?? 'N/A' }}</td>
                 <td>
                     <span class="badge bg-{{ $student->status == 'active' ? 'success' : ($student->status == 'passout' ? 'info' : 'danger') }}">

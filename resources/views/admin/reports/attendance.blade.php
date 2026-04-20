@@ -80,7 +80,10 @@
 
                                                 <tr>
                                                         <td>{{ $row->name }}
-                                                                <br><small>{{ $row->contact_number }}</small>
+                                                                <br><small class="text-muted">{{ $row->contact_number }}</small>
+                                                                @if($row->is_whatsapp_different)
+                                                                    <br><small class="text-success" style="font-size: 11px;">WA: +{{ $row->whatsapp_number }}</small>
+                                                                @endif
                                                         </td>
                                                         <td>{{ $row->class_name }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($row->class_started_at)->format('d M Y') }}</td>

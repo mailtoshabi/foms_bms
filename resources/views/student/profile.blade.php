@@ -1,4 +1,4 @@
-﻿@extends('student.layouts.master-layouts-noleft')
+@extends('student.layouts.master-layouts-noleft')
 
 @section('title', 'My Profile')
 
@@ -41,11 +41,15 @@
                         </tr>
                         <tr>
                             <th>Contact Number</th>
-                            <td>{{ $student->contact_number ?? '-' }}</td>
+                            <td>{{ $student->formatted_contact_number }}
+                                @if($student->is_whatsapp_different)
+                                    <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $student->formatted_whatsapp_number }}</small>
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <th>WhatsApp Number</th>
-                            <td>{{ $student->whatsapp_number ?? '-' }}</td>
+                            <td>{{ $student->formatted_whatsapp_number }}</td>
                         </tr>
                         <tr>
                             <th>Parent Name</th>

@@ -105,7 +105,11 @@ Reset
 
 </td>
 
-<td>{{ $teacher->contact_number }}</td>
+<td>{{ $teacher->formatted_contact_number }}
+    @if($teacher->is_whatsapp_different)
+        <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $teacher->formatted_whatsapp_number }}</small>
+    @endif
+</td>
 
 <td>{{ $teacher->email ?? '-' }}</td>
 

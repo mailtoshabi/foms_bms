@@ -98,7 +98,11 @@
         @foreach($leads as $lead)
             <tr>
                 <td>{{ $lead->name }}</td>
-                <td>{{ $lead->contact_number }}</td>
+                <td>{{ $lead->formatted_contact_number }}
+                    @if($lead->is_whatsapp_different)
+                        <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $lead->formatted_whatsapp_number }}</small>
+                    @endif
+                </td>
                 <td>{{ $lead->email ?? 'N/A' }}</td>
                 <td>{{ $lead->source->name ?? '-' }}</td>
                 <td>

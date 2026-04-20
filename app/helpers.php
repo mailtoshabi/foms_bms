@@ -3,6 +3,7 @@
 // use Illuminate\Support\Facades\Request;
 
 
+use App\Services\FeeService;
 use Illuminate\Support\Facades\Route;
 
 if (!function_exists('set_active')) {
@@ -68,7 +69,8 @@ if (!function_exists('teacherWhatsappMessage')) {
             "Password: {$password}\n\n" .
             "Login: " . route('teacher.login');
 
-        $phone = '91' . $teacher->phone;
+        $countryCode = $teacher->country ? preg_replace('/[^0-9]/', '', $teacher->country->code) : '91';
+        $phone = $countryCode . $teacher->phone;
 
         return "https://wa.me/" . $phone . "?text=" . urlencode($message);
     }
@@ -108,14 +110,14 @@ if (!function_exists('runDailySalaryFeeProcess')) {
             // 🔹 1. Teacher Salary
             // ============================
             foreach (Teacher::cursor() as $teacher) {
-                app(\App\Services\SalaryService::class)
+                app(SalaryService::class)
                     ->processTeacherSalary($teacher->id);
             }
 
             // ============================
             // 🔹 2. Group Class Fees
             // ============================
-            app(\App\Services\FeeService::class)
+            app(FeeService::class)
                 ->generateGroupFeesForToday();
 
             // ✅ Mark completed

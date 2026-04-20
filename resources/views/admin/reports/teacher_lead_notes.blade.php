@@ -90,7 +90,10 @@
                         <td>{{ $data->firstItem() + $loop->index }}</td>
                         <td>
                             {{ $row->lead->name ?? '—' }}
-                            <br><small class="text-muted">{{ $row->lead->contact_number ?? '' }}</small>
+                            <br><small class="text-muted">{{ $row->lead->formatted_contact_number ?? '' }}</small>
+                            @if($row->lead->is_whatsapp_different)
+                                <br><small class="text-success" style="font-size: 10px;">WA: {{ $row->lead->formatted_whatsapp_number }}</small>
+                            @endif
                         </td>
                         <td>{{ $row->note }}</td>
                         <td>

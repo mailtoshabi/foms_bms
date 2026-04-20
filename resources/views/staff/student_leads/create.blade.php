@@ -55,12 +55,27 @@
                     <label>Contact Number</label>
                     <input type="text"
                            name="contact_number"
+                           id="contact_number"
                            class="form-control @error('contact_number') is-invalid @enderror"
                            maxlength="15"
                            value="{{ old('contact_number', $lead->contact_number ?? '') }}">
                     @error('contact_number')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch mt-4">
+                        <input class="form-check-input" type="checkbox" id="whatsapp_different" name="is_whatsapp_different" value="1" {{ old('is_whatsapp_different', $lead->is_whatsapp_different ?? false) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="whatsapp_different">WhatsApp number is different?</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3" id="whatsapp_field_group" style="{{ old('is_whatsapp_different', $lead->is_whatsapp_different ?? false) ? '' : 'display: none;' }}">
+                    <label>WhatsApp Number (with country code)</label>
+                    <input type="text" name="whatsapp_number" id="whatsapp_number" class="form-control"
+                        value="{{ old('whatsapp_number', $lead->whatsapp_number ?? '') }}"
+                        placeholder="e.g. 919876543210">
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -188,6 +203,14 @@
 
             @if($lead->form_expires_at && now()->gt($lead->form_expires_at))
             <span class="badge bg-danger">Link Expired</span>
+ 
+            <form action="{{ route('staff.student-leads.regenerate-link', encrypt($lead->id)) }}" method="POST" class="d-inline ms-2">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-outline-danger py-0" onclick="return confirm('Generate new link? Existing link will stop working.')">
+                    <i class="mdi mdi-refresh"></i> Regenerate
+                </button>
+            </form>
+ 
             @else
             <span class="badge bg-success">
             Expires {{ $lead->form_expires_at->diffForHumans() }}
@@ -342,6 +365,20 @@ value="{{ $lead->email }}">
 </div>
 
 <div class="col-md-6 mb-3">
+    <div class="form-check form-switch mt-4">
+        <input class="form-check-input" type="checkbox" id="convert_whatsapp_different" name="is_whatsapp_different" value="1" {{ $lead->is_whatsapp_different ? 'checked' : '' }}>
+        <label class="form-check-label" for="convert_whatsapp_different">WhatsApp number is different?</label>
+    </div>
+</div>
+
+<div class="col-md-6 mb-3" id="convert_whatsapp_field_group" style="{{ $lead->is_whatsapp_different ? '' : 'display: none;' }}">
+    <label>WhatsApp Number (with country code)</label>
+    <input type="text" name="whatsapp_number" id="convert_whatsapp_number" class="form-control"
+        value="{{ $lead->whatsapp_number }}"
+        placeholder="e.g. 919876543210">
+</div>
+
+<div class="col-md-6 mb-3">
 <label>Date of Birth</label>
 <input type="date" name="dob" class="form-control">
 </div>
@@ -405,5 +442,23 @@ Create Student
 @section('script')
 <script>
     $('.select2').select2();
+
+    $('#whatsapp_different').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#whatsapp_field_group').show();
+        } else {
+            $('#whatsapp_field_group').hide();
+            $('#whatsapp_number').val('');
+        }
+    });
+
+    $('#convert_whatsapp_different').on('change', function () {
+        if ($(this).is(':checked')) {
+            $('#convert_whatsapp_field_group').show();
+        } else {
+            $('#convert_whatsapp_field_group').hide();
+            $('#convert_whatsapp_number').val('');
+        }
+    });
 </script>
 @endsection

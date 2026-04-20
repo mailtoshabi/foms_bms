@@ -42,7 +42,8 @@ class Student extends Authenticatable
         'is_monthly_fee_exempted',
         'monthly_fee_discount',
 
-        'status'
+        'status',
+        'is_whatsapp_different'
     ];
 
     protected $hidden = [
@@ -96,26 +97,23 @@ class Student extends Authenticatable
         return $this->dob?->format('d M Y');
     }
 
-
-    protected static function booted()
+    public function getFormattedContactNumberAttribute()
     {
-        static::creating(function ($student) {
-
-            $now = now();
-            $year = $now->format('y');  // 2-digit year  e.g. "26"
-            $month = $now->format('m');  // 2-digit month e.g. "04"
-
-            // Serial: total students admitted in the same month + 1
-            $countThisMonth = Student::whereYear('created_at', $now->year)
-                ->whereMonth('created_at', $now->month)
-                ->count();
-
-            $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
-
-            // Format: FA/{YY}/{MM}/{serial}
-            // Example: FA/26/04/27
-            $student->admission_no = 'FA/' . $year . '/' . $month . '/' . $serial;
-
-        });
+        $code = $this->country?->code ?? '';
+        return $code ? $code . ' ' . $this->contact_number : $this->contact_number;
     }
+
+    public function getFormattedWhatsappNumberAttribute()
+    {
+        return $this->whatsapp_number ? '+' . $this->whatsapp_number : null;
+    }
+
+    public function getFormattedPhoneAttribute()
+    {
+        $code = $this->country?->code ?? '';
+        return $code ? $code . ' ' . $this->phone : $this->phone;
+    }
+
+
+
 }

@@ -10,28 +10,31 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
-        return view('teacher.auth.login');
+        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        return view('teacher.auth.login', compact('countries'));
     }
 
     public function login(Request $request)
     {
         $request->validate([
-            'phone'    => 'required|digits:10',
-            'password' => 'required'
+            'country_id' => 'required|exists:countries,id',
+            'phone'      => 'required|string|min:7|max:15',
+            'password'   => 'required'
         ]);
-
+    
         $credentials = [
-            'phone'    => $request->phone,
-            'password' => $request->password,
+            'country_id' => $request->country_id,
+            'phone'      => $request->phone,
+            'password'   => $request->password,
         ];
-
+    
         if (Auth::guard('teacher')->attempt($credentials)) {
             return redirect()->intended('/teacher/dashboard');
         }
-
+    
         return back()->withErrors([
-            'phone' => 'Invalid phone or password.'
-        ])->onlyInput('phone');
+            'phone' => 'Invalid country, phone, or password.'
+        ])->onlyInput('phone', 'country_id');
     }
 
     public function logout()

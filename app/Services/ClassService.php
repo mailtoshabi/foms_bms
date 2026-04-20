@@ -102,7 +102,7 @@ class ClassService
     {
         return DB::transaction(function () use ($classId, $studentIds) {
 
-            $class = ClassRoom::with('classType','students')->findOrFail($classId);
+            $class = ClassRoom::with('classType', 'students')->findOrFail($classId);
 
             $type = $class->classType->name; // assuming 'individual' or 'group'
 
@@ -132,7 +132,7 @@ class ClassService
 
             foreach ($studentIds as $studentId) {
 
-                if ($class->students()->where('student_id',$studentId)->exists()) {
+                if ($class->students()->where('student_id', $studentId)->exists()) {
                     continue;
                 }
 
@@ -155,48 +155,34 @@ class ClassService
                 $student = Student::findOrFail($studentId);
 
                 $isAdmissionExempted = $student->is_admission_fee_exempted;
-                $isMonthlyExempted   = $student->is_monthly_fee_exempted;
+                $isMonthlyExempted = $student->is_monthly_fee_exempted;
 
-                // Both exempted → no fee
-                if ($isAdmissionExempted && $isMonthlyExempted) {
+                // Skip if admission exempted
+                if ($isAdmissionExempted) {
                     continue;
                 }
 
-                $feeType   = null;
-                $feeAmount = 0;
-
-                if ($isAdmissionExempted && !$isMonthlyExempted) {
-                    $feeType   = 'monthly';
-                    $feeAmount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
-                } elseif (!$isAdmissionExempted && $isMonthlyExempted) {
-                    $feeType   = 'admission';
-                    $feeAmount = max(0, $class->admission_fee - $student->admission_fee_discount);
-                } else {
-                    if ($class->admission_fee > 0) {
-                        $feeType   = 'admission';
-                        $feeAmount = max(0, $class->admission_fee - $student->admission_fee_discount);
-                    } else {
-                        $feeType   = 'monthly';
-                        $feeAmount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
-                    }
-                }
+                $feeType = 'admission';
+                $feeAmount = max(0, $class->admission_fee - $student->admission_fee_discount);
 
                 // Skip if fee already exists for this student/class/type
-                if (Fee::where('student_id', $student->id)
+                if (
+                    Fee::where('student_id', $student->id)
                         ->where('class_room_id', $class->id)
                         ->where('type', $feeType)
-                        ->exists()) {
+                        ->exists()
+                ) {
                     continue;
                 }
 
                 if ($feeAmount > 0) {
                     Fee::create([
-                        'student_id'   => $student->id,
+                        'student_id' => $student->id,
                         'class_room_id' => $class->id,
-                        'type'         => $feeType,
-                        'amount'       => $feeAmount,
-                        'due_date'     => Carbon::parse($class->starting_date)->addDays(7),
-                        'status'       => 'unpaid',
+                        'type' => $feeType,
+                        'amount' => $feeAmount,
+                        'due_date' => Carbon::parse($class->starting_date)->addDays(7),
+                        'status' => 'unpaid',
                     ]);
                 }
             }
@@ -232,7 +218,7 @@ class ClassService
                 ->where('status', 'pending');
 
             if ($type === 'individual' || ($type === 'group' && $remainingStudentsCount === 0)) {
-                
+
                 // Case: Individual class OR group class with no students left -> Delete pending class hours
                 $pendingClassHours->delete();
 

@@ -1,388 +1,375 @@
 @extends('staff.layouts.master')
 
 @php
-$isEdit = isset($student);
+    $isEdit = isset($student);
 @endphp
 
-@section('title',$isEdit?'Edit Student':'Add Student')
+@section('title', $isEdit ? 'Edit Student' : 'Add Student')
 
 @section('content')
 
-<div class="row">
-
-<form method="POST"
-action="{{ $isEdit ? route('staff.students.update',encrypt($student->id)) : route('staff.students.store') }}"
-enctype="multipart/form-data">
-
-@csrf
-
-@if($isEdit)
-@method('PUT')
-@endif
-
-<div class="col-12">
-
-{{-- ================= STUDENT DETAILS ================= --}}
-<div class="card">
-
-<div class="card-header">
-<h4 class="card-title">Student Details</h4>
-<p class="card-title-desc">
-{{ $isEdit ? 'Edit' : 'Enter' }} student details
-</p>
-</div>
-
-<div class="card-body">
-
-<div class="row">
-
-<div class="col-md-12 mb-3">
-<label>Country <span class="text-danger">*</span></label>
-<select name="country_id" class="form-control @error('country_id') is-invalid @enderror" required>
-    <option value="">Select Country</option>
-    @foreach($countries as $country)
-        <option value="{{ $country->id }}" {{ old('country_id', $student->country_id ?? '') == $country->id || (!old('country_id') && !isset($student) && $country->name == 'India') ? 'selected' : '' }}>
-            {{ $country->name }} ({{ $country->code }})
-        </option>
-    @endforeach
-</select>
-@error('country_id')
-    <div class="invalid-feedback">{{ $message }}</div>
-@enderror
-</div>
-
-<div class="col-md-6 mb-3">
-<label>Name</label>
-<input type="text"
-name="name"
-class="form-control"
-value="{{ old('name',$student->name ?? '') }}">
-</div>
-
-<div class="col-md-6 mb-3">
-<label>Contact Number</label>
-<input type="text"
-name="contact_number"
-id="contact_number"
-class="form-control @error('contact_number') is-invalid @enderror"
-maxlength="15"
-value="{{ old('contact_number',$student->contact_number ?? '') }}">
-@error('contact_number')
-    <div class="invalid-feedback">{{ $message }}</div>
-@enderror
-</div>
-
-<div class="col-md-6 mb-3">
-<label>WhatsApp Number</label>
-<input type="text"
-name="whatsapp_number"
-class="form-control"
-value="{{ old('whatsapp_number',$student->whatsapp_number ?? '') }}">
-</div>
-
-<div class="col-md-6 mb-3">
-<label>Email</label>
-<input type="email"
-name="email"
-class="form-control"
-value="{{ old('email',$student->email ?? '') }}">
-</div>
-
-<div class="col-md-6 mb-3">
-<label>Date of Birth</label>
-<input type="date"
-name="dob"
-class="form-control"
-value="{{ old('dob', isset($student) && $student->dob ? $student->dob->format('Y-m-d') : '') }}">
-</div>
-
-<div class="col-md-6 mb-3">
-<label>Parent Name</label>
-<input type="text"
-name="parent_name"
-class="form-control"
-value="{{ old('parent_name',$student->parent_name ?? '') }}">
-</div>
-
-<div class="col-md-6 mb-3">
-<label>Status</label>
-<select name="status" class="form-control">
-<option value="active"
-{{ old('status',$student->status ?? '')=='active'?'selected':'' }}>
-Active
-</option>
+    <div class="row">
+
+        <form method="POST"
+            action="{{ $isEdit ? route('staff.students.update', encrypt($student->id)) : route('staff.students.store') }}"
+            enctype="multipart/form-data">
+
+            @csrf
+
+            @if($isEdit)
+                @method('PUT')
+            @endif
+
+            <div class="col-12">
+
+                {{-- ================= STUDENT DETAILS ================= --}}
+                <div class="card">
+
+                    <div class="card-header">
+                        <h4 class="card-title">Student Details</h4>
+                        <p class="card-title-desc">
+                            {{ $isEdit ? 'Edit' : 'Enter' }} student details
+                        </p>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <div class="col-md-12 mb-3">
+                                <label>Country <span class="text-danger">*</span></label>
+                                <select name="country_id" class="form-control @error('country_id') is-invalid @enderror"
+                                    required>
+                                    <option value="">Select Country</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country->id }}" {{ old('country_id', $student->country_id ?? '') == $country->id || (!old('country_id') && !isset($student) && $country->name == 'India') ? 'selected' : '' }}>
+                                            {{ $country->name }} ({{ $country->code }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('country_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Name</label>
+                                <input type="text" name="name" class="form-control"
+                                    value="{{ old('name', $student->name ?? '') }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Contact Number</label>
+                                <input type="text" name="contact_number" id="contact_number"
+                                    class="form-control @error('contact_number') is-invalid @enderror @error('phone') is-invalid @enderror" maxlength="15"
+                                    value="{{ old('contact_number', $student->contact_number ?? '') }}">
+                                @error('contact_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                @error('phone')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" id="whatsapp_different" name="is_whatsapp_different" value="1" {{ old('is_whatsapp_different', $student->is_whatsapp_different ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="whatsapp_different">WhatsApp number is different?</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3" id="whatsapp_field_group" style="{{ old('is_whatsapp_different', $student->is_whatsapp_different ?? false) ? '' : 'display: none;' }}">
+                                <label>WhatsApp Number (with country code)</label>
+                                <input type="text" name="whatsapp_number" id="whatsapp_number" class="form-control"
+                                    value="{{ old('whatsapp_number', $student->whatsapp_number ?? '') }}"
+                                    placeholder="e.g. 919876543210">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Email</label>
+                                <input type="email" name="email" class="form-control"
+                                    value="{{ old('email', $student->email ?? '') }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Date of Birth</label>
+                                <input type="date" name="dob" class="form-control"
+                                    value="{{ old('dob', isset($student) && $student->dob ? $student->dob->format('Y-m-d') : '') }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Parent Name</label>
+                                <input type="text" name="parent_name" class="form-control"
+                                    value="{{ old('parent_name', $student->parent_name ?? '') }}">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label>Status</label>
+                                <select name="status" class="form-control">
+                                    <option value="active" {{ old('status', $student->status ?? '') == 'active' ? 'selected' : '' }}>
+                                        Active
+                                    </option>
 
-<option value="passout"
-{{ old('status',$student->status ?? '')=='passout'?'selected':'' }}>
-Passout
-</option>
+                                    <option value="passout" {{ old('status', $student->status ?? '') == 'passout' ? 'selected' : '' }}>
+                                        Passout
+                                    </option>
 
-<option value="dropout"
-{{ old('status',$student->status ?? '')=='dropout'?'selected':'' }}>
-Dropout
-</option>
-</select>
-</div>
+                                    <option value="dropout" {{ old('status', $student->status ?? '') == 'dropout' ? 'selected' : '' }}>
+                                        Dropout
+                                    </option>
+                                </select>
+                            </div>
 
-<div class="col-md-12 mb-3">
-<label>Address</label>
-<textarea name="address"
-class="form-control">{{ old('address',$student->address ?? '') }}</textarea>
-</div>
+                            <div class="col-md-12 mb-3">
+                                <label>Address</label>
+                                <textarea name="address"
+                                    class="form-control">{{ old('address', $student->address ?? '') }}</textarea>
+                            </div>
 
-<div class="col-md-6 mb-3">
-<label>Photo</label>
-<input type="file" name="photo" class="form-control">
-</div>
+                            <div class="col-md-6 mb-3">
+                                <label>Photo</label>
+                                <input type="file" name="photo" class="form-control">
+                            </div>
 
-<div class="col-md-6 mb-3">
-<label>ID Proof</label>
-<input type="file" name="id_proof" class="form-control">
-</div>
+                            <div class="col-md-6 mb-3">
+                                <label>ID Proof</label>
+                                <input type="file" name="id_proof" class="form-control">
+                            </div>
 
-</div>
+                        </div>
 
-</div>
-</div>
+                    </div>
+                </div>
 
-{{-- ================= CLASS SCHEDULE ================= --}}
-<div class="card">
+                {{-- ================= CLASS SCHEDULE ================= --}}
+                <div class="card">
 
-<div class="card-header">
-<h4 class="card-title">Class Schedule</h4>
-<p class="card-title-desc">Student class timing and schedule</p>
-</div>
+                    <div class="card-header">
+                        <h4 class="card-title">Class Schedule</h4>
+                        <p class="card-title-desc">Student class timing and schedule</p>
+                    </div>
 
-<div class="card-body">
+                    <div class="card-body">
 
-<div class="row">
+                        <div class="row">
 
-<div class="col-md-4 mb-3">
-<label>Classes Per Week</label>
+                            <div class="col-md-4 mb-3">
+                                <label>Classes Per Week</label>
 
-<input type="number"
-name="classes_per_week"
-id="classes_per_week"
-class="form-control"
-readonly
-data-bs-toggle="tooltip"
-data-bs-placement="top"
-title="Select days first to calculate classes per week"
-value="{{ old('classes_per_week',$student->classes_per_week ?? 0) }}">
+                                <input type="number" name="classes_per_week" id="classes_per_week" class="form-control"
+                                    readonly data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="Select days first to calculate classes per week"
+                                    value="{{ old('classes_per_week', $student->classes_per_week ?? 0) }}">
 
-</div>
+                            </div>
 
-<div class="col-md-4 mb-3">
-<label>Time Slot</label>
+                            <div class="col-md-4 mb-3">
+                                <label>Time Slot</label>
 
-<input type="text"
-name="time_slot"
-id="time_slot"
-class="form-control"
-value="{{ old('time_slot',$student->time_slot ?? '') }}">
+                                <input type="text" name="time_slot" id="time_slot" class="form-control"
+                                    value="{{ old('time_slot', $student->time_slot ?? '') }}">
 
-</div>
+                            </div>
 
-<div class="col-md-4 mb-3">
-<label>Starting Date</label>
-<input type="date"
-name="starting_date"
-class="form-control"
-value="{{ old('starting_date', isset($student) && $student->starting_date ? $student->starting_date->format('Y-m-d') : '') }}">
-</div>
+                            <div class="col-md-4 mb-3">
+                                <label>Starting Date</label>
+                                <input type="date" name="starting_date" class="form-control"
+                                    value="{{ old('starting_date', isset($student) && $student->starting_date ? $student->starting_date->format('Y-m-d') : '') }}">
+                            </div>
 
-</div>
+                        </div>
 
 
-{{-- Selected Days --}}
-<div class="row">
+                        {{-- Selected Days --}}
+                        <div class="row">
 
-<div class="col-md-12 mb-3">
-<label>Selected Days</label>
+                            <div class="col-md-12 mb-3">
+                                <label>Selected Days</label>
 
-@php
-$days = ['mon'=>'Monday','tue'=>'Tuesday','wed'=>'Wednesday','thu'=>'Thursday','fri'=>'Friday','sat'=>'Saturday','sun'=>'Sunday'];
-$selectedDays = old('selected_days',$student->selected_days ?? []);
-@endphp
+                                @php
+                                    $days = ['mon' => 'Monday', 'tue' => 'Tuesday', 'wed' => 'Wednesday', 'thu' => 'Thursday', 'fri' => 'Friday', 'sat' => 'Saturday', 'sun' => 'Sunday'];
+                                    $selectedDays = old('selected_days', $student->selected_days ?? []);
+                                @endphp
 
-<div class="d-flex flex-wrap gap-3">
+                                <div class="d-flex flex-wrap gap-3">
 
-@foreach($days as $key => $day)
+                                    @foreach($days as $key => $day)
 
-<label class="form-check">
-<input type="checkbox"
-name="selected_days[]"
-value="{{ $key }}"
-class="form-check-input class-day"
-{{ in_array($key,$selectedDays ?? []) ? 'checked' : '' }}>
+                                        <label class="form-check">
+                                            <input type="checkbox" name="selected_days[]" value="{{ $key }}"
+                                                class="form-check-input class-day" {{ in_array($key, $selectedDays ?? []) ? 'checked' : '' }}>
 
-<span class="form-check-label">
-{{ $day }}
-</span>
-</label>
+                                            <span class="form-check-label">
+                                                {{ $day }}
+                                            </span>
+                                        </label>
 
-@endforeach
+                                    @endforeach
 
-</div>
+                                </div>
 
-</div>
+                            </div>
 
-</div>
+                        </div>
 
-</div>
-</div>
+                    </div>
+                </div>
 
-{{-- ================= LOGIN INFORMATION ================= --}}
-<div class="card">
+                {{-- ================= LOGIN INFORMATION ================= --}}
+                <div class="card">
 
-<div class="card-header">
-<h4 class="card-title">Login Information</h4>
-<p class="card-title-desc">Student login credentials</p>
-</div>
+                    <div class="card-header">
+                        <h4 class="card-title">Login Information</h4>
+                        <p class="card-title-desc">Student login credentials</p>
+                    </div>
 
-<div class="card-body">
+                    <div class="card-body">
 
-<div class="row">
+                        <div class="row">
 
-<div class="col-md-6 mb-3">
-<label>Phone (Login)</label>
+                            <div class="col-md-6 mb-3">
+                                <label>Phone (Login)</label>
 
-<input type="text"
-name="phone"
-id="phone"
-class="form-control"
-value="{{ old('phone',$student->phone ?? '') }}">
+                                <input type="text" name="phone" id="phone" class="form-control" readonly
+                                    value="{{ old('phone', $student->phone ?? '') }}">
 
-</div>
+                            </div>
 
 
-<div class="col-md-6 mb-3 {{ $isEdit ? '' : 'required' }}">
-<label>Password</label>
+                            <div class="col-md-6 mb-3 {{ $isEdit ? '' : 'required' }}">
+                                <label>Password</label>
 
-<input type="password"
-name="password"
-id="password"
-class="form-control">
+                                <input type="password" name="password" id="password" class="form-control">
 
-@if($isEdit)
-<small class="text-muted">
-Leave blank to keep existing password
-</small>
-@endif
+                                @if($isEdit)
+                                    <small class="text-muted">
+                                        Leave blank to keep existing password
+                                    </small>
+                                @endif
 
-</div>
+                            </div>
 
-</div>
+                        </div>
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
 
 
-{{-- ================= ACTION BUTTONS ================= --}}
-<div class="card">
+                {{-- ================= ACTION BUTTONS ================= --}}
+                <div class="card">
 
-<div class="card-header">
+                    <div class="card-header">
 
-<button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
-{{ $isEdit?'Update Student':'Save Student' }}
-</button>
+                        <button class="btn btn-primary" type="submit"
+                            onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
+                            {{ $isEdit ? 'Update Student' : 'Save Student' }}
+                        </button>
 
-<a href="{{ route('staff.students.index') }}"
-class="btn btn-secondary">
-Cancel
-</a>
+                        <a href="{{ route('staff.students.index') }}" class="btn btn-secondary">
+                            Cancel
+                        </a>
 
-</div>
+                    </div>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</form>
+        </form>
 
-</div>
+    </div>
 
 @endsection
 
 @section('script')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<script>
+    <script>
 
-flatpickr("#time_slot", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",   // stored in DB
-    altInput: true,
-    altFormat: "h:i K"   // shown to user (AM/PM)
-});
+        flatpickr("#time_slot", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",   // stored in DB
+            altInput: true,
+            altFormat: "h:i K"   // shown to user (AM/PM)
+        });
 
-</script>
+    </script>
 
-@if(!$isEdit)
-<script>
-$('#contact_number').on('keyup change', function(){
+    @if(!$isEdit)
+        <script>
+            $('#contact_number').on('keyup change', function () {
 
-    let number = $(this).val();
+                let number = $(this).val();
 
-    $('#phone').val(number);
-    $('#password').val(number);
-    $('input[name="whatsapp_number"]').val(number);
+                $('#phone').val(number);
+                $('#password').val(number);
 
-});
-</script>
-@endif
+            });
+        </script>
+    @endif
 
-<script>
+    <script>
+        $('#whatsapp_different').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#whatsapp_field_group').show();
+            } else {
+                $('#whatsapp_field_group').hide();
+                $('#whatsapp_number').val(''); // Clear it to avoid confusion, though logic handles it on save
+            }
+        });
+    </script>
 
-function updateClassesPerWeek() {
+    <script>
 
-    let count = $('.class-day:checked').length;
+        function updateClassesPerWeek() {
 
-    $('#classes_per_week').val(count);
+            let count = $('.class-day:checked').length;
 
-}
+            $('#classes_per_week').val(count);
 
-$('.class-day').on('change', function () {
+        }
 
-    updateClassesPerWeek();
+        $('.class-day').on('change', function () {
 
-});
+            updateClassesPerWeek();
 
-$(document).ready(function () {
+        });
 
-    updateClassesPerWeek();
+        $(document).ready(function () {
 
-});
+            updateClassesPerWeek();
 
-</script>
-<script>
+        });
 
-var tooltipTriggerList = [].slice.call(
-document.querySelectorAll('[data-bs-toggle="tooltip"]')
-);
+    </script>
+    <script>
 
-tooltipTriggerList.map(function (tooltipTriggerEl) {
-return new bootstrap.Tooltip(tooltipTriggerEl);
-});
+        var tooltipTriggerList = [].slice.call(
+            document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        );
 
-</script>
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
 
-<script>
+    </script>
 
-$('#classes_per_week').on('click', function(){
+    <script>
 
-let count = $('.class-day:checked').length;
+        $('#classes_per_week').on('click', function () {
 
-if(count === 0){
-    alert('Select days first');
-}
+            let count = $('.class-day:checked').length;
 
-});
+            if (count === 0) {
+                alert('Select days first');
+            }
 
-</script>
+        });
+
+    </script>
 
 @endsection

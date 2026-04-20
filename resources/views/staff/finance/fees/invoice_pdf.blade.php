@@ -314,7 +314,12 @@
                     </tr>
                     <tr>
                         <td>Contact</td>
-                        <td>{{ $fee->student->contact_number ?? '-' }}</td>
+                        <td>
+                            {{ $fee->student->formatted_contact_number ?? '-' }}
+                            @if($fee->student->is_whatsapp_different)
+                                <br><small style="color: green;">WhatsApp: {{ $fee->student->formatted_whatsapp_number }}</small>
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <td>Class</td>

@@ -1,405 +1,398 @@
 @extends('admin.layouts.master-without-nav')
 
 @section('title')
-@if($type=='student')
-Student Admission
-@else
-Teacher Application
-@endif
+    @if($type == 'student')
+        Student Admission
+    @else
+        Teacher Application
+    @endif
 @endsection
 
 @section('content')
 
-@php
-$expired = $lead->form_expires_at && now()->gt($lead->form_expires_at);
-@endphp
-
-<div class="auth-page">
-<div class="container-fluid p-0">
-<div class="row g-0">
-
-<div class="col-xxl-3 col-lg-4 col-md-5">
-
-<div class="auth-full-page-content d-flex p-sm-5 p-4">
-<div class="w-100">
-
-<div class="d-flex flex-column h-100">
-
-<div class="mb-4 text-center">
-<h4 class="fw-bold">
-@if($type=='student')
-Student Admission
-@else
-Teacher Application
-@endif
-</h4>
-</div>
-
-<div class="auth-content my-auto">
-
-<div class="text-center mb-4">
-
-@if($type=='student')
-<h5>Complete Your Admission</h5>
-@else
-<h5>Complete Your Application</h5>
-@endif
-
-@if($expired)
-<p class="text-danger mt-2">
-This link has expired.
-</p>
-@elseif($lead->form_opened_at)
-<p class="text-success mt-2">
-Form opened successfully.
-</p>
-@endif
-
-</div>
-
-@if(!$expired)
-
-<form class="mt-4 pt-2"
-method="POST"
-action="{{ route('admission.submit',[$type,$lead->form_token]) }}"
-enctype="multipart/form-data">
-
-@csrf
-
-{{-- ================= BASIC DETAILS ================= --}}
-
-@if($type=='student')
-<div class="mb-4">
-    <label class="form-label">Country <span class="text-danger">*</span></label>
-    <select name="country_id" class="form-control" disabled>
-        @foreach($countries as $country)
-            <option value="{{ $country->id }}" {{ ($lead->country_id ?? '') == $country->id ? 'selected' : '' }}>
-                {{ $country->name }} ({{ $country->code }})
-            </option>
-        @endforeach
-    </select>
-    <input type="hidden" name="country_id" value="{{ $lead->country_id }}">
-    <small class="text-muted">Country is pre-filled based on your application.</small>
-</div>
-@endif
-
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="name"
-value="{{ $lead->name }}"
-required>
-<label>Name</label>
-<div class="form-floating-icon">
-<i data-feather="user"></i>
-</div>
-</div>
-
-
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="contact_number"
-value="{{ $lead->contact_number }}"
-required>
-<label>Contact Number</label>
-<div class="form-floating-icon">
-<i data-feather="phone"></i>
-</div>
-</div>
-
-
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="whatsapp_number"
-value="{{ $lead->contact_number }}">
-<label>WhatsApp Number</label>
-<div class="form-floating-icon">
-<i data-feather="message-circle"></i>
-</div>
-</div>
+    @php
+        $expired = $lead->form_expires_at && now()->gt($lead->form_expires_at);
+    @endphp
+
+    <div class="auth-page">
+        <div class="container-fluid p-0">
+            <div class="row g-0">
+
+                <div class="col-xxl-3 col-lg-4 col-md-5">
+
+                    <div class="auth-full-page-content d-flex p-sm-5 p-4">
+                        <div class="w-100">
+
+                            <div class="d-flex flex-column h-100">
+
+                                <div class="mb-4 text-center">
+                                    <h4 class="fw-bold">
+                                        @if($type == 'student')
+                                            Student Admission
+                                        @else
+                                            Teacher Application
+                                        @endif
+                                    </h4>
+                                </div>
+
+                                <div class="auth-content my-auto">
+
+                                    <div class="text-center mb-4">
+
+                                        @if($type == 'student')
+                                            <h5>Complete Your Admission</h5>
+                                        @else
+                                            <h5>Complete Your Application</h5>
+                                        @endif
+
+                                        @if($expired)
+                                            <p class="text-danger mt-2">
+                                                This link has expired.
+                                            </p>
+                                        @elseif($lead->form_opened_at)
+                                            <p class="text-success mt-2">
+                                                Form opened successfully.
+                                            </p>
+                                        @endif
+
+                                    </div>
+
+                                    @if(!$expired)
+
+                                        <form class="mt-4 pt-2" method="POST"
+                                            action="{{ route('admission.submit', [$type, $lead->form_token]) }}"
+                                            enctype="multipart/form-data">
+
+                                            @csrf
+
+                                            {{-- ================= BASIC DETAILS ================= --}}
+
+                                            @if($type == 'student')
+                                                <div class="mb-4">
+                                                    <label class="form-label">Country <span class="text-danger">*</span></label>
+                                                    <select name="country_id" class="form-control" disabled>
+                                                        @foreach($countries as $country)
+                                                            <option value="{{ $country->id }}" {{ ($lead->country_id ?? '') == $country->id ? 'selected' : '' }}>
+                                                                {{ $country->name }} ({{ $country->code }})
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <input type="hidden" name="country_id" value="{{ $lead->country_id }}">
+                                                    <small class="text-muted">Country is pre-filled based on your
+                                                        application.</small>
+                                                </div>
+                                            @endif
+
+                                            <div class="form-floating form-floating-custom mb-4">
+                                                <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $lead->name) }}"
+                                                    required>
+                                                <label>Name</label>
+                                                <div class="form-floating-icon">
+                                                    <i data-feather="user"></i>
+                                                </div>
+                                                @error('name')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
 
+
+                                            <div class="form-floating form-floating-custom mb-4">
+                                                <input type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number"
+                                                    value="{{ old('contact_number', $lead->contact_number) }}" required>
+                                                <label>Contact Number</label>
+                                                <div class="form-floating-icon">
+                                                    <i data-feather="phone"></i>
+                                                </div>
+                                                @error('contact_number')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="whatsapp_different" name="is_whatsapp_different" value="1">
+                                                <label class="form-check-label" for="whatsapp_different">WhatsApp number is different?</label>
+                                            </div>
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="email"
-class="form-control"
-name="email"
-value="{{ $lead->email }}">
-<label>Email</label>
-<div class="form-floating-icon">
-<i data-feather="mail"></i>
-</div>
-</div>
+                                            <div id="whatsapp_field_group" class="form-floating form-floating-custom mb-4" style="{{ old('is_whatsapp_different') ? '' : 'display: none;' }}">
+                                                <input type="text" class="form-control @error('whatsapp_number') is-invalid @enderror" name="whatsapp_number" id="whatsapp_number"
+                                                    value="{{ old('whatsapp_number') }}"
+                                                    placeholder="Include country code (e.g. 919876543210)">
+                                                <label>WhatsApp Number (with country code)</label>
+                                                <div class="form-floating-icon">
+                                                    <i data-feather="message-circle"></i>
+                                                </div>
+                                                @error('whatsapp_number')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            </div>
 
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="date"
-class="form-control"
-name="dob">
-<label>Date of Birth</label>
-</div>
+                                            <div class="form-floating form-floating-custom mb-4">
+                                                <input type="email" class="form-control" name="email"
+                                                    value="{{ $lead->email }}">
+                                                <label>Email</label>
+                                                <div class="form-floating-icon">
+                                                    <i data-feather="mail"></i>
+                                                </div>
+                                            </div>
 
 
-@if($type=='student')
+                                            <div class="form-floating form-floating-custom mb-4">
+                                                <input type="date" class="form-control" name="dob">
+                                                <label>Date of Birth</label>
+                                            </div>
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="parent_name">
-<label>Parent Name</label>
-</div>
 
-@endif
+                                            @if($type == 'student')
 
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="text" class="form-control" name="parent_name">
+                                                    <label>Parent Name</label>
+                                                </div>
 
-<div class="mb-4">
-<label class="form-label">Address</label>
-<textarea name="address"
-class="form-control"></textarea>
-</div>
+                                            @endif
 
 
+                                            <div class="mb-4">
+                                                <label class="form-label">Address</label>
+                                                <textarea name="address" class="form-control"></textarea>
+                                            </div>
 
-{{-- ================= STUDENT CLASS DETAILS ================= --}}
-@if($type=='student')
 
 
+                                            {{-- ================= STUDENT CLASS DETAILS ================= --}}
+                                            @if($type == 'student')
 
-<div class="mb-4">
-<label class="form-label">Preferred Days</label>
 
-<div class="d-flex flex-wrap gap-2">
 
-@php
-$days = ['mon'=>'Mon','tue'=>'Tue','wed'=>'Wed','thu'=>'Thu','fri'=>'Fri','sat'=>'Sat','sun'=>'Sun'];
-@endphp
+                                                <div class="mb-4">
+                                                    <label class="form-label">Preferred Days</label>
 
-@foreach($days as $key=>$day)
+                                                    <div class="d-flex flex-wrap gap-2">
 
-<label class="form-check">
-<input type="checkbox"
-name="selected_days[]"
-value="{{ $key }}"
-class="form-check-input class-day">
+                                                        @php
+                                                            $days = ['mon' => 'Mon', 'tue' => 'Tue', 'wed' => 'Wed', 'thu' => 'Thu', 'fri' => 'Fri', 'sat' => 'Sat', 'sun' => 'Sun'];
+                                                        @endphp
 
-<span class="form-check-label">
-{{ $day }}
-</span>
+                                                        @foreach($days as $key => $day)
 
-</label>
+                                                            <label class="form-check">
+                                                                <input type="checkbox" name="selected_days[]" value="{{ $key }}"
+                                                                    class="form-check-input class-day">
 
-@endforeach
+                                                                <span class="form-check-label">
+                                                                    {{ $day }}
+                                                                </span>
 
-</div>
-</div>
+                                                            </label>
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="number"
-class="form-control"
-name="classes_per_week"
-id="classes_per_week"
-readonly>
-<label>Classes Per Week</label>
-</div>
+                                                        @endforeach
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="time_slot"
-id="time_slot">
-<label>Preferred Time Slot</label>
-</div>
+                                                    </div>
+                                                </div>
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="date"
-class="form-control"
-name="starting_date">
-<label>Preferred Starting Date</label>
-</div>
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="number" class="form-control" name="classes_per_week"
+                                                        id="classes_per_week" readonly>
+                                                    <label>Classes Per Week</label>
+                                                </div>
 
-@endif
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="text" class="form-control" name="time_slot" id="time_slot">
+                                                    <label>Preferred Time Slot</label>
+                                                </div>
 
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="date" class="form-control" name="starting_date">
+                                                    <label>Preferred Starting Date</label>
+                                                </div>
 
+                                            @endif
 
-{{-- ================= TEACHER DETAILS ================= --}}
-@if($type=='teacher')
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="qualification">
-<label>Qualification</label>
-</div>
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="number"
-class="form-control"
-name="experience">
-<label>Experience (Years)</label>
-</div>
+                                            {{-- ================= TEACHER DETAILS ================= --}}
+                                            @if($type == 'teacher')
 
-<div class="form-floating form-floating-custom mb-4">
-<input type="text"
-class="form-control"
-name="upi_number">
-<label>UPI Number</label>
-</div>
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="text" class="form-control" name="qualification">
+                                                    <label>Qualification</label>
+                                                </div>
 
-@endif
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="number" class="form-control" name="experience">
+                                                    <label>Experience (Years)</label>
+                                                </div>
 
+                                                <div class="form-floating form-floating-custom mb-4">
+                                                    <input type="text" class="form-control" name="upi_number">
+                                                    <label>UPI Number</label>
+                                                </div>
 
+                                            @endif
 
-{{-- ================= FILE UPLOAD ================= --}}
 
-<div class="mb-4">
-<label class="form-label">Photo</label>
-<input type="file"
-class="form-control"
-name="photo">
-</div>
 
-<div class="mb-4">
-<label class="form-label">ID Proof</label>
-<input type="file"
-class="form-control"
-name="id_proof">
-</div>
+                                            {{-- ================= FILE UPLOAD ================= --}}
 
+                                            <div class="mb-4">
+                                                <label class="form-label">Photo</label>
+                                                <input type="file" class="form-control" name="photo">
+                                            </div>
 
-<div class="mb-3">
+                                            <div class="mb-4">
+                                                <label class="form-label">ID Proof</label>
+                                                <input type="file" class="form-control" name="id_proof">
+                                            </div>
 
-<button class="btn btn-zopa w-100 waves-effect waves-light"
-type="submit" onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
 
-@if($type=='student')
-Submit Admission Form
-@else
-Submit Application
-@endif
+                                            <div class="mb-3">
 
-</button>
+                                                <button class="btn btn-zopa w-100 waves-effect waves-light" type="submit"
+                                                    onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
 
-</div>
+                                                    @if($type == 'student')
+                                                        Submit Admission Form
+                                                    @else
+                                                        Submit Application
+                                                    @endif
 
-</form>
+                                                </button>
 
-@else
+                                            </div>
 
-<div class="alert alert-danger text-center">
-This link is no longer valid.<br>
-Please contact the institute.
-</div>
+                                        </form>
 
-@endif
+                                    @else
 
-</div>
+                                        <div class="alert alert-danger text-center">
+                                            This link is no longer valid.<br>
+                                            Please contact the institute.
+                                        </div>
 
-<div class="mt-4 mt-md-5 text-center">
-<p class="mb-0">
-© <script>document.write(new Date().getFullYear())</script>
-FOMS ACADEMY
-</p>
-</div>
+                                    @endif
 
-</div>
-</div>
-</div>
+                                </div>
 
-</div>
+                                <div class="mt-4 mt-md-5 text-center">
+                                    <p class="mb-0">
+                                        ©
+                                        <script>document.write(new Date().getFullYear())</script>
+                                        FOMS ACADEMY
+                                    </p>
+                                </div>
 
+                            </div>
+                        </div>
+                    </div>
 
+                </div>
 
-{{-- RIGHT SIDE DESIGN --}}
-<div class="col-xxl-9 col-lg-8 col-md-7">
-<div class="auth-bg pt-md-5 p-4 d-flex">
 
-<div class="bg-overlay"></div>
 
-<ul class="bg-bubbles">
-<li></li><li></li><li></li><li></li><li></li>
-<li></li><li></li><li></li><li></li><li></li>
-</ul>
+                {{-- RIGHT SIDE DESIGN --}}
+                <div class="col-xxl-9 col-lg-8 col-md-7">
+                    <div class="auth-bg pt-md-5 p-4 d-flex">
 
-<div class="row justify-content-center align-items-end">
-<div class="col-xl-7">
+                        <div class="bg-overlay"></div>
 
-<div class="p-0 p-sm-4 px-xl-0">
+                        <ul class="bg-bubbles">
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                            <li></li>
+                        </ul>
 
-<div class="carousel-inner">
+                        <div class="row justify-content-center align-items-end">
+                            <div class="col-xl-7">
 
-<div class="carousel-item active">
+                                <div class="p-0 p-sm-4 px-xl-0">
 
-<div class="testi-contain text-center text-white">
+                                    <div class="carousel-inner">
 
-<i class="bx bxs-quote-alt-left text-success display-6"></i>
+                                        <div class="carousel-item active">
 
-@if($type=='student')
+                                            <div class="testi-contain text-center text-white">
 
-<h4 class="mt-4 fw-medium lh-base text-white">
-“Welcome to FOMS Academy. Complete your admission details to begin your learning journey.”
-</h4>
+                                                <i class="bx bxs-quote-alt-left text-success display-6"></i>
 
-@else
+                                                @if($type == 'student')
 
-<h4 class="mt-4 fw-medium lh-base text-white">
-“Join FOMS Academy and help shape the future of students.”
-</h4>
+                                                    <h4 class="mt-4 fw-medium lh-base text-white">
+                                                        “Welcome to FOMS Academy. Complete your admission details to begin your
+                                                        learning journey.”
+                                                    </h4>
 
-@endif
+                                                @else
 
-</div>
+                                                    <h4 class="mt-4 fw-medium lh-base text-white">
+                                                        “Join FOMS Academy and help shape the future of students.”
+                                                    </h4>
 
-</div>
+                                                @endif
 
-</div>
+                                            </div>
 
-</div>
-</div>
-</div>
+                                        </div>
 
-</div>
+                                    </div>
 
-</div>
+                                </div>
+                            </div>
+                        </div>
 
-</div>
-</div>
-</div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 @endsection
 
 
 @section('script')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-<script>
+    <script>
 
-flatpickr("#time_slot", {
-    enableTime: true,
-    noCalendar: true,
-    dateFormat: "H:i",
-    altInput: true,
-    altFormat: "h:i K"
-});
+        flatpickr("#time_slot", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            altInput: true,
+            altFormat: "h:i K"
+        });
 
-$('input[name="contact_number"]').on('keyup change', function(){
+        $('#whatsapp_different').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#whatsapp_field_group').show();
+                $('#whatsapp_number').attr('required', true);
+            } else {
+                $('#whatsapp_field_group').hide();
+                $('#whatsapp_number').attr('required', false);
+            }
+        });
 
-let number = $(this).val();
+        function updateClassesPerWeek() {
+            let count = $('.class-day:checked').length;
+            $('#classes_per_week').val(count);
+        }
 
-$('input[name="whatsapp_number"]').val(number);
+        $('.class-day').on('change', function () {
+            updateClassesPerWeek();
+        });
 
-});
-
-function updateClassesPerWeek() {
-    let count = $('.class-day:checked').length;
-    $('#classes_per_week').val(count);
-}
-
-$('.class-day').on('change', function () {
-    updateClassesPerWeek();
-});
-
-</script>
+    </script>
 
 @endsection

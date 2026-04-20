@@ -23,16 +23,46 @@ Login
                                 </div>
                                 <form class="mt-4 pt-2" action="{{ route('teacher.login.submit') }}" method="POST">
                                     @csrf
-                                    <div class="form-floating form-floating-custom mb-4">
-                                        <input type="text" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', '') }}" id="input-username" placeholder="Enter User Name" name="phone">
-                                        @error('phone')
-                                            <span class="invalid-feedback" role="alert">
-                                                <strong>{{ $message }}</strong>
-                                            </span>
-                                        @enderror
-                                        <label for="input-username">Username</label>
-                                        <div class="form-floating-icon">
-                                        <i data-feather="users"></i>
+
+                                    <div class="row g-2 mb-4">
+                                        <div class="col-4">
+                                            <div class="form-floating form-floating-custom">
+                                                <select name="country_id"
+                                                    class="form-control @error('country_id') is-invalid @enderror"
+                                                    id="input-country" required>
+                                                    @foreach($countries as $country)
+                                                        <option value="{{ $country->id }}" {{ old('country_id') == $country->id || (!old('country_id') && $country->name == 'India') ? 'selected' : '' }}>
+                                                            {{ $country->code }} ({{ $country->name }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('country_id')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                                <label for="input-country">Country</label>
+                                                <div class="form-floating-icon">
+                                                    <i data-feather="globe"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="form-floating form-floating-custom">
+                                                <input type="text"
+                                                    class="form-control @error('phone') is-invalid @enderror"
+                                                    value="{{ old('phone', '') }}" id="input-username"
+                                                    placeholder="Enter Phone Number" name="phone" required>
+                                                @error('phone')
+                                                    <span class="invalid-feedback" role="alert">
+                                                        <strong>{{ $message }}</strong>
+                                                    </span>
+                                                @enderror
+                                                <label for="input-username">Phone Number</label>
+                                                <div class="form-floating-icon">
+                                                    <i data-feather="phone"></i>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 

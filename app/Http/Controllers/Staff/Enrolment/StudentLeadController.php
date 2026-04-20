@@ -8,8 +8,10 @@ use Illuminate\Http\Request;
 use App\Models\StudentLead;
 use App\Models\Source;
 use App\Models\Student;
+use App\Models\Country;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class StudentLeadController extends Controller
 {
@@ -73,10 +75,21 @@ class StudentLeadController extends Controller
             'source_id'      => ['nullable', 'exists:sources,id'],
         ]);
 
+        $country = \App\Models\Country::find($request->country_id);
+        $isWhatsappDifferent = $request->has('is_whatsapp_different');
+        if ($isWhatsappDifferent) {
+            $whatsapp_number = $request->whatsapp_number;
+        } else {
+            $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+            $whatsapp_number = $countryCode . $request->contact_number;
+        }
+
         StudentLead::create([
             'name'           => $request->name,
             'country_id'     => $request->country_id,
             'contact_number' => $request->contact_number,
+            'whatsapp_number' => $whatsapp_number,
+            'is_whatsapp_different' => $isWhatsappDifferent,
             'email'          => $request->email,
             'source_id'      => $request->source_id,
             'status'         => 'pending',
@@ -119,10 +132,21 @@ class StudentLeadController extends Controller
             'status'         => ['required', 'in:pending,admitted'],
         ]);
 
+        $country = \App\Models\Country::find($request->country_id);
+        $isWhatsappDifferent = $request->has('is_whatsapp_different');
+        if ($isWhatsappDifferent) {
+            $whatsapp_number = $request->whatsapp_number;
+        } else {
+            $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+            $whatsapp_number = $countryCode . $request->contact_number;
+        }
+
         $lead->update([
             'name'           => $request->name,
             'country_id'     => $request->country_id,
             'contact_number' => $request->contact_number,
+            'whatsapp_number' => $whatsapp_number,
+            'is_whatsapp_different' => $isWhatsappDifferent,
             'email'          => $request->email,
             'source_id'      => $request->source_id,
             'status'         => $request->status,
@@ -170,79 +194,116 @@ public function storeNote(Request $request, $leadId)
 }
 
 
-public function convertToStudent(Request $request, $id)
-{
-    $lead = StudentLead::with('student')->findOrFail(decrypt($id));
+    public function convertToStudent(Request $request, $id)
+    {
+        $lead = StudentLead::with('student')->findOrFail(decrypt($id));
 
-    // Prevent duplicate conversion
-    if ($lead->student) {
-        return redirect()
-            ->route('staff.student-leads.edit', $lead->id)
-            ->with('error', 'This lead has already been converted to a student.');
+        // Prevent duplicate conversion
+        if ($lead->student) {
+            return redirect()
+                ->route('staff.student-leads.edit', $lead->id)
+                ->with('error', 'This lead has already been converted to a student.');
+        }
+
+        $request->validate([
+            'name'           => 'required|string|max:255',
+            'contact_number' => 'required|string|digits_between:7,15',
+            'email'          => 'nullable|email',
+            'classes_per_week' => 'nullable|integer',
+            'selected_days'    => 'nullable|array',
+            'starting_date'    => 'nullable|date',
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $lead) {
+
+                $photo = null;
+                $idProof = null;
+
+                if ($request->hasFile('photo')) {
+                    $photo = $request->file('photo')
+                        ->store('students/photos', 'public');
+                }
+
+                if ($request->hasFile('id_proof')) {
+                    $idProof = $request->file('id_proof')
+                        ->store('students/id_proofs', 'public');
+                }
+
+                $phone = $request->contact_number;
+
+                $isWhatsappDifferent = $request->has('is_whatsapp_different');
+                if ($isWhatsappDifferent) {
+                    $whatsapp_number = $request->whatsapp_number;
+                } else {
+                    $countryCode = $lead->country ? preg_replace('/[^0-9]/', '', $lead->country->code) : '91';
+                    $whatsapp_number = $countryCode . $request->contact_number;
+                }
+
+                $admissionNo = $this->generateAdmissionNo();
+
+                Student::create([
+                    'admission_no' => $admissionNo,
+                    'student_lead_id' => $lead->id,
+                    'country_id' => $lead->country_id,
+                    'is_whatsapp_different' => $isWhatsappDifferent,
+                    'name' => $request->name,
+                    'dob' => $request->dob,
+                    'email' => $request->email,
+                    'contact_number' => $request->contact_number,
+                    'whatsapp_number' => $whatsapp_number,
+                    'parent_name' => $request->parent_name,
+                    'address' => $request->address,
+                    'phone' => $phone,
+                    'password' => Hash::make($phone),
+                    'photo' => $photo,
+                    'id_proof' => $idProof,
+                    'classes_per_week' => $request->classes_per_week,
+                    'selected_days' => $request->selected_days ?? [],
+                    'time_slot' => $request->time_slot,
+                    'starting_date' => $request->starting_date,
+                    'status' => $request->status ?? 'active'
+                ]);
+
+                // Update lead status
+                $lead->update([
+                    'status' => 'converted'
+                ]);
+            });
+
+            return redirect()
+                ->route('staff.student-leads.index')
+                ->with('success', 'Student created successfully.');
+
+        } catch (\Exception $e) {
+            Log::error("Student Lead Conversion Failed: " . $e->getMessage(), [
+                'lead_id' => $lead->id,
+                'request' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withInput()->with('error', 'Error converting lead: ' . $e->getMessage());
+        }
     }
 
-    $request->validate([
-        'name'           => 'required|string|max:255',
-        'contact_number' => 'required|string|digits_between:7,15',
-        'email'          => 'nullable|email',
-        'classes_per_week' => 'nullable|integer',
-        'selected_days'    => 'nullable|array',
-        'starting_date'    => 'nullable|date',
-    ]);
+    private function generateAdmissionNo()
+    {
+        $now = now();
+        $year = $now->format('y');
+        $month = $now->format('m');
 
-    DB::transaction(function () use ($request, $lead) {
+        $countThisMonth = \App\Models\Student::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
 
-        $photo = null;
-        $idProof = null;
+        $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
+        return 'FA/' . $year . '/' . $month . '/' . $serial;
+    }
 
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo')
-                ->store('students/photos','public');
-        }
+    public function regenerateLink($id)
+    {
+        $lead = StudentLead::findOrFail(decrypt($id));
+        $lead->regenerateFormToken();
 
-        if ($request->hasFile('id_proof')) {
-            $idProof = $request->file('id_proof')
-                ->store('students/id_proofs','public');
-        }
-
-        $phone = $request->contact_number;
-
-        Student::create([
-
-            'student_lead_id' => $lead->id,
-            'country_id' => $lead->country_id,
-
-            'name' => $request->name,
-            'dob' => $request->dob,
-            'email' => $request->email,
-            'contact_number' => $request->contact_number,
-            'whatsapp_number' => $request->whatsapp_number ?? $request->contact_number,
-            'parent_name' => $request->parent_name,
-            'address' => $request->address,
-
-            'phone' => $phone,
-            'password' => Hash::make($phone),
-
-            'photo' => $photo,
-            'id_proof' => $idProof,
-
-            // Class Schedule
-            'classes_per_week' => $request->classes_per_week,
-            'selected_days' => $request->selected_days ?? [],
-            'time_slot' => $request->time_slot,
-            'starting_date' => $request->starting_date,
-
-            'status' => $request->status ?? 'active'
-        ]);
-
-        // Update lead status
-        $lead->update([
-            'status' => 'admitted'
-        ]);
-    });
-
-    return redirect()
-        ->route('staff.student-leads.index')
-        ->with('success','Student created successfully.');
-}
+        return back()->with('success', 'Admission form link regenerated successfully.');
+    }
 }

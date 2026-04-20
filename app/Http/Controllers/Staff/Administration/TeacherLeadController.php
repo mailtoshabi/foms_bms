@@ -8,15 +8,17 @@ use App\Models\TeacherLead;
 use App\Models\Teacher;
 use App\Models\TeacherLeadNote;
 use App\Models\Source;
+use App\Models\Country;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class TeacherLeadController extends Controller
 {
 
 public function index(Request $request)
 {
-    $leads = TeacherLead::query();
+    $leads = TeacherLead::query()->with('country');
 
     if ($request->filled('status')) {
         $leads->where('status',$request->status);
@@ -35,7 +37,8 @@ public function index(Request $request)
 public function create()
 {
     $sources = Source::where('is_active', true)->get();
-    return view('staff.teacher_leads.create', compact('sources'));
+    $countries = Country::orderBy('name', 'asc')->get();
+    return view('staff.teacher_leads.create', compact('sources', 'countries'));
 }
 
 
@@ -43,14 +46,27 @@ public function store(Request $request)
 {
     $request->validate([
         'name'           => 'required',
+        'country_id'     => 'required|exists:countries,id',
         'contact_number' => 'required|string|digits_between:7,15|unique:teacher_leads,contact_number',
         'email'          => 'nullable|email',
         'source_id'      => 'nullable|exists:sources,id',
     ]);
 
+    $country = Country::find($request->country_id);
+    $isWhatsappDifferent = $request->has('is_whatsapp_different');
+    if ($isWhatsappDifferent) {
+        $whatsapp_number = $request->whatsapp_number;
+    } else {
+        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+        $whatsapp_number = $countryCode . $request->contact_number;
+    }
+
     TeacherLead::create([
         'name'           => $request->name,
+        'country_id'     => $request->country_id,
         'contact_number' => $request->contact_number,
+        'whatsapp_number' => $whatsapp_number,
+        'is_whatsapp_different' => $isWhatsappDifferent,
         'email'          => $request->email,
         'source_id'      => $request->source_id,
         'status'         => 'pending',
@@ -66,8 +82,9 @@ public function edit($id)
 {
     $lead = TeacherLead::findOrFail(decrypt($id));
     $sources = Source::where('is_active', true)->get();
+    $countries = Country::orderBy('name', 'asc')->get();
 
-    return view('staff.teacher_leads.create', compact('lead', 'sources'));
+    return view('staff.teacher_leads.create', compact('lead', 'sources', 'countries'));
 }
 
 
@@ -77,14 +94,30 @@ public function update(Request $request,$id)
 
     $request->validate([
         'name'           => 'required',
+        'country_id'     => 'required|exists:countries,id',
         'contact_number' => 'required|string|digits_between:7,15|unique:teacher_leads,contact_number,' . $lead->id,
         'email'          => 'nullable|email',
         'source_id'      => 'nullable|exists:sources,id',
     ]);
 
-    $lead->update($request->only(
-        'name', 'contact_number', 'email', 'source_id'
-    ));
+    $country = Country::find($request->country_id);
+    $isWhatsappDifferent = $request->has('is_whatsapp_different');
+    if ($isWhatsappDifferent) {
+        $whatsapp_number = $request->whatsapp_number;
+    } else {
+        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+        $whatsapp_number = $countryCode . $request->contact_number;
+    }
+
+    $lead->update([
+        'name'           => $request->name,
+        'country_id'     => $request->country_id,
+        'contact_number' => $request->contact_number,
+        'whatsapp_number' => $whatsapp_number,
+        'is_whatsapp_different' => $isWhatsappDifferent,
+        'email'          => $request->email,
+        'source_id'      => $request->source_id,
+    ]);
 
     return redirect()
         ->route('staff.teacher-leads.index')
@@ -125,6 +158,8 @@ public function convertToTeacher(Request $request,$id)
         return back()->with('error','Already converted.');
     }
 
+    $request->merge(['phone' => $request->contact_number]);
+
     $request->validate([
         'name'           => 'required',
         'contact_number' => 'required|string|digits_between:7,15',
@@ -146,15 +181,25 @@ public function convertToTeacher(Request $request,$id)
 
         $phone = $request->contact_number;
 
+        $isWhatsappDifferent = $request->has('is_whatsapp_different');
+        if ($isWhatsappDifferent) {
+            $whatsapp_number = $request->whatsapp_number;
+        } else {
+            $countryCode = $lead->country ? preg_replace('/[^0-9]/', '', $lead->country->code) : '91';
+            $whatsapp_number = $countryCode . $request->contact_number;
+        }
+
         Teacher::create([
 
             'teacher_lead_id'=>$lead->id,
+            'country_id'=>$lead->country_id,
+            'is_whatsapp_different' => $isWhatsappDifferent,
 
             'name'=>$request->name,
             'dob'=>$request->dob,
             'email'=>$request->email,
             'contact_number'=>$request->contact_number,
-            'whatsapp_number'=>$request->whatsapp_number ?? $request->contact_number,
+            'whatsapp_number'=>$whatsapp_number,
             'upi_number'=>$request->upi_number,
             'address'=>$request->address,
 
@@ -181,4 +226,11 @@ public function convertToTeacher(Request $request,$id)
         ->with('success','Teacher created successfully.');
 }
 
+    public function regenerateLink($id)
+    {
+        $lead = TeacherLead::findOrFail(decrypt($id));
+        $lead->regenerateFormToken();
+
+        return back()->with('success', 'Admission form link regenerated successfully.');
+    }
 }

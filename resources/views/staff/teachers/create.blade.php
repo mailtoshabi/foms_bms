@@ -35,6 +35,22 @@
 
                         <div class="row">
 
+                            <div class="col-md-12 mb-3">
+                                <label>Country <span class="text-danger">*</span></label>
+                                <select name="country_id" class="form-control @error('country_id') is-invalid @enderror"
+                                    required>
+                                    <option value="">Select Country</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country->id }}" {{ old('country_id', $teacher->country_id ?? '') == $country->id || (!old('country_id') && !isset($teacher) && $country->name == 'India') ? 'selected' : '' }}>
+                                            {{ $country->name }} ({{ $country->code }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('country_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="col-md-6 mb-3">
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control"
@@ -45,18 +61,29 @@
                             <div class="col-md-6 mb-3">
                                 <label>Contact Number</label>
                                 <input type="text" name="contact_number" id="contact_number"
-                                    class="form-control @error('contact_number') is-invalid @enderror" maxlength="15"
+                                    class="form-control @error('contact_number') is-invalid @enderror @error('phone') is-invalid @enderror" maxlength="15"
                                     value="{{ old('contact_number', $teacher->contact_number ?? '') }}">
                                 @error('contact_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                @error('phone')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
 
                             <div class="col-md-6 mb-3">
-                                <label>WhatsApp Number</label>
-                                <input type="text" name="whatsapp_number" class="form-control"
-                                    value="{{ old('whatsapp_number', $teacher->whatsapp_number ?? '') }}">
+                                <div class="form-check form-switch mt-4">
+                                    <input class="form-check-input" type="checkbox" id="whatsapp_different" name="is_whatsapp_different" value="1" {{ old('is_whatsapp_different', $teacher->is_whatsapp_different ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="whatsapp_different">WhatsApp number is different?</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3" id="whatsapp_field_group" style="{{ old('is_whatsapp_different', $teacher->is_whatsapp_different ?? false) ? '' : 'display: none;' }}">
+                                <label>WhatsApp Number (with country code)</label>
+                                <input type="text" name="whatsapp_number" id="whatsapp_number" class="form-control"
+                                    value="{{ old('whatsapp_number', $teacher->whatsapp_number ?? '') }}"
+                                    placeholder="e.g. 919876543210">
                             </div>
 
 
@@ -135,7 +162,7 @@
 
                                 <label>Phone (Login)</label>
 
-                                <input type="text" name="phone" id="phone" class="form-control"
+                                <input type="text" name="phone" id="phone" class="form-control" readonly
                                     value="{{ old('phone', $teacher->phone ?? '') }}">
 
                             </div>
@@ -199,12 +226,22 @@
 
                 $('#phone').val(number);
                 $('#password').val(number);
-                $('input[name="whatsapp_number"]').val(number);
 
             });
 
         </script>
 
     @endif
+
+    <script>
+        $('#whatsapp_different').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#whatsapp_field_group').show();
+            } else {
+                $('#whatsapp_field_group').hide();
+                $('#whatsapp_number').val('');
+            }
+        });
+    </script>
 
 @endsection

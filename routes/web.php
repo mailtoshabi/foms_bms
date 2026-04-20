@@ -369,6 +369,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [StudentLeadController::class, 'convertToStudent']
                 )->name('student-leads.convert');
 
+                Route::post(
+                    'student-leads/{lead}/regenerate-link',
+                    [StudentLeadController::class, 'regenerateLink']
+                )->name('student-leads.regenerate-link');
+
 
 
                 Route::post(
@@ -431,6 +436,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     'teacher-leads/{lead}/convert',
                     [TeacherLeadController::class, 'convertToTeacher']
                 )->name('teacher-leads.convert');
+
+                Route::post(
+                    'teacher-leads/{lead}/regenerate-link',
+                    [TeacherLeadController::class, 'regenerateLink']
+                )->name('teacher-leads.regenerate-link');
 
 
                 Route::post(
@@ -621,7 +631,7 @@ use App\Http\Controllers\Teacher\TeacherController as TeacherServiceController;
 
 Route::prefix('teacher')->name('teacher.')->group(function () {
     Route::get('/', function () {
-        return view('teacher.auth.login');
+        return redirect()->route('teacher.login');
     });
 
     // Login

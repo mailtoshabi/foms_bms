@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Teacher;
+use App\Models\Country;
 use App\Models\ClassRoom;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -14,6 +15,9 @@ class TeacherClassRoomImport implements ToCollection, WithHeadingRow
 {
     public function collection(Collection $rows)
     {
+        // Cache the default country to avoid repeated queries
+        $defaultCountry = Country::where('code', '+91')->first();
+
         foreach ($rows as $row) {
             // Sanitize phone to handle Excel formatting
             $phone = trim((string)$row['phone']);
@@ -26,7 +30,24 @@ class TeacherClassRoomImport implements ToCollection, WithHeadingRow
                 continue;
             }
 
-            $teacher = Teacher::where('phone', $phone)->first();
+            // Determine country_id
+            $country = null;
+            if (isset($row['country_code'])) {
+                $code = trim((string)$row['country_code']);
+                if (!empty($code)) {
+                    if (!str_starts_with($code, '+')) {
+                        $code = '+' . $code;
+                    }
+                    $country = Country::where('code', $code)->first();
+                }
+            }
+
+            // Default to India (+91) if country not found or missing
+            if (!$country) {
+                $country = $defaultCountry;
+            }
+
+            $teacher = Teacher::where('country_id', $country->id)->where('phone', $phone)->first();
             $classroom = ClassRoom::where('name', $row['classroom_name'])->first();
 
             if ($teacher && $classroom) {

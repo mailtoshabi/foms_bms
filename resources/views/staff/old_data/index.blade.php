@@ -104,6 +104,7 @@
                             <div class="form-text mt-3">
                                 <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
                                 <ul class="ps-3 text-muted small">
+                                    <li><code>Country Code</code> (Optional, default +91)</li>
                                     <li><code>Phone</code> (Student unique phone)</li>
                                     <li><code>Admission No</code> (New ID)</li>
                                     <li><code>Date</code> (System timestamp)</li>
@@ -163,6 +164,7 @@
                             <div class="form-text mt-3">
                                 <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
                                 <ul class="ps-3 text-muted small">
+                                    <li><code>Country Code</code> (Optional, default +91)</li>
                                     <li><code>Phone</code> (Student phone)</li>
                                     <li><code>Classroom Name</code> (Class Name)</li>
                                     <li><code>Date</code> (Assignment date)</li>
@@ -223,6 +225,7 @@
                             <div class="form-text mt-3">
                                 <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
                                 <ul class="ps-3 text-muted small">
+                                    <li><code>Country Code</code> (Optional, default +91)</li>
                                     <li><code>phone</code> (Teacher unique phone)</li>
                                     <li><code>salary_cycle_day</code> (Day of month)</li>
                                     <li><code>date</code> (System timestamp)</li>
@@ -282,6 +285,7 @@
                             <div class="form-text mt-3">
                                 <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
                                 <ul class="ps-3 text-muted small">
+                                    <li><code>Country Code</code> (Optional, default +91)</li>
                                     <li><code>Phone</code> (Teacher phone)</li>
                                     <li><code>Classroom Name</code> (Class Name)</li>
                                     <li><code>Date</code> (Assignment date)</li>

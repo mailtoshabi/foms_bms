@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use App\Models\Fee;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
@@ -73,6 +75,8 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $this->checkManagementRole();
+        $request->merge(['phone' => $request->contact_number]);
+
         $request->validate([
             'name' => 'required',
             'country_id' => 'required|exists:countries,id',
@@ -83,53 +87,82 @@ class StudentController extends Controller
             'selected_days' => 'required|array|min:1'
         ]);
 
-        // Enforce consistency
-        $classesPerWeek = count($request->selected_days ?? []);
+        try {
+            // Enforce consistency
+            $classesPerWeek = count($request->selected_days ?? []);
 
-        $photo = null;
-        $idProof = null;
+            $photo = null;
+            $idProof = null;
 
-        if ($request->hasFile('photo')) {
-            $photo = $request->file('photo')
-                ->store('students/photos', 'public');
+            if ($request->hasFile('photo')) {
+                $photo = $request->file('photo')
+                    ->store('students/photos', 'public');
+            }
+
+            if ($request->hasFile('id_proof')) {
+                $idProof = $request->file('id_proof')
+                    ->store('students/id_proofs', 'public');
+            }
+
+            $country = \App\Models\Country::find($request->country_id);
+            $isWhatsappDifferent = $request->has('is_whatsapp_different');
+            if ($isWhatsappDifferent) {
+                $whatsapp_number = $request->whatsapp_number;
+            } else {
+                $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+                $whatsapp_number = $countryCode . $request->contact_number;
+            }
+
+            $admissionNo = $this->generateAdmissionNo();
+
+            Student::create([
+                'admission_no' => $admissionNo,
+                'student_lead_id' => null,
+                'country_id' => $request->country_id,
+                'is_whatsapp_different' => $isWhatsappDifferent,
+                'name' => $request->name,
+                'dob' => $request->dob,
+                'email' => $request->email,
+                'contact_number' => $request->contact_number,
+                'whatsapp_number' => $whatsapp_number,
+                'parent_name' => $request->parent_name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'password' => Hash::make($request->password),
+                'photo' => $photo,
+                'id_proof' => $idProof,
+                'classes_per_week' => $classesPerWeek,
+                'selected_days' => $request->selected_days ?? [],
+                'time_slot' => $request->time_slot,
+                'starting_date' => $request->starting_date,
+                'status' => $request->status ?? 'active'
+            ]);
+
+            return redirect()
+                ->route('staff.students.index')
+                ->with('success', 'Student created successfully.');
+
+        } catch (\Exception $e) {
+            Log::error("Student Creation Failed: " . $e->getMessage(), [
+                'request' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withInput()->with('error', 'Error creating student: ' . $e->getMessage());
         }
+    }
 
-        if ($request->hasFile('id_proof')) {
-            $idProof = $request->file('id_proof')
-                ->store('students/id_proofs', 'public');
-        }
+    private function generateAdmissionNo()
+    {
+        $now = now();
+        $year = $now->format('y');
+        $month = $now->format('m');
 
-        Student::create([
+        $countThisMonth = Student::whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
 
-            'student_lead_id' => null,
-            'country_id' => $request->country_id,
-
-            'name' => $request->name,
-            'dob' => $request->dob,
-            'email' => $request->email,
-            'contact_number' => $request->contact_number,
-            'whatsapp_number' => $request->whatsapp_number ?? $request->contact_number,
-            'parent_name' => $request->parent_name,
-            'address' => $request->address,
-
-            'phone' => $request->phone,
-            'password' => Hash::make($request->password),
-
-            'photo' => $photo,
-            'id_proof' => $idProof,
-
-            // Class schedule
-            'classes_per_week' => $classesPerWeek,
-            'selected_days' => $request->selected_days ?? [],
-            'time_slot' => $request->time_slot,
-            'starting_date' => $request->starting_date,
-
-            'status' => $request->status ?? 'active'
-        ]);
-
-        return redirect()
-            ->route('staff.students.index')
-            ->with('success', 'Student created successfully.');
+        $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
+        return 'FA/' . $year . '/' . $month . '/' . $serial;
     }
 
 
@@ -147,6 +180,8 @@ class StudentController extends Controller
     {
         $this->checkManagementRole();
         $student = Student::findOrFail(decrypt($id));
+
+        $request->merge(['phone' => $request->contact_number]);
 
         $request->validate([
             'name' => 'required',
@@ -177,14 +212,24 @@ class StudentController extends Controller
 
         }
 
+        $country = \App\Models\Country::find($request->country_id);
+        $isWhatsappDifferent = $request->has('is_whatsapp_different');
+        if ($isWhatsappDifferent) {
+            $whatsapp_number = $request->whatsapp_number;
+        } else {
+            $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+            $whatsapp_number = $countryCode . $request->contact_number;
+        }
+
         $student->update([
 
             'country_id' => $request->country_id,
+            'is_whatsapp_different' => $isWhatsappDifferent,
             'name' => $request->name,
             'dob' => $request->dob,
             'email' => $request->email,
             'contact_number' => $request->contact_number,
-            'whatsapp_number' => $request->whatsapp_number ?? $request->contact_number,
+            'whatsapp_number' => $whatsapp_number,
             'parent_name' => $request->parent_name,
             'address' => $request->address,
 
@@ -301,40 +346,13 @@ class StudentController extends Controller
         $isMonthlyExempted = $student->is_monthly_fee_exempted;
 
 
-        // Case 1: Both exempted → do nothing
-        if ($isAdmissionExempted && $isMonthlyExempted) {
-            return back()->with('success', 'Class assigned (No fee - fully exempted)');
+        // Case: No admission fee if exempted
+        if ($isAdmissionExempted) {
+            return back()->with('success', 'Class assigned (Admission fee exempted)');
         }
 
-        $type = null;
-        $amount = 0;
-
-        // Case 2: Admission exempted → monthly fee
-        if ($isAdmissionExempted && !$isMonthlyExempted) {
-
-            $type = 'monthly';
-            $amount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
-
-        }
-        // Case 3: Monthly exempted → admission fee
-        elseif (!$isAdmissionExempted && $isMonthlyExempted) {
-
-            $type = 'admission';
-            $amount = max(0, $class->admission_fee - $student->admission_fee_discount);
-
-        }
-        // Case 4: No exemption
-        else {
-
-            if ($class->admission_fee > 0) {
-                $type = 'admission';
-                $amount = max(0, $class->admission_fee - $student->admission_fee_discount);
-            } else {
-                $type = 'monthly';
-                $amount = max(0, $class->monthly_fee - $student->monthly_fee_discount);
-            }
-
-        }
+        $type = 'admission';
+        $amount = max(0, $class->admission_fee - $student->admission_fee_discount);
 
         if (
             Fee::where('student_id', $student->id)

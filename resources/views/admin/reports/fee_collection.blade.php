@@ -126,8 +126,12 @@
                     @forelse($data as $row)
 
                         <tr>
-                            <td>{{ $row->name }}</td>
-                            <td>{{ $row->contact_number }}</td>
+                            <td>{{ $row->name }}
+                                <br><small class="text-muted">{{ $row->contact_number }}</small>
+                                @if($row->is_whatsapp_different)
+                                    <br><small class="text-success" style="font-size: 11px;">WA: +{{ $row->whatsapp_number }}</small>
+                                @endif
+                            </td>
                             <td>{{ $row->class_name }}</td>
                             <td><span class="badge bg-info">{{ ucfirst($row->category_name) }}</span></td>
                             <td>₹ {{ number_format($row->paid_amount, 2) }}</td>

@@ -16,6 +16,7 @@ class Teacher extends Authenticatable
     protected $fillable = [
         'admission_no',
         'teacher_lead_id',
+        'country_id',
 
         'name',
         'dob',
@@ -37,7 +38,8 @@ class Teacher extends Authenticatable
         'status',
 
         'salary_cycle_day',
-        'salary_amount'
+        'salary_amount',
+        'is_whatsapp_different'
     ];
 
     protected $hidden = [
@@ -66,6 +68,23 @@ class Teacher extends Authenticatable
     public function getDobFormattedAttribute()
     {
         return $this->dob?->format('d M Y');
+    }
+
+    public function getFormattedContactNumberAttribute()
+    {
+        $code = $this->country?->code ?? '';
+        return $code ? $code . ' ' . $this->contact_number : $this->contact_number;
+    }
+
+    public function getFormattedWhatsappNumberAttribute()
+    {
+        return $this->whatsapp_number ? '+' . $this->whatsapp_number : null;
+    }
+
+    public function getFormattedPhoneAttribute()
+    {
+        $code = $this->country?->code ?? '';
+        return $code ? $code . ' ' . $this->phone : $this->phone;
     }
 
     protected static function booted()
@@ -111,6 +130,11 @@ class Teacher extends Authenticatable
 public function lead()
 {
     return $this->belongsTo(TeacherLead::class,'teacher_lead_id');
+}
+
+public function country()
+{
+    return $this->belongsTo(Country::class);
 }
 
 public function getSalaryCreditDayAttribute()

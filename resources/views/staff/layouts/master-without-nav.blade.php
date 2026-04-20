@@ -49,6 +49,9 @@
 
     @yield('body')
 
+    <div class="container mt-4">
+        <x-alerts />
+    </div>
     @yield('content')
 
     <!-- PWA Install Banners -->

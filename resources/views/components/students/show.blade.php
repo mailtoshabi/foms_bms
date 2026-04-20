@@ -28,7 +28,10 @@
                     </p>
 
                     <p class="text-muted mb-1">
-                        {{ $student->contact_number }}
+                        {{ $student->formatted_contact_number }}
+                        @if($student->is_whatsapp_different)
+                            <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $student->formatted_whatsapp_number }}</small>
+                        @endif
                     </p>
 
                     <p class="text-muted mb-1">
@@ -72,15 +75,13 @@
                     <h5 class="mb-0">Course & Class Details</h5>
                     @if($showButtons == 'true')
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                data-bs-target="#assignClassModal">
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignClassModal">
 
                                 <i class="fas fa-plus"></i> Assign Class
 
                             </button>
 
-                            <button class="btn btn-sm btn-info" data-bs-toggle="modal"
-                                data-bs-target="#changeClassModal">
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#changeClassModal">
 
                                 <i class="fas fa-exchange-alt"></i> Change Class
 
@@ -180,7 +181,7 @@
                                     <tr>
 
                                         <td>{{ $teacher->name }}</td>
-                                        <td>{{ $teacher->phone }}</td>
+                                        <td>{{ $teacher->formatted_phone }}</td>
                                         <td>{{ $teacher->email }}</td>
 
                                     </tr>
@@ -465,7 +466,7 @@
 
                     <div class="col-md-6 mb-2">
 
-                        <strong>Admission Fee:</strong>
+                        <strong>Admission/First Month Fee:</strong>
 
                         @if($student->is_admission_fee_exempted)
                             <span class="text-success ms-2">
@@ -502,7 +503,7 @@
                     </div>
 
                     <div class="col-md-6 mb-2">
-                        <strong>Admission Fee Discount:</strong>
+                        <strong>Admission/First Month Fee Discount:</strong>
                         @if($student->admission_fee_discount > 0)
                             <span class="badge bg-warning text-dark ms-2">
                                 <i class="fas fa-tag"></i> ₹ {{ number_format($student->admission_fee_discount, 2) }}
@@ -641,7 +642,8 @@
                             <label class="form-label">To Class</label>
 
                             <select name="to_class_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.class_rooms.search') }}?type=group&exclude_student_id={{ $student->id }}" required>
+                                data-ajax-url="{{ route('staff.class_rooms.search') }}?type=group&exclude_student_id={{ $student->id }}"
+                                required>
 
                                 <option value="">Search new class...</option>
 
@@ -699,7 +701,7 @@
                     <div class="modal-body">
 
                         <div class="mb-3">
-                            <label class="form-label">Admission Fee Discount (₹)</label>
+                            <label class="form-label">Admission/First Month Fee Discount (₹)</label>
                             <input type="number" name="admission_fee_discount" class="form-control"
                                 value="{{ $student->admission_fee_discount ?? 0 }}" min="0" step="0.01">
                         </div>
@@ -839,7 +841,7 @@
                             <input type="checkbox" name="is_admission_fee_exempted" value="1" class="form-check-input" {{ $student->is_admission_fee_exempted ? 'checked' : '' }}>
 
                             <label class="form-check-label">
-                                Admission Fee Exemption
+                                Admission/First Month Fee Exemption
                             </label>
 
                         </div>

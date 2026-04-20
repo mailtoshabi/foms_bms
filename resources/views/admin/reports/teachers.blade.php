@@ -99,7 +99,11 @@
         @foreach($teachers as $teacher)
             <tr>
                 <td>{{ $teacher->name }}</td>
-                <td>{{ $teacher->contact_number }}</td>
+                <td>{{ $teacher->formatted_contact_number }}
+                    @if($teacher->is_whatsapp_different)
+                        <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $teacher->formatted_whatsapp_number }}</small>
+                    @endif
+                </td>
                 <td>{{ $teacher->email ?? 'N/A' }}</td>
                 <td>{{ $teacher->qualification ?? 'N/A' }}</td>
                 <td>
