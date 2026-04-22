@@ -308,6 +308,8 @@ use App\Http\Controllers\Staff\Finance\FeeController;
 use App\Http\Controllers\Staff\Finance\SalaryController;
 use App\Http\Controllers\Staff\Finance\ExpenseController;
 use App\Http\Controllers\Staff\Administration\OldDataController;
+use App\Http\Controllers\Staff\ReportController as StaffReportController;
+
 
 Route::prefix('departments')->name('staff.')->group(function () {
 
@@ -613,11 +615,17 @@ Route::prefix('departments')->name('staff.')->group(function () {
             Route::post('/old-data/students-import', [OldDataController::class, 'importStudentData'])->name('old_data.students_import');
             Route::post('/old-data/student-assignments-import', [OldDataController::class, 'importStudentClassRoom'])->name('old_data.student_assignments_import');
             Route::post('/old-data/teachers-import', [OldDataController::class, 'importTeacherData'])->name('old_data.teachers_import');
-            Route::post('/old-data/teacher-assignments-import', [OldDataController::class, 'importTeacherClassRoom'])->name('old_data.teacher_assignments_import');
         });
 
+        Route::middleware('role:id_hr_dept,id_finance_dept,id_operation_dept')
+            ->group(function () {
+                Route::get('/reports/attendance', [StaffReportController::class, 'attendance'])
+                    ->name('reports.attendance');
+            });
 
     });
+
+
 
 
 });

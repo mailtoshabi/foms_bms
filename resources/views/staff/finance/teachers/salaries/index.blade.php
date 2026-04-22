@@ -1,4 +1,4 @@
-﻿@extends('staff.layouts.master')
+@extends('staff.layouts.master')
 
 @section('title', 'Teacher Salaries')
 
@@ -60,6 +60,7 @@
 
                             {{-- Teacher --}}
                             <div class="col-md-3 mb-2">
+                                <label class="form-label fw-bold">Teacher</label>
                                 <select name="teacher_id" class="form-control select2">
                                     <option value="">All Teachers</option>
 
@@ -74,17 +75,21 @@
 
                             {{-- From Date --}}
                             <div class="col-md-3 mb-2">
-                                <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                                <label class="form-label fw-bold">From Date</label>
+                                <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}"
+                                    placeholder="From Date">
                             </div>
 
                             {{-- To Date --}}
                             <div class="col-md-3 mb-2">
-                                <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                                <label class="form-label fw-bold">To Date</label>
+                                <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}"
+                                    placeholder="To Date">
                             </div>
 
                             {{-- Buttons --}}
                             <div class="col-md-3 mb-2">
-
+                                <label class="form-label d-none d-md-block">&nbsp;</label>
                                 <button class="btn btn-primary">
                                     <i class="fas fa-search"></i> Filter
                                 </button>
@@ -129,57 +134,57 @@
 
                                 @forelse($salaries as $salary)
 
-                                                            <tr>
+                                    <tr>
 
-                                                                <td>{{ $salary->teacher->name ?? '-' }}</td>
+                                        <td>{{ $salary->teacher->name ?? '-' }}</td>
 
-                                                                <td>
-                                                                    {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
-                                                                    -
-                                                                    {{ \Carbon\Carbon::parse($salary->cycle_end)->format('d M Y') }}
-                                                                </td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
+                                            -
+                                            {{ \Carbon\Carbon::parse($salary->cycle_end)->format('d M Y') }}
+                                        </td>
 
-                                                                <td>
-                                                                    <span class="badge bg-info">
-                                                                        {{ number_format($salary->total_hours, 2) }} hrs
-                                                                    </span>
-                                                                </td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ number_format($salary->total_hours, 2) }} hrs
+                                            </span>
+                                        </td>
 
-                                                                <td>
-                                                                    <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
-                                                                        ₹ {{ number_format($salary->total_amount, 2) }}
-                                                                    </strong>
-                                                                    @if($salary->status == 'paid')
-                                                                        <br><small class="text-muted">
-                                                                            Paid on {{ optional($salary->payment_date)->format('d M Y') }}
-                                                                        </small>
-                                                                    @endif
-                                                                </td>
+                                        <td>
+                                            <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
+                                                ₹ {{ number_format($salary->total_amount, 2) }}
+                                            </strong>
+                                            @if($salary->status == 'paid')
+                                                <br><small class="text-muted">
+                                                    Paid on {{ optional($salary->payment_date)->format('d M Y') }}
+                                                </small>
+                                            @endif
+                                        </td>
 
-                                                                <td>
-                                                                    <span class="badge
-                                    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
-                                                                        {{ ucfirst($salary->status) }}
-                                                                    </span>
-                                                                </td>
+                                        <td>
+                                            <span class="badge
+                                                    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
+                                                {{ ucfirst($salary->status) }}
+                                            </span>
+                                        </td>
 
-                                                                <td>
+                                        <td>
 
-                                                                    <button
-                                                                        class="btn btn-sm btn-primary paySalaryBtn {{ $salary->status == 'paid' ? 'disabled' : '' }}"
-                                                                        data-id="{{ $salary->id }}" data-amount="{{ $salary->total_amount }}"
-                                                                        data-status="{{ $salary->status }}"
-                                                                        data-date="{{ optional($salary->payment_date)->format('d M Y') }}"
-                                                                        data-method="{{ $salary->payment_method }}"
-                                                                        data-ref="{{ $salary->reference_number }}" data-notes="{{ $salary->notes }}">
+                                            <button
+                                                class="btn btn-sm btn-primary paySalaryBtn {{ $salary->status == 'paid' ? 'disabled' : '' }}"
+                                                data-id="{{ $salary->id }}" data-amount="{{ $salary->total_amount }}"
+                                                data-status="{{ $salary->status }}"
+                                                data-date="{{ optional($salary->payment_date)->format('d M Y') }}"
+                                                data-method="{{ $salary->payment_method }}"
+                                                data-ref="{{ $salary->reference_number }}" data-notes="{{ $salary->notes }}">
 
-                                                                        <i class="fas fa-money-bill"></i>
+                                                <i class="fas fa-money-bill"></i>
 
-                                                                    </button>
+                                            </button>
 
-                                                                </td>
+                                        </td>
 
-                                                            </tr>
+                                    </tr>
 
                                 @empty
 

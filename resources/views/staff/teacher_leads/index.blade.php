@@ -25,6 +25,7 @@ Add Lead
 <form method="GET" class="row mb-3">
 
 <div class="col-md-4">
+    <label class="form-label fw-bold">Status</label>
 <select name="status" class="form-control select2">
 <option value="">All Status</option>
 
@@ -47,13 +48,15 @@ Not Interested
 </div>
 
 <div class="col-md-4">
+    <label class="form-label fw-bold">Date</label>
 <input type="date"
 name="date"
 value="{{ request('date') }}"
-class="form-control">
+class="form-control"
+placeholder="Date">
 </div>
 
-<div class="col-md-4 d-flex gap-2">
+<div class="col-md-4 d-flex align-items-end gap-2">
 
 <button class="btn btn-primary">
 Filter

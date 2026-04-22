@@ -89,33 +89,6 @@
             </div>
         @endif
 
-        {{-- Expenses this month: hr | operation --}}
-        @if($isHr)
-            <div class="col-xl-3 col-md-6">
-                <a href="{{ route('staff.expenses.index') }}" class="text-decoration-none">
-                    <div class="card card-h-100">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <span class="text-muted d-block">Total Expenses <small class="text-muted">(this
-                                            month)</small></span>
-                                    <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <i class="fas fa-receipt fa-2x text-danger"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        @endif
-
-    </div>
-
-    {{-- ===== Row 2: Pending / Action Items ===== --}}
-    <div class="row">
-
         {{-- Pending Student Leads: enrolment | operation --}}
         @if($isEnrolment)
             <div class="col-xl-3 col-md-6">
@@ -203,7 +176,30 @@
             </div>
         @endif
 
+        {{-- Expenses this month: hr | operation --}}
+        @if($isHr)
+            <!-- <div class="col-xl-3 col-md-6">
+                        <a href="{{ route('staff.expenses.index') }}" class="text-decoration-none">
+                            <div class="card card-h-100">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <span class="text-muted d-block">Total Expenses <small class="text-muted">(this
+                                                    month)</small></span>
+                                            <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-receipt fa-2x text-danger"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div> -->
+        @endif
+
     </div>
+
 
     {{-- ===== Top Performing Teachers: administrator | hr | operation ===== --}}
     @if($isAdministrator || $isHr)

@@ -41,12 +41,12 @@
 
                     <div class="col-md-2">
                         <label class="form-label fw-bold">From Date</label>
-                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
+                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control" placeholder="From Date">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label fw-bold">To Date</label>
-                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
+                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control" placeholder="To Date">
                     </div>
 
                     <div class="col-md-12 d-flex justify-content-end gap-2 mt-2">
@@ -115,7 +115,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">No sessions found matching your criteria.</td>
+                                <td colspan="6" class="text-center py-4 text-muted">No sessions found matching your criteria.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -1,86 +1,84 @@
 @extends('teacher.layouts.master')
 
-@section('title','Assigned Classes')
+@section('title', 'Assigned Classes')
 
 @section('content')
 
-<div class="card">
+    <div class="card">
 
-<div class="card-header">
-<h4>Assigned Classes</h4>
-</div>
+        <div class="card-header">
+            <h4>Assigned Classes</h4>
+        </div>
 
-<div class="card-body table-responsive">
+        <div class="card-body table-responsive">
 
-<table class="table table-bordered">
+            <table class="table table-bordered">
 
-<thead>
+                <thead>
 
-<tr>
-<th>Course</th>
-<th>Class</th>
-<th>Type</th>
-<th>Schedule</th>
-<th>Action</th>
-</tr>
+                    <tr>
+                        <th>Course</th>
+                        <th>Class</th>
+                        <th>Type</th>
+                        <th>Schedule</th>
+                        <th>Action</th>
+                    </tr>
 
-</thead>
+                </thead>
 
-<tbody>
+                <tbody>
 
-@forelse($classes as $class)
+                    @forelse($classes as $class)
 
-<tr>
+                        <tr>
 
-<td>{{ $class->course->name ?? '-' }}</td>
+                            <td>{{ $class->course->name ?? '-' }}</td>
 
-<td>{{ $class->name }}</td>
+                            <td>{{ $class->name }}</td>
 
-<td>{{ ucfirst($class->classType->name ?? '-') }}</td>
+                            <td>{{ ucfirst($class->classType->name ?? '-') }}</td>
 
-<td>
+                            <td>
 
-{{ implode(', ', $class->selected_days ?? []) }}
-<small>
-<br>
+                                {{ implode(', ', $class->selected_days ?? []) }}
+                                <small>
+                                    <br>
 
-{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
+                                    {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
 
-</small>
+                                </small>
 
-</td>
+                            </td>
 
-<td>
+                            <td>
 
-<a href="{{ route('teacher.classes.show',encrypt($class->id)) }}"
-class="btn btn-sm btn-primary">
+                                <a href="{{ route('teacher.classes.show', encrypt($class->id)) }}"
+                                    class="btn btn-sm btn-primary">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Enter
+                                </a>
 
-View
+                            </td>
 
-</a>
+                        </tr>
 
-</td>
+                    @empty
 
-</tr>
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No Classes Assigned
+                            </td>
+                        </tr>
 
-@empty
+                    @endforelse
 
-<tr>
-<td colspan="5" class="text-center">
-No Classes Assigned
-</td>
-</tr>
+                </tbody>
 
-@endforelse
+            </table>
 
-</tbody>
+            {{ $classes->links() }}
 
-</table>
+        </div>
 
-{{ $classes->links() }}
-
-</div>
-
-</div>
+    </div>
 
 @endsection

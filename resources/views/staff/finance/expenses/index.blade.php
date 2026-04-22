@@ -1,4 +1,4 @@
-﻿@extends('staff.layouts.master')
+@extends('staff.layouts.master')
 
 @section('title', 'Expenses')
 
@@ -44,6 +44,7 @@
                         <div class="row">
                             {{-- Category Filter --}}
                             <div class="col-md-3 mb-2">
+                                <label class="form-label fw-bold">Category</label>
                                 <select name="category_id" class="form-control select2">
                                     <option value="">All Categories</option>
                                     @foreach($categories as $id => $name)
@@ -56,24 +57,27 @@
 
                             {{-- From Date --}}
                             <div class="col-md-2 mb-2">
+                                <label class="form-label fw-bold">From Date</label>
                                 <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}"
                                     placeholder="From Date">
                             </div>
 
                             {{-- To Date --}}
                             <div class="col-md-2 mb-2">
+                                <label class="form-label fw-bold">To Date</label>
                                 <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}"
                                     placeholder="To Date">
                             </div>
 
                             {{-- Search Remarks --}}
                             <div class="col-md-3 mb-2">
+                                <label class="form-label fw-bold">Search</label>
                                 <input type="text" name="search" class="form-control" value="{{ request('search') }}"
                                     placeholder="Search remarks...">
                             </div>
 
                             {{-- Buttons --}}
-                            <div class="col-md-2 mb-2">
+                            <div class="col-md-2 mb-2 d-flex align-items-end">
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="fas fa-search"></i> Filter
                                 </button>

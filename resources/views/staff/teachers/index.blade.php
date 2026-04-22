@@ -28,7 +28,7 @@ Add Teacher
 <form method="GET" class="row mb-3">
 
 <div class="col-md-4">
-
+<label class="form-label fw-bold">Search</label>
 <input type="text"
 name="search"
 value="{{ request('search') }}"
@@ -38,7 +38,7 @@ placeholder="Search name or contact">
 </div>
 
 <div class="col-md-3">
-
+<label class="form-label fw-bold">Status</label>
 <select name="status" class="form-control select2">
 
 <option value="">All Status</option>
@@ -57,7 +57,7 @@ Inactive
 
 </div>
 
-<div class="col-md-3 d-flex gap-2">
+<div class="col-md-3 d-flex align-items-end gap-2">
 
 <button class="btn btn-primary">
 Filter
