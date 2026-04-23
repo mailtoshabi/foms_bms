@@ -44,6 +44,11 @@ public function create()
 
 public function store(Request $request)
 {
+    $request->merge([
+        'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+    ]);
+
     $request->validate([
         'name'           => 'required',
         'country_id'     => 'required|exists:countries,id',
@@ -90,6 +95,11 @@ public function edit($id)
 
 public function update(Request $request,$id)
 {
+    $request->merge([
+        'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+    ]);
+
     $lead = TeacherLead::findOrFail(decrypt($id));
 
     $request->validate([
@@ -152,6 +162,11 @@ public function storeNote(Request $request, $leadId)
 
 public function convertToTeacher(Request $request,$id)
 {
+    $request->merge([
+        'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+    ]);
+
     $lead = TeacherLead::with('teacher')->findOrFail(decrypt($id));
 
     if($lead->teacher){

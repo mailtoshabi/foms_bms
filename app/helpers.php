@@ -290,4 +290,19 @@ if (!function_exists('teacherRankData')) {
     }
 }
 
+if (!function_exists('generateAdmissionNo')) {
+    function generateAdmissionNo()
+    {
+        $now = now();
+        $year = $now->format('y');
+        $month = $now->format('m');
 
+        $countThisMonth = \App\Models\Student::withTrashed()
+            ->whereYear('created_at', $now->year)
+            ->whereMonth('created_at', $now->month)
+            ->count();
+
+        $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
+        return 'FA/' . $year . '/' . $month . '/' . $serial;
+    }
+}

@@ -67,12 +67,17 @@ class StudentLeadController extends Controller
     */
     public function store(Request $request)
     {
+        $request->merge([
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
+
         $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'country_id'     => ['required', 'exists:countries,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'country_id' => ['required', 'exists:countries,id'],
             'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number'],
-            'email'          => ['nullable', 'email'],
-            'source_id'      => ['nullable', 'exists:sources,id'],
+            'email' => ['nullable', 'email'],
+            'source_id' => ['nullable', 'exists:sources,id'],
         ]);
 
         $country = \App\Models\Country::find($request->country_id);
@@ -85,14 +90,14 @@ class StudentLeadController extends Controller
         }
 
         StudentLead::create([
-            'name'           => $request->name,
-            'country_id'     => $request->country_id,
+            'name' => $request->name,
+            'country_id' => $request->country_id,
             'contact_number' => $request->contact_number,
             'whatsapp_number' => $whatsapp_number,
             'is_whatsapp_different' => $isWhatsappDifferent,
-            'email'          => $request->email,
-            'source_id'      => $request->source_id,
-            'status'         => 'pending',
+            'email' => $request->email,
+            'source_id' => $request->source_id,
+            'status' => 'pending',
         ]);
 
         return redirect()
@@ -106,13 +111,13 @@ class StudentLeadController extends Controller
     |--------------------------------------------------------------------------
     */
     public function edit($id)
-{
-    $lead = StudentLead::with('notes.staff')->findOrFail(decrypt($id));
-    $sources = Source::where('is_active', true)->get();
-    $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+    {
+        $lead = StudentLead::with('notes.staff')->findOrFail(decrypt($id));
+        $sources = Source::where('is_active', true)->get();
+        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
 
-    return view('staff.student_leads.create', compact('lead', 'sources', 'countries'));
-}
+        return view('staff.student_leads.create', compact('lead', 'sources', 'countries'));
+    }
 
     /*
     |--------------------------------------------------------------------------
@@ -121,15 +126,20 @@ class StudentLeadController extends Controller
     */
     public function update(Request $request, $id)
     {
+        $request->merge([
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
+
         $lead = StudentLead::findOrFail(decrypt($id));
 
         $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'country_id'     => ['required', 'exists:countries,id'],
+            'name' => ['required', 'string', 'max:255'],
+            'country_id' => ['required', 'exists:countries,id'],
             'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number,' . $lead->id],
-            'email'          => ['nullable', 'email'],
-            'source_id'      => ['nullable', 'exists:sources,id'],
-            'status'         => ['required', 'in:pending,admitted'],
+            'email' => ['nullable', 'email'],
+            'source_id' => ['nullable', 'exists:sources,id'],
+            'status' => ['required', 'in:pending,admitted'],
         ]);
 
         $country = \App\Models\Country::find($request->country_id);
@@ -142,14 +152,14 @@ class StudentLeadController extends Controller
         }
 
         $lead->update([
-            'name'           => $request->name,
-            'country_id'     => $request->country_id,
+            'name' => $request->name,
+            'country_id' => $request->country_id,
             'contact_number' => $request->contact_number,
             'whatsapp_number' => $whatsapp_number,
             'is_whatsapp_different' => $isWhatsappDifferent,
-            'email'          => $request->email,
-            'source_id'      => $request->source_id,
-            'status'         => $request->status,
+            'email' => $request->email,
+            'source_id' => $request->source_id,
+            'status' => $request->status,
         ]);
 
         return redirect()
@@ -176,26 +186,31 @@ class StudentLeadController extends Controller
     }
 
 
-public function storeNote(Request $request, $leadId)
-{
-    $request->validate([
-        'note' => 'required|string',
-        'status' => 'required|in:pending,follow_up,no_response,not_interested,interested,converted'
-    ]);
+    public function storeNote(Request $request, $leadId)
+    {
+        $request->validate([
+            'note' => 'required|string',
+            'status' => 'required|in:pending,follow_up,no_response,not_interested,interested,converted'
+        ]);
 
-    LeadNote::create([
-        'student_lead_id' => $leadId,
-        'staff_id' => auth('staff')->id(),
-        'note' => $request->note,
-        'status' => $request->status,
-    ]);
+        LeadNote::create([
+            'student_lead_id' => $leadId,
+            'staff_id' => auth('staff')->id(),
+            'note' => $request->note,
+            'status' => $request->status,
+        ]);
 
-    return back()->with('success', 'Note added successfully.');
-}
+        return back()->with('success', 'Note added successfully.');
+    }
 
 
     public function convertToStudent(Request $request, $id)
     {
+        $request->merge([
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
+
         $lead = StudentLead::with('student')->findOrFail(decrypt($id));
 
         // Prevent duplicate conversion
@@ -206,12 +221,12 @@ public function storeNote(Request $request, $leadId)
         }
 
         $request->validate([
-            'name'           => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'contact_number' => 'required|string|digits_between:7,15',
-            'email'          => 'nullable|email',
+            'email' => 'nullable|email',
             'classes_per_week' => 'nullable|integer',
-            'selected_days'    => 'nullable|array',
-            'starting_date'    => 'nullable|date',
+            'selected_days' => 'nullable|array',
+            'starting_date' => 'nullable|date',
         ]);
 
         try {
@@ -240,7 +255,7 @@ public function storeNote(Request $request, $leadId)
                     $whatsapp_number = $countryCode . $request->contact_number;
                 }
 
-                $admissionNo = $this->generateAdmissionNo();
+                $admissionNo = generateAdmissionNo();
 
                 Student::create([
                     'admission_no' => $admissionNo,
@@ -285,19 +300,7 @@ public function storeNote(Request $request, $leadId)
         }
     }
 
-    private function generateAdmissionNo()
-    {
-        $now = now();
-        $year = $now->format('y');
-        $month = $now->format('m');
 
-        $countThisMonth = \App\Models\Student::whereYear('created_at', $now->year)
-            ->whereMonth('created_at', $now->month)
-            ->count();
-
-        $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
-        return 'FA/' . $year . '/' . $month . '/' . $serial;
-    }
 
     public function regenerateLink($id)
     {

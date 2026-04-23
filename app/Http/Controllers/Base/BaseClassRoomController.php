@@ -83,7 +83,7 @@ class BaseClassRoomController extends BaseServiceController
             'selected_days.*' => 'string',
 
             'time_slot' => 'nullable|string|max:255',
-            'slot_duration' => 'nullable|integer|min:1',
+            'slot_duration' => 'required|integer|min:1',
 
             'admission_fee' => 'nullable|numeric|min:0',
             'monthly_fee' => 'nullable|numeric|min:0',
@@ -134,7 +134,7 @@ class BaseClassRoomController extends BaseServiceController
             'selected_days.*' => 'string',
 
             'time_slot' => 'nullable|string|max:255',
-            'slot_duration' => 'nullable|integer|min:1',
+            'slot_duration' => 'required|integer|min:1',
 
             'admission_fee' => 'nullable|numeric|min:0',
             'monthly_fee' => 'nullable|numeric|min:0',

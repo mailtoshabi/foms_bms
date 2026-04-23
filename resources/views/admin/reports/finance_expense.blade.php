@@ -5,7 +5,12 @@
 
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h4>Expense Report</h4>
+            <h4 class="mb-0">
+                <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                Expense Report
+            </h4>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
                 <i class="fas fa-plus"></i> Add Direct Expense
             </button>
@@ -54,14 +59,16 @@
                 </div>
             </div>
 
-            <form method="GET" class="row mb-3">
+            <form method="GET" class="row mb-3 align-items-end">
 
                 <div class="col-md-3">
+                    <label class="form-label fw-bold">Search</label>
                     <input type="text" name="search" value="{{ request('search') }}" class="form-control"
                         placeholder="Search name/particular/remarks">
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label fw-bold">Type</label>
                     <select name="type" class="form-control">
                         <option value="">All Types</option>
                         <option value="staff_salary" {{ request('type') == 'staff_salary' ? 'selected' : '' }}>Staff Salary
@@ -73,10 +80,12 @@
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label fw-bold">From Date</label>
                     <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
                 </div>
 
                 <div class="col-md-2">
+                    <label class="form-label fw-bold">To Date</label>
                     <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
                 </div>
 

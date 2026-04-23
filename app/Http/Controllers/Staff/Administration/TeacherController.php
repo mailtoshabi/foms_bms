@@ -41,6 +41,11 @@ public function create()
 
 public function store(Request $request)
 {
+    $request->merge([
+        'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+    ]);
+    
     $request->merge(['phone' => $request->contact_number]);
     $request->validate([
         'name'           => 'required',
@@ -116,6 +121,11 @@ public function edit($id)
 public function update(Request $request,$id)
 {
     $teacher = Teacher::findOrFail(decrypt($id));
+
+    $request->merge([
+        'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+    ]);
 
     $request->merge(['phone' => $request->contact_number]);
 

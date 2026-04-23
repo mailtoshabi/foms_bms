@@ -49,7 +49,7 @@
 <div class="mb-3 required">
 <label>Category</label>
 
-<select name="category_id" class="form-control select2">
+<select name="category_id" class="form-control select2 @error('category_id') is-invalid @enderror">
 <option value="">Select Category</option>
 
 @foreach($categories as $category)
@@ -65,7 +65,7 @@
 </select>
 
 @error('category_id')
-<p class="text-danger">{{ $message }}</p>
+<div class="invalid-feedback">{{ $message }}</div>
 @enderror
 </div>
 </div>
@@ -76,12 +76,12 @@
 <label>Course Name</label>
 <input type="text"
        name="name"
-       class="form-control"
+       class="form-control @error('name') is-invalid @enderror"
        placeholder="Course Name"
-       value="{{ $course->name ?? old('name') }}">
+       value="{{ old('name', $course->name ?? '') }}">
 
 @error('name')
-<p class="text-danger">{{ $message }}</p>
+<div class="invalid-feedback">{{ $message }}</div>
 @enderror
 </div>
 

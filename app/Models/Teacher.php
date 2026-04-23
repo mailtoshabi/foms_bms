@@ -166,4 +166,19 @@ public function getSalaryCreditDateAttribute()
 
     return $date->addDays(10)->format('d M Y');
 }
+
+public function setContactNumberAttribute($value)
+{
+    $this->attributes['contact_number'] = preg_replace('/[^0-9]/', '', $value);
+}
+
+public function setWhatsappNumberAttribute($value)
+{
+    $this->attributes['whatsapp_number'] = preg_replace('/[^0-9]/', '', $value);
+}
+
+public function setPhoneAttribute($value)
+{
+    $this->attributes['phone'] = preg_replace('/[^0-9]/', '', $value);
+}
 }

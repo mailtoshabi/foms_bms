@@ -8,6 +8,27 @@
     @endif
 @endsection
 
+@section('css')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .auth-page {
+            overflow-y: auto !important;
+            height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+            .auth-page {
+                overflow: visible !important;
+            }
+        }
+
+        #pwa-install-banner,
+        #pwa-ios-banner {
+            display: none !important;
+        }
+    </style>
+@endsection
+
 @section('content')
 
     @php
@@ -84,8 +105,8 @@
                                             @endif
 
                                             <div class="form-floating form-floating-custom mb-4">
-                                                <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $lead->name) }}"
-                                                    required>
+                                                <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                                    name="name" value="{{ old('name', $lead->name) }}" required>
                                                 <label>Name</label>
                                                 <div class="form-floating-icon">
                                                     <i data-feather="user"></i>
@@ -97,7 +118,9 @@
 
 
                                             <div class="form-floating form-floating-custom mb-4">
-                                                <input type="text" class="form-control @error('contact_number') is-invalid @enderror" name="contact_number"
+                                                <input type="text"
+                                                    class="form-control @error('contact_number') is-invalid @enderror"
+                                                    name="contact_number"
                                                     value="{{ old('contact_number', $lead->contact_number) }}" required>
                                                 <label>Contact Number</label>
                                                 <div class="form-floating-icon">
@@ -110,12 +133,17 @@
 
 
                                             <div class="form-check form-switch mb-3">
-                                                <input class="form-check-input" type="checkbox" id="whatsapp_different" name="is_whatsapp_different" value="1">
-                                                <label class="form-check-label" for="whatsapp_different">WhatsApp number is different?</label>
+                                                <input class="form-check-input" type="checkbox" id="whatsapp_different"
+                                                    name="is_whatsapp_different" value="1" {{ old('is_whatsapp_different') ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="whatsapp_different">WhatsApp number is
+                                                    different?</label>
                                             </div>
 
-                                            <div id="whatsapp_field_group" class="form-floating form-floating-custom mb-4" style="{{ old('is_whatsapp_different') ? '' : 'display: none;' }}">
-                                                <input type="text" class="form-control @error('whatsapp_number') is-invalid @enderror" name="whatsapp_number" id="whatsapp_number"
+                                            <div id="whatsapp_field_group" class="form-floating form-floating-custom mb-4"
+                                                style="{{ old('is_whatsapp_different') ? '' : 'display: none;' }}">
+                                                <input type="text"
+                                                    class="form-control @error('whatsapp_number') is-invalid @enderror"
+                                                    name="whatsapp_number" id="whatsapp_number"
                                                     value="{{ old('whatsapp_number') }}"
                                                     placeholder="Include country code (e.g. 919876543210)">
                                                 <label>WhatsApp Number (with country code)</label>
@@ -126,30 +154,38 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
-                                            </div>
 
 
                                             <div class="form-floating form-floating-custom mb-4">
-                                                <input type="email" class="form-control" name="email"
-                                                    value="{{ $lead->email }}">
+                                                <input type="email" class="form-control @error('email') is-invalid @enderror" name="email"
+                                                    value="{{ old('email', $lead->email) }}">
                                                 <label>Email</label>
                                                 <div class="form-floating-icon">
                                                     <i data-feather="mail"></i>
                                                 </div>
+                                                @error('email')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
 
                                             <div class="form-floating form-floating-custom mb-4">
-                                                <input type="date" class="form-control" name="dob">
+                                                <input type="date" class="form-control @error('dob') is-invalid @enderror" name="dob" value="{{ old('dob') }}">
                                                 <label>Date of Birth</label>
+                                                @error('dob')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
 
                                             @if($type == 'student')
 
                                                 <div class="form-floating form-floating-custom mb-4">
-                                                    <input type="text" class="form-control" name="parent_name">
+                                                    <input type="text" class="form-control @error('parent_name') is-invalid @enderror" name="parent_name" value="{{ old('parent_name') }}">
                                                     <label>Parent Name</label>
+                                                    @error('parent_name')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                             @endif
@@ -157,7 +193,10 @@
 
                                             <div class="mb-4">
                                                 <label class="form-label">Address</label>
-                                                <textarea name="address" class="form-control"></textarea>
+                                                <textarea name="address" class="form-control @error('address') is-invalid @enderror">{{ old('address') }}</textarea>
+                                                @error('address')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
 
@@ -168,19 +207,20 @@
 
 
                                                 <div class="mb-4">
-                                                    <label class="form-label">Preferred Days</label>
+                                                    <label class="form-label">Preferred Days @error('selected_days') <span class="text-danger">({{ $message }})</span> @enderror</label>
 
                                                     <div class="d-flex flex-wrap gap-2">
 
                                                         @php
                                                             $days = ['mon' => 'Mon', 'tue' => 'Tue', 'wed' => 'Wed', 'thu' => 'Thu', 'fri' => 'Fri', 'sat' => 'Sat', 'sun' => 'Sun'];
+                                                            $selectedDays = old('selected_days', []);
                                                         @endphp
 
                                                         @foreach($days as $key => $day)
 
                                                             <label class="form-check">
                                                                 <input type="checkbox" name="selected_days[]" value="{{ $key }}"
-                                                                    class="form-check-input class-day">
+                                                                    class="form-check-input class-day" {{ in_array($key, $selectedDays) ? 'checked' : '' }}>
 
                                                                 <span class="form-check-label">
                                                                     {{ $day }}
@@ -200,13 +240,19 @@
                                                 </div>
 
                                                 <div class="form-floating form-floating-custom mb-4">
-                                                    <input type="text" class="form-control" name="time_slot" id="time_slot">
+                                                    <input type="text" class="form-control @error('time_slot') is-invalid @enderror" name="time_slot" id="time_slot" value="{{ old('time_slot') }}">
                                                     <label>Preferred Time Slot</label>
+                                                    @error('time_slot')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                                 <div class="form-floating form-floating-custom mb-4">
-                                                    <input type="date" class="form-control" name="starting_date">
+                                                    <input type="date" class="form-control @error('starting_date') is-invalid @enderror" name="starting_date" value="{{ old('starting_date') }}">
                                                     <label>Preferred Starting Date</label>
+                                                    @error('starting_date')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                             @endif
@@ -217,18 +263,27 @@
                                             @if($type == 'teacher')
 
                                                 <div class="form-floating form-floating-custom mb-4">
-                                                    <input type="text" class="form-control" name="qualification">
+                                                    <input type="text" class="form-control @error('qualification') is-invalid @enderror" name="qualification" value="{{ old('qualification') }}">
                                                     <label>Qualification</label>
+                                                    @error('qualification')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                                 <div class="form-floating form-floating-custom mb-4">
-                                                    <input type="number" class="form-control" name="experience">
+                                                    <input type="number" class="form-control @error('experience') is-invalid @enderror" name="experience" value="{{ old('experience') }}">
                                                     <label>Experience (Years)</label>
+                                                    @error('experience')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                                 <div class="form-floating form-floating-custom mb-4">
-                                                    <input type="text" class="form-control" name="upi_number">
+                                                    <input type="text" class="form-control @error('upi_number') is-invalid @enderror" name="upi_number" value="{{ old('upi_number') }}">
                                                     <label>UPI Number</label>
+                                                    @error('upi_number')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                             @endif
@@ -239,12 +294,18 @@
 
                                             <div class="mb-4">
                                                 <label class="form-label">Photo</label>
-                                                <input type="file" class="form-control" name="photo">
+                                                <input type="file" class="form-control @error('photo') is-invalid @enderror" name="photo">
+                                                @error('photo')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
                                             <div class="mb-4">
                                                 <label class="form-label">ID Proof</label>
-                                                <input type="file" class="form-control" name="id_proof">
+                                                <input type="file" class="form-control @error('id_proof') is-invalid @enderror" name="id_proof">
+                                                @error('id_proof')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
                                             </div>
 
 
@@ -293,8 +354,8 @@
 
 
                 {{-- RIGHT SIDE DESIGN --}}
-                <div class="col-xxl-9 col-lg-8 col-md-7">
-                    <div class="auth-bg pt-md-5 p-4 d-flex">
+                <div class="col-xxl-9 col-lg-8 col-md-7 d-none d-md-block">
+                    <div class="auth-bg pt-md-5 p-4 d-flex sticky-top vh-100">
 
                         <div class="bg-overlay"></div>
 
@@ -361,7 +422,6 @@
 
 
 @section('script')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>

@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.master')
+@extends('admin.layouts.master')
 
 @section('title') Staff List @endsection
 
@@ -40,47 +40,51 @@
 <div class="row">
 
 <div class="col-md-3">
-<input type="text"
-       name="name"
-       value="{{ request('name') }}"
-       class="form-control"
-       placeholder="Search by Name">
+    <label class="form-label fw-bold">Name</label>
+    <input type="text"
+           name="name"
+           value="{{ request('name') }}"
+           class="form-control"
+           placeholder="Search by Name">
 </div>
 
 <div class="col-md-3">
-<input type="text"
-       name="phone"
-       value="{{ request('phone') }}"
-       class="form-control"
-       placeholder="Search by Contact">
+    <label class="form-label fw-bold">Contact</label>
+    <input type="text"
+           name="phone"
+           value="{{ request('phone') }}"
+           class="form-control"
+           placeholder="Search by Contact">
 </div>
 
 <div class="col-md-3">
-<select name="role" class="form-control">
-<option value="">All Departments</option>
+    <label class="form-label fw-bold">Department</label>
+    <select name="role" class="form-control">
+        <option value="">All Departments</option>
 
-@foreach($roles as $role)
-<option value="{{ $role->id }}"
-@if(request('role')==$role->id) selected @endif>
-{{ ucfirst($role->name) }}
-</option>
-@endforeach
+        @foreach($roles as $role)
+            <option value="{{ $role->id }}"
+                @if(request('role')==$role->id) selected @endif>
+                {{ ucfirst($role->name) }}
+            </option>
+        @endforeach
 
-</select>
+    </select>
 </div>
 
 <div class="col-md-2">
-<select name="status" class="form-control">
-<option value="">All Status</option>
-<option value="active" {{ request('status')=='active'?'selected':'' }}>Active</option>
-<option value="blocked" {{ request('status')=='blocked'?'selected':'' }}>Blocked</option>
-</select>
+    <label class="form-label fw-bold">Status</label>
+    <select name="status" class="form-control">
+        <option value="">All Status</option>
+        <option value="active" {{ request('status')=='active'?'selected':'' }}>Active</option>
+        <option value="blocked" {{ request('status')=='blocked'?'selected':'' }}>Blocked</option>
+    </select>
 </div>
 
-<div class="col-md-1 d-grid">
-<button class="btn btn-primary">
-<i class="fas fa-search"></i>
-</button>
+<div class="col-md-1 d-grid align-items-end">
+    <button class="btn btn-primary">
+        <i class="fas fa-search"></i>
+    </button>
 </div>
 
 </div>

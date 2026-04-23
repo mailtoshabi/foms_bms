@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.master')
+@extends('admin.layouts.master')
 @section('title') Course List @endsection
 
 @section('content')
@@ -32,37 +32,39 @@
 <div class="row">
 
 <div class="col-md-4">
-<input type="text"
-       name="name"
-       value="{{ request('name') }}"
-       class="form-control"
-       placeholder="Search by Course Name">
+    <label class="form-label fw-bold">Course Name</label>
+    <input type="text"
+           name="name"
+           value="{{ request('name') }}"
+           class="form-control"
+           placeholder="Search by Course Name">
 </div>
 
 <div class="col-md-4">
-<select name="category_id" class="form-control select2">
-<option value="">All Categories</option>
+    <label class="form-label fw-bold">Category</label>
+    <select name="category_id" class="form-control select2">
+        <option value="">All Categories</option>
 
-@foreach($categories as $category)
-<option value="{{ $category->id }}"
-@if(request('category_id')==$category->id) selected @endif>
-{{ ucfirst($category->name) }}
-</option>
-@endforeach
+        @foreach($categories as $category)
+            <option value="{{ $category->id }}"
+                @if(request('category_id')==$category->id) selected @endif>
+                {{ ucfirst($category->name) }}
+            </option>
+        @endforeach
 
-</select>
+    </select>
 </div>
 
-<div class="col-md-2 d-grid">
-<button class="btn btn-primary">
-<i class="fas fa-search"></i> Filter
-</button>
+<div class="col-md-2 d-grid align-items-end">
+    <button class="btn btn-primary">
+        <i class="fas fa-search"></i> Filter
+    </button>
 </div>
 
-<div class="col-md-2 d-grid">
-<a href="{{ route('admin.courses.index') }}" class="btn btn-light">
-Reset
-</a>
+<div class="col-md-2 d-grid align-items-end">
+    <a href="{{ route('admin.courses.index') }}" class="btn btn-light">
+        Reset
+    </a>
 </div>
 
 </div>

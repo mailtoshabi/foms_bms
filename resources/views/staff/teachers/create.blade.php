@@ -27,8 +27,11 @@
                 {{-- ================= TEACHER DETAILS ================= --}}
                 <div class="card">
 
-                    <div class="card-header">
-                        <h4 class="card-title">Teacher Details</h4>
+                    <div class="card-header d-flex align-items-center">
+                        <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        <h4 class="card-title mb-0">Teacher Details</h4>
                     </div>
 
                     <div class="card-body">
@@ -53,8 +56,11 @@
 
                             <div class="col-md-6 mb-3">
                                 <label>Name</label>
-                                <input type="text" name="name" class="form-control"
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                                     value="{{ old('name', $teacher->name ?? '') }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
@@ -89,43 +95,61 @@
 
                             <div class="col-md-6 mb-3">
                                 <label>Email</label>
-                                <input type="email" name="email" class="form-control"
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                     value="{{ old('email', $teacher->email ?? '') }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
                             <div class="col-md-6 mb-3">
                                 <label>Date of Birth</label>
-                                <input type="date" name="dob" class="form-control"
+                                <input type="date" name="dob" class="form-control @error('dob') is-invalid @enderror"
                                     value="{{ old('dob', isset($teacher) && $teacher->dob ? $teacher->dob->format('Y-m-d') : '') }}">
+                                @error('dob')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
                             <div class="col-md-6 mb-3">
                                 <label>Qualification</label>
-                                <input type="text" name="qualification" class="form-control"
+                                <input type="text" name="qualification" class="form-control @error('qualification') is-invalid @enderror"
                                     value="{{ old('qualification', $teacher->qualification ?? '') }}">
+                                @error('qualification')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
                             <div class="col-md-6 mb-3">
                                 <label>Experience (Years)</label>
-                                <input type="number" name="experience" class="form-control"
+                                <input type="number" name="experience" class="form-control @error('experience') is-invalid @enderror"
                                     value="{{ old('experience', $teacher->experience ?? '') }}">
+                                @error('experience')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
                             <div class="col-md-6 mb-3">
                                 <label>UPI Number</label>
-                                <input type="text" name="upi_number" class="form-control"
+                                <input type="text" name="upi_number" class="form-control @error('upi_number') is-invalid @enderror"
                                     value="{{ old('upi_number', $teacher->upi_number ?? '') }}">
+                                @error('upi_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
                             <div class="col-md-12 mb-3">
                                 <label>Address</label>
                                 <textarea name="address"
-                                    class="form-control">{{ old('address', $teacher->address ?? '') }}</textarea>
+                                    class="form-control @error('address') is-invalid @enderror">{{ old('address', $teacher->address ?? '') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
 
@@ -172,7 +196,10 @@
 
                                 <label>Password</label>
 
-                                <input type="password" name="password" id="password" class="form-control">
+                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror">
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
 
                                 @if($isEdit)
                                     <small class="text-muted">

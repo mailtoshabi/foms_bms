@@ -58,16 +58,16 @@ class AdmissionController extends Controller
         $request->merge(['phone' => $request->contact_number]);
 
         $request->validate([
-            'name'           => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'contact_number' => 'required|string|digits_between:7,15',
-            'phone'          => [
+            'phone' => [
                 'required',
                 $type == 'student'
-                    ? Rule::unique('students', 'phone')->where('country_id', $lead->country_id)
-                    : Rule::unique('teachers', 'phone')->where('country_id', $lead->country_id)
+                ? Rule::unique('students', 'phone')->where('country_id', $lead->country_id)
+                : Rule::unique('teachers', 'phone')->where('country_id', $lead->country_id)
             ],
-            'photo'          => 'required|image|max:2048',
-            'id_proof'       => 'required|file|max:4096',
+            'photo' => 'required|image|max:2048',
+            'id_proof' => 'required|file|max:4096',
             'whatsapp_number' => 'nullable|required_if:is_whatsapp_different,1|string|digits_between:7,15'
         ], [
             'phone.unique' => 'This contact number is already registered under this country.'
@@ -97,7 +97,7 @@ class AdmissionController extends Controller
                     $whatsapp_number = $countryCode . $phone;
                 }
 
-                $admissionNo = $this->generateAdmissionNo();
+                $admissionNo = generateAdmissionNo();
 
                 $student = Student::create([
                     'admission_no' => $admissionNo,
@@ -178,17 +178,4 @@ class AdmissionController extends Controller
         }
     }
 
-    private function generateAdmissionNo()
-    {
-        $now = now();
-        $year = $now->format('y');
-        $month = $now->format('m');
-
-        $countThisMonth = Student::whereYear('created_at', $now->year)
-            ->whereMonth('created_at', $now->month)
-            ->count();
-
-        $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
-        return 'FA/' . $year . '/' . $month . '/' . $serial;
-    }
 }

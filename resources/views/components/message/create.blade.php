@@ -20,7 +20,7 @@
 <label class="form-label">Send To</label>
 
 <select name="receiver_id"
-class="form-control select2"
+class="form-control select2 @error('receiver_id') is-invalid @enderror"
 required>
 
 <option value="">-- Select User --</option>
@@ -43,7 +43,7 @@ required>
 </select>
 
 @error('receiver_id')
-<small class="text-danger">{{ $message }}</small>
+<div class="invalid-feedback">{{ $message }}</div>
 @enderror
 
 </div>
@@ -56,13 +56,13 @@ required>
 
 <input type="text"
 name="subject"
-class="form-control"
+class="form-control @error('subject') is-invalid @enderror"
 placeholder="Enter subject"
 value="{{ old('subject') }}"
 required>
 
 @error('subject')
-<small class="text-danger">{{ $message }}</small>
+<div class="invalid-feedback">{{ $message }}</div>
 @enderror
 
 </div>
@@ -74,13 +74,13 @@ required>
 <label class="form-label">Message</label>
 
 <textarea name="message"
-class="form-control"
+class="form-control @error('message') is-invalid @enderror"
 rows="6"
 placeholder="Type your message here..."
 required>{{ old('message') }}</textarea>
 
 @error('message')
-<small class="text-danger">{{ $message }}</small>
+<div class="invalid-feedback">{{ $message }}</div>
 @enderror
 
 </div>

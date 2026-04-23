@@ -36,5 +36,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 return redirect()->route($loginRoute)->with('error', 'Your session has expired. Please log in again.');
             }
+            return $view;
         });
     })->create();

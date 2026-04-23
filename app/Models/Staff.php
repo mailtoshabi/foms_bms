@@ -33,5 +33,15 @@ class Staff extends Authenticatable
     {
         return $this->hasMany(\App\Models\StaffSalary::class, 'staff_id');
     }
+
+    public function setPhoneAttribute($value)
+    {
+        $this->attributes['phone'] = preg_replace('/[^0-9]/', '', $value);
+    }
+
+    public function setGpayNumberAttribute($value)
+    {
+        $this->attributes['gpay_number'] = preg_replace('/[^0-9]/', '', $value);
+    }
 }
 

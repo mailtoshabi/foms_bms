@@ -25,11 +25,16 @@
                 {{-- ================= STUDENT DETAILS ================= --}}
                 <div class="card">
 
-                    <div class="card-header">
-                        <h4 class="card-title">Student Details</h4>
-                        <p class="card-title-desc">
-                            {{ $isEdit ? 'Edit' : 'Enter' }} student details
-                        </p>
+                    <div class="card-header d-flex align-items-center">
+                        <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                        <div>
+                            <h4 class="card-title mb-0">Student Details</h4>
+                            <p class="card-title-desc mb-0">
+                                {{ $isEdit ? 'Edit' : 'Enter' }} student details
+                            </p>
+                        </div>
                     </div>
 
                     <div class="card-body">
@@ -54,8 +59,11 @@
 
                             <div class="col-md-6 mb-3">
                                 <label>Name</label>
-                                <input type="text" name="name" class="form-control"
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                                     value="{{ old('name', $student->name ?? '') }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -87,25 +95,34 @@
 
                             <div class="col-md-6 mb-3">
                                 <label>Email</label>
-                                <input type="email" name="email" class="form-control"
+                                <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                     value="{{ old('email', $student->email ?? '') }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label>Date of Birth</label>
-                                <input type="date" name="dob" class="form-control"
+                                <input type="date" name="dob" class="form-control @error('dob') is-invalid @enderror"
                                     value="{{ old('dob', isset($student) && $student->dob ? $student->dob->format('Y-m-d') : '') }}">
+                                @error('dob')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label>Parent Name</label>
-                                <input type="text" name="parent_name" class="form-control"
+                                <input type="text" name="parent_name" class="form-control @error('parent_name') is-invalid @enderror"
                                     value="{{ old('parent_name', $student->parent_name ?? '') }}">
+                                @error('parent_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label>Status</label>
-                                <select name="status" class="form-control">
+                                <select name="status" class="form-control @error('status') is-invalid @enderror">
                                     <option value="active" {{ old('status', $student->status ?? '') == 'active' ? 'selected' : '' }}>
                                         Active
                                     </option>
@@ -118,12 +135,18 @@
                                         Dropout
                                     </option>
                                 </select>
+                                @error('status')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-12 mb-3">
                                 <label>Address</label>
                                 <textarea name="address"
-                                    class="form-control">{{ old('address', $student->address ?? '') }}</textarea>
+                                    class="form-control @error('address') is-invalid @enderror">{{ old('address', $student->address ?? '') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -166,15 +189,21 @@
                             <div class="col-md-4 mb-3">
                                 <label>Time Slot</label>
 
-                                <input type="text" name="time_slot" id="time_slot" class="form-control"
+                                <input type="text" name="time_slot" id="time_slot" class="form-control @error('time_slot') is-invalid @enderror"
                                     value="{{ old('time_slot', $student->time_slot ?? '') }}">
+                                @error('time_slot')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
 
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <label>Starting Date</label>
-                                <input type="date" name="starting_date" class="form-control"
+                                <input type="date" name="starting_date" class="form-control @error('starting_date') is-invalid @enderror"
                                     value="{{ old('starting_date', isset($student) && $student->starting_date ? $student->starting_date->format('Y-m-d') : '') }}">
+                                @error('starting_date')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
 
                         </div>
@@ -239,7 +268,10 @@
                             <div class="col-md-6 mb-3 {{ $isEdit ? '' : 'required' }}">
                                 <label>Password</label>
 
-                                <input type="password" name="password" id="password" class="form-control">
+                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror">
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
 
                                 @if($isEdit)
                                     <small class="text-muted">

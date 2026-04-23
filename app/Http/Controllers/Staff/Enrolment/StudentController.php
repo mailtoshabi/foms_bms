@@ -75,6 +75,12 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $this->checkManagementRole();
+        
+        $request->merge([
+            'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
+        
         $request->merge(['phone' => $request->contact_number]);
 
         $request->validate([
@@ -113,7 +119,7 @@ class StudentController extends Controller
                 $whatsapp_number = $countryCode . $request->contact_number;
             }
 
-            $admissionNo = $this->generateAdmissionNo();
+            $admissionNo = generateAdmissionNo();
 
             Student::create([
                 'admission_no' => $admissionNo,
@@ -151,19 +157,7 @@ class StudentController extends Controller
         }
     }
 
-    private function generateAdmissionNo()
-    {
-        $now = now();
-        $year = $now->format('y');
-        $month = $now->format('m');
 
-        $countThisMonth = Student::whereYear('created_at', $now->year)
-            ->whereMonth('created_at', $now->month)
-            ->count();
-
-        $serial = str_pad($countThisMonth + 1, 2, '0', STR_PAD_LEFT);
-        return 'FA/' . $year . '/' . $month . '/' . $serial;
-    }
 
 
     public function edit($id)
@@ -180,6 +174,11 @@ class StudentController extends Controller
     {
         $this->checkManagementRole();
         $student = Student::findOrFail(decrypt($id));
+
+        $request->merge([
+            'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
 
         $request->merge(['phone' => $request->contact_number]);
 

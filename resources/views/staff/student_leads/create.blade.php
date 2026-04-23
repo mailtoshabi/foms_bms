@@ -73,9 +73,12 @@
 
                 <div class="col-md-6 mb-3" id="whatsapp_field_group" style="{{ old('is_whatsapp_different', $lead->is_whatsapp_different ?? false) ? '' : 'display: none;' }}">
                     <label>WhatsApp Number (with country code)</label>
-                    <input type="text" name="whatsapp_number" id="whatsapp_number" class="form-control"
+                    <input type="text" name="whatsapp_number" id="whatsapp_number" class="form-control @error('whatsapp_number') is-invalid @enderror"
                         value="{{ old('whatsapp_number', $lead->whatsapp_number ?? '') }}"
                         placeholder="e.g. 919876543210">
+                    @error('whatsapp_number')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="col-md-6 mb-3">
@@ -348,20 +351,29 @@
 
 <div class="col-md-6 mb-3">
 <label>Name</label>
-<input type="text" name="name" class="form-control"
-value="{{ $lead->name }}" required>
+<input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+value="{{ old('name', $lead->name) }}" required>
+@error('name')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
 <label>Contact Number</label>
-<input type="text" name="contact_number" class="form-control"
-value="{{ $lead->contact_number }}" required>
+<input type="text" name="contact_number" class="form-control @error('contact_number') is-invalid @enderror"
+value="{{ old('contact_number', $lead->contact_number) }}" required>
+@error('contact_number')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
 <label>Email</label>
-<input type="email" name="email" class="form-control"
-value="{{ $lead->email }}">
+<input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+value="{{ old('email', $lead->email) }}">
+@error('email')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
@@ -371,21 +383,30 @@ value="{{ $lead->email }}">
     </div>
 </div>
 
-<div class="col-md-6 mb-3" id="convert_whatsapp_field_group" style="{{ $lead->is_whatsapp_different ? '' : 'display: none;' }}">
+<div class="col-md-6 mb-3" id="convert_whatsapp_field_group" style="{{ old('is_whatsapp_different', $lead->is_whatsapp_different) ? '' : 'display: none;' }}">
     <label>WhatsApp Number (with country code)</label>
-    <input type="text" name="whatsapp_number" id="convert_whatsapp_number" class="form-control"
-        value="{{ $lead->whatsapp_number }}"
+    <input type="text" name="whatsapp_number" id="convert_whatsapp_number" class="form-control @error('whatsapp_number') is-invalid @enderror"
+        value="{{ old('whatsapp_number', $lead->whatsapp_number) }}"
         placeholder="e.g. 919876543210">
+    @error('whatsapp_number')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
 </div>
 
 <div class="col-md-6 mb-3">
 <label>Date of Birth</label>
-<input type="date" name="dob" class="form-control">
+<input type="date" name="dob" class="form-control @error('dob') is-invalid @enderror" value="{{ old('dob') }}">
+@error('dob')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
 <label>Parent Name</label>
-<input type="text" name="parent_name" class="form-control">
+<input type="text" name="parent_name" class="form-control @error('parent_name') is-invalid @enderror" value="{{ old('parent_name') }}">
+@error('parent_name')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
@@ -399,17 +420,26 @@ value="{{ $lead->email }}">
 
 <div class="col-md-12 mb-3">
 <label>Address</label>
-<textarea name="address" class="form-control"></textarea>
+<textarea name="address" class="form-control @error('address') is-invalid @enderror">{{ old('address') }}</textarea>
+@error('address')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
 <label>Photo</label>
-<input type="file" name="photo" class="form-control">
+<input type="file" name="photo" class="form-control @error('photo') is-invalid @enderror">
+@error('photo')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-md-6 mb-3">
 <label>ID Proof</label>
-<input type="file" name="id_proof" class="form-control">
+<input type="file" name="id_proof" class="form-control @error('id_proof') is-invalid @enderror">
+@error('id_proof')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 </div>

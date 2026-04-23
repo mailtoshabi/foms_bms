@@ -34,8 +34,13 @@
 
 <div class="card">
 
-<div class="card-header d-flex justify-content-between">
-<h4>Teachers Report</h4>
+<div class="card-header d-flex justify-content-between align-items-center">
+    <h4 class="mb-0">
+        <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        Teachers Report
+    </h4>
 </div>
 
 <div class="card-body table-responsive">
@@ -52,21 +57,24 @@
         </div>
     </div>
 
-<form method="GET" class="row mb-3">
+<form method="GET" class="row mb-3 align-items-end">
 
     <div class="col-md-2">
+        <label class="form-label fw-bold">From Date</label>
         <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
     </div>
 
     <div class="col-md-2">
+        <label class="form-label fw-bold">To Date</label>
         <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
     </div>
 
     <div class="col-md-2">
+        <label class="form-label fw-bold">Status</label>
         <select name="status" class="form-control">
             <option value="">All Status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
         </select>
     </div>
 

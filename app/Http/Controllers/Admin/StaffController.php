@@ -55,6 +55,11 @@ class StaffController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge([
+            'phone'       => preg_replace('/[^0-9]/', '', $request->phone),
+            'gpay_number' => preg_replace('/[^0-9]/', '', $request->gpay_number),
+        ]);
+
         $request->validate([
             'name'          => 'required|string|max:255',
             'phone'         => 'required|string|max:20|unique:staffs,phone',
@@ -125,6 +130,11 @@ class StaffController extends Controller
 
     public function update(Request $request)
     {
+        $request->merge([
+            'phone'       => preg_replace('/[^0-9]/', '', $request->phone),
+            'gpay_number' => preg_replace('/[^0-9]/', '', $request->gpay_number),
+        ]);
+
         $staffId = decrypt($request->staff_id);
 
         $staff = Staff::findOrFail($staffId);

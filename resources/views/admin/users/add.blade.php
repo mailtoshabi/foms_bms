@@ -46,18 +46,22 @@
 
                         <div class="mb-3 required">
                             <label for="name">Name</label>
-                            <input id="name" name="name" type="text" class="form-control"
+                            <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"
                                    placeholder="Full Name"
-                                   value="{{ isset($user) ? $user->name : old('name') }}">
-                            @error('name') <p class="text-danger">{{ $message }}</p> @enderror
+                                   value="{{ old('name', $user->name ?? '') }}">
+                            @error('name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3 required">
                             <label for="phone">Phone</label>
-                            <input id="phone" name="phone" type="text" class="form-control"
+                            <input id="phone" name="phone" type="text" class="form-control @error('phone') is-invalid @enderror"
                                    placeholder="Login Phone"
-                                   value="{{ isset($user) ? $user->phone : old('phone') }}">
-                            @error('phone') <p class="text-danger">{{ $message }}</p> @enderror
+                                   value="{{ old('phone', $user->phone ?? '') }}">
+                            @error('phone')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         {{-- <div class="mb-3">
@@ -81,9 +85,11 @@
 
                         <div class="mb-3 {{ isset($user) ? '' : 'required' }}">
                             <label for="password">Password</label>
-                            <input type="password" name="password" class="form-control"
+                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
                                    placeholder="Enter Password">
-                            @error('password') <p class="text-danger">{{ $message }}</p> @enderror
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
 
                             @if(isset($user))
                                 <small class="text-muted">

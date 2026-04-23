@@ -15,6 +15,7 @@
             <form method="GET" class="row g-2 mb-4">
 
                 <div class="col-md-3">
+                    <label class="form-label fw-bold">Status</label>
                     <select name="filter" class="form-control">
                         <option value="">All Statuses</option>
                         <optgroup label="Session Status">
@@ -33,16 +34,18 @@
                 </div>
 
                 <div class="col-md-3">
+                    <label class="form-label fw-bold">From Date</label>
                     <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}"
                         placeholder="From Date">
                 </div>
 
                 <div class="col-md-3">
+                    <label class="form-label fw-bold">To Date</label>
                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}"
                         placeholder="To Date">
                 </div>
 
-                <div class="col-md-3 d-flex gap-2">
+                <div class="col-md-3 d-flex align-items-end gap-2">
                     <button class="btn btn-primary">Filter</button>
                     <a href="{{ route('teacher.sessions.index') }}" class="btn btn-light">Reset</a>
                 </div>

@@ -47,19 +47,28 @@
 
 <div class="mb-3 required">
 <label>Name</label>
-<input name="name" class="form-control"
-value="{{ $staff->name ?? old('name') }}">
+<input name="name" class="form-control @error('name') is-invalid @enderror"
+value="{{ old('name', $staff->name ?? '') }}">
+@error('name')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="mb-3">
 <label>Email (Optional)</label>
-<input name="email" class="form-control"
-value="{{ $staff->email ?? old('email') }}">
+<input name="email" class="form-control @error('email') is-invalid @enderror"
+value="{{ old('email', $staff->email ?? '') }}">
+@error('email')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="mb-3">
 <label>Address</label>
-<textarea rows="5" name="address" class="form-control">{{ $staff->address ?? old('address') }}</textarea>
+<textarea rows="5" name="address" class="form-control @error('address') is-invalid @enderror">{{ old('address', $staff->address ?? '') }}</textarea>
+@error('address')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 </div>
@@ -84,7 +93,7 @@ value="{{ $staff->gpay_number ?? old('gpay_number') }}">
 
 <div class="mb-3">
 <label>Departments / Roles</label>
-<select name="roles[]" multiple class="form-control select2">
+<select name="roles[]" multiple class="form-control select2 @error('roles') is-invalid @enderror">
 @foreach($roles as $role)
 <option value="{{ $role->id }}"
 @if(isset($staff) && $staff->roles->pluck('id')->contains($role->id)) selected @endif>
@@ -92,6 +101,9 @@ value="{{ $staff->gpay_number ?? old('gpay_number') }}">
 </option>
 @endforeach
 </select>
+@error('roles')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 </div>
@@ -112,13 +124,19 @@ value="{{ $staff->gpay_number ?? old('gpay_number') }}">
 
 <div class="col-sm-6 required">
 <label>Phone (Login)</label>
-<input name="phone" class="form-control"
-value="{{ $staff->phone ?? old('phone') }}">
+<input name="phone" class="form-control @error('phone') is-invalid @enderror"
+value="{{ old('phone', $staff->phone ?? '') }}">
+@error('phone')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 </div>
 
 <div class="col-sm-6 {{ isset($staff)?'':'required' }}">
 <label>Password</label>
-<input type="password" name="password" class="form-control">
+<input type="password" name="password" class="form-control @error('password') is-invalid @enderror">
+@error('password')
+<div class="invalid-feedback">{{ $message }}</div>
+@enderror
 @if(isset($staff))
 <small class="text-muted">Leave blank to keep existing password</small>
 @endif

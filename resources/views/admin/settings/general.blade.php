@@ -31,7 +31,10 @@
                         <div class="col-sm-6">
                             <div class="mb-3">
                                 <label for="name">Name</label>
-                                <input id="name" name="name" type="text" class="form-control"  placeholder="Name" value="{{ Utility::settings('name') }}">
+                                <input id="name" name="name" type="text" class="form-control @error('name') is-invalid @enderror"  placeholder="Name" value="{{ old('name', Utility::settings('name')) }}">
+                                @error('name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="mb-3">
                                 <label for="trade_name">Trande Name</label>
@@ -39,11 +42,17 @@
                             </div>
                             <div class="mb-3">
                                 <label for="email">Email</label>
-                                <input id="email" name="email" type="text" class="form-control"  placeholder="Email" value="{{ Utility::settings('email') }}">
+                                <input id="email" name="email" type="text" class="form-control @error('email') is-invalid @enderror"  placeholder="Email" value="{{ old('email', Utility::settings('email')) }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="mb-3">
                                 <label for="mobile">Mobile No</label>
-                                <input id="mobile" name="mobile" type="text" class="form-control" placeholder="Mobile No" value="{{ Utility::settings('phone') }}">
+                                <input id="mobile" name="mobile" type="text" class="form-control @error('mobile') is-invalid @enderror" placeholder="Mobile No" value="{{ old('mobile', Utility::settings('phone')) }}">
+                                @error('mobile')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="mb-3">
                                 <label for="address1">Address 1</label>
@@ -92,10 +101,10 @@
                                 <label for="cin">CIN </label>
                                 <input id="cin" name="cin" type="text" class="form-control" placeholder="CIN" value="{{ Utility::settings('CIN') }}">
                             </div>
-                            <div class="mb-3">
-                                <label for="pan">PAN </label>
-                                <input id="pan" name="pan" type="text" class="form-control" placeholder="PAN" value="{{ Utility::settings('pan') }}">
-                            </div>
+                             <div class="mb-3">
+                                 <label for="pan">PAN </label>
+                                 <input id="pan" name="pan" type="text" class="form-control" placeholder="PAN" value="{{ Utility::settings('pan') }}">
+                             </div>
                             <div class="mb-3">
                                 <label for="bank_id">Bank ID </label>
                                 <input id="bank_id" name="bank_id" type="text" class="form-control" placeholder="Bank ID" value="{{ Utility::settings('bank_id') }}">

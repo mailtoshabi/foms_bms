@@ -11,8 +11,11 @@
 
             <div class="card">
 
-                <div class="card-header">
-                    <h5>Student Profile</h5>
+                <div class="card-header d-flex align-items-center">
+                    <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <h5 class="mb-0">Student Profile</h5>
                 </div>
 
                 <div class="card-body text-center">

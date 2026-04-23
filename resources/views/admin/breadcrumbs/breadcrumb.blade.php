@@ -2,7 +2,12 @@
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0 font-size-18">{{ $title }}</h4>
+            <h4 class="mb-sm-0 font-size-18">
+                <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+                {{ $title }}
+            </h4>
 
             <div class="page-title-right">
                 <ol class="breadcrumb m-0">

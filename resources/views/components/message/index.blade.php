@@ -1,11 +1,16 @@
 <div class="card">
 
-<div class="card-header d-flex justify-content-between">
-<h4>Messages ({{ $messages->total() }})</h4>
+<div class="card-header d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center">
+        <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h4 class="mb-0">Messages ({{ $messages->total() }})</h4>
+    </div>
 
-<a href="{{ $createRoute }}" class="btn btn-primary">
-New Message
-</a>
+    <a href="{{ $createRoute }}" class="btn btn-primary">
+        New Message
+    </a>
 </div>
 
 <div class="card-body table-responsive">
@@ -14,6 +19,7 @@ New Message
 
 {{-- Sender Filter --}}
 <div class="col-md-3">
+    <label class="form-label fw-bold">Sender</label>
 <select name="sender" class="form-control select2">
 <option value="">All Senders</option>
 
@@ -30,6 +36,7 @@ Staff
 
 {{-- Receiver Filter --}}
 <div class="col-md-3">
+    <label class="form-label fw-bold">Receiver</label>
 <select name="receiver" class="form-control select2">
 <option value="">All Receivers</option>
 
@@ -46,13 +53,14 @@ Staff
 
 {{-- Date Filter --}}
 <div class="col-md-3">
+    <label class="form-label fw-bold">Date</label>
 <input type="date"
 name="date"
 value="{{ request('date') }}"
 class="form-control">
 </div>
 
-<div class="col-md-3 d-flex gap-2">
+<div class="col-md-3 d-flex align-items-end gap-2">
 
 <button class="btn btn-primary">
 Filter

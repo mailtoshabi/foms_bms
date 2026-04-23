@@ -35,86 +35,58 @@ Add Class
 <form method="GET" class="row mb-3">
 
 <div class="col-md-2">
-
-<select name="course_id" class="form-control select2">
-
-<option value="">All Courses</option>
-
-@foreach($courses as $course)
-
-<option value="{{ $course->id }}"
-{{ request('course_id')==$course->id?'selected':'' }}>
-
-{{ $course->name }}
-
-</option>
-
-@endforeach
-
-</select>
-
+    <label class="form-label fw-bold">Course</label>
+    <select name="course_id" class="form-control select2">
+        <option value="">All Courses</option>
+        @foreach($courses as $course)
+            <option value="{{ $course->id }}"
+                {{ request('course_id')==$course->id?'selected':'' }}>
+                {{ $course->name }}
+            </option>
+        @endforeach
+    </select>
 </div>
 
-
 <div class="col-md-2">
-
-<select name="class_type_id" class="form-control select2">
-
-<option value="">All Types</option>
-
-@foreach($types as $type)
-
-<option value="{{ $type->id }}"
-{{ request('class_type_id')==$type->id?'selected':'' }}>
-
-{{ ucfirst($type->name) }}
-
-</option>
-
-@endforeach
-
-</select>
-
+    <label class="form-label fw-bold">Type</label>
+    <select name="class_type_id" class="form-control select2">
+        <option value="">All Types</option>
+        @foreach($types as $type)
+            <option value="{{ $type->id }}"
+                {{ request('class_type_id')==$type->id?'selected':'' }}>
+                {{ ucfirst($type->name) }}
+            </option>
+        @endforeach
+    </select>
 </div>
 
-
 <div class="col-md-2">
-
-<select name="status" class="form-control">
-
-<option value="">All Status</option>
-
-<option value="active"
-{{ request('status')=='active'?'selected':'' }}>
-Active
-</option>
-
-<option value="completed"
-{{ request('status')=='completed'?'selected':'' }}>
-Completed
-</option>
-
-</select>
-
+    <label class="form-label fw-bold">Status</label>
+    <select name="status" class="form-control">
+        <option value="">All Status</option>
+        <option value="active"
+            {{ request('status')=='active'?'selected':'' }}>
+            Active
+        </option>
+        <option value="completed"
+            {{ request('status')=='completed'?'selected':'' }}>
+            Completed
+        </option>
+    </select>
 </div>
 
 <div class="col-md-3">
-
-<input type="text" name="name" value="{{ request('name') }}" class="form-control" placeholder="Search Class Name...">
-
+    <label class="form-label fw-bold">Class Name</label>
+    <input type="text" name="name" value="{{ request('name') }}" class="form-control" placeholder="Search Class Name...">
 </div>
 
-
-<div class="col-md-3 d-flex gap-2">
-
-<button class="btn btn-primary px-3">
-Filter
-</button>
-
-<a href="{{ $indexRoute }}" class="btn btn-light px-3">
-Reset
-</a>
-
+<div class="col-md-3 d-flex align-items-end gap-2">
+    <button class="btn btn-primary px-3">
+        Filter
+    </button>
+    <a href="{{ $indexRoute }}" class="btn btn-light px-3">
+        Reset
+    </a>
 </div>
 
 </form>

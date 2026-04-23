@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.master')
+@extends('admin.layouts.master')
 
 @section('title', 'Teacher Salaries')
 
@@ -56,9 +56,10 @@
                 <div class="card mb-3">
                     <div class="card-body">
 
-                        <div class="row">
+                        <div class="row align-items-end">
 
                             <div class="col-md-3 mb-2">
+                                <label class="form-label fw-bold">Teacher</label>
                                 <select name="teacher_id" class="form-control select2">
                                     <option value="">All Teachers</option>
 
@@ -72,10 +73,12 @@
                             </div>
 
                             <div class="col-md-3 mb-2">
+                                <label class="form-label fw-bold">From Date</label>
                                 <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
                             </div>
 
                             <div class="col-md-3 mb-2">
+                                <label class="form-label fw-bold">To Date</label>
                                 <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
                             </div>
 
@@ -229,26 +232,38 @@
 
                         <div class="mb-3">
                             <label>Payment Date</label>
-                            <input type="date" name="payment_date" id="payment_date" class="form-control">
+                            <input type="date" name="payment_date" id="payment_date" class="form-control @error('payment_date') is-invalid @enderror" value="{{ old('payment_date') }}">
+                            @error('payment_date')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label>Payment Method</label>
-                            <select name="payment_method" id="payment_method" class="form-control">
-                                <option value="cash">Cash</option>
-                                <option value="upi">UPI</option>
-                                <option value="bank_transfer">Bank Transfer</option>
+                            <select name="payment_method" id="payment_method" class="form-control @error('payment_method') is-invalid @enderror">
+                                <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
+                                <option value="upi" {{ old('payment_method') == 'upi' ? 'selected' : '' }}>UPI</option>
+                                <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
                             </select>
+                            @error('payment_method')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label>Reference Number</label>
-                            <input type="text" name="reference_number" id="reference_number" class="form-control">
+                            <input type="text" name="reference_number" id="reference_number" class="form-control @error('reference_number') is-invalid @enderror" value="{{ old('reference_number') }}">
+                            @error('reference_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="mb-3">
                             <label>Notes</label>
-                            <textarea name="notes" id="notes" class="form-control"></textarea>
+                            <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
+                            @error('notes')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                     </div>

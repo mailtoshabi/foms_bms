@@ -114,6 +114,18 @@ class Student extends Authenticatable
         return $code ? $code . ' ' . $this->phone : $this->phone;
     }
 
+    public function setContactNumberAttribute($value)
+    {
+        $this->attributes['contact_number'] = preg_replace('/[^0-9]/', '', $value);
+    }
 
+    public function setWhatsappNumberAttribute($value)
+    {
+        $this->attributes['whatsapp_number'] = preg_replace('/[^0-9]/', '', $value);
+    }
 
+    public function setPhoneAttribute($value)
+    {
+        $this->attributes['phone'] = preg_replace('/[^0-9]/', '', $value);
+    }
 }

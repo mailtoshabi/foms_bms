@@ -96,4 +96,14 @@ class StudentLead extends Model
             }
         });
     }
+
+    public function setContactNumberAttribute($value)
+    {
+        $this->attributes['contact_number'] = preg_replace('/[^0-9]/', '', $value);
+    }
+
+    public function setWhatsappNumberAttribute($value)
+    {
+        $this->attributes['whatsapp_number'] = preg_replace('/[^0-9]/', '', $value);
+    }
 }

@@ -31,9 +31,9 @@
                         <div class="col-sm-12">
                             <div class="mb-3">
                                 <label for="old_password">Old Password</label>
-                                <input id="old_password" name="old_password" type="password" class="form-control"  placeholder="Old Password" value="{{ old('name') }}">
+                                <input id="old_password" name="old_password" type="password" class="form-control @error('old_password') is-invalid @enderror" placeholder="Old Password">
                                 @error('old_password')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
@@ -43,9 +43,9 @@
                         <div class="col-sm-6">
                             <div class="mb-3">
                                 <label for="new_password">New Password</label>
-                                <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Enter Your Password">
+                                <input type="password" class="form-control @error('new_password') is-invalid @enderror" id="new_password" name="new_password" placeholder="Enter Your Password">
                                 @error('new_password')
-                                    <span class="text-danger">{{ $message }}</span>
+                                    <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
