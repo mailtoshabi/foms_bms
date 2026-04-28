@@ -60,6 +60,27 @@
                 </div>
             </form>
 
+            @if(request()->anyFilled(['class_room_id', 'teacher_id', 'status', 'from_date', 'to_date']))
+                <div class="row mb-4">
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card bg-primary bg-gradient text-white shadow-sm mb-0">
+                            <div class="card-body p-3">
+                                <h6 class="text-white-50 mb-2">Total Sessions</h6>
+                                <h4 class="mb-0 text-white"><i class="fas fa-video me-2"></i>{{ $totalClassHours }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="card bg-success bg-gradient text-white shadow-sm mb-0">
+                            <div class="card-body p-3">
+                                <h6 class="text-white-50 mb-2">Total Duration</h6>
+                                <h4 class="mb-0 text-white"><i class="fas fa-clock me-2"></i>{{ $totalDurationFormatted }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="table-responsive">
                 <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">

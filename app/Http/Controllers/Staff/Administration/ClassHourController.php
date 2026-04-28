@@ -33,6 +33,13 @@ class ClassHourController extends Controller
             $query->whereDate('class_started_at', '<=', $request->to_date);
         }
 
+        $totalClassHours = $query->count();
+        $totalDurationMins = (int) $query->sum('duration');
+
+        $totalDurationHours = floor($totalDurationMins / 60);
+        $remainingMins = $totalDurationMins % 60;
+        $totalDurationFormatted = "{$totalDurationHours}h {$remainingMins}m";
+
         $data = $query->latest('class_started_at')->paginate(20)->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
@@ -43,6 +50,12 @@ class ClassHourController extends Controller
             ? optional(\App\Models\Teacher::find($request->teacher_id))->name
             : null;
 
-        return view('staff.reports.class_hours', compact('data', 'selectedClassName', 'selectedTeacherName'));
+        return view('staff.reports.class_hours', compact(
+            'data',
+            'selectedClassName',
+            'selectedTeacherName',
+            'totalClassHours',
+            'totalDurationFormatted'
+        ));
     }
 }
