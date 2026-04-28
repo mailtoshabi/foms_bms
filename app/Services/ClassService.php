@@ -155,7 +155,6 @@ class ClassService
                 $student = Student::findOrFail($studentId);
 
                 $isAdmissionExempted = $student->is_admission_fee_exempted;
-                $isMonthlyExempted = $student->is_monthly_fee_exempted;
 
                 // Skip if admission exempted
                 if ($isAdmissionExempted) {

@@ -75,12 +75,12 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $this->checkManagementRole();
-        
+
         $request->merge([
-            'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
             'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
         ]);
-        
+
         $request->merge(['phone' => $request->contact_number]);
 
         $request->validate([
@@ -176,7 +176,7 @@ class StudentController extends Controller
         $student = Student::findOrFail(decrypt($id));
 
         $request->merge([
-            'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
             'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
         ]);
 
@@ -325,7 +325,14 @@ class StudentController extends Controller
         ]);
 
         $student = Student::findOrFail($request->student_id);
-        $class = ClassRoom::findOrFail($request->class_room_id);
+        $class = ClassRoom::with('classType', 'students')->findOrFail($request->class_room_id);
+
+        // 🔴 INDIVIDUAL CLASS LOGIC
+        if ($class->classType?->name === 'individual') {
+            if ($class->students()->count() > 0) {
+                return back()->with('error', 'Only one student allowed for individual class.');
+            }
+        }
 
         // duplicate
         if ($student->class_rooms()->where('class_room_id', $class->id)->exists()) {
@@ -342,7 +349,6 @@ class StudentController extends Controller
         // =========================
 
         $isAdmissionExempted = $student->is_admission_fee_exempted;
-        $isMonthlyExempted = $student->is_monthly_fee_exempted;
 
 
         // Case: No admission fee if exempted
