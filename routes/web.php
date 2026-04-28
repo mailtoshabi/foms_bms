@@ -615,6 +615,8 @@ Route::prefix('departments')->name('staff.')->group(function () {
             Route::post('/old-data/students-import', [OldDataController::class, 'importStudentData'])->name('old_data.students_import');
             Route::post('/old-data/student-assignments-import', [OldDataController::class, 'importStudentClassRoom'])->name('old_data.student_assignments_import');
             Route::post('/old-data/teachers-import', [OldDataController::class, 'importTeacherData'])->name('old_data.teachers_import');
+            Route::post('/old-data/teacher-assignments-import', [OldDataController::class, 'importTeacherClassRoom'])->name('old_data.teacher_assignments_import');
+            Route::post('/old-data/students-bulk-create', [OldDataController::class, 'bulkCreateStudents'])->name('old_data.students_bulk_create');
         });
 
         Route::middleware('role:id_hr_dept,id_finance_dept,id_operation_dept')

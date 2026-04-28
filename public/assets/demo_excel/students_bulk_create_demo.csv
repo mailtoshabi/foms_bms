@@ -1,0 +1,4 @@
+admission_no,country_code,phone,name,whatsapp_number,starting_date
+ADM001,+91,9876543210,John Doe,9876543210,2023-01-15
+ADM002,+971,501234567,Jane Smith,501234567,2023-02-01
+ADM003,+1,5551234567,Alice Johnson,5559876543,2023-03-10

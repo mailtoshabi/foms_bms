@@ -8,6 +8,7 @@ use App\Imports\StudentOldDataImport;
 use App\Imports\StudentClassRoomImport;
 use App\Imports\TeacherOldDataImport;
 use App\Imports\TeacherClassRoomImport;
+use App\Imports\StudentBulkCreateImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 
@@ -85,6 +86,20 @@ class OldDataController extends Controller
             return back()->with('success_teacher_assignments', 'Teacher assignments updated successfully.');
         } catch (\Exception $e) {
             return back()->with('error_teacher_assignments', 'Error during import: ' . $e->getMessage());
+        }
+    }
+
+    public function bulkCreateStudents(Request $request)
+    {
+        $request->validateWithBag('students_bulk_create', [
+            'file' => 'required|extensions:xlsx,xls,csv'
+        ]);
+
+        try {
+            Excel::import(new StudentBulkCreateImport, $request->file('file'));
+            return back()->with('success_students_bulk_create', 'Students created successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error_students_bulk_create', 'Error during import: ' . $e->getMessage());
         }
     }
 }

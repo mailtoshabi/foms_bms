@@ -282,7 +282,7 @@ class StudentLeadController extends Controller
 
                 // Update lead status
                 $lead->update([
-                    'status' => 'converted'
+                    'status' => 'admitted'
                 ]);
             });
 
