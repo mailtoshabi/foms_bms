@@ -106,6 +106,7 @@
                                     <th>Type</th>
                                     <th>Days</th>
                                     <th>Time</th>
+                                    <th>Assigned Date</th>
                                 </tr>
                             </thead>
 
@@ -136,6 +137,8 @@
 
                                         <td>{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
                                         </td>
+
+                                        <td>{{ $class->pivot->assigned_date ? \Carbon\Carbon::parse($class->pivot->assigned_date)->format('d M Y') : '-' }}</td>
 
                                     </tr>
 

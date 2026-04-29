@@ -20,9 +20,9 @@ class StudentClassRoomImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $row) {
             // Sanitize phone to handle Excel formatting
-            $phone = trim((string)$row['phone']);
+            $phone = trim((string) $row['phone']);
             if (is_numeric($phone) && str_contains($phone, '.')) {
-                 $phone = (string)intval($phone);
+                $phone = (string) intval($phone);
             }
             $phone = preg_replace('/[^0-9]/', '', $phone);
 
@@ -33,7 +33,7 @@ class StudentClassRoomImport implements ToCollection, WithHeadingRow
             // Determine country_id
             $country = null;
             if (isset($row['country_code'])) {
-                $code = trim((string)$row['country_code']);
+                $code = trim((string) $row['country_code']);
                 if (!empty($code)) {
                     if (!str_starts_with($code, '+')) {
                         $code = '+' . $code;
@@ -59,16 +59,20 @@ class StudentClassRoomImport implements ToCollection, WithHeadingRow
 
             if ($student && $classroom) {
                 $date = $this->transformDate($row['date']);
-                
+
                 if ($date) {
                     DB::table('student_class_room')
-                        ->where('student_id', $student->id)
-                        ->where('class_room_id', $classroom->id)
-                        ->update([
-                            'assigned_date' => $date,
-                            'created_at'    => $date,
-                            'updated_at'    => $date,
-                        ]);
+                        ->updateOrInsert(
+                            [
+                                'student_id' => $student->id,
+                                'class_room_id' => $classroom->id,
+                            ],
+                            [
+                                'assigned_date' => $date,
+                                'created_at' => $date,
+                                'updated_at' => $date,
+                            ]
+                        );
                 }
             }
         }
@@ -76,7 +80,8 @@ class StudentClassRoomImport implements ToCollection, WithHeadingRow
 
     private function transformDate($value)
     {
-        if (!$value) return null;
+        if (!$value)
+            return null;
 
         try {
             if (is_numeric($value)) {

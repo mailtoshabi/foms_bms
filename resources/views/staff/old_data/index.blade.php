@@ -68,124 +68,65 @@
             </div>
         </div>
 
-        {{-- 2. Classrooms Import --}}
-        <div class="col-xl-4 col-md-6">
-            <div class="card shadow-sm h-100 border-start border-primary border-4">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0 text-primary"><i class="fas fa-chalkboard me-2"></i>Classroom Dates</h5>
-                    <a href="{{ asset('assets/demo_excel/classrooms_demo.csv') }}" class="btn btn-sm btn-outline-primary"
-                        download>
-                        <i class="fas fa-download me-1"></i> Demo
-                    </a>
-                </div>
-                <div class="card-body d-flex flex-column">
-                    @if ($errors->classrooms->any())
-                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
-                            <ul class="mb-0">
-                                @foreach ($errors->classrooms->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-                    @if (session('success_classrooms'))
-                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
-                            {{ session('success_classrooms') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-                    @if (session('error_classrooms'))
-                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
-                            {{ session('error_classrooms') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
-                    <form action="{{ route('staff.old_data.import') }}" method="POST" enctype="multipart/form-data"
-                        class="flex-grow-1">
-                        @csrf
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Select Excel File</label>
-                            <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
-                            <div class="form-text mt-3">
-                                <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
-                                <ul class="ps-3 text-muted small">
-                                    <li><code>Name</code> (Classroom Name)</li>
-                                    <li><code>Starting Date</code> (New start date)</li>
-                                </ul>
-                                <p class="small text-muted mb-0">Updates: starting_date, Created Date.</p>
-                            </div>
-                        </div>
-                        <div class="d-grid mt-auto">
-                            <button type="submit" class="btn btn-primary"
-                                onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Processing...'; this.form.submit();">
-                                <i class="fas fa-file-import me-1"></i> Update Classrooms
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
         {{-- 3. Students Import --}}
         <!-- <div class="col-xl-4 col-md-6">
-                            <div class="card shadow-sm h-100 border-start border-success border-4">
-                                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                                    <h5 class="card-title mb-0 text-success"><i class="fas fa-user-graduate me-2"></i>Student Data</h5>
-                                    <a href="{{ asset('assets/demo_excel/students_demo.csv') }}" class="btn btn-sm btn-outline-success" download>
-                                        <i class="fas fa-download me-1"></i> Demo
-                                    </a>
-                                </div>
-                                <div class="card-body d-flex flex-column">
-                                    @if ($errors->students->any())
-                                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
-                                            <ul class="mb-0">
-                                                @foreach ($errors->students->all() as $error)
-                                                    <li>{{ $error }}</li>
-                                                @endforeach
-                                            </ul>
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div class="card shadow-sm h-100 border-start border-success border-4">
+                                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                                            <h5 class="card-title mb-0 text-success"><i class="fas fa-user-graduate me-2"></i>Student Data</h5>
+                                            <a href="{{ asset('assets/demo_excel/students_demo.csv') }}" class="btn btn-sm btn-outline-success" download>
+                                                <i class="fas fa-download me-1"></i> Demo
+                                            </a>
                                         </div>
-                                    @endif
-                                    @if (session('success_students'))
-                                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
-                                            {{ session('success_students') }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        <div class="card-body d-flex flex-column">
+                                            @if ($errors->students->any())
+                                                <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                                                    <ul class="mb-0">
+                                                        @foreach ($errors->students->all() as $error)
+                                                            <li>{{ $error }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                </div>
+                                            @endif
+                                            @if (session('success_students'))
+                                                <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                                                    {{ session('success_students') }}
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                </div>
+                                            @endif
+                                            @if (session('error_students'))
+                                                <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                                                    {{ session('error_students') }}
+                                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                </div>
+                                            @endif
+                                            <form action="{{ route('staff.old_data.students_import') }}" method="POST" enctype="multipart/form-data"
+                                                class="flex-grow-1">
+                                                @csrf
+                                                <div class="mb-4">
+                                                    <label class="form-label fw-bold">Select Excel File</label>
+                                                    <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
+                                                    <div class="form-text mt-3">
+                                                        <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
+                                                        <ul class="ps-3 text-muted small">
+                                                            <li><code>Country Code</code> (Optional, default +91)</li>
+                                                            <li><code>Phone</code> (Student unique phone)</li>
+                                                            <li><code>Admission No</code> (New ID)</li>
+                                                            <li><code>Date</code> (System timestamp)</li>
+                                                        </ul>
+                                                        <p class="small text-muted mb-0">Updates: admission_no, Created Date.</p>
+                                                    </div>
+                                                </div>
+                                                <div class="d-grid mt-auto">
+                                                    <button type="submit" class="btn btn-success"
+                                                        onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Processing...'; this.form.submit();">
+                                                        <i class="fas fa-file-import me-1"></i> Update Students
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
-                                    @endif
-                                    @if (session('error_students'))
-                                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
-                                            {{ session('error_students') }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    @endif
-                                    <form action="{{ route('staff.old_data.students_import') }}" method="POST" enctype="multipart/form-data"
-                                        class="flex-grow-1">
-                                        @csrf
-                                        <div class="mb-4">
-                                            <label class="form-label fw-bold">Select Excel File</label>
-                                            <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
-                                            <div class="form-text mt-3">
-                                                <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
-                                                <ul class="ps-3 text-muted small">
-                                                    <li><code>Country Code</code> (Optional, default +91)</li>
-                                                    <li><code>Phone</code> (Student unique phone)</li>
-                                                    <li><code>Admission No</code> (New ID)</li>
-                                                    <li><code>Date</code> (System timestamp)</li>
-                                                </ul>
-                                                <p class="small text-muted mb-0">Updates: admission_no, Created Date.</p>
-                                            </div>
-                                        </div>
-                                        <div class="d-grid mt-auto">
-                                            <button type="submit" class="btn btn-success"
-                                                onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Processing...'; this.form.submit();">
-                                                <i class="fas fa-file-import me-1"></i> Update Students
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div> -->
+                                    </div>
+                                </div> -->
 
         {{-- 4. Student Assignments Import --}}
         <div class="col-xl-4 col-md-6">
@@ -365,6 +306,65 @@
                             <button type="submit" class="btn btn-secondary"
                                 onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Processing...'; this.form.submit();">
                                 <i class="fas fa-file-import me-1"></i> Update Assignments
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- 2. Classrooms Import --}}
+        <div class="col-xl-4 col-md-6">
+            <div class="card shadow-sm h-100 border-start border-primary border-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-primary"><i class="fas fa-chalkboard me-2"></i>Classroom Dates</h5>
+                    <a href="{{ asset('assets/demo_excel/classrooms_demo.csv') }}" class="btn btn-sm btn-outline-primary"
+                        download>
+                        <i class="fas fa-download me-1"></i> Demo
+                    </a>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    @if ($errors->classrooms->any())
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            <ul class="mb-0">
+                                @foreach ($errors->classrooms->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('success_classrooms'))
+                        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
+                            {{ session('success_classrooms') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error_classrooms'))
+                        <div class="alert alert-danger alert-dismissible fade show small py-2" role="alert">
+                            {{ session('error_classrooms') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+                    <form action="{{ route('staff.old_data.import') }}" method="POST" enctype="multipart/form-data"
+                        class="flex-grow-1">
+                        @csrf
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Excel File</label>
+                            <input type="file" name="file" class="form-control" accept=".xlsx, .xls, .csv" required>
+                            <div class="form-text mt-3">
+                                <p class="mb-1 fw-bold text-dark small">Required Columns:</p>
+                                <ul class="ps-3 text-muted small">
+                                    <li><code>Name</code> (Classroom Name)</li>
+                                    <li><code>Starting Date</code> (New start date)</li>
+                                </ul>
+                                <p class="small text-muted mb-0">Updates: starting_date, Created Date.</p>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-auto">
+                            <button type="submit" class="btn btn-primary"
+                                onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Processing...'; this.form.submit();">
+                                <i class="fas fa-file-import me-1"></i> Update Classrooms
                             </button>
                         </div>
                     </form>

@@ -153,6 +153,8 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Contact</th>
+                                <th>Assigned Date</th>
+                                <th>Remove from Class</th>
                             </tr>
                         </thead>
 
@@ -164,7 +166,8 @@
 
                                     <td>{{ $student->name }}</td>
                                     <td>{{ $student->contact_number }}</td>
-
+                                    <td>{{ $student->pivot->assigned_date ? \Carbon\Carbon::parse($student->pivot->assigned_date)->format('d M Y') : '-' }}
+                                    </td>
                                     @php
                                         $administratorRoleId = utility('id_administrator_dept');
                                         $operationRoleId = utility('id_operation_dept');
