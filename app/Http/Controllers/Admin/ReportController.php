@@ -469,7 +469,7 @@ class ReportController extends Controller
 
         // Summary (like salary totals)
         $totalLeads = $query->count();
-        $convertedLeads = $query->clone()->where('status', 'admitted')->count();
+        $convertedLeads = $query->clone()->where('status', 'converted')->count();
         $pendingLeads = $query->clone()->where('status', 'pending')->count();
 
         return view('admin.reports.student_leads', compact(

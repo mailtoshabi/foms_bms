@@ -139,7 +139,7 @@ class StudentLeadController extends Controller
             'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number,' . $lead->id],
             'email' => ['nullable', 'email'],
             'source_id' => ['nullable', 'exists:sources,id'],
-            'status' => ['required', 'in:pending,admitted'],
+            'status' => ['required', 'in:pending,follow_up,no_response,not_interested,interested,converted'],
         ]);
 
         $country = \App\Models\Country::find($request->country_id);
@@ -282,7 +282,7 @@ class StudentLeadController extends Controller
 
                 // Update lead status
                 $lead->update([
-                    'status' => 'admitted'
+                    'status' => 'converted'
                 ]);
             });
 

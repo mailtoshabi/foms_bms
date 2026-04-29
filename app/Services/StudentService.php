@@ -21,7 +21,7 @@ class StudentService
             $studentData
         ));
 
-        $lead->update(['status' => 'admitted']);
+        $lead->update(['status' => 'converted']);
 
         return $student;
     }

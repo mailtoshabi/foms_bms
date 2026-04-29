@@ -20,7 +20,7 @@ class StudentLeadExport implements FromCollection
             return [
                 'Name' => $lead->name,
                 'Phone' => $lead->phone,
-                'Status' => ucfirst($lead->status), // admitted / pending
+                'Status' => ucfirst($lead->status), // converted / pending
                 'Created Date' => $lead->created_at->format('Y-m-d'),
             ];
         });

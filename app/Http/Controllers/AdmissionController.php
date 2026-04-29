@@ -119,7 +119,7 @@ class AdmissionController extends Controller
                 ]);
 
                 $lead->update([
-                    'status' => 'admitted',
+                    'status' => 'converted',
                     'form_disabled' => true,
                     'whatsapp_number' => $whatsapp_number,
                     'is_whatsapp_different' => $isWhatsappDifferent

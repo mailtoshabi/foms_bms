@@ -7,7 +7,8 @@
 
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">
-                <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                <a href="javascript:window.history.back();"
+                    class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 Fee Collection Report
@@ -55,8 +56,7 @@
                             <option value="cash" {{ request('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
                             <option value="upi" {{ request('payment_method') == 'upi' ? 'selected' : '' }}>UPI</option>
                             <option value="card" {{ request('payment_method') == 'card' ? 'selected' : '' }}>Card</option>
-                            <option value="bank_transfer"
-                                {{ request('payment_method') == 'bank_transfer' ? 'selected' : '' }}>
+                            <option value="bank_transfer" {{ request('payment_method') == 'bank_transfer' ? 'selected' : '' }}>
                                 Bank Transfer
                             </option>
                         </select>
@@ -99,7 +99,8 @@
                         <div class="card bg-soft-info border-info">
                             <div class="card-body d-flex justify-content-between align-items-center p-3">
                                 <div>
-                                    <h5 class="text-info mb-1"><i class="mdi mdi-information-outline me-1"></i> Filtering Summary</h5>
+                                    <h5 class="text-info mb-1"><i class="mdi mdi-information-outline me-1"></i> Filtering
+                                        Summary</h5>
                                     <p class="text-muted mb-0 small">Showing total results based on your selected criteria.</p>
                                 </div>
                                 <div class="text-end">
@@ -117,7 +118,7 @@
                 <thead>
                     <tr>
                         <th>Student</th>
-                        <th>Contact</th>
+                        <!-- <th>Contact</th> -->
                         <th>Class</th>
                         <th>Category</th>
                         <th>Amount</th>
@@ -134,7 +135,8 @@
                             <td>{{ $row->name }}
                                 <br><small class="text-muted">{{ $row->contact_number }}</small>
                                 @if($row->is_whatsapp_different)
-                                    <br><small class="text-success" style="font-size: 11px;">WA: +{{ $row->whatsapp_number }}</small>
+                                    <br><small class="text-success" style="font-size: 11px;">WA:
+                                        +{{ $row->whatsapp_number }}</small>
                                 @endif
                             </td>
                             <td>{{ $row->class_name }}</td>
