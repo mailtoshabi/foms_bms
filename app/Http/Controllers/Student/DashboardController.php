@@ -26,9 +26,7 @@ class DashboardController extends Controller
         ])->findOrFail($id);
 
         $currentClass = $student->class_rooms()
-            ->join('class_hours', 'class_rooms.id', '=', 'class_hours.class_room_id')
-            ->select('class_rooms.*')
-            ->orderBy('class_hours.created_at', 'desc')
+            ->orderBy('student_class_room.created_at', 'desc')
             ->first();
 
         $teacher = null;

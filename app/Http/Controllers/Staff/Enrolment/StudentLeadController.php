@@ -225,6 +225,7 @@ class StudentLeadController extends Controller
             'contact_number' => 'required|string|digits_between:7,15',
             'email' => 'nullable|email',
             'classes_per_week' => 'nullable|integer',
+            'time_slot' => 'nullable|string',
             'selected_days' => 'nullable|array',
             'starting_date' => 'nullable|date',
         ]);

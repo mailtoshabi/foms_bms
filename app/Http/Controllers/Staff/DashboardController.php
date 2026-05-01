@@ -69,6 +69,19 @@ class DashboardController extends Controller
         $pendingTeacherLeads         = TeacherLead::where('status', 'pending')->count();
         $unpaidFeesCount             = Fee::whereIn('status', ['unpaid', 'partial'])->count();
         $unpaidFeesAmount            = Fee::whereIn('status', ['unpaid', 'partial'])->sum('amount');
+
+        $fourDaysAgo = now()->subDays(4)->endOfDay();
+
+        $overdueFeesQuery = Fee::where('status', '<>', 'paid')
+            ->whereDate('due_date', '<', $fourDaysAgo);
+
+        $overdueFeesCount = (clone $overdueFeesQuery)->count();
+        $overdueFees      = (clone $overdueFeesQuery)->with('payments')->get();
+            
+        $overdueFeesAmount = $overdueFees->sum(function($fee) {
+            return $fee->amount - $fee->payments->sum('paid_amount');
+        });
+
         $unpaidTeacherSalariesCount  = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->count();
         $unpaidTeacherSalariesAmount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->sum('total_amount');
 
@@ -81,6 +94,8 @@ class DashboardController extends Controller
             'pendingTeacherLeads',
             'unpaidFeesCount',
             'unpaidFeesAmount',
+            'overdueFeesCount',
+            'overdueFeesAmount',
             'unpaidTeacherSalariesCount',
             'unpaidTeacherSalariesAmount'
         ));

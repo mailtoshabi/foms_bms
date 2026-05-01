@@ -24,7 +24,7 @@
                 @endphp
 
                 {{-- Students: enrolment | administrator | operation --}}
-                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
                     <li class="{{ set_active(['staff.student-leads.*', 'staff.students.*']) }}">
                         <a href="javascript:void(0);" class="has-arrow">
                             <i class="fas fa-user-graduate text-primary"></i>
@@ -54,18 +54,20 @@
                                 </li>
                             @endif
 
-                            <li class="{{ set_active(['staff.students.*']) }}">
-                                <a href="{{ route('staff.students.index') }}">
-                                    Students
-                                </a>
-                            </li>
+                            @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
+                                <li class="{{ set_active(['staff.students.*']) }}">
+                                    <a href="{{ route('staff.students.index') }}">
+                                        Students
+                                    </a>
+                                </li>
+                            @endif
 
                         </ul>
                     </li>
                 @endif
 
-                {{-- Teachers: administrator | hr | operation --}}
-                @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
+                {{-- Teachers: administrator | hr | operation | finance --}}
+                @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
                     <li class="{{ set_active(['staff.teacher-leads.*', 'staff.teachers.*']) }}">
                         <a href="javascript:void(0);" class="has-arrow">
                             <i class="mdi mdi-teach text-primary"></i>
@@ -81,23 +83,27 @@
 
                         <ul class="sub-menu" aria-expanded="false">
 
-                            <li class="{{ set_active(['staff.teacher-leads.*']) }}">
-                                <a href="{{ route('staff.teacher-leads.index') }}">
-                                    Teacher Leads
+                            @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
+                                <li class="{{ set_active(['staff.teacher-leads.*']) }}">
+                                    <a href="{{ route('staff.teacher-leads.index') }}">
+                                        Teacher Leads
 
-                                    @if($pendingCount_t > 0)
-                                        <span class="badge bg-warning float-end">
-                                            {{ $pendingCount_t }}
-                                        </span>
-                                    @endif
-                                </a>
-                            </li>
+                                        @if($pendingCount_t > 0)
+                                            <span class="badge bg-warning float-end">
+                                                {{ $pendingCount_t }}
+                                            </span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endif
 
-                            <li class="{{ set_active(['staff.teachers.*']) }}">
-                                <a href="{{ route('staff.teachers.index') }}">
-                                    Teachers
-                                </a>
-                            </li>
+                            @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
+                                <li class="{{ set_active(['staff.teachers.*']) }}">
+                                    <a href="{{ route('staff.teachers.index') }}">
+                                        Teachers
+                                    </a>
+                                </li>
+                            @endif
 
                         </ul>
                     </li>
@@ -135,7 +141,9 @@
                             <span>Salaries</span>
                         </a>
                     </li>
-
+                @endif
+                {{-- Class Hours: hr | operation | finance --}}
+                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
                     <li class="{{ set_active(['staff.class-hours.index']) }}">
                         <a href="{{ route('staff.class-hours.index') }}">
                             <i class="fas fa-history text-info"></i>

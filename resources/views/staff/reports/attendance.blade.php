@@ -58,6 +58,35 @@
 
                         <hr class="my-4">
 
+                        @if(isset($hasFilters) && $hasFilters && isset($summary))
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <div class="card bg-soft-primary border-0 shadow-none">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-primary mb-2">Total Records Found</h6>
+                                            <h3 class="mb-0 text-primary">{{ $summary['total'] }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-soft-success border-0 shadow-none">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-success mb-2">Total Present</h6>
+                                            <h3 class="mb-0 text-success">{{ $summary['present'] }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-soft-danger border-0 shadow-none">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-danger mb-2">Total Absent</h6>
+                                            <h3 class="mb-0 text-danger">{{ $summary['absent'] }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <table class="table table-bordered align-middle">
 
                                 <thead>

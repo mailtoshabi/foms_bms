@@ -1,4 +1,4 @@
-﻿@extends('staff.layouts.master')
+@extends('staff.layouts.master')
 @section('title') Dashboard @endsection
 @section('css')
 
@@ -145,6 +145,25 @@
                                 </div>
                                 <div class="flex-shrink-0">
                                     <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-xl-3 col-md-6">
+                <a href="{{ route('staff.fees.index', ['tab' => 'overdue']) }}" class="text-decoration-none">
+                    <div class="card card-h-100 border-danger bg-soft-danger">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <span class="text-danger fw-bold d-block">Overdue Fees</span>
+                                    <h4 class="mb-0">{{ $overdueFeesCount }} <small
+                                            class="fs-6 text-danger">₹{{ number_format($overdueFeesAmount, 2) }}</small></h4>
+                                </div>
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-clock fa-2x text-danger"></i>
                                 </div>
                             </div>
                         </div>

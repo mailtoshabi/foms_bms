@@ -46,8 +46,19 @@ class ReportController extends Controller
             $query->where('student_attendance.is_present', $request->status);
         }
 
+        $hasFilters = $request->anyFilled(['search', 'from_date', 'to_date', 'status']);
+        $summary = null;
+
+        if ($hasFilters) {
+            $summary = [
+                'total' => (clone $query)->count(),
+                'present' => (clone $query)->where('student_attendance.is_present', 1)->count(),
+                'absent' => (clone $query)->where('student_attendance.is_present', 0)->count(),
+            ];
+        }
+
         $data = $query->latest('class_hours.class_started_at')->paginate(10)->withQueryString();
 
-        return view('staff.reports.attendance', compact('data'));
+        return view('staff.reports.attendance', compact('data', 'hasFilters', 'summary'));
     }
 }

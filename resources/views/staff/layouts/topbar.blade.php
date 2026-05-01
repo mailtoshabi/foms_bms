@@ -8,7 +8,8 @@
                         <i class="fas fa-graduation-cap" style="font-size: 24px;"></i>
                     </span>
                     <span class="logo-lg">
-                        <i class="fas fa-graduation-cap" style="font-size: 24px;"></i> <span class="logo-txt">FOMS ACADEMY Business Management System</span>
+                        <i class="fas fa-graduation-cap" style="font-size: 24px;"></i> <span class="logo-txt">FOMS
+                            ACADEMY Business Management System</span>
                     </span>
                 </a>
 
@@ -18,7 +19,7 @@
                     </span>
                     <span class="logo-lg">
                         {{-- <img src="{{ URL::asset('assets/images/logo-sm.svg') }}" alt="" height="24"> --}}
-                         <span class="logo-txt">FOMS ACADEMY BMS</span>
+                        <span class="logo-txt">FOMS ACADEMY BMS</span>
                     </span>
                 </a>
             </div>
@@ -39,26 +40,47 @@
                 </button>
             </div>
 
+            @php
+                $unreadMessageCount = app(\App\Http\Controllers\Staff\MessageController::class)->getUnreadCount();
+            @endphp
+            <div class="dropdown d-inline-block">
+                <button type="button" class="btn header-item noti-icon position-relative"
+                    onclick="window.location.href='{{ route('staff.messages.index') }}'">
+                    <i data-feather="bell" class="icon-lg"></i>
+                    @if($unreadMessageCount > 0)
+                        <span class="badge bg-danger rounded-pill">{{ $unreadMessageCount }}</span>
+                    @endif
+                </button>
+            </div>
+
 
 
             <div class="dropdown d-inline-block">
-                <button type="submit" onclick="goLink('')" class="btn header-item  me-2"> {{-- right-bar-toggle href="{{ route('admin.settings.index') }}"  --}}
+                <button type="submit" onclick="goLink('')" class="btn header-item  me-2"> {{-- right-bar-toggle href="{{
+                    route('admin.settings.index') }}" --}}
                     <i data-feather="settings" class="icon-lg"></i>
                 </button>
             </div>
 
             <div class="dropdown d-inline-block">
-                <button type="button" class="btn header-item bg-soft-light border-start border-end" id="page-header-user-dropdown"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img class="rounded-circle header-profile-user" src="@if ((Auth::guard('staff')->user()->photo == '') || (empty(Auth::guard('staff')->user()->photo))) https://ui-avatars.com/api/?name={{ Auth::guard('staff')->user()->name }}&size=200 @else {{ URL::asset('images/'. Auth::guard('staff')->user()->photo) }} @endif" alt="Header Avatar">
-                    <span class="d-none d-xl-inline-block ms-1 fw-medium">{{ Auth::guard('staff')->user()->name }}</span>
+                <button type="button" class="btn header-item bg-soft-light border-start border-end"
+                    id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="rounded-circle header-profile-user"
+                        src="@if ((Auth::guard('staff')->user()->photo == '') || (empty(Auth::guard('staff')->user()->photo))) https://ui-avatars.com/api/?name={{ Auth::guard('staff')->user()->name }}&size=200 @else {{ URL::asset('images/' . Auth::guard('staff')->user()->photo) }} @endif"
+                        alt="Header Avatar">
+                    <span
+                        class="d-none d-xl-inline-block ms-1 fw-medium">{{ Auth::guard('staff')->user()->name }}</span>
                     <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- item-->
-                    <a class="dropdown-item" href="{{ route('staff.profile') }}"><i class="mdi mdi-face-profile font-size-16 align-middle me-1"></i> Profile </a>
+                    <a class="dropdown-item" href="{{ route('staff.profile') }}"><i
+                            class="mdi mdi-face-profile font-size-16 align-middle me-1"></i> Profile </a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item " href="javascript:void();" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="bx bx-power-off font-size-16 align-middle me-1"></i> <span key="t-logout">Logout</span></a>
+                    <a class="dropdown-item " href="javascript:void();"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i
+                            class="bx bx-power-off font-size-16 align-middle me-1"></i> <span
+                            key="t-logout">Logout</span></a>
                     <form id="logout-form" action="{{ route('staff.logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>

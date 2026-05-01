@@ -457,6 +457,53 @@
                                     @enderror
                                 </div>
 
+                                <div class="col-12 mt-3 mb-2">
+                                    <h6 class="border-bottom pb-2">Class Schedule</h6>
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label>Classes Per Week</label>
+                                    <input type="number" name="classes_per_week" id="convert_classes_per_week" class="form-control"
+                                        readonly data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="Select days first to calculate classes per week"
+                                        value="{{ old('classes_per_week') }}">
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label>Time Slot</label>
+                                    <input type="text" name="time_slot" id="convert_time_slot" class="form-control @error('time_slot') is-invalid @enderror"
+                                        value="{{ old('time_slot') }}">
+                                    @error('time_slot')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label>Starting Date</label>
+                                    <input type="date" name="starting_date" class="form-control @error('starting_date') is-invalid @enderror"
+                                        value="{{ old('starting_date') }}">
+                                    @error('starting_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-12 mb-3">
+                                    <label>Selected Days</label>
+                                    @php
+                                        $days = ['mon' => 'Monday', 'tue' => 'Tuesday', 'wed' => 'Wednesday', 'thu' => 'Thursday', 'fri' => 'Friday', 'sat' => 'Saturday', 'sun' => 'Sunday'];
+                                        $selectedConvertDays = old('selected_days', []);
+                                    @endphp
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach($days as $key => $day)
+                                            <label class="form-check">
+                                                <input type="checkbox" name="selected_days[]" value="{{ $key }}"
+                                                    class="form-check-input convert-class-day" {{ in_array($key, $selectedConvertDays) ? 'checked' : '' }}>
+                                                <span class="form-check-label">{{ $day }}</span>
+                                            </label>
+                                        @endforeach
+                                    </div>
+                                </div>
+
                             </div>
 
                         </div>
@@ -486,6 +533,9 @@
 
 
 @section('script')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <script>
         $('.select2').select2();
 
@@ -504,6 +554,39 @@
             } else {
                 $('#convert_whatsapp_field_group').hide();
                 $('#convert_whatsapp_number').val('');
+            }
+        });
+
+        flatpickr("#convert_time_slot", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            altInput: true,
+            altFormat: "h:i K"
+        });
+
+        function updateConvertClassesPerWeek() {
+            let count = $('.convert-class-day:checked').length;
+            $('#convert_classes_per_week').val(count);
+        }
+
+        $('.convert-class-day').on('change', function () {
+            updateConvertClassesPerWeek();
+        });
+
+        $(document).ready(function () {
+            updateConvertClassesPerWeek();
+            
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+
+        $('#convert_classes_per_week').on('click', function () {
+            let count = $('.convert-class-day:checked').length;
+            if (count === 0) {
+                alert('Select days first');
             }
         });
     </script>
