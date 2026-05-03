@@ -22,7 +22,7 @@ class ReportController extends Controller
                 'students.whatsapp_number',
                 'students.is_whatsapp_different',
                 'class_rooms.name as class_name',
-                'class_hours.join_teacher_at',
+                'class_hours.updated_at',
                 'student_attendance.is_present'
             );
 
@@ -36,11 +36,11 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('class_hours.join_teacher_at', '>=', $request->from_date);
+            $query->whereDate('class_hours.updated_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('class_hours.join_teacher_at', '<=', $request->to_date);
+            $query->whereDate('class_hours.updated_at', '<=', $request->to_date);
         }
 
         if ($request->filled('status')) {
@@ -62,7 +62,7 @@ class ReportController extends Controller
             ];
         }
 
-        $data = $query->latest('class_hours.join_teacher_at')->paginate(10)->withQueryString();
+        $data = $query->latest('class_hours.updated_at')->paginate(10)->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(ClassRoom::find($request->class_room_id))->name

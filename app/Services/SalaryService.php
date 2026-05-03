@@ -65,7 +65,7 @@ class SalaryService
         $classHours = ClassHour::where('teacher_id', $teacher->id)
             ->where('status', 'completed')
             ->where('has_salary_calculated', false)
-            ->whereBetween('join_teacher_at', [
+            ->whereBetween('updated_at', [
                 $cycleStart,
                 $cycleEnd
             ])
