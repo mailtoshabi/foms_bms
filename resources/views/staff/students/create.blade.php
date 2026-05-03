@@ -26,7 +26,8 @@
                 <div class="card">
 
                     <div class="card-header d-flex align-items-center">
-                        <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                        <a href="javascript:window.history.back();"
+                            class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                         <div>
@@ -69,8 +70,8 @@
                             <div class="col-md-6 mb-3">
                                 <label>Contact Number</label>
                                 <input type="text" name="contact_number" id="contact_number"
-                                    class="form-control @error('contact_number') is-invalid @enderror @error('phone') is-invalid @enderror" maxlength="15"
-                                    value="{{ old('contact_number', $student->contact_number ?? '') }}">
+                                    class="form-control @error('contact_number') is-invalid @enderror @error('phone') is-invalid @enderror"
+                                    maxlength="15" value="{{ old('contact_number', $student->contact_number ?? '') }}">
                                 @error('contact_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -81,12 +82,15 @@
 
                             <div class="col-md-6 mb-3">
                                 <div class="form-check form-switch mt-4">
-                                    <input class="form-check-input" type="checkbox" id="whatsapp_different" name="is_whatsapp_different" value="1" {{ old('is_whatsapp_different', $student->is_whatsapp_different ?? false) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="whatsapp_different">WhatsApp number is different?</label>
+                                    <input class="form-check-input" type="checkbox" id="whatsapp_different"
+                                        name="is_whatsapp_different" value="1" {{ old('is_whatsapp_different', $student->is_whatsapp_different ?? false) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="whatsapp_different">WhatsApp number is
+                                        different?</label>
                                 </div>
                             </div>
 
-                            <div class="col-md-6 mb-3" id="whatsapp_field_group" style="{{ old('is_whatsapp_different', $student->is_whatsapp_different ?? false) ? '' : 'display: none;' }}">
+                            <div class="col-md-6 mb-3" id="whatsapp_field_group"
+                                style="{{ old('is_whatsapp_different', $student->is_whatsapp_different ?? false) ? '' : 'display: none;' }}">
                                 <label>WhatsApp Number (with country code)</label>
                                 <input type="text" name="whatsapp_number" id="whatsapp_number" class="form-control"
                                     value="{{ old('whatsapp_number', $student->whatsapp_number ?? '') }}"
@@ -113,7 +117,8 @@
 
                             <div class="col-md-6 mb-3">
                                 <label>Parent Name</label>
-                                <input type="text" name="parent_name" class="form-control @error('parent_name') is-invalid @enderror"
+                                <input type="text" name="parent_name"
+                                    class="form-control @error('parent_name') is-invalid @enderror"
                                     value="{{ old('parent_name', $student->parent_name ?? '') }}">
                                 @error('parent_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -189,7 +194,8 @@
                             <div class="col-md-4 mb-3">
                                 <label>Time Slot</label>
 
-                                <input type="text" name="time_slot" id="time_slot" class="form-control @error('time_slot') is-invalid @enderror"
+                                <input type="text" name="time_slot" id="time_slot"
+                                    class="form-control @error('time_slot') is-invalid @enderror"
                                     value="{{ old('time_slot', $student->time_slot ?? '') }}">
                                 @error('time_slot')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -199,7 +205,8 @@
 
                             <div class="col-md-4 mb-3">
                                 <label>Starting Date</label>
-                                <input type="date" name="starting_date" class="form-control @error('starting_date') is-invalid @enderror"
+                                <input type="date" name="starting_date"
+                                    class="form-control @error('starting_date') is-invalid @enderror"
                                     value="{{ old('starting_date', isset($student) && $student->starting_date ? $student->starting_date->format('Y-m-d') : '') }}">
                                 @error('starting_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -268,7 +275,8 @@
                             <div class="col-md-6 mb-3 {{ $isEdit ? '' : 'required' }}">
                                 <label>Password</label>
 
-                                <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror">
+                                <input type="password" name="password" id="password"
+                                    class="form-control @error('password') is-invalid @enderror">
                                 @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

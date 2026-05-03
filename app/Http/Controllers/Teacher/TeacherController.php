@@ -179,6 +179,19 @@ class TeacherController extends Controller
         ]);
     }
 
+    public function joinClass($id)
+    {
+        $classHour = ClassHour::findOrFail(decrypt($id));
+
+        // if (is_null($classHour->join_teacher_at)) {
+        $classHour->update([
+            'join_teacher_at' => now()
+        ]);
+        // }
+
+        return redirect()->away($classHour->google_meet_link);
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Sessions – All class hours for the logged-in teacher
@@ -280,7 +293,8 @@ class TeacherController extends Controller
                 // Mark class completed
                 // =========================
                 $classHour->update([
-                    'status' => 'completed'
+                    'status' => 'completed',
+                    'completed_at' => now()
                 ]);
 
                 // =========================

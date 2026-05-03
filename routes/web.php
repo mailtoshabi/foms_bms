@@ -704,6 +704,12 @@ Route::prefix('teacher')
             [TeacherServiceController::class, 'getClassHourStudents']
         );
 
+        // Join class (updates join_teacher_at)
+        Route::get(
+            '/class-hours/{id}/join',
+            [TeacherServiceController::class, 'joinClass']
+        )->name('class-hours.join');
+
         // Submit attendance + complete
         Route::post(
             '/class-hours/{id}/complete',
@@ -774,6 +780,7 @@ Route::prefix('student')
             ->name('classes.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
+                Route::get('/join/{id}', 'joinClass')->name('join');
                 Route::get('/{id}', 'show')->name('show');
             });
 

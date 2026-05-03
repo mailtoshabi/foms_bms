@@ -93,7 +93,7 @@
                 <div class="card-body">
                     <h6 class="text-muted">Fee Due</h6>
                     <h4 class="{{ $feeDue > 0 ? 'text-danger' : 'text-success' }}">
-                        ? {{ number_format($feeDue, 2) }}
+                        ₹ {{ number_format($feeDue, 2) }}
                     </h4>
                     @if($feeDue > 0)
                         <span class="badge bg-danger">Pending</span>
@@ -110,13 +110,14 @@
         <div class="col-md-3">
             <div class="card">
                 <div class="card-body">
-                    <h6 class="text-muted">Upcoming Session</h6>
+                    <h6 class="text-muted">Upcoming Sessions</h6>
                     @if($pendingClassHours->count() > 0)
                         @php $nextSession = $pendingClassHours->first(); @endphp
                         <strong>{{ $nextSession->classRoom->name ?? '-' }}</strong>
                         <p class="text-muted small mb-1">{{ $nextSession->created_at->format('d M Y, h:i A') }}</p>
                         @if($nextSession->google_meet_link)
-                            <a href="{{ $nextSession->google_meet_link }}" target="_blank" class="btn btn-sm btn-success mt-2">
+                            <a href="{{ route('student.classes.join', encrypt($nextSession->id)) }}" target="_blank"
+                                class="btn btn-sm btn-success mt-2">
                                 <i class="fas fa-video"></i> Join
                             </a>
                         @endif
@@ -211,10 +212,11 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $fee->classRoom->name ?? '-' }}</td>
                                             <td>{{ ucfirst($fee->type) }}</td>
-                                            <td>? {{ number_format($fee->amount, 2) }}</td>
-                                            <td class="text-success">? {{ number_format($paid, 2) }}</td>
-                                            <td class="{{ $balance > 0 ? 'text-danger' : 'text-success' }}">?
-                                                {{ number_format($balance, 2) }}</td>
+                                            <td>₹ {{ number_format($fee->amount, 2) }}</td>
+                                            <td class="text-success">₹ {{ number_format($paid, 2) }}</td>
+                                            <td class="{{ $balance > 0 ? 'text-danger' : 'text-success' }}">₹
+                                                {{ number_format($balance, 2) }}
+                                            </td>
                                             <td>{{ $fee->due_date ? \Carbon\Carbon::parse($fee->due_date)->format('d M Y') : '-' }}
                                             </td>
                                             <td>
@@ -232,9 +234,9 @@
                                 <tfoot>
                                     <tr class="fw-bold">
                                         <td colspan="3" class="text-end">Total:</td>
-                                        <td>? {{ number_format($feeDetails->sum('amount'), 2) }}</td>
-                                        <td class="text-success">? {{ number_format($feeDetails->sum('paid_amount'), 2) }}</td>
-                                        <td class="text-danger">?
+                                        <td>₹ {{ number_format($feeDetails->sum('amount'), 2) }}</td>
+                                        <td class="text-success">₹ {{ number_format($feeDetails->sum('paid_amount'), 2) }}</td>
+                                        <td class="text-danger">₹
                                             {{ number_format($feeDetails->sum('amount') - $feeDetails->sum('paid_amount'), 2) }}
                                         </td>
                                         <td colspan="2"></td>
@@ -392,7 +394,7 @@
                                             <td>{{ $hour->duration }} min</td>
                                             <td>
                                                 @if($hour->google_meet_link)
-                                                    <a href="{{ $hour->google_meet_link }}" target="_blank"
+                                                    <a href="{{ route('student.classes.join', encrypt($hour->id)) }}" target="_blank"
                                                         class="btn btn-sm btn-success">
                                                         <i class="fas fa-video"></i> Join
                                                     </a>

@@ -180,7 +180,7 @@ class ClassService
                         'class_room_id' => $class->id,
                         'type' => $feeType,
                         'amount' => $feeAmount,
-                        'due_date' => Carbon::parse($class->starting_date)->addDays(7),
+                        'due_date' => now()->addDays(7),
                         'status' => 'unpaid',
                     ]);
                 }

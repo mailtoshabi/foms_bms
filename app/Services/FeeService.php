@@ -26,18 +26,24 @@ class FeeService
 
     public function generateGroupFeesForToday()
     {
-        $today = now()->toDateString();
+        $today = now();
+        $dayOfMonth = $today->day;
+        $isLastDayOfMonth = $today->copy()->endOfMonth()->isToday();
 
-        $classRooms = ClassRoom::with(['students', 'classType'])
-            ->whereDate('starting_date', $today)
+        $query = ClassRoom::with(['students', 'classType'])
             ->where('is_completed', false)
-
-            // ✅ FIXED: filter using class_types.name
+            ->whereDate('starting_date', '<=', $today->toDateString())
             ->whereHas('classType', function ($q) {
                 $q->where('name', 'group');
-            })
+            });
 
-            ->get();
+        if ($isLastDayOfMonth) {
+            $query->whereRaw('DAY(starting_date) >= ?', [$dayOfMonth]);
+        } else {
+            $query->whereRaw('DAY(starting_date) = ?', [$dayOfMonth]);
+        }
+
+        $classRooms = $query->get();
 
         foreach ($classRooms as $classRoom) {
 
@@ -46,7 +52,8 @@ class FeeService
                 // ✅ Prevent duplicate fee for same day
                 $exists = Fee::where('student_id', $student->id)
                     ->where('class_room_id', $classRoom->id)
-                    ->whereDate('due_date', $today)
+                    ->where('type', 'monthly')
+                    ->whereDate('created_at', $today->toDateString())
                     ->exists();
 
                 if ($exists) {
@@ -57,12 +64,12 @@ class FeeService
 
                 if ($amount > 0) {
                     Fee::create([
-                        'student_id'    => $student->id,
+                        'student_id' => $student->id,
                         'class_room_id' => $classRoom->id,
-                        'amount'        => $amount, // adjust if needed
-                        'due_date'      => Carbon::parse($classRoom->starting_date)->addDays(7),
-                        'status'        => 'unpaid',
-                        'type'          => 'monthly',
+                        'amount' => $amount,
+                        'due_date' => now()->addDays(7),
+                        'status' => 'unpaid',
+                        'type' => 'monthly',
                     ]);
                 }
             }

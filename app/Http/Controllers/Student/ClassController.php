@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\ClassRoom;
+use App\Models\ClassHour;
 
 class ClassController extends Controller
 {
@@ -63,5 +64,16 @@ class ClassController extends Controller
             'myPresent',
             'myPercentage'
         ));
+    }
+
+    public function joinClass($id)
+    {
+        $classHour = ClassHour::findOrFail(decrypt($id));
+
+        $classHour->update([
+            'join_student_at' => now()
+        ]);
+
+        return redirect()->away($classHour->google_meet_link);
     }
 }
