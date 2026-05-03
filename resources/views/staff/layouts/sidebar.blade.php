@@ -143,7 +143,7 @@
                     </li>
                 @endif
                 {{-- Class Hours: hr | operation | finance --}}
-                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
+                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId))
                     <li class="{{ set_active(['staff.class-hours.index']) }}">
                         <a href="{{ route('staff.class-hours.index') }}">
                             <i class="fas fa-history text-info"></i>
@@ -152,7 +152,7 @@
                     </li>
                 @endif
 
-                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
+                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($administratorRoleId))
                     <li class="{{ set_active(['staff.reports.attendance']) }}">
                         <a href="{{ route('staff.reports.attendance') }}">
                             <i class="fas fa-clipboard-list text-success"></i>

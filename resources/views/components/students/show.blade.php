@@ -12,7 +12,8 @@
             <div class="card">
 
                 <div class="card-header d-flex align-items-center">
-                    <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                    <a href="javascript:window.history.back();"
+                        class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                     <h5 class="mb-0">Student Profile</h5>
@@ -33,7 +34,8 @@
                     <p class="text-muted mb-1">
                         {{ $student->formatted_contact_number }}
                         @if($student->is_whatsapp_different)
-                            <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $student->formatted_whatsapp_number }}</small>
+                            <br><small class="text-success"><i class="mdi mdi-whatsapp"></i>
+                                {{ $student->formatted_whatsapp_number }}</small>
                         @endif
                     </p>
 
@@ -89,6 +91,12 @@
                                 <i class="fas fa-exchange-alt"></i> Change Class
 
                             </button>
+
+                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#promoteClassModal">
+
+                                <i class="fas fa-arrow-up"></i> Promote Class
+
+                            </button>
                         </div>
                     @endif
 
@@ -118,7 +126,12 @@
 
                                         <td>{{ $class->course->name ?? '-' }}</td>
 
-                                        <td>{{ $class->name }}</td>
+                                        <td>
+                                            {{ $class->name }}
+                                            @if($class->is_completed)
+                                                <span class="badge bg-success">Completed</span>
+                                            @endif
+                                        </td>
 
                                         <td>{{ ucfirst($class->classType->name ?? '-') }}</td>
 
@@ -138,7 +151,8 @@
                                         <td>{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
                                         </td>
 
-                                        <td>{{ $class->pivot->assigned_date ? \Carbon\Carbon::parse($class->pivot->assigned_date)->format('d M Y') : '-' }}</td>
+                                        <td>{{ $class->pivot->assigned_date ? \Carbon\Carbon::parse($class->pivot->assigned_date)->format('d M Y') : '-' }}
+                                        </td>
 
                                     </tr>
 
@@ -567,9 +581,10 @@
                             <label class="form-label">Select Class</label>
 
                             <select name="class_room_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.class_rooms.search') }}" required>
+                                data-ajax-url="{{ route('staff.students.active-classes.search') }}?exclude_student_id={{ $student->id }}"
+                                required>
 
-                                <option value="">Search class...</option>
+                                <option value="">Search active class...</option>
 
                             </select>
 
@@ -624,6 +639,18 @@
 
                     <div class="modal-body">
 
+                        @php
+                            $hasGroupClasses = $student->class_rooms->filter(fn($c) => $c->classType && $c->classType->name == 'group')->count() > 0;
+                        @endphp
+
+                        @if(!$hasGroupClasses)
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle"></i>
+                                Student must be enrolled in at least one <strong>Group Class</strong> to use the Change Class
+                                feature.
+                            </div>
+                        @endif
+
                         <div class="mb-3">
 
                             <label class="form-label">From Class</label>
@@ -648,7 +675,7 @@
                             <label class="form-label">To Class</label>
 
                             <select name="to_class_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.class_rooms.search') }}?type=group&exclude_student_id={{ $student->id }}"
+                                data-ajax-url="{{ route('staff.students.active-classes.search') }}?type=group&exclude_student_id={{ $student->id }}"
                                 required>
 
                                 <option value="">Search new class...</option>
@@ -674,6 +701,93 @@
                             onclick="this.disabled=true; this.innerText='Changing...'; this.form.submit();">
 
                             Change Class
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+
+    {{-- Promote Class Modal --}}
+
+    <div class="modal fade" id="promoteClassModal">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <form method="POST" action="{{ route('staff.students.promote.class') }}">
+
+                    @csrf
+
+                    <input type="hidden" name="student_id" value="{{ $student->id }}">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">Promote Class</h5>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="mb-3">
+
+                            <label class="form-label">From Class</label>
+
+                            <select name="from_class_id" class="form-control select2" required>
+
+                                <option value="">Select current class...</option>
+                                @foreach($student->class_rooms as $class)
+                                    <option value="{{ $class->id }}">
+                                        {{ $class->course->name ?? 'No Course' }} - {{ $class->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">To Class (Promotion)</label>
+
+                            <select name="to_class_id" class="form-control select2-class-ajax"
+                                data-ajax-url="{{ route('staff.students.active-classes.search') }}?type=group,individual&exclude_student_id={{ $student->id }}"
+                                required>
+
+                                <option value="">Search new class...</option>
+
+                            </select>
+
+                            <div class="alert alert-warning mt-2">
+                                <small>
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Requires all fees in the current class to be fully paid.
+                                </small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+
+                            Cancel
+
+                        </button>
+
+                        <button class="btn btn-success" type="submit"
+                            onclick="this.disabled=true; this.innerText='Promoting...'; this.form.submit();">
+
+                            Promote Student
 
                         </button>
 

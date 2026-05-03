@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('class_hours', function (Blueprint $table) {
@@ -24,9 +23,11 @@ return new class extends Migration
 
             $table->string('google_meet_link')->nullable();
 
-            $table->dateTime('class_started_at')->nullable();
+            $table->dateTime('join_teacher_at')->nullable();
+            $table->dateTime('join_student_at')->nullable();
+            $table->dateTime('completed_at')->nullable();
 
-            $table->enum('status',['pending','completed'])
+            $table->enum('status', ['pending', 'completed'])
                 ->default('pending');
 
             $table->boolean('has_fee_calculated')->default(false);

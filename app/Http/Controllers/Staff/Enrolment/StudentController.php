@@ -449,6 +449,7 @@ class StudentController extends Controller
                 'student_id' => $student->id,
                 'class_room_id_from' => $request->from_class_id,
                 'class_room_id_to' => $request->to_class_id,
+                'type' => 'change',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -467,5 +468,118 @@ class StudentController extends Controller
         });
 
         return back()->with('success', 'Class changed successfully. Unpaid fees have been transferred.');
+    }
+
+    public function promoteClass(Request $request)
+    {
+        $this->checkManagementRole();
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'from_class_id' => 'required|exists:class_rooms,id',
+            'to_class_id' => 'required|exists:class_rooms,id|different:from_class_id'
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+
+        // Check if student is actually in the from class
+        if (!$student->class_rooms()->where('class_room_id', $request->from_class_id)->exists()) {
+            return back()->with('error', 'Student is not assigned to the selected "From Class".');
+        }
+
+        // Check if student is already in the to class
+        if ($student->class_rooms()->where('class_room_id', $request->to_class_id)->exists()) {
+            return back()->with('error', 'Student is already assigned to the selected "To Class".');
+        }
+
+        // Check for unpaid fees
+        $hasUnpaidFees = Fee::where('student_id', $student->id)
+            ->where('class_room_id', $request->from_class_id)
+            ->where('status', '!=', 'paid')
+            ->exists();
+
+        if ($hasUnpaidFees) {
+            return back()->with('error', 'Cannot promote student. There are unpaid fees in the current class.');
+        }
+
+        DB::transaction(function () use ($student, $request) {
+            // 1. Log the promotion
+            DB::table('class_change_logs')->insert([
+                'student_id' => $student->id,
+                'class_room_id_from' => $request->from_class_id,
+                'class_room_id_to' => $request->to_class_id,
+                'type' => 'promote',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 2. Add new class association
+            $student->class_rooms()->attach($request->to_class_id, [
+                'assigned_date' => now()
+            ]);
+
+            // 3. Mark the from class as completed
+            ClassRoom::where('id', $request->from_class_id)->update(['is_completed' => true]);
+        });
+
+        return back()->with('success', 'Student promoted to new class successfully.');
+    }
+
+    public function searchActiveClasses(Request $request)
+    {
+        $term = $request->input('q', '');
+        $query = ClassRoom::with('course')
+            ->where('is_completed', false);
+
+        // Filter by type name (e.g., 'group,individual') if provided
+        if ($request->filled('type')) {
+            $types = explode(',', $request->type);
+            $query->whereHas('classType', function ($q) use ($types) {
+                $q->whereIn('name', $types);
+            });
+        }
+
+        // Exclude specific student's enrolled classes
+        if ($request->filled('exclude_student_id')) {
+            $query->whereDoesntHave('students', function ($q) use ($request) {
+                $q->where('students.id', $request->exclude_student_id);
+            });
+        }
+
+        $results = $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhereHas('course', fn($c) => $c->where('name', 'like', "%{$term}%"));
+        })
+            ->limit(30)
+            ->get()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'text' => $c->name . ($c->course ? ' (' . $c->course->name . ')' : ''),
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
+
+    public function searchStudents(Request $request)
+    {
+        $term = $request->input('q', '');
+        $excludeClassId = $request->input('exclude_class_id');
+
+        $query = Student::query();
+
+        if ($excludeClassId) {
+            $query->whereDoesntHave('class_rooms', function ($q) use ($excludeClassId) {
+                $q->where('class_rooms.id', $excludeClassId);
+            });
+        }
+
+        $results = $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhere('contact_number', 'like', "%{$term}%")
+                ->orWhere('admission_no', 'like', "%{$term}%");
+        })
+            ->limit(20)
+            ->get();
+
+        return response()->json(['results' => $results]);
     }
 }

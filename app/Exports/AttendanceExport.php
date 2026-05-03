@@ -18,14 +18,14 @@ class AttendanceExport implements FromCollection, WithHeadings
     public function collection()
     {
         $query = DB::table('student_attendance')
-            ->join('students','students.id','=','student_attendance.student_id')
-            ->join('class_hours','class_hours.id','=','student_attendance.class_hour_id')
-            ->join('class_rooms','class_rooms.id','=','class_hours.class_room_id')
+            ->join('students', 'students.id', '=', 'student_attendance.student_id')
+            ->join('class_hours', 'class_hours.id', '=', 'student_attendance.class_hour_id')
+            ->join('class_rooms', 'class_rooms.id', '=', 'class_hours.class_room_id')
 
             ->select(
                 'students.name',
                 'class_rooms.name as class_name',
-                'class_hours.class_started_at',
+                'class_hours.updated_at',
                 DB::raw("CASE WHEN student_attendance.is_present = 1 THEN 'Present' ELSE 'Absent' END as status")
             );
 
@@ -40,19 +40,27 @@ class AttendanceExport implements FromCollection, WithHeadings
 
             $query->where(function ($q) use ($search) {
                 $q->where('students.name', 'like', "%$search%")
-                ->orWhere('students.contact_number', 'like', "%$search%");
+                    ->orWhere('students.contact_number', 'like', "%$search%");
             });
         }
 
         if (isset($this->filters['status']) && $this->filters['status'] !== '') {
-            $query->where('student_attendance.is_present',$this->filters['status']);
+            $query->where('student_attendance.is_present', $this->filters['status']);
         }
 
-        if (!empty($this->filters['date'])) {
-            $query->whereDate('class_hours.class_started_at',$this->filters['date']);
+        if (!empty($this->filters['class_room_id'])) {
+            $query->where('class_rooms.id', $this->filters['class_room_id']);
         }
 
-        return $query->orderByDesc('class_hours.class_started_at')->get();
+        if (!empty($this->filters['from_date'])) {
+            $query->whereDate('class_hours.updated_at', '>=', $this->filters['from_date']);
+        }
+
+        if (!empty($this->filters['to_date'])) {
+            $query->whereDate('class_hours.updated_at', '<=', $this->filters['to_date']);
+        }
+
+        return $query->orderByDesc('class_hours.updated_at')->get();
     }
 
     public function headings(): array

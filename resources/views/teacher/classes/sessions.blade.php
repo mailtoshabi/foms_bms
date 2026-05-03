@@ -73,8 +73,8 @@
                                             <td>{{ $sessions->firstItem() + $loop->index }}</td>
 
                                             <td>
-                                                {{ $session->class_started_at
-                            ? $session->class_started_at->format('d M Y')
+                                                {{ $session->join_teacher_at
+                            ? $session->join_teacher_at->format('d M Y')
                             : '-' }}
                                             </td>
 

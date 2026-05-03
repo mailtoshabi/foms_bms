@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\ClassRoom;
 
 class ReportController extends Controller
 {
@@ -21,7 +22,7 @@ class ReportController extends Controller
                 'students.whatsapp_number',
                 'students.is_whatsapp_different',
                 'class_rooms.name as class_name',
-                'class_hours.class_started_at',
+                'class_hours.join_teacher_at',
                 'student_attendance.is_present'
             );
 
@@ -35,18 +36,22 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('class_hours.class_started_at', '>=', $request->from_date);
+            $query->whereDate('class_hours.join_teacher_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('class_hours.class_started_at', '<=', $request->to_date);
+            $query->whereDate('class_hours.join_teacher_at', '<=', $request->to_date);
         }
 
         if ($request->filled('status')) {
             $query->where('student_attendance.is_present', $request->status);
         }
 
-        $hasFilters = $request->anyFilled(['search', 'from_date', 'to_date', 'status']);
+        if ($request->filled('class_room_id')) {
+            $query->where('class_rooms.id', $request->class_room_id);
+        }
+
+        $hasFilters = $request->anyFilled(['search', 'from_date', 'to_date', 'status', 'class_room_id']);
         $summary = null;
 
         if ($hasFilters) {
@@ -57,8 +62,14 @@ class ReportController extends Controller
             ];
         }
 
-        $data = $query->latest('class_hours.class_started_at')->paginate(10)->withQueryString();
+        $data = $query->latest('class_hours.join_teacher_at')->paginate(10)->withQueryString();
 
-        return view('staff.reports.attendance', compact('data', 'hasFilters', 'summary'));
+        $selectedClassName = $request->filled('class_room_id')
+            ? optional(ClassRoom::find($request->class_room_id))->name
+            : null;
+
+        $classRoomSearchUrl = route('staff.class_rooms.search');
+
+        return view('staff.reports.attendance', compact('data', 'hasFilters', 'summary', 'selectedClassName', 'classRoomSearchUrl'));
     }
 }

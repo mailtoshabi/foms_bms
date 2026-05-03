@@ -19,7 +19,9 @@ class BaseClassRoomController extends BaseServiceController
 
     public function index(Request $request)
     {
-        $query = ClassRoom::with(['course', 'classType'])->latest();
+        $query = ClassRoom::with(['course', 'classType'])
+            ->orderBy('is_completed', 'asc')
+            ->orderBy('created_at', 'desc');
 
         if ($request->filled('course_id')) {
             $query->where('course_id', $request->course_id);
@@ -152,12 +154,13 @@ class BaseClassRoomController extends BaseServiceController
     public function search(Request $request)
     {
         $term = $request->input('q', '');
-        $query = ClassRoom::with('course');
+        $query = ClassRoom::active()->with('course');
 
-        // Filter by type name (e.g., 'group') if provided
+        // Filter by type name (e.g., 'group,individual') if provided
         if ($request->filled('type')) {
-            $query->whereHas('classType', function ($q) use ($request) {
-                $q->where('name', $request->type);
+            $types = explode(',', $request->type);
+            $query->whereHas('classType', function ($q) use ($types) {
+                $q->whereIn('name', $types);
             });
         }
 
@@ -192,12 +195,10 @@ class BaseClassRoomController extends BaseServiceController
         ])->findOrFail(decrypt($id));
 
         $teachers = Teacher::all();
-        $allStudents = Student::all();
 
         return view($this->viewPrefix . '.show', compact(
             'class',
-            'teachers',
-            'allStudents'
+            'teachers'
         ));
     }
 
@@ -211,6 +212,11 @@ class BaseClassRoomController extends BaseServiceController
 
         $classId = decrypt($validated['class_room_id']);
         $teacherId = decrypt($validated['teacher_id']);
+
+        $class = ClassRoom::findOrFail($classId);
+        if ($class->is_completed) {
+            return back()->with('error', 'Cannot assign teacher. The class is already marked as completed.');
+        }
 
         $result = $this->classService->assignTeacher(
             $classId,
@@ -235,6 +241,11 @@ class BaseClassRoomController extends BaseServiceController
         $classId = decrypt($validated['class_room_id']);
         $teacherId = decrypt($validated['teacher_id']);
 
+        $class = ClassRoom::findOrFail($classId);
+        if ($class->is_completed) {
+            return back()->with('error', 'Cannot remove teacher. The class is already marked as completed.');
+        }
+
         $this->classService->removeTeacher($classId, $teacherId);
 
         return back()->with('success', 'Teacher removed from class');
@@ -249,6 +260,11 @@ class BaseClassRoomController extends BaseServiceController
 
         $classId = decrypt($validated['class_room_id']);
 
+        $class = ClassRoom::findOrFail($classId);
+        if ($class->is_completed) {
+            return back()->with('error', 'Cannot assign students. The class is already marked as completed.');
+        }
+
         $result = $this->classService->assignStudents(
             $classId,
             $validated['student_ids']
@@ -261,7 +277,6 @@ class BaseClassRoomController extends BaseServiceController
         return back()->with('success', $result['message']);
     }
 
-
     public function destroy($id)
     {
         $staff = auth('staff')->user();
@@ -272,7 +287,14 @@ class BaseClassRoomController extends BaseServiceController
             abort(403, 'Unauthorized access: Only Administrators or Operations department can delete classes.');
         }
 
-        $class = $this->classService->delete(decrypt($id));
+        $classId = decrypt($id);
+        $class = ClassRoom::findOrFail($classId);
+
+        if ($class->is_completed) {
+            return back()->with('error', 'Cannot delete. The class is already marked as completed.');
+        }
+
+        $class = $this->classService->delete($classId);
 
         return back()->with('success', "Class \"{$class->name}\" deleted successfully.");
     }
@@ -294,6 +316,11 @@ class BaseClassRoomController extends BaseServiceController
 
         $classId = decrypt($validated['class_room_id']);
         $studentId = decrypt($validated['student_id']);
+
+        $class = ClassRoom::findOrFail($classId);
+        if ($class->is_completed) {
+            return back()->with('error', 'Cannot remove student. The class is already marked as completed.');
+        }
 
         $this->classService->removeStudent($classId, $studentId);
 

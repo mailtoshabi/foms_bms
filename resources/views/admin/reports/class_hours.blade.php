@@ -99,9 +99,9 @@
                         @forelse($data as $row)
                             <tr>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($row->class_started_at)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
                                     <br>
-                                    <small class="text-muted">{{ \Carbon\Carbon::parse($row->class_started_at)->format('h:i A') }}</small>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
                                     <strong>{{ $row->classRoom->name ?? 'N/A' }}</strong>

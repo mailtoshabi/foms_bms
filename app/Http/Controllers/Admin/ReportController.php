@@ -317,7 +317,7 @@ class ReportController extends Controller
                 'students.whatsapp_number',
                 'students.is_whatsapp_different',
                 'class_rooms.name as class_name',
-                'class_hours.class_started_at',
+                'class_hours.updated_at',
                 'student_attendance.is_present'
             );
 
@@ -331,18 +331,22 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('class_hours.class_started_at', '>=', $request->from_date);
+            $query->whereDate('class_hours.updated_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('class_hours.class_started_at', '<=', $request->to_date);
+            $query->whereDate('class_hours.updated_at', '<=', $request->to_date);
         }
 
         if ($request->filled('status')) {
             $query->where('student_attendance.is_present', $request->status);
         }
 
-        $hasFilters = $request->anyFilled(['search', 'from_date', 'to_date', 'status']);
+        if ($request->filled('class_room_id')) {
+            $query->where('class_rooms.id', $request->class_room_id);
+        }
+
+        $hasFilters = $request->anyFilled(['search', 'from_date', 'to_date', 'status', 'class_room_id']);
         $summary = null;
 
         if ($hasFilters) {
@@ -353,9 +357,15 @@ class ReportController extends Controller
             ];
         }
 
-        $data = $query->latest('class_hours.class_started_at')->paginate(10)->withQueryString();
+        $data = $query->latest('class_hours.updated_at')->paginate(10)->withQueryString();
 
-        return view('admin.reports.attendance', compact('data', 'hasFilters', 'summary'));
+        $selectedClassName = $request->filled('class_room_id')
+            ? optional(ClassRoom::find($request->class_room_id))->name
+            : null;
+
+        $classRoomSearchUrl = route('admin.class_rooms.search');
+
+        return view('admin.reports.attendance', compact('data', 'hasFilters', 'summary', 'selectedClassName', 'classRoomSearchUrl'));
     }
 
     public function exportAttendance(Request $request)
@@ -951,11 +961,11 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('class_started_at', '>=', $request->from_date);
+            $query->whereDate('updated_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('class_started_at', '<=', $request->to_date);
+            $query->whereDate('updated_at', '<=', $request->to_date);
         }
 
         $totalClassHours = $query->count();
@@ -965,7 +975,7 @@ class ReportController extends Controller
         $remainingMins = $totalDurationMins % 60;
         $totalDurationFormatted = "{$totalDurationHours}h {$remainingMins}m";
 
-        $data = $query->latest('class_started_at')->paginate(20)->withQueryString();
+        $data = $query->latest('updated_at')->paginate(20)->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name

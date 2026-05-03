@@ -15,14 +15,18 @@ class ClassHour extends Model
         'status',
         'has_fee_calculated',
         'has_salary_calculated',
-        'class_started_at'
+        'join_teacher_at',
+        'join_student_at',
+        'completed_at'
     ];
 
     protected $casts = [
-        'has_fee_calculated'  => 'boolean',
-        'has_salary_calculated'  => 'boolean',
-        'class_started_at'  => 'date'
-        ];
+        'has_fee_calculated' => 'boolean',
+        'has_salary_calculated' => 'boolean',
+        'join_teacher_at' => 'datetime',
+        'join_student_at' => 'datetime',
+        'completed_at' => 'datetime'
+    ];
 
     public function classRoom()
     {

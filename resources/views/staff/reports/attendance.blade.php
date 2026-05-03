@@ -22,13 +22,27 @@
                                         <div class="col-md-2">
                                                 <label class="form-label fw-bold">Status</label>
                                                 <select name="status" class="form-control">
-                                                        <option value="">All</option>
+                                                        <option value="">All Status</option>
                                                         <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>
                                                                 Present
                                                         </option>
                                                         <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>
                                                                 Absent
                                                         </option>
+                                                </select>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                                <label class="form-label fw-bold">Class</label>
+                                                <select name="class_room_id" class="form-control select2-class-ajax"
+                                                        data-ajax-url="{{ $classRoomSearchUrl }}"
+                                                        data-placeholder="Search Class...">
+                                                        <option value="">All Classes</option>
+                                                        @if(request('class_room_id') && isset($selectedClassName))
+                                                                <option value="{{ request('class_room_id') }}" selected>
+                                                                        {{ $selectedClassName }}
+                                                                </option>
+                                                        @endif
                                                 </select>
                                         </div>
 
@@ -110,7 +124,7 @@
                                                                 @endif
                                                         </td>
                                                         <td>{{ $row->class_name }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($row->class_started_at)->format('d M Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}</td>
                                                         <td>
                                                                 <span class="badge {{ $row->is_present ? 'bg-success' : 'bg-danger' }}">
                                                                         {{ $row->is_present ? 'Present' : 'Absent' }}

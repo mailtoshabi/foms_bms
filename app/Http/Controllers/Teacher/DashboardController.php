@@ -43,8 +43,8 @@ public function dashboard()
     // This Month Classes
     $thisMonthClasses = ClassHour::where('teacher_id',$teacher->id)
         ->where('status','completed')
-        ->whereMonth('class_started_at', now()->month)
-        ->whereYear('class_started_at', now()->year)
+        ->whereMonth('join_teacher_at', now()->month)
+        ->whereYear('join_teacher_at', now()->year)
         ->count();
 
     // =========================
@@ -85,10 +85,10 @@ public function dashboard()
     // Earnings Graph
     $monthlyData = ClassHour::where('teacher_id',$teacher->id)
     ->where('status','completed')
-    ->whereYear('class_started_at', now()->year)
+    ->whereYear('join_teacher_at', now()->year)
     ->get()
     ->groupBy(function ($item) {
-        return Carbon::parse($item->class_started_at)->format('M');
+        return Carbon::parse($item->join_teacher_at)->format('M');
     });
 
     $chartLabels = [];

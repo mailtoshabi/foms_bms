@@ -10,12 +10,14 @@
 
             <h4>{{ $class->name }}</h4>
 
-            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#startClassModal">
+            @if (!$class->is_completed)
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#startClassModal">
 
-                Create New Session
+                    Create New Session
 
-            </button>
+                </button>
 
+            @endif
         </div>
 
         <div class="card-body">
@@ -73,7 +75,7 @@
 
                                     <span
                                         class="badge
-                                                            {{ $percentage >= 75 ? 'bg-success' : ($percentage >= 50 ? 'bg-warning' : 'bg-danger') }}">
+                                                                            {{ $percentage >= 75 ? 'bg-success' : ($percentage >= 50 ? 'bg-warning' : 'bg-danger') }}">
 
                                         {{ $present }}/{{ $total }} ({{ $percentage }}%)
 
@@ -120,18 +122,18 @@
                                 <td>{{ $hour->created_at->format('d M Y h:i A') }}</td>
 
                                 <!-- <td>
-                                                    @if($hour->status == 'pending')
-                                                            {{ $hour->google_meet_link }}
-                                                            <button class="btn btn-primary"
-                                                            onclick="navigator.clipboard.writeText('{{ $hour->google_meet_link }}')">
-                                                            <i class="mdi mdi-content-copy"></i>
-                                                            </button>
-                                                            @else
-                                                            Expired
-                                                            @endif
+                                                                    @if($hour->status == 'pending')
+                                                                            {{ $hour->google_meet_link }}
+                                                                            <button class="btn btn-primary"
+                                                                            onclick="navigator.clipboard.writeText('{{ $hour->google_meet_link }}')">
+                                                                            <i class="mdi mdi-content-copy"></i>
+                                                                            </button>
+                                                                            @else
+                                                                            Expired
+                                                                            @endif
 
 
-                                                </td> -->
+                                                                </td> -->
 
                                 <td>
                                     @if($hour->status == 'completed')
@@ -452,22 +454,22 @@
                 res.students.forEach(student => {
 
                     html += `
-                                            <div class="col-md-6 mb-2">
+                                                    <div class="col-md-6 mb-2">
 
-                                                <label class="d-flex align-items-center border rounded p-2">
+                                                        <label class="d-flex align-items-center border rounded p-2">
 
-                                                    <input type="checkbox"
-                                                    name="attendance[${student.id}]"
-                                                    value="1"
-                                                    class="form-check-input me-2"
-                                                    checked>
+                                                            <input type="checkbox"
+                                                            name="attendance[${student.id}]"
+                                                            value="1"
+                                                            class="form-check-input me-2"
+                                                            checked>
 
-                                                    <span>${student.name}</span>
+                                                            <span>${student.name}</span>
 
-                                                </label>
+                                                        </label>
 
-                                            </div>
-                                        `;
+                                                    </div>
+                                                `;
 
                 });
 

@@ -17,12 +17,34 @@
         {{-- ================= CLASS DETAILS ================= --}}
         <div class="card">
 
-            <div class="card-header d-flex align-items-center">
-                <a href="javascript:window.history.back();"
-                    class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
-                    <i class="fas fa-chevron-left"></i>
-                </a>
-                <h4 class="mb-0">{{ $class->name }}</h4>
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <a href="javascript:window.history.back();"
+                        class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <h4 class="mb-0">{{ $class->name }}</h4>
+                    @if($class->is_completed)
+                        <span class="badge bg-success ms-2">Completed</span>
+                    @else
+                        <span class="badge bg-primary ms-2">Active</span>
+                    @endif
+                </div>
+
+                @php
+                    $staff = auth('staff')->user();
+                    $isAdmin = auth('admin')->check();
+                    $isOperation = $staff && $staff->hasRoleId(utility('id_operation_dept'));
+                @endphp
+
+                @if($isAdmin || $isOperation)
+                    <a href="{{ route('staff.class_rooms.changeStatus', encrypt($class->id)) }}"
+                        class="btn btn-sm {{ $class->is_completed ? 'btn-warning' : 'btn-success' }}"
+                        onclick="return confirm('{{ $class->is_completed ? 'Are you sure you want to unmark this class as completed?' : 'Are you sure you want to mark this class as completed?' }}')">
+                        <i class="fas {{ $class->is_completed ? 'fa-undo' : 'fa-check-circle' }}"></i>
+                        {{ $class->is_completed ? 'Unmark Completed' : 'Mark as Completed' }}
+                    </a>
+                @endif
             </div>
 
             <div class="card-body">
@@ -54,13 +76,13 @@
             <div class="card-header d-flex justify-content-between">
 
                 <h5>Teachers</h5>
+                @if(!$class->is_completed)
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignTeacherModal" {{ $class->teachers->count() ? 'disabled' : '' }}>
 
-                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignTeacherModal" {{ $class->teachers->count() ? 'disabled' : '' }}>
+                        <i class="fas fa-plus"></i> Assign Teacher
 
-                    <i class="fas fa-plus"></i> Assign Teacher
-
-                </button>
-
+                    </button>
+                @endif
             </div>
 
             <div class="card-body">
@@ -73,7 +95,8 @@
                                 <th>Name</th>
                                 <th>Phone</th>
                                 <th>Wage/Hour</th>
-                                <th>Action</th>
+                                @if(!$class->is_completed)
+                                <th>Action</th> @endif
                             </tr>
                         </thead>
 
@@ -88,24 +111,24 @@
                                     <td>
                                         ₹ {{ number_format($teacher->pivot->hourly_wage, 2) }}
                                     </td>
+                                    @if(!$class->is_completed)
+                                        <td>
 
-                                    <td>
+                                            <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
+                                                onsubmit="return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.')">
 
-                                        <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
-                                            onsubmit="return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.')">
+                                                @csrf
 
-                                            @csrf
+                                                <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                                                <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
+                                                <button class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
 
-                                            <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
-                                            <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
+                                            </form>
 
-                                            <button class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-
-                                        </form>
-
-                                    </td>
+                                        </td>
+                                    @endif
 
                                 </tr>
 
@@ -135,12 +158,15 @@
             <div class="card-header d-flex justify-content-between">
 
                 <h5>Students</h5>
+                @if(!$class->is_completed)
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignStudentModal"
+                        @if(($class->classType->name ?? '') === 'individual' && $class->students->count() >= 1) disabled
+                        title="Individual class already has a student" @endif>
 
-                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignStudentModal">
+                        <i class="fas fa-user-plus"></i> Add
 
-                    <i class="fas fa-user-plus"></i> Add
-
-                </button>
+                    </button>
+                @endif
 
             </div>
 
@@ -154,7 +180,8 @@
                                 <th>Name</th>
                                 <th>Contact</th>
                                 <th>Assigned Date</th>
-                                <th>Remove from Class</th>
+                                @if(!$class->is_completed)
+                                <th>Remove from Class</th> @endif
                             </tr>
                         </thead>
 
@@ -175,23 +202,25 @@
                                     @endphp
 
                                     @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
-                                        <td>
+                                        @if(!$class->is_completed)
+                                            <td>
 
-                                            <form method="POST" action="{{ route('staff.class_rooms.remove.student') }}"
-                                                onsubmit="return confirm('Are you sure you want to remove this student?\n\nThis will:\n1. Delete all UNPAID fees for this student in this class.\n2. Delete PENDING class sessions (if individual class or last student).')">
+                                                <form method="POST" action="{{ route('staff.class_rooms.remove.student') }}"
+                                                    onsubmit="return confirm('Are you sure you want to remove this student?\n\nThis will:\n1. Delete all UNPAID fees for this student in this class.\n2. Delete PENDING class sessions (if individual class or last student).')">
 
-                                                @csrf
+                                                    @csrf
 
-                                                <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
-                                                <input type="hidden" name="student_id" value="{{ encrypt($student->id) }}">
+                                                    <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                                                    <input type="hidden" name="student_id" value="{{ encrypt($student->id) }}">
 
-                                                <button class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
 
-                                            </form>
+                                                </form>
 
-                                        </td>
+                                            </td>
+                                        @endif
                                     @endif
                                 </tr>
 
@@ -290,34 +319,28 @@
 
                 <div class="modal-body">
 
-                    <div class="row">
-
-                        @if(($class->classType->name ?? '') === 'individual')
-                            <small class="text-danger">
-                                Only one student allowed for this class
-                            </small>
-                        @endif
-
-                        @foreach($allStudents as $student)
-
-                            <div class="col-md-6 mb-2">
-
-                                <label class="d-flex align-items-center border p-2 rounded">
-
-                                    @if(!$class->students->contains($student->id))
-                                        <input type="checkbox" name="student_ids[]" value="{{ $student->id }}"
-                                            class="form-check-input me-2">
-                                    @endif
-
-                                    <span>{{ $student->name }}</span>
-
-                                </label>
-
-                            </div>
-
-                        @endforeach
-
+                    <div class="mb-3">
+                        <input type="text" id="studentSearch" class="form-control"
+                            placeholder="Type name or contact to search students..." autocomplete="off">
+                        <small class="text-muted">Search result will appear here. Selected students will be
+                            preserved.</small>
                     </div>
+
+                    {{-- Selected Students Preview --}}
+                    <div id="selectedStudentsContainer" class="mb-3 d-flex flex-wrap gap-2">
+                        {{-- Badges for selected students will appear here --}}
+                    </div>
+
+                    <div class="row" id="studentList">
+                        {{-- Search results will be injected here via AJAX --}}
+                        <div class="col-12 text-center py-4 text-muted" id="initialMessage">
+                            <i class="fas fa-search fa-2x mb-2"></i>
+                            <p>Start typing to find students to add...</p>
+                        </div>
+                    </div>
+
+                    {{-- Hidden inputs for selected IDs --}}
+                    <div id="hiddenInputsContainer"></div>
 
                 </div>
 
@@ -336,12 +359,105 @@
 
 @section('script')
     <script>
-        @if(($class->classType->name ?? '') === 'individual')
+        $(document).ready(function () {
+            let selectedStudents = new Map(); // Store as ID => Name
+            let searchTimeout = null;
 
-            $('input[name="student_ids[]"]').on('change', function () {
-                $('input[name="student_ids[]"]').not(this).prop('checked', false);
+            function updateUI() {
+                // Update badges
+                let badgesHtml = '';
+                let inputsHtml = '';
+
+                selectedStudents.forEach((name, id) => {
+                    badgesHtml += `
+                                    <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
+                                        ${name}
+                                        <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
+                                    </span>`;
+                    inputsHtml += `<input type="hidden" name="student_ids[]" value="${id}">`;
+                });
+
+                $('#selectedStudentsContainer').html(badgesHtml);
+                $('#hiddenInputsContainer').html(inputsHtml);
+            }
+
+            // Handle checkbox changes in search results
+            $(document).on('change', '.ajax-student-checkbox', function () {
+                let id = $(this).val();
+                let name = $(this).data('name');
+
+                @if(($class->classType->name ?? '') === 'individual')
+                    if ($(this).is(':checked')) {
+                        selectedStudents.clear();
+                        $('.ajax-student-checkbox').not(this).prop('checked', false);
+                    }
+                @endif
+
+                            if ($(this).is(':checked')) {
+                    selectedStudents.set(id, name);
+                } else {
+                    selectedStudents.delete(id);
+                }
+                updateUI();
             });
 
-        @endif
+            // Handle badge removal
+            $(document).on('click', '.remove-selected', function () {
+                let id = $(this).data('id').toString();
+                selectedStudents.delete(id);
+                // Uncheck in the list if visible
+                $(`.ajax-student-checkbox[value="${id}"]`).prop('checked', false);
+                updateUI();
+            });
+
+            $('#studentSearch').on('input', function () {
+                let q = $(this).val();
+                clearTimeout(searchTimeout);
+
+                if (q.length < 2) {
+                    if (q.length === 0) {
+                        $('#studentList').html(`
+                                        <div class="col-12 text-center py-4 text-muted">
+                                            <i class="fas fa-search fa-2x mb-2"></i>
+                                            <p>Start typing to find students to add...</p>
+                                        </div>`);
+                    }
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    $('#studentList').html('<div class="col-12 text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>');
+
+                    $.ajax({
+                        url: "{{ route('staff.students.search') }}",
+                        method: 'GET',
+                        data: {
+                            q: q,
+                            exclude_class_id: "{{ $class->id }}"
+                        },
+                        success: function (response) {
+                            let html = '';
+
+                            if (response.results.length === 0) {
+                                html = '<div class="col-12 text-center py-4 text-muted">No students found.</div>';
+                            } else {
+                                response.results.forEach(student => {
+                                    let isChecked = selectedStudents.has(student.id.toString()) ? 'checked' : '';
+                                    html += `
+                                                    <div class="col-md-6 mb-2">
+                                                        <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
+                                                            <input type="checkbox" value="${student.id}" data-name="${student.name}" 
+                                                                class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
+                                                            <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
+                                                        </label>
+                                                    </div>`;
+                                });
+                            }
+                            $('#studentList').html(html);
+                        }
+                    });
+                }, 300);
+            });
+        });
     </script>
 @endsection

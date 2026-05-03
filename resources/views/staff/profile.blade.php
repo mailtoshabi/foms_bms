@@ -1,4 +1,4 @@
-﻿@extends('staff.layouts.master')
+@extends('staff.layouts.master')
 
 @section('title', 'My Profile')
 
@@ -50,7 +50,7 @@
                                 </tr>
                                 <tr>
                                     <th>Salary Amount</th>
-                                    <td>{{ $staff->salary_amount ? '₹' . number_format($staff->salary_amount, 2) : '-' }}
+                                    <td>{{ $staff->salary_amount ? '?' . number_format($staff->salary_amount, 2) : '-' }}
                                     </td>
                                 </tr>
                             </tbody>

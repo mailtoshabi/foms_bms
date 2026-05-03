@@ -1,4 +1,4 @@
-﻿@extends('student.layouts.master-layouts-noleft')
+@extends('student.layouts.master-layouts-noleft')
 
 @section('title', 'Messages - Inbox')
 

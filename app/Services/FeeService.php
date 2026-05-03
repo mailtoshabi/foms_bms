@@ -30,6 +30,7 @@ class FeeService
 
         $classRooms = ClassRoom::with(['students', 'classType'])
             ->whereDate('starting_date', $today)
+            ->where('is_completed', false)
 
             // ✅ FIXED: filter using class_types.name
             ->whereHas('classType', function ($q) {

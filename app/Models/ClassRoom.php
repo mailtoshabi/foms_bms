@@ -66,12 +66,16 @@ public function teachers()
 }
 
 
-public function classHours()
-{
-    return $this->hasMany(ClassHour::class, 'class_room_id')
-        ->latest();
-}
+    public function classHours()
+    {
+        return $this->hasMany(ClassHour::class, 'class_room_id')
+            ->latest();
+    }
 
+    public function scopeActive($query)
+    {
+        return $query->where('is_completed', false);
+    }
 }
 
 

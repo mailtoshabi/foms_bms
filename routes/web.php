@@ -597,6 +597,19 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [StudentController::class, 'changeClass']
                 )->name('students.change.class');
 
+                Route::post(
+                    '/students/promote-class',
+                    [StudentController::class, 'promoteClass']
+                )->name('students.promote.class');
+                Route::get(
+                    '/students-active-classes/search',
+                    [StudentController::class, 'searchActiveClasses']
+                )->name('students.active-classes.search');
+                Route::get(
+                    '/students-search',
+                    [StudentController::class, 'searchStudents']
+                )->name('students.search');
+
 
             });
 

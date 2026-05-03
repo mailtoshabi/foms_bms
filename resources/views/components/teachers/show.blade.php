@@ -12,10 +12,11 @@
             <div class="card">
 
                 <div class="card-header d-flex align-items-center">
-                    <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                    <a href="javascript:window.history.back();"
+                        class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                         <i class="fas fa-chevron-left"></i>
                     </a>
-                    <h5 class="mb-0">Teacher Profile</h5>
+                    <h5 class="mb-0">Teacher Profiles</h5>
                 </div>
 
                 <div class="card-body text-center">
@@ -390,9 +391,9 @@
                             <label class="form-label">Class Room</label>
 
                             <select name="class_room_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.class_rooms.search') }}" required>
+                                data-ajax-url="{{ route('staff.students.active-classes.search') }}" required>
 
-                                <option value="">Search class...</option>
+                                <option value="">Search active class...</option>
 
                             </select>
 

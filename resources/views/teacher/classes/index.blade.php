@@ -34,7 +34,12 @@
 
                             <td>{{ $class->course->name ?? '-' }}</td>
 
-                            <td>{{ $class->name }}</td>
+                            <td>
+                                {{ $class->name }}
+                                @if($class->is_completed)
+                                    <span class="badge bg-success">Completed</span>
+                                @endif
+                            </td>
 
                             <td>{{ ucfirst($class->classType->name ?? '-') }}</td>
 

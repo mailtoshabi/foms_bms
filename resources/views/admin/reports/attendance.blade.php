@@ -7,10 +7,11 @@
 
                 <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="mb-0">
-                            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                            Attendance Report
+                                <a href="javascript:window.history.back();"
+                                        class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                                        <i class="fas fa-chevron-left"></i>
+                                </a>
+                                Attendance Report
                         </h4>
                 </div>
 
@@ -27,13 +28,27 @@
                                         <div class="col-md-2">
                                                 <label class="form-label fw-bold">Status</label>
                                                 <select name="status" class="form-control">
-                                                        <option value="">All</option>
+                                                        <option value="">All Status</option>
                                                         <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>
                                                                 Present
                                                         </option>
                                                         <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>
                                                                 Absent
                                                         </option>
+                                                </select>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                                <label class="form-label fw-bold">Class</label>
+                                                <select name="class_room_id" class="form-control select2-class-ajax"
+                                                        data-ajax-url="{{ $classRoomSearchUrl }}"
+                                                        data-placeholder="Search Class...">
+                                                        <option value="">All Classes</option>
+                                                        @if(request('class_room_id') && isset($selectedClassName))
+                                                                <option value="{{ request('class_room_id') }}" selected>
+                                                                        {{ $selectedClassName }}
+                                                                </option>
+                                                        @endif
                                                 </select>
                                         </div>
 
@@ -69,32 +84,32 @@
                         <hr class="my-4">
 
                         @if(isset($hasFilters) && $hasFilters && isset($summary))
-                            <div class="row mb-4">
-                                <div class="col-md-4">
-                                    <div class="card bg-soft-primary border-0 shadow-none">
-                                        <div class="card-body text-center">
-                                            <h6 class="text-primary mb-2">Total Records Found</h6>
-                                            <h3 class="mb-0 text-primary">{{ $summary['total'] }}</h3>
+                                <div class="row mb-4">
+                                        <div class="col-md-4">
+                                                <div class="card bg-soft-primary border-0 shadow-none">
+                                                        <div class="card-body text-center">
+                                                                <h6 class="text-primary mb-2">Total Records Found</h6>
+                                                                <h3 class="mb-0 text-primary">{{ $summary['total'] }}</h3>
+                                                        </div>
+                                                </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card bg-soft-success border-0 shadow-none">
-                                        <div class="card-body text-center">
-                                            <h6 class="text-success mb-2">Total Present</h6>
-                                            <h3 class="mb-0 text-success">{{ $summary['present'] }}</h3>
+                                        <div class="col-md-4">
+                                                <div class="card bg-soft-success border-0 shadow-none">
+                                                        <div class="card-body text-center">
+                                                                <h6 class="text-success mb-2">Total Present</h6>
+                                                                <h3 class="mb-0 text-success">{{ $summary['present'] }}</h3>
+                                                        </div>
+                                                </div>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card bg-soft-danger border-0 shadow-none">
-                                        <div class="card-body text-center">
-                                            <h6 class="text-danger mb-2">Total Absent</h6>
-                                            <h3 class="mb-0 text-danger">{{ $summary['absent'] }}</h3>
+                                        <div class="col-md-4">
+                                                <div class="card bg-soft-danger border-0 shadow-none">
+                                                        <div class="card-body text-center">
+                                                                <h6 class="text-danger mb-2">Total Absent</h6>
+                                                                <h3 class="mb-0 text-danger">{{ $summary['absent'] }}</h3>
+                                                        </div>
+                                                </div>
                                         </div>
-                                    </div>
                                 </div>
-                            </div>
                         @endif
 
                         <table class="table table-bordered align-middle">
@@ -116,11 +131,12 @@
                                                         <td>{{ $row->name }}
                                                                 <br><small class="text-muted">{{ $row->contact_number }}</small>
                                                                 @if($row->is_whatsapp_different)
-                                                                    <br><small class="text-success" style="font-size: 11px;">WA: +{{ $row->whatsapp_number }}</small>
+                                                                        <br><small class="text-success" style="font-size: 11px;">WA:
+                                                                                +{{ $row->whatsapp_number }}</small>
                                                                 @endif
                                                         </td>
                                                         <td>{{ $row->class_name }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($row->class_started_at)->format('d M Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}</td>
                                                         <td>
                                                                 <span class="badge {{ $row->is_present ? 'bg-success' : 'bg-danger' }}">
                                                                         {{ $row->is_present ? 'Present' : 'Absent' }}

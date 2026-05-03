@@ -26,11 +26,11 @@ class ClassHourController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('class_started_at', '>=', $request->from_date);
+            $query->whereDate('join_teacher_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('class_started_at', '<=', $request->to_date);
+            $query->whereDate('join_teacher_at', '<=', $request->to_date);
         }
 
         $totalClassHours = $query->count();
@@ -40,7 +40,7 @@ class ClassHourController extends Controller
         $remainingMins = $totalDurationMins % 60;
         $totalDurationFormatted = "{$totalDurationHours}h {$remainingMins}m";
 
-        $data = $query->latest('class_started_at')->paginate(20)->withQueryString();
+        $data = $query->latest('join_teacher_at')->paginate(20)->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(ClassRoom::find($request->class_room_id))->name

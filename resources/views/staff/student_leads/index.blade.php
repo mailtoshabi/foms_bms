@@ -90,22 +90,27 @@
                                 </span>
                             </td>
                             <td>
+                                @php
+                                    $operationRoleId = utility('id_operation_dept');
+                                    $staff = auth('staff')->user();
+                                @endphp
                                 <div class="d-flex gap-2">
 
                                     <a href="{{ route('staff.student-leads.edit', encrypt($lead->id)) }}">
                                         <i class="mdi mdi-pencil text-success"></i>
                                     </a>
 
-                                    <a href="#" data-plugin="delete-data" data-target-form="#delete_{{ $lead->id }}">
-                                        <i class="mdi mdi-trash-can text-danger"></i>
-                                    </a>
+                                    @if($staff->hasRoleId($operationRoleId))
+                                        <a href="#" data-plugin="delete-data" data-target-form="#delete_{{ $lead->id }}">
+                                            <i class="mdi mdi-trash-can text-danger"></i>
+                                        </a>
 
-                                    <form id="delete_{{ $lead->id }}" method="POST"
-                                        action="{{ route('staff.student-leads.destroy', encrypt($lead->id)) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                    </form>
-
+                                        <form id="delete_{{ $lead->id }}" method="POST"
+                                            action="{{ route('staff.student-leads.destroy', encrypt($lead->id)) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
