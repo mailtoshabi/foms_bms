@@ -15,120 +15,123 @@ class DashboardController extends Controller
 {
 
 
-public function dashboard()
-{
-    $teacher = Auth::guard('teacher')->user();
+    public function dashboard()
+    {
+        $teacher = Auth::guard('teacher')->user();
 
-    // Assigned Classes
-    $classes = $teacher->classRooms()
-        ->with(['course','classType'])
-        ->get();
+        // Assigned Classes
+        $classes = $teacher->classRooms()
+            ->with(['course', 'classType'])
+            ->get();
 
-    $stats = \App\Models\ClassHour::where('teacher_id',$teacher->id)
-        ->selectRaw("
+        $stats = \App\Models\ClassHour::where('teacher_id', $teacher->id)
+            ->selectRaw("
             COUNT(*) as total,
             SUM(status = 'completed') as completed
         ")
-        ->first();
+            ->first();
 
-    $completedClasses = $stats->completed;
+        $completedClasses = $stats->completed;
 
-    // Total Hours
-    $totalMinutes = ClassHour::where('teacher_id',$teacher->id)
-        ->where('status','completed')
-        ->sum('duration');
+        // Total Hours
+        $totalMinutes = ClassHour::where('teacher_id', $teacher->id)
+            ->where('status', 'completed')
+            ->sum('duration');
 
-    $totalHours = round($totalMinutes / 60, 2);
+        $totalHours = round($totalMinutes / 60, 2);
 
-    // This Month Classes
-    $thisMonthClasses = ClassHour::where('teacher_id',$teacher->id)
-        ->where('status','completed')
-        ->whereMonth('join_teacher_at', now()->month)
-        ->whereYear('join_teacher_at', now()->year)
-        ->count();
+        // This Month Classes
+        $thisMonthClasses = ClassHour::where('teacher_id', $teacher->id)
+            ->where('status', 'completed')
+            ->whereMonth('updated_at', now()->month)
+            ->whereYear('updated_at', now()->year)
+            ->count();
 
-    // =========================
-    // EARNINGS (THIS MONTH)
-    // =========================
+        // =========================
+        // EARNINGS (THIS MONTH)
+        // =========================
 
-    // Latest Earnings
-    $latestEarnings = TeacherSalary::where('teacher_id', $teacher->id)
-        ->latest('cycle_start')
-        ->value('total_amount') ?? 0;
+        // Latest Earnings
+        $latestEarnings = TeacherSalary::where('teacher_id', $teacher->id)
+            ->latest('cycle_start')
+            ->value('total_amount') ?? 0;
 
-    // Salary history
-    $salaries = TeacherSalary::where('teacher_id',$teacher->id)
-        ->latest()
-        ->take(5)
-        ->get();
+        // Salary history
+        $salaries = TeacherSalary::where('teacher_id', $teacher->id)
+            ->latest()
+            ->take(5)
+            ->get();
 
-    // Latest class notes
-    $notes = ClassNote::where('teacher_id',$teacher->id)
-        ->latest()
-        ->take(5)
-        ->get();
+        // Latest class notes
+        $notes = ClassNote::where('teacher_id', $teacher->id)
+            ->latest()
+            ->take(5)
+            ->get();
 
-    //Upcoming Salary (unprocessed completed class hours)
-    $upcomingSalary = ClassHour::where('teacher_id', $teacher->id)
-        ->where('status', 'completed')
-        ->where('has_salary_calculated', false)
-        ->whereNotNull('duration')
-        ->selectRaw('SUM((duration / 60) * hourly_wage) as total')
-        ->value('total') ?? 0;
+        //Upcoming Salary (unprocessed completed class hours)
+        $upcomingSalary = ClassHour::where('teacher_id', $teacher->id)
+            ->where('status', 'completed')
+            ->where('has_salary_calculated', false)
+            ->whereNotNull('duration')
+            ->selectRaw('SUM((duration / 60) * hourly_wage) as total')
+            ->value('total') ?? 0;
 
-    // $pendingSalary = round($upcomingSalary, 2);
-    //Pending Salary
-    $pendingSalary = TeacherSalary::where('teacher_id', $teacher->id)
-        ->where('status', 'unpaid')
-        ->sum('total_amount');
+        // $pendingSalary = round($upcomingSalary, 2);
+        //Pending Salary
+        $pendingSalary = TeacherSalary::where('teacher_id', $teacher->id)
+            ->where('status', 'unpaid')
+            ->sum('total_amount');
 
-    // Earnings Graph
-    $monthlyData = ClassHour::where('teacher_id',$teacher->id)
-    ->where('status','completed')
-    ->whereYear('join_teacher_at', now()->year)
-    ->get()
-    ->groupBy(function ($item) {
-        return Carbon::parse($item->join_teacher_at)->format('M');
-    });
+        // Earnings Graph
+        $monthlyData = ClassHour::where('teacher_id', $teacher->id)
+            ->where('status', 'completed')
+            ->whereYear('updated_at', now()->year)
+            ->get()
+            ->groupBy(function ($item) {
+                return Carbon::parse($item->updated_at)->format('M');
+            });
 
-    $chartLabels = [];
-    $classCounts = [];
-    $earnings = [];
+        $chartLabels = [];
+        $classCounts = [];
+        $earnings = [];
 
-    foreach ($monthlyData as $month => $hours) {
+        foreach ($monthlyData as $month => $hours) {
 
-        $chartLabels[] = $month;
+            $chartLabels[] = $month;
 
-        $classCounts[] = $hours->count();
+            $classCounts[] = $hours->count();
 
-        $total = 0;
+            $total = 0;
 
-        foreach ($hours as $hour) {
+            foreach ($hours as $hour) {
 
-            if (!$hour->duration) continue;
+                if (!$hour->duration)
+                    continue;
 
-            $wage = $hour->hourly_wage ?? 0;
+                $wage = $hour->hourly_wage ?? 0;
 
-            $total += ($hour->duration / 60) * $wage;
+                $total += ($hour->duration / 60) * $wage;
+            }
+
+            $earnings[] = round($total, 2);
         }
 
-        $earnings[] = round($total,2);
+        return view('teacher.dashboard', compact(
+
+            'classes',
+            'completedClasses',
+            'totalHours',
+            'thisMonthClasses',
+            'latestEarnings',
+            'upcomingSalary',
+            'salaries',
+            'notes',
+            'pendingSalary',
+            'chartLabels',
+            'classCounts',
+            'earnings'
+        ));
     }
-
-    return view('teacher.dashboard',compact(
-
-        'classes',
-        'completedClasses',
-        'totalHours',
-        'thisMonthClasses',
-        'latestEarnings',
-        'upcomingSalary',
-        'salaries',
-        'notes',
-        'pendingSalary',
-        'chartLabels','classCounts','earnings'
-    ));
-}
 
     public function profile()
     {

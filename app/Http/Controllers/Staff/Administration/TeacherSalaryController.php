@@ -39,9 +39,9 @@ class TeacherSalaryController extends Controller
         // Get class hours in cycle
         $classHours = ClassHour::with('classRoom')
             ->where('teacher_id', $teacher->id)
-            ->where('status','completed')
+            ->where('status', 'completed')
             ->where('has_salary_calculated', false)
-            ->whereBetween('join_teacher_at', [
+            ->whereBetween('updated_at', [
                 $cycleStart->startOfDay(),
                 $cycleEnd->endOfDay()
             ])
@@ -49,7 +49,7 @@ class TeacherSalaryController extends Controller
 
 
 
-            // return  $cycleEnd->endOfDay();
+        // return  $cycleEnd->endOfDay();
 
         if ($classHours->isEmpty()) {
             return;
@@ -92,63 +92,63 @@ class TeacherSalaryController extends Controller
 
         });
 
-        return back()->with('success','Salary Updated successfully');
+        return back()->with('success', 'Salary Updated successfully');
     }
 
     public function create(Teacher $teacher)
     {
-        return view('staff.teacher_salaries.create',compact('teacher'));
+        return view('staff.teacher_salaries.create', compact('teacher'));
     }
 
     public function store(Request $request, Teacher $teacher)
     {
 
-    $request->validate([
-    'amount'=>'required|numeric',
-    'payment_date'=>'required|date'
-    ]);
+        $request->validate([
+            'amount' => 'required|numeric',
+            'payment_date' => 'required|date'
+        ]);
 
-    TeacherSalary::create([
-    'teacher_id'=>$teacher->id,
-    'amount'=>$request->amount,
-    'payment_method'=>$request->payment_method,
-    'payment_date'=>$request->payment_date,
-    'notes'=>$request->notes
-    ]);
+        TeacherSalary::create([
+            'teacher_id' => $teacher->id,
+            'amount' => $request->amount,
+            'payment_method' => $request->payment_method,
+            'payment_date' => $request->payment_date,
+            'notes' => $request->notes
+        ]);
 
-    return back()->with('success','Salary added');
+        return back()->with('success', 'Salary added');
 
     }
 
 
     public function update(Request $request, TeacherSalary $salary)
     {
-    $request->validate([
-        'total_amount'   => 'nullable|numeric|min:0',
-        'payment_method' => 'nullable|string|max:50',
-        'payment_date'   => 'nullable|date',
-        'status'         => 'nullable|in:unpaid,paid',
-        'notes'          => 'nullable|string|max:1000',
-    ]);
+        $request->validate([
+            'total_amount' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string|max:50',
+            'payment_date' => 'nullable|date',
+            'status' => 'nullable|in:unpaid,paid',
+            'notes' => 'nullable|string|max:1000',
+        ]);
 
-    $salary->update($request->only(
-    'total_amount',
-    'payment_method',
-    'payment_date',
-    'status',
-    'notes'
-    ));
+        $salary->update($request->only(
+            'total_amount',
+            'payment_method',
+            'payment_date',
+            'status',
+            'notes'
+        ));
 
-    return back()->with('success','Salary updated');
+        return back()->with('success', 'Salary updated');
 
     }
 
     public function destroy(TeacherSalary $salary)
     {
 
-    $salary->delete();
+        $salary->delete();
 
-    return back()->with('success','Salary deleted');
+        return back()->with('success', 'Salary deleted');
 
     }
 }
