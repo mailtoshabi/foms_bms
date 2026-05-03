@@ -5,7 +5,8 @@
 
     <div class="card">
         <div class="card-header d-flex align-items-center">
-            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle"
+                title="Go Back">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <h4 class="card-title mb-0">Class Sessions Report</h4>
@@ -37,7 +38,8 @@
                         <select name="status" class="form-control">
                             <option value="">All Statuses</option>
                             <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed
+                            </option>
                         </select>
                     </div>
 
@@ -99,9 +101,10 @@
                         @forelse($data as $row)
                             <tr>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}
                                     <br>
-                                    <small class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small>
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->updated_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
                                     <strong>{{ $row->classRoom->name ?? 'N/A' }}</strong>
@@ -117,24 +120,28 @@
                                 </td>
                                 <td>
                                     @if($row->google_meet_link)
-                                        <a href="{{ $row->google_meet_link }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ $row->google_meet_link }}" target="_blank"
+                                            class="btn btn-sm btn-outline-primary">
                                             <i class="mdi mdi-google-meet"></i> Meet
                                         </a>
                                     @endif
-                                    
+
                                     <div class="mt-1">
                                         @if($row->has_fee_calculated)
-                                            <span class="badge badge-soft-info" title="Fees Calculated">Fee <i class="mdi mdi-check"></i></span>
+                                            <span class="badge badge-soft-info" title="Fees Calculated">Fee <i
+                                                    class="mdi mdi-check"></i></span>
                                         @endif
                                         @if($row->has_salary_calculated)
-                                            <span class="badge badge-soft-success" title="Salary Calculated">Salary <i class="mdi mdi-check"></i></span>
+                                            <span class="badge badge-soft-success" title="Salary Calculated">Salary <i
+                                                    class="mdi mdi-check"></i></span>
                                         @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">No sessions found matching your criteria.</td>
+                                <td colspan="6" class="text-center py-4 text-muted">No sessions found matching your criteria.
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -150,51 +157,51 @@
 @endsection
 
 @section('script')
-<script>
-    $(document).ready(function() {
-        $('.class-select2').select2({
-            placeholder: "Search Class...",
-            minimumInputLength: 2,
-            allowClear: true,
-            ajax: {
-                url: "{{ route('admin.class_rooms.search') }}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        q: params.term
-                    };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            }
-        });
+    <script>
+        $(document).ready(function () {
+            $('.class-select2').select2({
+                placeholder: "Search Class...",
+                minimumInputLength: 2,
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('admin.class_rooms.search') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
+            });
 
-        $('.teacher-select2').select2({
-            placeholder: "Search Teacher...",
-            minimumInputLength: 2,
-            allowClear: true,
-            ajax: {
-                url: "{{ route('admin.teachers.search') }}",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        q: params.term
-                    };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            }
+            $('.teacher-select2').select2({
+                placeholder: "Search Teacher...",
+                minimumInputLength: 2,
+                allowClear: true,
+                ajax: {
+                    url: "{{ route('admin.teachers.search') }}",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            q: params.term
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results
+                        };
+                    },
+                    cache: true
+                }
+            });
         });
-    });
-</script>
+    </script>
 @endsection

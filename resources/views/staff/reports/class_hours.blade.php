@@ -41,12 +41,14 @@
 
                     <div class="col-md-2">
                         <label class="form-label fw-bold">From Date</label>
-                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control" placeholder="From Date">
+                        <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control"
+                            placeholder="From Date">
                     </div>
 
                     <div class="col-md-2">
                         <label class="form-label fw-bold">To Date</label>
-                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control" placeholder="To Date">
+                        <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control"
+                            placeholder="To Date">
                     </div>
 
                     <div class="col-md-12 d-flex justify-content-end gap-2 mt-2">
@@ -97,10 +99,10 @@
                         @forelse($data as $row)
                             <tr>
                                 <td>
-                                    {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}
                                     <br>
                                     <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small>
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->updated_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
                                     <strong>{{ $row->classRoom->name ?? 'N/A' }}</strong>
