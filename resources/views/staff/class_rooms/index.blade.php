@@ -18,7 +18,8 @@
 
     <x-classrooms.index :class_rooms="$class_rooms" :courses="$courses" :types="$types"
         createRoute="{{ route('staff.class_rooms.create') }}" indexRoute="{{ route('staff.class_rooms.index') }}"
-        :editRoute="fn($id) => route('staff.class_rooms.edit', $id)" :deleteRoute="fn($id) => route('staff.class_rooms.destroy', $id)" :showRoute="fn($id) => route('staff.class_rooms.show', $id)" />
+        :editRoute="fn($id) => route('staff.class_rooms.edit', $id)" :deleteRoute="fn($id) => route('staff.class_rooms.destroy', $id)" :showRoute="fn($id) => route('staff.class_rooms.show', $id)"
+        :classRoomSearchUrl="$classRoomSearchUrl" :selectedClassName="$selectedClassName" />
 
 @endsection
 

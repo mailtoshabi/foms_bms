@@ -529,7 +529,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     });
             });
 
-        Route::middleware('role:id_hr_dept,id_operation_dept')
+        Route::middleware('role:id_hr_dept,id_operation_dept,id_administrator_dept')
             ->group(function () {
                 Route::get(
                     '/teacher-salaries',
@@ -546,6 +546,10 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [TeacherSalaryController::class, 'processTeacherSalary']
                 )->name('process.teacher.salary');
 
+            });
+
+        Route::middleware('role:id_hr_dept,id_operation_dept,id_administrator_dept,id_finance_dept')
+            ->group(function () {
                 Route::get('/class-hours', [\App\Http\Controllers\Staff\Administration\ClassHourController::class, 'index'])
                     ->name('class-hours.index');
             });
@@ -575,7 +579,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
             });
 
-        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_hr_dept,id_operation_dept')
+        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_hr_dept,id_operation_dept,id_finance_dept')
             ->group(function () {
                 Route::get(
                     '/students',
@@ -613,7 +617,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
             });
 
-        Route::middleware('role:id_administrator_dept,id_hr_dept,id_operation_dept')
+        Route::middleware('role:id_administrator_dept,id_hr_dept,id_operation_dept,id_finance_dept')
             ->group(function () {
                 Route::get('teachers/search', [TeacherController::class, 'search'])
                     ->name('teachers.search');
@@ -632,7 +636,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
             Route::post('/old-data/students-bulk-create', [OldDataController::class, 'bulkCreateStudents'])->name('old_data.students_bulk_create');
         });
 
-        Route::middleware('role:id_hr_dept,id_finance_dept,id_operation_dept')
+        Route::middleware('role:id_hr_dept,id_finance_dept,id_operation_dept,id_administrator_dept')
             ->group(function () {
                 Route::get('/reports/attendance', [StaffReportController::class, 'attendance'])
                     ->name('reports.attendance');

@@ -54,7 +54,7 @@
                                 </li>
                             @endif
 
-                            @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
+                            @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                                 <li class="{{ set_active(['staff.students.*']) }}">
                                     <a href="{{ route('staff.students.index') }}">
                                         Students
@@ -74,7 +74,7 @@
 
                             <span>Teachers</span>
 
-                            @if($pendingCount_t > 0)
+                            @if($pendingCount_t > 0 && $staff->hasRoleId($operationRoleId))
                                 <span class="badge bg-warning float-end">
                                     {{ $pendingCount_t }}
                                 </span>
@@ -83,7 +83,7 @@
 
                         <ul class="sub-menu" aria-expanded="false">
 
-                            @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
+                            @if($staff->hasRoleId($operationRoleId))
                                 <li class="{{ set_active(['staff.teacher-leads.*']) }}">
                                     <a href="{{ route('staff.teacher-leads.index') }}">
                                         Teacher Leads
@@ -97,7 +97,7 @@
                                 </li>
                             @endif
 
-                            @if($staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
+                            @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
                                 <li class="{{ set_active(['staff.teachers.*']) }}">
                                     <a href="{{ route('staff.teachers.index') }}">
                                         Teachers
@@ -143,7 +143,7 @@
                     </li>
                 @endif
                 {{-- Class Hours: hr | operation | finance --}}
-                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId))
+                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                     <li class="{{ set_active(['staff.class-hours.index']) }}">
                         <a href="{{ route('staff.class-hours.index') }}">
                             <i class="fas fa-history text-info"></i>
@@ -152,7 +152,7 @@
                     </li>
                 @endif
 
-                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($administratorRoleId))
+                @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
                     <li class="{{ set_active(['staff.reports.attendance']) }}">
                         <a href="{{ route('staff.reports.attendance') }}">
                             <i class="fas fa-clipboard-list text-success"></i>

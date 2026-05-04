@@ -1,4 +1,4 @@
-@extends('admin.layouts.master')
+﻿@extends('admin.layouts.master')
 @section('title') Dashboard @endsection
 @section('css')
 
@@ -77,7 +77,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <span class="text-muted d-block">Fee Collected <small>(this month)</small></span>
-                                <h4 class="mb-0">?{{ number_format($stats['fee'], 2) }}</h4>
+                                <h4 class="mb-0">₹{{ number_format($stats['fee'], 2) }}</h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-rupee-sign fa-2x text-info"></i>
@@ -95,7 +95,7 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <span class="text-muted d-block">Expenses <small>(this month)</small></span>
-                                <h4 class="mb-0">?{{ number_format($stats['expense'], 2) }}</h4>
+                                <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-file-invoice-dollar fa-2x text-danger"></i>
@@ -113,7 +113,7 @@
                         <div class="flex-grow-1">
                             <span class="text-muted d-block">Balance Sheet <small>(this month)</small></span>
                             <h4 class="mb-0 {{ $stats['balanceSheet'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                ?{{ number_format($stats['balanceSheet'], 2) }}
+                                ₹{{ number_format($stats['balanceSheet'], 2) }}
                             </h4>
                         </div>
                         <div class="flex-shrink-0">
@@ -173,7 +173,7 @@
                             <div class="flex-grow-1">
                                 <span class="text-muted d-block">Unpaid Fees</span>
                                 <h4 class="mb-0">{{ $unpaidFeesCount }} <small
-                                        class="fs-6 text-danger">?{{ number_format($unpaidFeesAmount, 2) }}</small></h4>
+                                        class="fs-6 text-danger">₹{{ number_format($unpaidFeesAmount, 2) }}</small></h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
@@ -192,7 +192,7 @@
                             <div class="flex-grow-1">
                                 <span class="text-muted d-block">Unpaid Teacher Salaries</span>
                                 <h4 class="mb-0">{{ $unpaidTeacherSalariesCount }} <small
-                                        class="fs-6 text-danger">?{{ number_format($unpaidTeacherSalariesAmount, 2) }}</small>
+                                        class="fs-6 text-danger">₹{{ number_format($unpaidTeacherSalariesAmount, 2) }}</small>
                                 </h4>
                             </div>
                             <div class="flex-shrink-0">
@@ -415,7 +415,7 @@
 
                 datasets: [{
                     data: [
-                                                {{ $paidAmount }},
+                                                    {{ $paidAmount }},
                         {{ $pendingAmount }}
                     ],
                     borderWidth: 1

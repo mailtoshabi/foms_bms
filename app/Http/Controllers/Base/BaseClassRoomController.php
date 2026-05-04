@@ -35,8 +35,11 @@ class BaseClassRoomController extends BaseServiceController
             $query->where('class_type_id', $request->class_type_id);
         }
 
-        if ($request->filled('status')) {
+        if ($request->filled('class_room_id')) {
+            $query->where('id', $request->class_room_id);
+        }
 
+        if ($request->filled('status')) {
             if ($request->status == 'active') {
                 $query->where('is_completed', false);
             }
@@ -51,9 +54,14 @@ class BaseClassRoomController extends BaseServiceController
         $courses = Course::all();
         $types = ClassType::all();
 
+        $classRoomSearchUrl = route($this->routePrefix . '.search');
+        $selectedClassName = $request->filled('class_room_id')
+            ? optional(ClassRoom::find($request->class_room_id))->name
+            : null;
+
         return view(
             $this->viewPrefix . '.index',
-            compact('class_rooms', 'courses', 'types')
+            compact('class_rooms', 'courses', 'types', 'classRoomSearchUrl', 'selectedClassName')
         );
     }
 

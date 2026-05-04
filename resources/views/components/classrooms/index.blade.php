@@ -6,7 +6,9 @@
     'indexRoute',
     'editRoute',
     'deleteRoute',
-    'showRoute'
+    'showRoute',
+    'classRoomSearchUrl',
+    'selectedClassName'
 ])
 
 @if(session('success'))
@@ -76,8 +78,16 @@ Add Class
 </div>
 
 <div class="col-md-3">
-    <label class="form-label fw-bold">Class Name</label>
-    <input type="text" name="name" value="{{ request('name') }}" class="form-control" placeholder="Search Class Name...">
+    <label class="form-label fw-bold">Class Room</label>
+    <select name="class_room_id" class="form-control select2-class-ajax"
+        data-ajax-url="{{ $classRoomSearchUrl }}"
+        data-selected-id="{{ request('class_room_id') }}"
+        data-selected-text="{{ $selectedClassName ?? '' }}">
+        @if(request('class_room_id') && isset($selectedClassName))
+            <option value="{{ request('class_room_id') }}" selected>{{ $selectedClassName }}
+            </option>
+        @endif
+    </select>
 </div>
 
 <div class="col-md-3 d-flex align-items-end gap-2">
