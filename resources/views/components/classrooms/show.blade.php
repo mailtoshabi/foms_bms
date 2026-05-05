@@ -372,10 +372,10 @@
 
                 selectedStudents.forEach((name, id) => {
                     badgesHtml += `
-                                    <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
-                                        ${name}
-                                        <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
-                                    </span>`;
+                                        <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
+                                            ${name}
+                                            <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
+                                        </span>`;
                     inputsHtml += `<input type="hidden" name="student_ids[]" value="${id}">`;
                 });
 
@@ -395,7 +395,7 @@
                     }
                 @endif
 
-                            if ($(this).is(':checked')) {
+                                if ($(this).is(':checked')) {
                     selectedStudents.set(id, name);
                 } else {
                     selectedStudents.delete(id);
@@ -419,10 +419,10 @@
                 if (q.length < 2) {
                     if (q.length === 0) {
                         $('#studentList').html(`
-                                        <div class="col-12 text-center py-4 text-muted">
-                                            <i class="fas fa-search fa-2x mb-2"></i>
-                                            <p>Start typing to find students to add...</p>
-                                        </div>`);
+                                            <div class="col-12 text-center py-4 text-muted">
+                                                <i class="fas fa-search fa-2x mb-2"></i>
+                                                <p>Start typing to find students to add...</p>
+                                            </div>`);
                     }
                     return;
                 }
@@ -446,13 +446,13 @@
                                 response.results.forEach(student => {
                                     let isChecked = selectedStudents.has(student.id.toString()) ? 'checked' : '';
                                     html += `
-                                                    <div class="col-md-6 mb-2">
-                                                        <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
-                                                            <input type="checkbox" value="${student.id}" data-name="${student.name}" 
-                                                                class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
-                                                            <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
-                                                        </label>
-                                                    </div>`;
+                                                        <div class="col-md-6 mb-2">
+                                                            <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
+                                                                <input type="checkbox" value="${student.id}" data-name="${student.name}" 
+                                                                    class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
+                                                                <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
+                                                            </label>
+                                                        </div>`;
                                 });
                             }
                             $('#studentList').html(html);
