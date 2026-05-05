@@ -185,6 +185,13 @@
                             </tr>
                         </thead>
 
+                        @php
+                            $administratorRoleId = utility('id_administrator_dept');
+                            $operationRoleId = utility('id_operation_dept');
+                            $staff = auth('staff')->user();
+                            $isAdmin = auth('admin')->check();
+                        @endphp
+
                         <tbody>
 
                             @forelse($class->students as $student)
@@ -195,13 +202,8 @@
                                     <td>{{ $student->contact_number }}</td>
                                     <td>{{ $student->pivot->assigned_date ? \Carbon\Carbon::parse($student->pivot->assigned_date)->format('d M Y') : '-' }}
                                     </td>
-                                    @php
-                                        $administratorRoleId = utility('id_administrator_dept');
-                                        $operationRoleId = utility('id_operation_dept');
-                                        $staff = auth('staff')->user();
-                                    @endphp
 
-                                    @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                                    @if($isAdmin || ($staff && ($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))))
                                         @if(!$class->is_completed)
                                             <td>
 
