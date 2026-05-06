@@ -185,13 +185,17 @@ Monthly: ₹{{ number_format($class->monthly_fee,2) }}
 <i class="fas fa-eye"></i>
 </a>
 
+<a href="#" data-bs-toggle="modal" data-bs-target="#attendanceModal_{{ $class->id }}">
+<i class="fas fa-clipboard-list text-info"></i>
+</a>
+
 <a href="{{ $editRoute(encrypt($class->id)) }}">
 <i class="mdi mdi-pencil text-success"></i>
 </a>
 
 @php
     $canDelete = false;
-    if (auth('admin')->check()) {
+    if (auth('admin')->check()) {  
         $canDelete = true;
     } elseif (auth('staff')->check()) {
         $staff = auth('staff')->user();
@@ -219,6 +223,59 @@ action="{{ $deleteRoute(encrypt($class->id)) }}">
 @endif
 
 </div>
+
+<!-- Attendance Modal -->
+<div class="modal fade" id="attendanceModal_{{ $class->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Attendance - {{ $class->name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start">
+                @php
+                    $completedClassHours = \App\Models\ClassHour::where('class_room_id', $class->id)->where('status', 'completed')->pluck('id');
+                    $totalClasses = $completedClassHours->count() ?: 1;
+                    
+                    $attendanceStats = \Illuminate\Support\Facades\DB::table('student_attendance')
+                            ->select('student_id', \Illuminate\Support\Facades\DB::raw('SUM(is_present) as present'))
+                            ->whereIn('class_hour_id', $completedClassHours)
+                            ->groupBy('student_id')
+                            ->get()
+                            ->keyBy('student_id');
+                @endphp
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($class->students as $student)
+                                @php
+                                    $stat = $attendanceStats->get($student->id);
+                                    $present = $stat ? $stat->present : 0;
+                                    $percentage = round(($present / $totalClasses) * 100);
+                                @endphp
+                                <tr>
+                                    <td>{{ $student->name }}</td>
+                                    <td>
+                                        <span class="badge {{ $percentage >= 75 ? 'bg-success' : ($percentage >= 50 ? 'bg-warning' : 'bg-danger') }}">
+                                            {{ $present }}/{{ $completedClassHours->count() ?: 1 }} ({{ $percentage }}%)
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Modal -->
 
 </td>
 

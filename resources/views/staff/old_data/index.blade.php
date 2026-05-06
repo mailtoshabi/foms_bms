@@ -298,14 +298,13 @@
                                     <li><code>Classroom Name</code> (Class Name)</li>
                                     <li><code>Date</code> (Assignment date)</li>
                                 </ul>
-                                <p class="small text-muted mb-0">Updates: Assignment date, Created Date in pivot
-                                    table.</p>
+                                <p class="small text-muted mb-0">Assigns teacher to classroom automatically or updates dates if already assigned.</p>
                             </div>
                         </div>
                         <div class="d-grid mt-auto">
                             <button type="submit" class="btn btn-secondary"
                                 onclick="this.disabled=true; this.innerHTML='<span class=\'spinner-border spinner-border-sm me-1\'></span> Processing...'; this.form.submit();">
-                                <i class="fas fa-file-import me-1"></i> Update Assignments
+                                <i class="fas fa-file-import me-1"></i> Import Assignments
                             </button>
                         </div>
                     </form>

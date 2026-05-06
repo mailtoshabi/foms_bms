@@ -55,13 +55,17 @@ class TeacherClassRoomImport implements ToCollection, WithHeadingRow
                 
                 if ($date) {
                     DB::table('teacher_class_room')
-                        ->where('teacher_id', $teacher->id)
-                        ->where('class_room_id', $classroom->id)
-                        ->update([
-                            'assigned_at' => $date,
-                            'created_at'  => $date,
-                            'updated_at'  => $date,
-                        ]);
+                        ->updateOrInsert(
+                            [
+                                'teacher_id' => $teacher->id,
+                                'class_room_id' => $classroom->id
+                            ],
+                            [
+                                'assigned_at' => $date,
+                                'created_at'  => $date,
+                                'updated_at'  => $date,
+                            ]
+                        );
                 }
             }
         }

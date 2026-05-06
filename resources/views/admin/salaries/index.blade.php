@@ -117,6 +117,7 @@
                                 <tr>
                                     <th>Teacher</th>
                                     <th>Cycle</th>
+                                    <th>Credit Date</th>
                                     <th>Total Hours</th>
                                     <th>Total Amount</th>
                                     <th>Status</th>
@@ -128,57 +129,65 @@
 
                                 @forelse($salaries as $salary)
 
-                                                            <tr>
+                                    <tr>
 
-                                                                <td>{{ $salary->teacher->name ?? '-' }}</td>
+                                        <td>{{ $salary->teacher->name ?? '-' }}</td>
 
-                                                                <td>
-                                                                    {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
-                                                                    -
-                                                                    {{ \Carbon\Carbon::parse($salary->cycle_end)->format('d M Y') }}
-                                                                </td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
+                                            -
+                                            {{ \Carbon\Carbon::parse($salary->cycle_end)->format('d M Y') }}
+                                        </td>
 
-                                                                <td>
-                                                                    <span class="badge bg-info">
-                                                                        {{ number_format($salary->total_hours, 2) }} hrs
-                                                                    </span>
-                                                                </td>
+                                        <td>
+                                            @if($salary->credit_date)
+                                                {{ \Carbon\Carbon::parse($salary->credit_date)->format('d M Y') }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
 
-                                                                <td>
-                                                                    <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
-                                                                        ₹ {{ number_format($salary->total_amount, 2) }}
-                                                                    </strong>
-                                                                    @if($salary->status == 'paid')
-                                                                        <br><small class="text-muted">
-                                                                            Paid on {{ optional($salary->payment_date)->format('d M Y') }}
-                                                                        </small>
-                                                                    @endif
-                                                                </td>
+                                        <td>
+                                            <span class="badge bg-info">
+                                                {{ number_format($salary->total_hours, 2) }} hrs
+                                            </span>
+                                        </td>
 
-                                                                <td>
-                                                                    <span class="badge
-                                    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
-                                                                        {{ ucfirst($salary->status) }}
-                                                                    </span>
-                                                                </td>
+                                        <td>
+                                            <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
+                                                ₹ {{ number_format($salary->total_amount, 2) }}
+                                            </strong>
+                                            @if($salary->status == 'paid')
+                                                <br><small class="text-muted">
+                                                    Paid on {{ optional($salary->payment_date)->format('d M Y') }}
+                                                </small>
+                                            @endif
+                                        </td>
 
-                                                                <td>
+                                        <td>
+                                            <span class="badge
+                                                    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
+                                                {{ ucfirst($salary->status) }}
+                                            </span>
+                                        </td>
 
-                                                                    <button
-                                                                        class="btn btn-sm btn-primary paySalaryBtn {{ $salary->status == 'paid' ? 'disabled' : '' }}"
-                                                                        data-id="{{ $salary->id }}" data-amount="{{ $salary->total_amount }}"
-                                                                        data-status="{{ $salary->status }}"
-                                                                        data-date="{{ optional($salary->payment_date)->format('Y-m-d') }}"
-                                                                        data-method="{{ $salary->payment_method }}"
-                                                                        data-ref="{{ $salary->reference_number }}" data-notes="{{ $salary->notes }}">
+                                        <td>
 
-                                                                        <i class="fas fa-money-bill"></i>
+                                            <button
+                                                class="btn btn-sm btn-primary paySalaryBtn {{ $salary->status == 'paid' ? 'disabled' : '' }}"
+                                                data-id="{{ $salary->id }}" data-amount="{{ $salary->total_amount }}"
+                                                data-status="{{ $salary->status }}"
+                                                data-date="{{ optional($salary->payment_date)->format('Y-m-d') }}"
+                                                data-method="{{ $salary->payment_method }}"
+                                                data-ref="{{ $salary->reference_number }}" data-notes="{{ $salary->notes }}">
 
-                                                                    </button>
+                                                <i class="fas fa-money-bill"></i>
 
-                                                                </td>
+                                            </button>
 
-                                                            </tr>
+                                        </td>
+
+                                    </tr>
 
                                 @empty
 
@@ -232,7 +241,9 @@
 
                         <div class="mb-3">
                             <label>Payment Date</label>
-                            <input type="date" name="payment_date" id="payment_date" class="form-control @error('payment_date') is-invalid @enderror" value="{{ old('payment_date') }}">
+                            <input type="date" name="payment_date" id="payment_date"
+                                class="form-control @error('payment_date') is-invalid @enderror"
+                                value="{{ old('payment_date') }}">
                             @error('payment_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -240,7 +251,8 @@
 
                         <div class="mb-3">
                             <label>Payment Method</label>
-                            <select name="payment_method" id="payment_method" class="form-control @error('payment_method') is-invalid @enderror">
+                            <select name="payment_method" id="payment_method"
+                                class="form-control @error('payment_method') is-invalid @enderror">
                                 <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
                                 <option value="upi" {{ old('payment_method') == 'upi' ? 'selected' : '' }}>UPI</option>
                                 <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
@@ -252,7 +264,9 @@
 
                         <div class="mb-3">
                             <label>Reference Number</label>
-                            <input type="text" name="reference_number" id="reference_number" class="form-control @error('reference_number') is-invalid @enderror" value="{{ old('reference_number') }}">
+                            <input type="text" name="reference_number" id="reference_number"
+                                class="form-control @error('reference_number') is-invalid @enderror"
+                                value="{{ old('reference_number') }}">
                             @error('reference_number')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -260,7 +274,8 @@
 
                         <div class="mb-3">
                             <label>Notes</label>
-                            <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
+                            <textarea name="notes" id="notes"
+                                class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
                             @error('notes')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

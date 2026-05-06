@@ -123,6 +123,7 @@
                                 <tr>
                                     <th>Teacher</th>
                                     <th>Cycle</th>
+                                    <th>Credit Date</th>
                                     <th>Total Hours</th>
                                     <th>Total Amount</th>
                                     <th>Status</th>
@@ -142,6 +143,14 @@
                                             {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
                                             -
                                             {{ \Carbon\Carbon::parse($salary->cycle_end)->format('d M Y') }}
+                                        </td>
+
+                                        <td>
+                                            @if($salary->credit_date)
+                                                {{ \Carbon\Carbon::parse($salary->credit_date)->format('d M Y') }}
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
 
                                         <td>

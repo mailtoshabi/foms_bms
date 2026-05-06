@@ -99,6 +99,7 @@ class SalaryService
                 'cycle_end' => $cycleEnd,
                 'total_hours' => $totalHours,
                 'total_amount' => round($totalAmount, 2),
+                'credit_date' => $cycleStart->copy()->addDays(10),
             ]);
 
             ClassHour::whereIn('id', $classHours->pluck('id'))

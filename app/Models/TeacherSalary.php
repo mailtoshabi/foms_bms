@@ -16,11 +16,13 @@ class TeacherSalary extends Model
         'payment_method',
         'reference_number',
         'notes',
-        'status'
+        'status',
+        'credit_date'
     ];
 
     protected $casts = [
         'payment_date' => 'date',
+        'credit_date' => 'date',
         'cycle_start' => 'date',
         'cycle_end' => 'date'
     ];

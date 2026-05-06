@@ -133,10 +133,10 @@ use App\Models\StudentAttendance;
 use App\Models\ClassNote;
 use Illuminate\Support\Facades\Cache;
 
-if (!function_exists('topTeachers')) {
-    function topTeachers()
+if (!function_exists('allTeachersRanked')) {
+    function allTeachersRanked()
     {
-        return Cache::remember('top_teachers', 300, function () {
+        return Cache::remember('all_teachers_ranked', 300, function () {
 
             // ── Query 1: classes count + total minutes per teacher ────────────
             $classStats = ClassHour::where('status', 'completed')
@@ -175,7 +175,7 @@ if (!function_exists('topTeachers')) {
 
             // ── Query 5: only teachers who have conducted at least one class ──
             $teacherIds = $classStats->keys()->all();
-            $teachers = Teacher::whereIn('id', $teacherIds)->get()->keyBy('id');
+            $teachers = \App\Models\Teacher::whereIn('id', $teacherIds)->get()->keyBy('id');
 
             $data = [];
 
@@ -214,55 +214,50 @@ if (!function_exists('topTeachers')) {
 
             usort($data, fn($a, $b) => $b['score'] <=> $a['score']);
 
-            return array_slice($data, 0, 5);
+            return $data;
         });
+    }
+}
+
+if (!function_exists('topTeachers')) {
+    function topTeachers()
+    {
+        return array_slice(allTeachersRanked(), 0, 5);
     }
 }
 
 if (!function_exists('teacherRankData')) {
     function teacherRankData($teacherId)
     {
-        $totalClasses = ClassHour::where('teacher_id', $teacherId)
-            ->where('status', 'completed')
-            ->count();
+        $allRanked = allTeachersRanked();
+        
+        $teacherData = null;
+        $rank = '-'; // Default if not found
 
-        $totalHours = ClassHour::where('teacher_id', $teacherId)
-            ->where('status', 'completed')
-            ->sum('duration') / 60;
+        foreach ($allRanked as $index => $data) {
+            if ($data['teacher']->id == $teacherId) {
+                $teacherData = $data;
+                $rank = $index + 1; // 1-based ranking
+                break;
+            }
+        }
 
-        $attendanceStats = DB::table('student_attendance')
-            ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
-            ->where('class_hours.teacher_id', $teacherId)
-            ->where('class_hours.status', 'completed')
-            ->selectRaw('COUNT(*) as total, SUM(student_attendance.is_present = 1) as present')
-            ->first();
-
-        $attendancePercent = ($attendanceStats->total)
-            ? ($attendanceStats->present / $attendanceStats->total) * 100
-            : 0;
-
-        $earningsRow = DB::table('class_hours')
-            ->join('teacher_class_room', function ($join) {
-                $join->on('class_hours.class_room_id', '=', 'teacher_class_room.class_room_id')
-                    ->on('class_hours.teacher_id', '=', 'teacher_class_room.teacher_id');
-            })
-            ->where('class_hours.teacher_id', $teacherId)
-            ->where('class_hours.status', 'completed')
-            ->whereNotNull('class_hours.duration')
-            ->selectRaw('SUM((class_hours.duration / 60) * teacher_class_room.hourly_wage) as total_earnings')
-            ->first();
-
-        $earnings = $earningsRow->total_earnings ?? 0;
-        $totalNotes = ClassNote::where('teacher_id', $teacherId)->count();
-
-        // Updated Formula: Classes 35%, Hours 25%, Attendance 15%, Notes 15%, Earnings 10%
-        $score = ($totalClasses * 0.35) +
-            ($totalHours * 0.25) +
-            ($attendancePercent * 0.15) +
-            ($totalNotes * 0.15) +
-            (($earnings / 100) * 0.10);
-
-        $score = round($score, 2);
+        // If teacher is not in the ranked list (e.g., 0 completed classes)
+        if (!$teacherData) {
+            $score = 0;
+            $totalClasses = 0;
+            $totalHours = 0;
+            $attendancePercent = 0;
+            $totalNotes = 0;
+            $earnings = 0;
+        } else {
+            $score = $teacherData['score'];
+            $totalClasses = $teacherData['classes'];
+            $totalHours = $teacherData['hours'];
+            $attendancePercent = $teacherData['attendance'];
+            $totalNotes = $teacherData['notes'];
+            $earnings = $teacherData['earnings'];
+        }
 
         if ($score >= 70) {
             $stars = 5;
@@ -286,7 +281,7 @@ if (!function_exists('teacherRankData')) {
             $color = 'light';
         }
 
-        return compact('score', 'stars', 'label', 'color', 'totalClasses', 'totalHours', 'attendancePercent', 'totalNotes');
+        return compact('score', 'stars', 'label', 'color', 'totalClasses', 'totalHours', 'attendancePercent', 'totalNotes', 'rank');
     }
 }
 
