@@ -393,6 +393,7 @@ class ReportController extends Controller
                 'teacher_salaries.cycle_start',
                 'teacher_salaries.cycle_end',
                 'teacher_salaries.payment_date',
+                'teacher_salaries.credit_date',
                 'teacher_salaries.reference_number',
                 'teacher_salaries.notes',
                 'teacher_salaries.payment_method',

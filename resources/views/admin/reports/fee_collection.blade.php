@@ -123,7 +123,7 @@
                         <th>Category</th>
                         <th>Amount</th>
                         <th>Method</th>
-                        <th>Date</th>
+                        <th>Payment Date</th>
                     </tr>
                 </thead>
 

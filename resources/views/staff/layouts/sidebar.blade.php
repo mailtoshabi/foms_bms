@@ -110,7 +110,7 @@
                 @endif
 
                 {{-- Classes: enrolment | administrator | operation --}}
-                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
+                @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                     <li class="{{ set_active(['staff.class_rooms.*']) }}">
                         <a href="javascript:void(0);" class="has-arrow">
                             <i class="fas fa-chalkboard"></i>

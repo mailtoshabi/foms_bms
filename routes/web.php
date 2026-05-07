@@ -554,7 +554,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     ->name('class-hours.index');
             });
 
-        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_operation_dept')
+        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_hr_dept,id_finance_dept,id_operation_dept')
             ->group(function () {
 
                 Route::controller(EnrolmentClassRoomController::class)

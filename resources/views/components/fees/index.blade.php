@@ -45,7 +45,8 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
 
                     <h4 class="mb-0">
-                        <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                        <a href="javascript:window.history.back();"
+                            class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                             <i class="fas fa-chevron-left"></i>
                         </a>
                         @if($tab == 'paid')
@@ -161,12 +162,15 @@
                                 <div class="card bg-soft-info border-info">
                                     <div class="card-body d-flex justify-content-between align-items-center p-3">
                                         <div>
-                                            <h5 class="text-info mb-1"><i class="mdi mdi-information-outline me-1"></i> Filtering Summary</h5>
-                                            <p class="text-muted mb-0 small">Showing total results based on your selected criteria.</p>
+                                            <h5 class="text-info mb-1"><i class="mdi mdi-information-outline me-1"></i>
+                                                Filtering Summary</h5>
+                                            <p class="text-muted mb-0 small">Showing total results based on your selected
+                                                criteria.</p>
                                         </div>
                                         <div class="text-end">
                                             <p class="text-muted mb-1 small uppercase fw-bold">Grand Total Fees</p>
-                                            <h3 class="text-primary mb-0 fw-bold">₹ {{ number_format($totalAmount ?? 0, 2) }}</h3>
+                                            <h3 class="text-primary mb-0 fw-bold">₹ {{ number_format($totalAmount ?? 0, 2) }}
+                                            </h3>
                                         </div>
                                     </div>
                                 </div>
@@ -244,6 +248,13 @@
 
                                     <td>
                                         {{ \Carbon\Carbon::parse($fee->due_date)->format('d M Y') }}
+                                        @php
+                                            $lastPaymentDate = $fee->payments()->max('paid_date');
+                                        @endphp
+                                        @if($lastPaymentDate)
+                                            <br><small class="text-muted" title="Last Payment Date">Last paid:
+                                                {{ \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') }}</small>
+                                        @endif
                                         @if($daysOverdue > 0)
                                             <br><small class="badge bg-danger">{{ $daysOverdue }} days overdue</small>
                                         @endif
@@ -481,10 +492,10 @@
                 let url = $(this).data('url');
 
                 $('#paymentsTableBody').html(`
-                                <tr>
-                                    <td colspan="4" class="text-center">Loading...</td>
-                                </tr>
-                            `);
+                                                        <tr>
+                                                            <td colspan="4" class="text-center">Loading...</td>
+                                                        </tr>
+                                                    `);
 
                 $('#totalPaid').text('0.00');
 
@@ -496,12 +507,12 @@
                     if (res.payments.length === 0) {
 
                         rows = `
-                                        <tr>
-                                            <td colspan="4" class="text-center text-muted">
-                                                No payments found
-                                            </td>
-                                        </tr>
-                                    `;
+                                                                <tr>
+                                                                    <td colspan="4" class="text-center text-muted">
+                                                                        No payments found
+                                                                    </td>
+                                                                </tr>
+                                                            `;
 
                     } else {
 
@@ -511,13 +522,13 @@
                             total += amount;
 
                             rows += `
-                                            <tr>
-                                                <td>${formatDate(p.paid_date)}</td>
-                                                <td>₹ ${amount.toFixed(2)}</td>
-                                                <td>${formatMethod(p.payment_method)}</td>
-                                                <td>${p.notes ?? '-'}</td>
-                                            </tr>
-                                        `;
+                                                                    <tr>
+                                                                        <td>${formatDate(p.paid_date)}</td>
+                                                                        <td>₹ ${amount.toFixed(2)}</td>
+                                                                        <td>${formatMethod(p.payment_method)}</td>
+                                                                        <td>${p.notes ?? '-'}</td>
+                                                                    </tr>
+                                                                `;
 
                         });
 

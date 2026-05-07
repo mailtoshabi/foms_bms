@@ -24,7 +24,8 @@
 
        <div class="card">
               <div class="card-header d-flex align-items-center">
-                     <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                     <a href="javascript:window.history.back();"
+                            class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                             <i class="fas fa-chevron-left"></i>
                      </a>
                      <h4 class="mb-0">
@@ -127,6 +128,7 @@
                                    <tr>
                                           <th>Teacher</th>
                                           <th>Cycle</th>
+                                          <th>Credit Date</th>
                                           <th>Total Hours</th>
                                           <th>Total Amount</th>
                                           <th>Status</th>
@@ -143,6 +145,14 @@
                                                         {{ \Carbon\Carbon::parse($row->cycle_start)->format('d M Y') }}
                                                         -
                                                         {{ \Carbon\Carbon::parse($row->cycle_end)->format('d M Y') }}
+                                                 </td>
+
+                                                 <td>
+                                                        @if($row->credit_date)
+                                                               {{ \Carbon\Carbon::parse($row->credit_date)->format('d M Y') }}
+                                                        @else
+                                                               <span class="text-muted">-</span>
+                                                        @endif
                                                  </td>
 
                                                  <td>
