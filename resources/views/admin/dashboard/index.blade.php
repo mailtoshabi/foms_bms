@@ -1,4 +1,4 @@
-﻿@extends('admin.layouts.master')
+@extends('admin.layouts.master')
 @section('title') Dashboard @endsection
 @section('css')
 
@@ -206,110 +206,7 @@
 
     </div>
 
-    <div class="row">
-
-        <div class="card">
-            <div class="card-header">
-                <h5>Top Performing Teachers</h5>
-            </div>
-
-            <div class="card-body">
-
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
-
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Rank</th>
-                                <th>Name</th>
-                                <th>Classes</th>
-                                <th>Hours</th>
-                                <th>Attendance</th>
-                                <th>Score</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-
-                            @foreach($topTeachers as $index => $t)
-
-                                @php
-                                    $score = $t['score'];
-                                    if ($score >= 70) {
-                                        $stars = 5;
-                                        $rankLabel = 'Elite';
-                                        $rankColor = 'warning';
-                                    } elseif ($score >= 50) {
-                                        $stars = 4;
-                                        $rankLabel = 'Expert';
-                                        $rankColor = 'primary';
-                                    } elseif ($score >= 30) {
-                                        $stars = 3;
-                                        $rankLabel = 'Advanced';
-                                        $rankColor = 'info';
-                                    } elseif ($score >= 15) {
-                                        $stars = 2;
-                                        $rankLabel = 'Intermediate';
-                                        $rankColor = 'secondary';
-                                    } else {
-                                        $stars = 1;
-                                        $rankLabel = 'Beginner';
-                                        $rankColor = 'light';
-                                    }
-                                @endphp
-
-                                <tr>
-
-                                    <td>
-                                        @if($index == 0) &#x1F947;
-                                        @elseif($index == 1) &#x1F948;
-                                        @elseif($index == 2) &#x1F949;
-                                        @else {{ $index + 1 }}
-                                        @endif
-                                    </td>
-
-                                    <td>
-                                        <span class="badge bg-{{ $rankColor }} me-1">{{ $rankLabel }}</span><br>
-                                        <small>
-                                            @for($s = 1; $s <= 5; $s++)
-                                                @if($s <= $stars)
-                                                    <span class="text-warning">&#9733;</span>
-                                                @else
-                                                    <span class="text-muted">&#9733;</span>
-                                                @endif
-                                            @endfor
-                                        </small>
-                                    </td>
-
-                                    <td>{{ $t['teacher']->name }}</td>
-
-                                    <td>{{ $t['classes'] }}</td>
-
-                                    <td>{{ $t['hours'] }}</td>
-
-                                    <td>{{ $t['attendance'] }}%</td>
-
-                                    <td>
-                                        <span class="badge bg-success">
-                                            {{ $t['score'] }}
-                                        </span>
-                                    </td>
-
-                                </tr>
-
-                            @endforeach
-
-                        </tbody>
-
-                    </table>
-                </div>
-
-            </div>
-        </div>
-
-
-    </div>
+    @include('components.dashboard.top-teachers', ['topTeachers' => $topTeachers])
 
     <div class="row mt-4">
 
