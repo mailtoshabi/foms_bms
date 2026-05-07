@@ -64,7 +64,8 @@
                     <td>{{ $hour->created_at->format('d M Y h:i A') }}</td>
                     <td>
                         @if($hour->status == 'pending' && $hour->google_meet_link)
-                            <a href="{{ $hour->google_meet_link }}" target="_blank" class="btn btn-sm btn-primary">
+                            <a href="{{ $hour->google_meet_link }}" target="_blank" class="btn btn-sm btn-primary"
+                                onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                 <i class="fas fa-video"></i> Join
                             </a>
                         @elseif($hour->status == 'completed')

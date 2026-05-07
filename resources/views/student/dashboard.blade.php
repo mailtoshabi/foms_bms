@@ -116,8 +116,9 @@
                         <strong>{{ $nextSession->classRoom->name ?? '-' }}</strong>
                         <p class="text-muted small mb-1">{{ $nextSession->created_at->format('d M Y, h:i A') }}</p>
                         @if($nextSession->google_meet_link)
-                            <a href="{{ route('student.classes.join', encrypt($nextSession->id)) }}" target="_blank"
-                                class="btn btn-sm btn-success mt-2">
+                            <a href="{{ $nextSession->google_meet_link }}" target="_blank"
+                                class="btn btn-sm btn-success mt-2"
+                                onclick="fetch('{{ route('student.classes.join', encrypt($nextSession->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                 <i class="fas fa-video"></i> Join
                             </a>
                         @endif
@@ -394,8 +395,9 @@
                                             <td>{{ $hour->duration }} min</td>
                                             <td>
                                                 @if($hour->google_meet_link)
-                                                    <a href="{{ route('student.classes.join', encrypt($hour->id)) }}" target="_blank"
-                                                        class="btn btn-sm btn-success">
+                                                    <a href="{{ $hour->google_meet_link }}" target="_blank"
+                                                        class="btn btn-sm btn-success"
+                                                        onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                                         <i class="fas fa-video"></i> Join
                                                     </a>
                                                 @else

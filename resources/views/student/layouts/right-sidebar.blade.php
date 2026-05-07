@@ -22,8 +22,9 @@
                             {{ $hour->created_at->format('d M Y, h:i A') }}
                         </small>
                         @if($hour->google_meet_link)
-                            <a href="{{ route('student.classes.join', encrypt($hour->id)) }}"
-                                target="_blank" class="btn btn-sm btn-primary mt-2">
+                            <a href="{{ $hour->google_meet_link }}"
+                                target="_blank" class="btn btn-sm btn-primary mt-2"
+                                onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                 <i class="fas fa-video"></i> Join
                             </a>
                         @endif

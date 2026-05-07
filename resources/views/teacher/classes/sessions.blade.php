@@ -106,8 +106,9 @@
 
                                             <td>
                                                 @if($session->google_meet_link && $session->status == 'pending')
-                                                    <a href="{{ route('teacher.class-hours.join', encrypt($session->id)) }}" target="_blank"
-                                                        rel="noopener" class="btn btn-sm btn-outline-primary">
+                                                    <a href="{{ $session->google_meet_link }}" target="_blank"
+                                                        rel="noopener" class="btn btn-sm btn-outline-primary"
+                                                        onclick="fetch('{{ route('teacher.class-hours.join', encrypt($session->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                                         <i class="fas fa-video"></i> Join
                                                     </a>
                                                 @else

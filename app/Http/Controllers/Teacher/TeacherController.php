@@ -179,15 +179,17 @@ class TeacherController extends Controller
         ]);
     }
 
-    public function joinClass($id)
+    public function joinClass(Request $request, $id)
     {
         $classHour = ClassHour::findOrFail(decrypt($id));
 
-        // if (is_null($classHour->join_teacher_at)) {
         $classHour->update([
             'join_teacher_at' => now()
         ]);
-        // }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->away($classHour->google_meet_link);
     }
