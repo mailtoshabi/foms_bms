@@ -120,10 +120,16 @@
                                 </td>
                                 <td>
                                     @if($row->google_meet_link)
-                                        <a href="{{ $row->google_meet_link }}" target="_blank"
-                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="mdi mdi-google-meet"></i> Meet
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ $row->google_meet_link }}" target="_blank"
+                                                class="btn btn-sm btn-outline-primary">
+                                                <i class="mdi mdi-google-meet"></i> Meet
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" title="Copy Link"
+                                                onclick="navigator.clipboard.writeText('{{ $row->google_meet_link }}'); const icon = this.querySelector('i'); icon.className = 'mdi mdi-check'; setTimeout(() => icon.className = 'mdi mdi-content-copy', 2000);">
+                                                <i class="mdi mdi-content-copy"></i>
+                                            </button>
+                                        </div>
                                     @endif
 
                                     <div class="mt-1">

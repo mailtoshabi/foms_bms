@@ -1,6 +1,6 @@
 @php
     $topAllTimeTeachers = topAllTimeTeachers();
-    
+
     $tabs = [
         'recent' => [
             'label' => 'Recent Performance',
@@ -22,7 +22,9 @@
                 <ul class="nav nav-pills" id="topTeachersTabs" role="tablist">
                     @foreach($tabs as $id => $tab)
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link {{ $tab['active'] ? 'active' : '' }}" id="{{ $id }}-tab" data-bs-toggle="tab" data-bs-target="#{{ $id }}" type="button" role="tab" aria-controls="{{ $id }}" aria-selected="{{ $tab['active'] ? 'true' : 'false' }}">
+                            <button class="nav-link {{ $tab['active'] ? 'active' : '' }}" id="{{ $id }}-tab"
+                                data-bs-toggle="tab" data-bs-target="#{{ $id }}" type="button" role="tab"
+                                aria-controls="{{ $id }}" aria-selected="{{ $tab['active'] ? 'true' : 'false' }}">
                                 {{ $tab['label'] }}
                             </button>
                         </li>
@@ -32,12 +34,13 @@
             <div class="card-body">
                 <div class="tab-content" id="topTeachersTabsContent">
                     @foreach($tabs as $id => $tab)
-                        <div class="tab-pane fade {{ $tab['active'] ? 'show active' : '' }}" id="{{ $id }}" role="tabpanel" aria-labelledby="{{ $id }}-tab">
+                        <div class="tab-pane fade {{ $tab['active'] ? 'show active' : '' }}" id="{{ $id }}" role="tabpanel"
+                            aria-labelledby="{{ $id }}-tab">
                             <div class="table-responsive">
                                 <table class="table table-bordered align-middle mb-0">
                                     <thead>
                                         <tr>
-                                            <th>#</th>
+                                            <!-- <th>#</th> -->
                                             <th>Rank</th>
                                             <th>Name</th>
                                             <th>Classes</th>
@@ -51,36 +54,19 @@
                                         @forelse($tab['data'] as $index => $t)
                                             @php
                                                 $score = $t['score'];
-                                                if ($score >= 70) {
-                                                    $stars = 5;
-                                                    $rankLabel = 'Elite';
-                                                    $rankColor = 'warning';
-                                                } elseif ($score >= 50) {
-                                                    $stars = 4;
-                                                    $rankLabel = 'Expert';
-                                                    $rankColor = 'primary';
-                                                } elseif ($score >= 30) {
-                                                    $stars = 3;
-                                                    $rankLabel = 'Advanced';
-                                                    $rankColor = 'info';
-                                                } elseif ($score >= 15) {
-                                                    $stars = 2;
-                                                    $rankLabel = 'Intermediate';
-                                                    $rankColor = 'secondary';
-                                                } else {
-                                                    $stars = 1;
-                                                    $rankLabel = 'Beginner';
-                                                    $rankColor = 'light';
-                                                }
+                                                $tier = getTeacherRankTier($score);
+                                                $stars = $tier['stars'];
+                                                $rankLabel = $tier['label'];
+                                                $rankColor = $tier['color'];
                                             @endphp
                                             <tr>
-                                                <td>
-                                                    @if($index == 0) &#x1F947;
-                                                    @elseif($index == 1) &#x1F948;
-                                                    @elseif($index == 2) &#x1F949;
-                                                    @else {{ $index + 1 }}
-                                                    @endif
-                                                </td>
+                                                <!-- <td>
+                                                                    @if($index == 0) &#x1F947;
+                                                                    @elseif($index == 1) &#x1F948;
+                                                                    @elseif($index == 2) &#x1F949;
+                                                                    @else {{ $index + 1 }}
+                                                                    @endif
+                                                                </td> -->
                                                 <td>
                                                     <span class="badge bg-{{ $rankColor }} me-1">{{ $rankLabel }}</span><br>
                                                     <small>

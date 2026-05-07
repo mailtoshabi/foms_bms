@@ -91,12 +91,13 @@
                 <tbody>
 
                     @forelse($teachers as $teacher)
-
+                        @php
+                            $rank = teacherRankData($teacher->id);
+                        @endphp
                         <tr>
 
                             <td>
                                 {{ $teacher->name }}
-
                                 <br>
 
                                 @isset($teacher->dob)
@@ -127,12 +128,17 @@
 
                             <td>
 
-                                <span class="badge
-                                                                    {{ $teacher->status == 'active' ? 'bg-success' : '' }}
-                                                                    {{ $teacher->status == 'inactive' ? 'bg-danger' : '' }}">
+                                <span
+                                    class="badge {{ $teacher->status == 'active' ? 'bg-success' : '' }} {{ $teacher->status == 'inactive' ? 'bg-danger' : '' }}">
                                     {{ ucfirst($teacher->status) }}
                                 </span>
 
+                                <span class="badge bg-{{ $rank['color'] }}  px-3 ">{{ $rank['label'] }}</span><br>
+                                @for($s = 1; $s <= 5; $s++)
+                                    <span
+                                        style="font-size:1rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">&#9733;</span>
+                                @endfor
+                                <small class="text-muted">Score: {{ $rank['score'] }}</small>
                             </td>
 
 

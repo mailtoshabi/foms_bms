@@ -402,29 +402,29 @@ if (!function_exists('teacherRankData')) {
             $earnings = $teacherData['earnings'];
         }
 
-        if ($score >= 70) {
-            $stars = 5;
-            $label = 'Elite';
-            $color = 'warning';
-        } elseif ($score >= 50) {
-            $stars = 4;
-            $label = 'Expert';
-            $color = 'primary';
-        } elseif ($score >= 30) {
-            $stars = 3;
-            $label = 'Advanced';
-            $color = 'info';
-        } elseif ($score >= 15) {
-            $stars = 2;
-            $label = 'Intermediate';
-            $color = 'secondary';
-        } else {
-            $stars = 1;
-            $label = 'Beginner';
-            $color = 'light';
-        }
+        $tier = getTeacherRankTier($score);
+        $stars = $tier['stars'];
+        $label = $tier['label'];
+        $color = $tier['color'];
 
         return compact('score', 'stars', 'label', 'color', 'totalClasses', 'totalHours', 'attendancePercent', 'totalNotes', 'studentsCount', 'rank');
+    }
+}
+
+if (!function_exists('getTeacherRankTier')) {
+    function getTeacherRankTier($score)
+    {
+        if ($score >= 70) {
+            return ['stars' => 5, 'label' => 'Elite', 'color' => 'warning'];
+        } elseif ($score >= 50) {
+            return ['stars' => 4, 'label' => 'Expert', 'color' => 'primary'];
+        } elseif ($score >= 30) {
+            return ['stars' => 3, 'label' => 'Advanced', 'color' => 'info'];
+        } elseif ($score >= 15) {
+            return ['stars' => 2, 'label' => 'Intermediate', 'color' => 'secondary'];
+        } else {
+            return ['stars' => 1, 'label' => 'Beginner', 'color' => 'light'];
+        }
     }
 }
 
