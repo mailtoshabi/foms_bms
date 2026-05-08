@@ -18,10 +18,10 @@ class ClassNoteController extends Controller
         $student = Auth::guard('student')->user();
         $classRoomIds = $student->class_rooms->pluck('id');
 
-        $notes = ClassNote::with(['classRoom','teacher'])
+        $notes = ClassNote::with(['classRoom', 'teacher'])
             ->whereIn('class_room_id', $classRoomIds)
             ->latest()
-            ->paginate(10);
+            ->paginate(utility('pagination', 50));
 
         return view('student.class_notes.index', compact('notes'));
     }
@@ -32,7 +32,7 @@ class ClassNoteController extends Controller
         $student = Auth::guard('student')->user();
         $classRoomIds = $student->class_rooms->pluck('id');
 
-        $note = ClassNote::with(['classRoom','teacher'])
+        $note = ClassNote::with(['classRoom', 'teacher'])
             ->whereIn('class_room_id', $classRoomIds)
             ->findOrFail(decrypt($id));
 

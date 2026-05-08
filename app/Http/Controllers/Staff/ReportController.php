@@ -62,7 +62,7 @@ class ReportController extends Controller
             ];
         }
 
-        $data = $query->latest('class_hours.updated_at')->paginate(10)->withQueryString();
+        $data = $query->latest('class_hours.updated_at')->paginate(utility('pagination', 50))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(ClassRoom::find($request->class_room_id))->name

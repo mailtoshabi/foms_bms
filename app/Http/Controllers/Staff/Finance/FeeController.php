@@ -88,7 +88,7 @@ class FeeController extends Controller
             $query->latest();
         }
 
-        $fees = $query->paginate(10)->withQueryString();
+        $fees = $query->paginate(utility('pagination', 50))->withQueryString();
 
         $classRoomSearchUrl = route('staff.class_rooms.search');
         $selectedClassName = $request->filled('class_room_id')

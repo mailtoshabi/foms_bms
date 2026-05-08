@@ -34,7 +34,7 @@ class SalaryController extends Controller
             $query->whereDate('cycle_end', '<=', $request->to_date);
         }
 
-        $salaries = $query->latest()->paginate(10)->withQueryString();
+        $salaries = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         $teachers = Teacher::pluck('name', 'id');
 
@@ -44,9 +44,10 @@ class SalaryController extends Controller
         ")->first();
 
         $unpaidCount = $counts->unpaid;
-        $paidCount   = $counts->paid;
+        $paidCount = $counts->paid;
 
-        return view('admin.salaries.index',
+        return view(
+            'admin.salaries.index',
             compact('salaries', 'teachers', 'tab', 'unpaidCount', 'paidCount')
         );
     }
@@ -54,19 +55,19 @@ class SalaryController extends Controller
     public function pay(Request $request)
     {
         $validated = $request->validate([
-            'salary_id'      => 'required|exists:teacher_salaries,id',
-            'payment_date'   => 'required|date',
+            'salary_id' => 'required|exists:teacher_salaries,id',
+            'payment_date' => 'required|date',
             'payment_method' => 'required',
         ]);
 
         $salary = TeacherSalary::findOrFail($validated['salary_id']);
 
         $salary->update([
-            'status'           => 'paid',
-            'payment_date'     => $validated['payment_date'],
-            'payment_method'   => $validated['payment_method'],
+            'status' => 'paid',
+            'payment_date' => $validated['payment_date'],
+            'payment_method' => $validated['payment_method'],
             'reference_number' => $request->reference_number,
-            'notes'            => $request->notes,
+            'notes' => $request->notes,
         ]);
 
         return back()->with('success', 'Salary marked as paid');

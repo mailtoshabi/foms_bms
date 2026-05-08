@@ -20,7 +20,7 @@ class ExpenseController extends Controller
     public function index(Request $request)
     {
         $query = $this->expenseService->getExpenses($request);
-        $expenses = $query->paginate(10)->withQueryString();
+        $expenses = $query->paginate(utility('pagination', 50))->withQueryString();
 
         $categories = $this->expenseService->getCategories();
         $totalExpense = $this->expenseService->getTotalExpenses($query);

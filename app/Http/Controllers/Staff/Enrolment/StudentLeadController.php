@@ -39,7 +39,7 @@ class StudentLeadController extends Controller
             $leads->whereDate('created_at', $request->date);
         }
 
-        $leads = $leads->latest()->paginate(10);
+        $leads = $leads->latest()->paginate(utility('pagination', 50));
 
         // Needed for filter dropdown
         $sources = Source::where('is_active', true)->get();

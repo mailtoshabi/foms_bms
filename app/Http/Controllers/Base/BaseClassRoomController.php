@@ -49,7 +49,7 @@ class BaseClassRoomController extends BaseServiceController
             }
         }
 
-        $class_rooms = $query->paginate(10)->withQueryString();
+        $class_rooms = $query->paginate(utility('pagination', 50))->withQueryString();
 
         $courses = Course::all();
         $types = ClassType::all();

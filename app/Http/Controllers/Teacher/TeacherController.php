@@ -29,7 +29,7 @@ class TeacherController extends Controller
         $classes = $teacher->classRooms()
             ->with(['course', 'classType'])
             ->latest()
-            ->paginate(10);
+            ->paginate(utility('pagination', 50));
 
         return view('teacher.classes.index', compact('classes'));
     }
@@ -224,7 +224,7 @@ class TeacherController extends Controller
             $query->whereDate('updated_at', '<=', $request->date_to);
         }
 
-        $sessions = $query->latest()->paginate(15)->withQueryString();
+        $sessions = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
 
         return view('teacher.classes.sessions', compact('sessions'));
     }

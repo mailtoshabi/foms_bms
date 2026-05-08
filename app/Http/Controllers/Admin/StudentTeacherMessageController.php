@@ -40,7 +40,7 @@ class StudentTeacherMessageController extends Controller
             }
         }
 
-        $messages = $query->latest()->paginate(15)->withQueryString();
+        $messages = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
 
         return view('admin.st-messages.index', compact('messages'));
     }

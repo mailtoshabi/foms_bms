@@ -52,7 +52,7 @@ class MessageController extends BaseServiceController
             }
         ]);
 
-        $messages = $messages->latest()->paginate(10);
+        $messages = $messages->latest()->paginate(utility('pagination', 50));
 
         return view('staff.messages.index', compact('messages'));
     }

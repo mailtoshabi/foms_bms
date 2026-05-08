@@ -112,7 +112,7 @@ class ReportController extends Controller
             $query->latest();
         }
 
-        $fees = $query->paginate(10)->withQueryString();
+        $fees = $query->paginate(utility('pagination', 50))->withQueryString();
 
         $classRoomSearchUrl = route('admin.class_rooms.search');
         $selectedClassName = $request->filled('class_room_id')
@@ -188,7 +188,7 @@ class ReportController extends Controller
             $totalAmount = (clone $query)->sum('fee_payments.paid_amount');
         }
 
-        $data = $query->latest('fee_payments.paid_date')->paginate(10)->withQueryString();
+        $data = $query->latest('fee_payments.paid_date')->paginate(utility('pagination', 50))->withQueryString();
 
         // Get course categories for dropdown
         $categories = \App\Models\CourseCategory::orderBy('name', 'asc')->pluck('name', 'id');
@@ -282,7 +282,7 @@ class ReportController extends Controller
 
         $data = (clone $baseQuery)
             ->orderByDesc('transaction_date')
-            ->paginate(10)
+            ->paginate(utility('pagination', 50))
             ->withQueryString();
 
         $categories = $this->expenseService->getCategories();
@@ -357,7 +357,7 @@ class ReportController extends Controller
             ];
         }
 
-        $data = $query->latest('class_hours.updated_at')->paginate(10)->withQueryString();
+        $data = $query->latest('class_hours.updated_at')->paginate(utility('pagination', 50))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(ClassRoom::find($request->class_room_id))->name
@@ -454,7 +454,7 @@ class ReportController extends Controller
         }
 
         $data = $query->latest('teacher_salaries.cycle_start')
-            ->paginate(10)
+            ->paginate(utility('pagination', 50))
             ->withQueryString();
 
         return view('admin.reports.teacher_salary', compact('data', 'tab', 'totalAmount', 'isFiltered'));
@@ -487,7 +487,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $leads = $query->latest()->paginate(20);
+        $leads = $query->latest()->paginate(utility('pagination', 20));
 
         // Summary (like salary totals)
         $totalLeads = $query->count();
@@ -546,7 +546,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $students = $query->latest()->paginate(20);
+        $students = $query->latest()->paginate(utility('pagination', 20));
 
         // Summary
         $totalStudents = $query->count();
@@ -609,7 +609,7 @@ class ReportController extends Controller
             });
         }
 
-        $staffs = $query->latest()->paginate(20)->withQueryString();
+        $staffs = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         $totalStaffs = (clone $query)->count();
         $withSalary = (clone $query)->whereNotNull('salary_amount')->count();
@@ -700,7 +700,7 @@ class ReportController extends Controller
         }
 
         $data = $query->orderByDesc('staff_salaries.salary_month')
-            ->paginate(10)
+            ->paginate(utility('pagination', 50))
             ->withQueryString();
 
         return view('admin.reports.staff_salary', compact('data'));
@@ -758,7 +758,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $leads = $query->latest()->paginate(20);
+        $leads = $query->latest()->paginate(utility('pagination', 20));
 
         // Summary
         $totalLeads = $query->count();
@@ -817,7 +817,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $teachers = $query->latest()->paginate(20);
+        $teachers = $query->latest()->paginate(utility('pagination', 20));
 
         // Summary
         $totalTeachers = $query->count();
@@ -896,7 +896,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $data = $query->latest()->paginate(15)->withQueryString();
+        $data = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
 
         return view('admin.reports.student_lead_notes', compact('data'));
     }
@@ -925,7 +925,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $data = $query->latest()->paginate(15)->withQueryString();
+        $data = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
 
         return view('admin.reports.teacher_lead_notes', compact('data'));
     }
@@ -976,7 +976,7 @@ class ReportController extends Controller
         $remainingMins = $totalDurationMins % 60;
         $totalDurationFormatted = "{$totalDurationHours}h {$remainingMins}m";
 
-        $data = $query->latest('updated_at')->paginate(20)->withQueryString();
+        $data = $query->latest('updated_at')->paginate(utility('pagination', 20))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name

@@ -19,7 +19,7 @@ class ClassNoteController extends Controller
         $notes = auth('teacher')->user()->notes()
             ->with(['classRoom', 'teacher'])
             ->latest()
-            ->paginate(10);
+            ->paginate(utility('pagination', 50));
 
         return view('teacher.class_notes.index', compact('notes'));
     }

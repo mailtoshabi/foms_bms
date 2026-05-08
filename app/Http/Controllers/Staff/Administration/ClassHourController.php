@@ -40,7 +40,7 @@ class ClassHourController extends Controller
         $remainingMins = $totalDurationMins % 60;
         $totalDurationFormatted = "{$totalDurationHours}h {$remainingMins}m";
 
-        $data = $query->latest('updated_at')->paginate(20)->withQueryString();
+        $data = $query->latest('updated_at')->paginate(utility('pagination', 20))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(ClassRoom::find($request->class_room_id))->name

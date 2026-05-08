@@ -56,7 +56,7 @@ class StudentController extends Controller
             });
         }
 
-        $students = $students->latest()->paginate(10);
+        $students = $students->latest()->paginate(utility('pagination', 50));
 
         return view('staff.students.index', compact('students'));
     }

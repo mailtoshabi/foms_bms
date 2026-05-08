@@ -15,186 +15,195 @@ use Illuminate\Support\Facades\Storage;
 class TeacherController extends Controller
 {
 
-public function index(Request $request)
-{
-    $teachers = Teacher::query()->with(['lead', 'country']);
+    public function index(Request $request)
+    {
+        $teachers = Teacher::query()->with(['lead', 'country']);
 
-    if ($request->filled('search')) {
-        $teachers->where(function ($q) use ($request) {
-            $q->where('name','like','%'.$request->search.'%')
-              ->orWhere('contact_number','like','%'.$request->search.'%');
-        });
+        if ($request->filled('search')) {
+            $teachers->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('contact_number', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $teachers = $teachers->latest()->paginate(utility('pagination', 50));
+
+        return view('staff.teachers.index', compact('teachers'));
     }
 
-    $teachers = $teachers->latest()->paginate(10);
 
-    return view('staff.teachers.index',compact('teachers'));
-}
-
-
-public function create()
-{
-    $countries = Country::orderBy('name', 'asc')->get();
-    return view('staff.teachers.create', compact('countries'));
-}
-
-
-public function store(Request $request)
-{
-    $request->merge([
-        'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
-        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
-    ]);
-    
-    $request->merge(['phone' => $request->contact_number]);
-    $request->validate([
-        'name'           => 'required',
-        'country_id'     => 'required|exists:countries,id',
-        'contact_number' => 'required|string|digits_between:7,15',
-        'phone'          => [
-            'required',
-            Rule::unique('teachers')->where('country_id', $request->country_id)
-        ],
-        'password'       => 'required|min:6'
-    ]);
-
-    $photo=null;
-    $idProof=null;
-
-    if($request->hasFile('photo')){
-        $photo=$request->file('photo')->store('teachers/photos','public');
+    public function create()
+    {
+        $countries = Country::orderBy('name', 'asc')->get();
+        return view('staff.teachers.create', compact('countries'));
     }
 
-    if($request->hasFile('id_proof')){
-        $idProof=$request->file('id_proof')->store('teachers/id_proofs','public');
+
+    public function store(Request $request)
+    {
+        $request->merge([
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
+
+        $request->merge(['phone' => $request->contact_number]);
+        $request->validate([
+            'name' => 'required',
+            'country_id' => 'required|exists:countries,id',
+            'contact_number' => 'required|string|digits_between:7,15',
+            'phone' => [
+                'required',
+                Rule::unique('teachers')->where('country_id', $request->country_id)
+            ],
+            'password' => 'required|min:6'
+        ]);
+
+        $photo = null;
+        $idProof = null;
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo')->store('teachers/photos', 'public');
+        }
+
+        if ($request->hasFile('id_proof')) {
+            $idProof = $request->file('id_proof')->store('teachers/id_proofs', 'public');
+        }
+
+        $country = Country::find($request->country_id);
+        $isWhatsappDifferent = $request->has('is_whatsapp_different');
+        if ($isWhatsappDifferent) {
+            $whatsapp_number = $request->whatsapp_number;
+        } else {
+            $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+            $whatsapp_number = $countryCode . $request->contact_number;
+        }
+
+        Teacher::create([
+            'teacher_lead_id' => null,
+            'country_id' => $request->country_id,
+            'is_whatsapp_different' => $isWhatsappDifferent,
+
+            'name' => $request->name,
+            'dob' => $request->dob,
+            'email' => $request->email,
+            'contact_number' => $request->contact_number,
+            'whatsapp_number' => $whatsapp_number,
+            'upi_number' => $request->upi_number,
+            'address' => $request->address,
+
+            'qualification' => $request->qualification,
+            'experience' => $request->experience,
+
+            'phone' => $request->phone,
+            'password' => Hash::make($request->password),
+
+            'photo' => $photo,
+            'id_proof' => $idProof,
+
+            'status' => 'active'
+        ]);
+
+        return redirect()
+            ->route('staff.teachers.index')
+            ->with('success', 'Teacher created.');
     }
 
-    $country = Country::find($request->country_id);
-    $isWhatsappDifferent = $request->has('is_whatsapp_different');
-    if ($isWhatsappDifferent) {
-        $whatsapp_number = $request->whatsapp_number;
-    } else {
-        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
-        $whatsapp_number = $countryCode . $request->contact_number;
+
+    public function edit($id)
+    {
+        $teacher = Teacher::findOrFail(decrypt($id));
+        $countries = Country::orderBy('name', 'asc')->get();
+
+        return view('staff.teachers.create', compact('teacher', 'countries'));
     }
 
-    Teacher::create([
-        'teacher_lead_id'=>null,
-        'country_id'=>$request->country_id,
-        'is_whatsapp_different' => $isWhatsappDifferent,
 
-        'name'=>$request->name,
-        'dob'=>$request->dob,
-        'email'=>$request->email,
-        'contact_number'=>$request->contact_number,
-        'whatsapp_number'=>$whatsapp_number,
-        'upi_number'=>$request->upi_number,
-        'address'=>$request->address,
+    public function update(Request $request, $id)
+    {
+        $teacher = Teacher::findOrFail(decrypt($id));
 
-        'qualification'=>$request->qualification,
-        'experience'=>$request->experience,
+        $request->merge([
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
 
-        'phone'=>$request->phone,
-        'password'=>Hash::make($request->password),
+        $request->merge(['phone' => $request->contact_number]);
 
-        'photo'=>$photo,
-        'id_proof'=>$idProof,
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'country_id' => 'required|exists:countries,id',
+            'contact_number' => 'required|string|digits_between:7,15',
+            'phone' => [
+                'required',
+                Rule::unique('teachers')->where('country_id', $request->country_id)->ignore($teacher->id)
+            ],
+            'email' => 'nullable|email|max:255',
+            'dob' => 'nullable|date',
+            'qualification' => 'nullable|string|max:255',
+            'experience' => 'nullable|string|max:255',
+            'address' => 'nullable|string|max:500',
+            'upi_number' => 'nullable|string|max:20',
+            'whatsapp_number' => 'nullable|string|digits_between:7,15',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'id_proof' => 'nullable|file|max:4096',
+            'password' => 'nullable|min:6',
+        ]);
 
-        'status'=>'active'
-    ]);
+        $country = Country::find($request->country_id);
+        $isWhatsappDifferent = $request->has('is_whatsapp_different');
+        if ($isWhatsappDifferent) {
+            $whatsapp_number = $request->whatsapp_number;
+        } else {
+            $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+            $whatsapp_number = $countryCode . $request->contact_number;
+        }
 
-    return redirect()
-        ->route('staff.teachers.index')
-        ->with('success','Teacher created.');
-}
+        $data = $request->only([
+            'name',
+            'country_id',
+            'dob',
+            'email',
+            'contact_number',
+            'upi_number',
+            'address',
+            'qualification',
+            'experience',
+            'phone',
+            'status',
+        ]);
 
+        $data['whatsapp_number'] = $whatsapp_number;
+        $data['is_whatsapp_different'] = $isWhatsappDifferent;
 
-public function edit($id)
-{
-    $teacher = Teacher::findOrFail(decrypt($id));
-    $countries = Country::orderBy('name', 'asc')->get();
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
 
-    return view('staff.teachers.create',compact('teacher', 'countries'));
-}
+        $teacher->update($data);
 
-
-public function update(Request $request,$id)
-{
-    $teacher = Teacher::findOrFail(decrypt($id));
-
-    $request->merge([
-        'contact_number'  => preg_replace('/[^0-9]/', '', $request->contact_number),
-        'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
-    ]);
-
-    $request->merge(['phone' => $request->contact_number]);
-
-    $request->validate([
-        'name'           => 'required|string|max:255',
-        'country_id'     => 'required|exists:countries,id',
-        'contact_number' => 'required|string|digits_between:7,15',
-        'phone'          => [
-            'required',
-            Rule::unique('teachers')->where('country_id', $request->country_id)->ignore($teacher->id)
-        ],
-        'email'          => 'nullable|email|max:255',
-        'dob'            => 'nullable|date',
-        'qualification'  => 'nullable|string|max:255',
-        'experience'     => 'nullable|string|max:255',
-        'address'        => 'nullable|string|max:500',
-        'upi_number'     => 'nullable|string|max:20',
-        'whatsapp_number'=> 'nullable|string|digits_between:7,15',
-        'photo'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        'id_proof'       => 'nullable|file|max:4096',
-        'password'       => 'nullable|min:6',
-    ]);
-
-    $country = Country::find($request->country_id);
-    $isWhatsappDifferent = $request->has('is_whatsapp_different');
-    if ($isWhatsappDifferent) {
-        $whatsapp_number = $request->whatsapp_number;
-    } else {
-        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
-        $whatsapp_number = $countryCode . $request->contact_number;
+        return redirect()
+            ->route('staff.teachers.index')
+            ->with('success', 'Teacher updated.');
     }
 
-    $data = $request->only([
-        'name', 'country_id', 'dob', 'email', 'contact_number',
-        'upi_number', 'address', 'qualification', 'experience', 'phone', 'status',
-    ]);
+    public function show($id)
+    {
+        $teacher = Teacher::with([
+            'classRooms.course',
+            'classRooms.classType',
+            'salaries'
+        ])->findOrFail(decrypt($id));
 
-    $data['whatsapp_number'] = $whatsapp_number;
-    $data['is_whatsapp_different'] = $isWhatsappDifferent;
+        $assignedClasses = $teacher->classRooms->pluck('id')->toArray();
 
-    if ($request->filled('password')) {
-        $data['password'] = Hash::make($request->password);
+        $notes = ClassNote::where('teacher_id', $teacher->id)->latest()->get();
+
+        return view('staff.teachers.show', [
+            'teacher' => $teacher,
+            'assignedClasses' => $assignedClasses,
+            'notes' => $notes
+        ]);
     }
-
-    $teacher->update($data);
-
-    return redirect()
-        ->route('staff.teachers.index')
-        ->with('success','Teacher updated.');
-}
-
-public function show($id)
-{
-    $teacher = Teacher::with([
-    'classRooms.course',
-    'classRooms.classType',
-    'salaries'
-    ])->findOrFail(decrypt($id));
-
-    $assignedClasses = $teacher->classRooms->pluck('id')->toArray();
-
-    $notes = ClassNote::where('teacher_id',$teacher->id)->latest()->get();
-
-    return view('staff.teachers.show',[
-        'teacher'=>$teacher,
-        'assignedClasses'=>$assignedClasses,
-        'notes'=>$notes
-    ]);
-}
 
 
     public function destroy($id)
@@ -213,7 +222,7 @@ public function show($id)
             ->limit(30)
             ->get()
             ->map(fn($t) => [
-                'id'   => $t->id,
+                'id' => $t->id,
                 'text' => $t->name,
             ]);
 

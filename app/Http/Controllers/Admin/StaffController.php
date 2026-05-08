@@ -19,57 +19,57 @@ class StaffController extends Controller
         $query = Staff::with('roles');
 
         if ($request->filled('name')) {
-            $query->where('name','like','%'.$request->name.'%');
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         if ($request->filled('phone')) {
-            $query->where('phone','like','%'.$request->phone.'%');
+            $query->where('phone', 'like', '%' . $request->phone . '%');
         }
 
         if ($request->filled('status')) {
             if ($request->status == 'active') {
-                $query->where('is_blocked',0);
+                $query->where('is_blocked', 0);
             } else {
-                $query->where('is_blocked',1);
+                $query->where('is_blocked', 1);
             }
         }
 
         if ($request->filled('role')) {
-            $query->whereHas('roles', function($q) use ($request){
-                $q->where('roles.id',$request->role);
+            $query->whereHas('roles', function ($q) use ($request) {
+                $q->where('roles.id', $request->role);
             });
         }
 
-        $staffs = $query->latest()->paginate(10)->withQueryString();
+        $staffs = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         $roles = Role::all();
 
-        return view('admin.staffs.index', compact('staffs','roles'));
+        return view('admin.staffs.index', compact('staffs', 'roles'));
     }
 
     public function create()
     {
         $roles = Role::all();
-        return view('admin.staffs.create',compact('roles'));
+        return view('admin.staffs.create', compact('roles'));
     }
 
     public function store(Request $request)
     {
         $request->merge([
-            'phone'       => preg_replace('/[^0-9]/', '', $request->phone),
+            'phone' => preg_replace('/[^0-9]/', '', $request->phone),
             'gpay_number' => preg_replace('/[^0-9]/', '', $request->gpay_number),
         ]);
 
         $request->validate([
-            'name'          => 'required|string|max:255',
-            'phone'         => 'required|string|max:20|unique:staffs,phone',
-            'email'         => 'nullable|email|max:255',
-            'password'      => 'required|min:4',
-            'photo'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'id_proof'      => 'nullable|file|max:4096',
-            'roles'         => 'nullable|array',
-            'address'       => 'nullable|string|max:500',
-            'gpay_number'   => 'nullable|string|max:20',
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20|unique:staffs,phone',
+            'email' => 'nullable|email|max:255',
+            'password' => 'required|min:4',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'id_proof' => 'nullable|file|max:4096',
+            'roles' => 'nullable|array',
+            'address' => 'nullable|string|max:500',
+            'gpay_number' => 'nullable|string|max:20',
         ]);
 
         DB::beginTransaction();
@@ -89,12 +89,12 @@ class StaffController extends Controller
 
             // ================= Upload Photo =================
             if ($request->hasFile('photo')) {
-                $data['photo'] = $request->file('photo')->store('staffs/photos','public');
+                $data['photo'] = $request->file('photo')->store('staffs/photos', 'public');
             }
 
             // ================= Upload ID Proof =================
             if ($request->hasFile('id_proof')) {
-                $data['id_proof'] = $request->file('id_proof')->store('staffs/id_proofs','public');
+                $data['id_proof'] = $request->file('id_proof')->store('staffs/id_proofs', 'public');
             }
 
             // ================= Create Staff =================
@@ -109,7 +109,7 @@ class StaffController extends Controller
 
             return redirect()
                 ->route('admin.staffs.index')
-                ->with('success','Staff created successfully');
+                ->with('success', 'Staff created successfully');
 
         } catch (\Exception $e) {
 
@@ -117,7 +117,7 @@ class StaffController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error','Something went wrong');
+                ->with('error', 'Something went wrong');
         }
     }
 
@@ -125,13 +125,13 @@ class StaffController extends Controller
     {
         $staff = Staff::with('roles')->findOrFail(decrypt($id));
         $roles = Role::all();
-        return view('admin.staffs.create',compact('staff','roles'));
+        return view('admin.staffs.create', compact('staff', 'roles'));
     }
 
     public function update(Request $request)
     {
         $request->merge([
-            'phone'       => preg_replace('/[^0-9]/', '', $request->phone),
+            'phone' => preg_replace('/[^0-9]/', '', $request->phone),
             'gpay_number' => preg_replace('/[^0-9]/', '', $request->gpay_number),
         ]);
 
@@ -140,14 +140,14 @@ class StaffController extends Controller
         $staff = Staff::findOrFail($staffId);
 
         $request->validate([
-            'name'      => 'required|string|max:255',
-            'phone'     => 'required|string|max:20|unique:staffs,phone,' . $staff->id,
-            'email'     => 'nullable|email|max:255',
-            'password'  => 'nullable|min:4',
-            'photo'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            'id_proof'  => 'nullable|file|max:4096',
-            'roles'     => 'nullable|array',
-            'address'   => 'nullable|string|max:500',
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20|unique:staffs,phone,' . $staff->id,
+            'email' => 'nullable|email|max:255',
+            'password' => 'nullable|min:4',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'id_proof' => 'nullable|file|max:4096',
+            'roles' => 'nullable|array',
+            'address' => 'nullable|string|max:500',
             'gpay_number' => 'nullable|string|max:20',
         ]);
 
@@ -175,7 +175,7 @@ class StaffController extends Controller
                     Storage::disk('public')->delete($staff->photo);
                 }
 
-                $data['photo'] = $request->file('photo')->store('staffs/photos','public');
+                $data['photo'] = $request->file('photo')->store('staffs/photos', 'public');
             }
 
             // ================= ID Proof Upload =================
@@ -185,7 +185,7 @@ class StaffController extends Controller
                     Storage::disk('public')->delete($staff->id_proof);
                 }
 
-                $data['id_proof'] = $request->file('id_proof')->store('staffs/id_proofs','public');
+                $data['id_proof'] = $request->file('id_proof')->store('staffs/id_proofs', 'public');
             }
 
             // ================= Update Staff =================
@@ -200,7 +200,7 @@ class StaffController extends Controller
 
             return redirect()
                 ->route('admin.staffs.index')
-                ->with('success','Staff updated successfully');
+                ->with('success', 'Staff updated successfully');
 
         } catch (\Exception $e) {
 
@@ -208,7 +208,7 @@ class StaffController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error','Something went wrong');
+                ->with('error', 'Something went wrong');
         }
     }
 
@@ -221,12 +221,12 @@ class StaffController extends Controller
     public function storeSalary(Request $request)
     {
         $request->validate([
-            'staff_id'       => 'required|exists:staffs,id',
-            'salary_month'   => 'required|date_format:Y-m',
+            'staff_id' => 'required|exists:staffs,id',
+            'salary_month' => 'required|date_format:Y-m',
             'payment_method' => 'nullable|string|in:cash,card,upi,bank_transfer',
-            'payment_date'   => 'nullable|date',
-            'paid_amount'    => 'nullable|numeric|min:0',
-            'remarks'        => 'nullable|string'
+            'payment_date' => 'nullable|date',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'remarks' => 'nullable|string'
         ]);
 
         try {
@@ -254,22 +254,22 @@ class StaffController extends Controller
             }
 
             $staffSalary = StaffSalary::create([
-                'staff_id'      => $request->staff_id,
-                'salary_month'  => $request->salary_month,
+                'staff_id' => $request->staff_id,
+                'salary_month' => $request->salary_month,
                 'salary_amount' => $salaryAmount,
-                'status'        => $status,
-                'paid_date'     => $request->payment_date,
-                'remarks'       => $request->remarks
+                'status' => $status,
+                'paid_date' => $request->payment_date,
+                'remarks' => $request->remarks
             ]);
 
             // Create payment record if paid_amount is greater than 0
             if ($paidAmount > 0 && $request->payment_method) {
                 StaffSalaryPayment::create([
                     'staff_salary_id' => $staffSalary->id,
-                    'paid_amount'     => $paidAmount,
-                    'payment_method'  => $request->payment_method,
-                    'paid_date'       => $request->payment_date,
-                    'notes'           => $request->remarks
+                    'paid_amount' => $paidAmount,
+                    'payment_method' => $request->payment_method,
+                    'paid_date' => $request->payment_date,
+                    'notes' => $request->remarks
                 ]);
             }
 
@@ -285,12 +285,12 @@ class StaffController extends Controller
     {
         $request->validate([
             'staff_salary_id' => 'required|exists:staff_salaries,id',
-            'staff_id'        => 'required|exists:staffs,id',
-            'salary_month'    => 'required|date_format:Y-m',
-            'payment_method'  => 'nullable|string|in:cash,card,upi,bank_transfer',
-            'payment_date'    => 'nullable|date',
-            'paid_amount'     => 'nullable|numeric|min:0',
-            'remarks'         => 'nullable|string'
+            'staff_id' => 'required|exists:staffs,id',
+            'salary_month' => 'required|date_format:Y-m',
+            'payment_method' => 'nullable|string|in:cash,card,upi,bank_transfer',
+            'payment_date' => 'nullable|date',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'remarks' => 'nullable|string'
         ]);
 
         try {
@@ -305,7 +305,7 @@ class StaffController extends Controller
 
             $editablePayment = $staffSalary->payments->sortBy('id')->first();
             $otherPaymentsTotal = $staffSalary->payments
-                ->when($editablePayment, fn ($payments) => $payments->where('id', '!=', $editablePayment->id))
+                ->when($editablePayment, fn($payments) => $payments->where('id', '!=', $editablePayment->id))
                 ->sum('paid_amount');
 
             // Validate that paid_amount doesn't exceed salary_amount
@@ -333,11 +333,11 @@ class StaffController extends Controller
             }
 
             $staffSalary->update([
-                'salary_month'  => $request->salary_month,
+                'salary_month' => $request->salary_month,
                 'salary_amount' => $salaryAmount,
-                'status'        => $status,
-                'paid_date'     => $request->payment_date,
-                'remarks'       => $request->remarks
+                'status' => $status,
+                'paid_date' => $request->payment_date,
+                'remarks' => $request->remarks
             ]);
 
             // Keep the entered amount aligned with payment history totals.
@@ -346,18 +346,18 @@ class StaffController extends Controller
 
                 if ($payment) {
                     $payment->update([
-                        'paid_amount'     => $currentPaymentAmount,
-                        'payment_method'  => $request->payment_method,
-                        'paid_date'       => $request->payment_date,
-                        'notes'           => $request->remarks
+                        'paid_amount' => $currentPaymentAmount,
+                        'payment_method' => $request->payment_method,
+                        'paid_date' => $request->payment_date,
+                        'notes' => $request->remarks
                     ]);
                 } elseif ($currentPaymentAmount > 0) {
                     StaffSalaryPayment::create([
                         'staff_salary_id' => $staffSalary->id,
-                        'paid_amount'     => $currentPaymentAmount,
-                        'payment_method'  => $request->payment_method,
-                        'paid_date'       => $request->payment_date,
-                        'notes'           => $request->remarks
+                        'paid_amount' => $currentPaymentAmount,
+                        'payment_method' => $request->payment_method,
+                        'paid_date' => $request->payment_date,
+                        'notes' => $request->remarks
                     ]);
                 }
             }
@@ -373,7 +373,7 @@ class StaffController extends Controller
     public function updateSalaryAmount(Request $request)
     {
         $request->validate([
-            'staff_id'      => 'required|exists:staffs,id',
+            'staff_id' => 'required|exists:staffs,id',
             'salary_amount' => 'required|numeric|min:0'
         ]);
 
@@ -391,10 +391,10 @@ class StaffController extends Controller
     {
         $request->validate([
             'staff_salary_id' => 'required|exists:staff_salaries,id',
-            'payment_amount'  => 'required|numeric|min:0',
-            'payment_method'  => 'nullable|string|in:cash,card,upi,bank_transfer',
-            'payment_date'    => 'nullable|date',
-            'remarks'         => 'nullable|string'
+            'payment_amount' => 'required|numeric|min:0',
+            'payment_method' => 'nullable|string|in:cash,card,upi,bank_transfer',
+            'payment_date' => 'nullable|date',
+            'remarks' => 'nullable|string'
         ]);
 
         try {
@@ -415,19 +415,19 @@ class StaffController extends Controller
 
             // Update salary record with new status
             $staffSalary->update([
-                'status'      => $newStatus,
-                'paid_date'   => $request->payment_date,
-                'remarks'     => $request->remarks
+                'status' => $newStatus,
+                'paid_date' => $request->payment_date,
+                'remarks' => $request->remarks
             ]);
 
             // Create payment record
             if ($request->payment_method) {
                 StaffSalaryPayment::create([
                     'staff_salary_id' => $staffSalary->id,
-                    'paid_amount'     => $request->payment_amount,
-                    'payment_method'  => $request->payment_method,
-                    'paid_date'       => $request->payment_date,
-                    'notes'           => $request->remarks
+                    'paid_amount' => $request->payment_amount,
+                    'payment_method' => $request->payment_method,
+                    'paid_date' => $request->payment_date,
+                    'notes' => $request->remarks
                 ]);
             }
 
@@ -453,6 +453,6 @@ class StaffController extends Controller
         $staff->is_blocked = !$staff->is_blocked;
         $staff->save();
 
-        return back()->with('success','Status changed');
+        return back()->with('success', 'Status changed');
     }
 }
