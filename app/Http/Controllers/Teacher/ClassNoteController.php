@@ -59,7 +59,7 @@ class ClassNoteController extends Controller
                     ->where('teacher_id', auth('teacher')->id())
             ],
             'files' => 'nullable|array',
-            'files.*' => 'file|max:10240' // 10MB per file
+            'files.*' => 'file|max:2048' // 2MB per file
         ]);
 
         try {

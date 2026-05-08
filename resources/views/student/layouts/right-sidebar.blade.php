@@ -1,4 +1,3 @@
-
 <!-- Right Sidebar -->
 <div class="right-bar">
     <div data-simplebar class="h-100">
@@ -19,11 +18,10 @@
                         </div>
                         <small class="text-muted d-block">
                             <i class="mdi mdi-calendar-clock"></i>
-                            {{ $hour->created_at->format('d M Y, h:i A') }}
+                            {{ $hour->updated_at->format('d M Y, h:i A') }}
                         </small>
                         @if($hour->google_meet_link)
-                            <a href="{{ $hour->google_meet_link }}"
-                                target="_blank" class="btn btn-sm btn-primary mt-2"
+                            <a href="{{ $hour->google_meet_link }}" target="_blank" class="btn btn-sm btn-primary mt-2"
                                 onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                 <i class="fas fa-video"></i> Join
                             </a>

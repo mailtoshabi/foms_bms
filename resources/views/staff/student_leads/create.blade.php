@@ -590,4 +590,5 @@
             }
         });
     </script>
+    @include('components.image-compressor')
 @endsection

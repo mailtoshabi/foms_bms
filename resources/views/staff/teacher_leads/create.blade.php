@@ -580,4 +580,5 @@ $('#convert_whatsapp_different').on('change', function () {
     }
 });
 </script>
+@include('components.image-compressor')
 @endsection

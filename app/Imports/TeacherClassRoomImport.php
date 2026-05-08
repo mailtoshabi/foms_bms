@@ -17,23 +17,27 @@ class TeacherClassRoomImport implements ToCollection, WithHeadingRow
     {
         // Cache the default country to avoid repeated queries
         $defaultCountry = Country::where('code', '+91')->first();
+        $errors = [];
 
-        foreach ($rows as $row) {
+        foreach ($rows as $index => $row) {
+            $rowNumber = $index + 2; // Assuming row 1 is header
+
             // Sanitize phone to handle Excel formatting
-            $phone = trim((string)$row['phone']);
+            $phone = trim((string) $row['phone']);
             if (is_numeric($phone) && str_contains($phone, '.')) {
-                 $phone = (string)intval($phone);
+                $phone = (string) intval($phone);
             }
             $phone = preg_replace('/[^0-9]/', '', $phone);
 
             if (empty($phone) || !isset($row['classroom_name']) || !isset($row['date'])) {
+                $errors[] = "Row {$rowNumber}: Missing required fields (phone, classroom_name, or date)";
                 continue;
             }
 
             // Determine country_id
             $country = null;
             if (isset($row['country_code'])) {
-                $code = trim((string)$row['country_code']);
+                $code = trim((string) $row['country_code']);
                 if (!empty($code)) {
                     if (!str_starts_with($code, '+')) {
                         $code = '+' . $code;
@@ -50,9 +54,16 @@ class TeacherClassRoomImport implements ToCollection, WithHeadingRow
             $teacher = Teacher::where('country_id', $country->id)->where('phone', $phone)->first();
             $classroom = ClassRoom::where('name', $row['classroom_name'])->first();
 
+            if (!$teacher) {
+                $errors[] = "Row {$rowNumber}: Teacher not found with phone {$phone}";
+            }
+            if (!$classroom) {
+                $errors[] = "Row {$rowNumber}: Classroom not found with name {$row['classroom_name']}";
+            }
+
             if ($teacher && $classroom) {
                 $date = $this->transformDate($row['date']);
-                
+
                 if ($date) {
                     DB::table('teacher_class_room')
                         ->updateOrInsert(
@@ -62,18 +73,25 @@ class TeacherClassRoomImport implements ToCollection, WithHeadingRow
                             ],
                             [
                                 'assigned_at' => $date,
-                                'created_at'  => $date,
-                                'updated_at'  => $date,
+                                'created_at' => $date,
+                                'updated_at' => $date,
                             ]
                         );
+                } else {
+                    $errors[] = "Row {$rowNumber}: Invalid date format ({$row['date']})";
                 }
             }
+        }
+
+        if (!empty($errors)) {
+            throw new \Exception(implode(' | ', $errors));
         }
     }
 
     private function transformDate($value)
     {
-        if (!$value) return null;
+        if (!$value)
+            return null;
 
         try {
             if (is_numeric($value)) {

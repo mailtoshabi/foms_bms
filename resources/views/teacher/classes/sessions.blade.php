@@ -57,8 +57,9 @@
                 <table class="table table-bordered align-middle">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Date</th>
+                            <!-- <th>#</th> -->
+                            <th>Date & Time</th>
+                            <th>Class Timing</th>
                             <th>Class</th>
                             <th>Duration</th>
                             <th>Hourly Wage</th>
@@ -69,65 +70,85 @@
                     <tbody>
 
                         @forelse($sessions as $session)
-                                        <tr>
-                                            <td>{{ $sessions->firstItem() + $loop->index }}</td>
+                            <tr>
+                                <!-- <td>{{ $sessions->firstItem() + $loop->index }}</td> -->
 
-                                            <td>
-                                                {{ $session->updated_at
-                            ? $session->updated_at->format('d M Y')
-                            : '-' }}
-                                            </td>
+                                <td>
+                                    <small>Created:</small><br>
+                                    {{ \Carbon\Carbon::parse($session->created_at)->format('d M Y') }}
 
-                                            <td>{{ optional($session->classRoom->course)->name ?? '-' }}:
-                                                {{ $session->classRoom->name ?? '-' }}
-                                            </td>
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($session->created_at)->format('h:i A') }}</small><br>
+                                    <small>Updated:</small><br>
+                                    {{ \Carbon\Carbon::parse($session->updated_at)->format('d M Y') }}
 
-                                            {{-- <td>{{ $session->classRoom->course->name ?? '-' }}</td> --}}
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($session->updated_at)->format('h:i A') }}</small>
+                                </td>
+
+                                <td>
+                                    <small>Joined:</small><br>
+                                    {{ \Carbon\Carbon::parse($session->join_teacher_at)->format('d M Y') }}
+
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($session->join_teacher_at)->format('h:i A') }}</small><br>
+                                    <small>Completed:</small><br>
+                                    {{ \Carbon\Carbon::parse($session->completed_at)->format('d M Y') }}
+
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($session->completed_at)->format('h:i A') }}</small>
+                                </td>
+
+                                <td>{{ optional($session->classRoom->course)->name ?? '-' }}:
+                                    {{ $session->classRoom->name ?? '-' }}
+                                </td>
+
+                                {{-- <td>{{ $session->classRoom->course->name ?? '-' }}</td> --}}
 
 
 
-                                            <td>
-                                                @if($session->duration)
-                                                    {{ floor($session->duration / 60) }}h
-                                                    {{ $session->duration % 60 > 0 ? ($session->duration % 60) . 'm' : '' }}
-                                                @else
-                                                    -
-                                                @endif
-                                            </td>
-                                            <td>{{ $session->hourly_wage ?? '-' }}</td>
+                                <td>
+                                    @if($session->duration)
+                                        {{ floor($session->duration / 60) }}h
+                                        {{ $session->duration % 60 > 0 ? ($session->duration % 60) . 'm' : '' }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
+                                <td>{{ $session->hourly_wage ?? '-' }}</td>
 
-                                            <td>
-                                                @if($session->status == 'completed')
-                                                    <span class="badge bg-success">Completed</span>
-                                                @else
-                                                    <span class="badge bg-warning text-dark">Pending</span>
-                                                @endif
-                                            </td>
+                                <td>
+                                    @if($session->status == 'completed')
+                                        <span class="badge bg-success">Completed</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    @endif
+                                </td>
 
-                                            <td>
-                                                @if($session->google_meet_link && $session->status == 'pending')
-                                                    <a href="{{ $session->google_meet_link }}" target="_blank"
-                                                        rel="noopener" class="btn btn-sm btn-outline-primary"
-                                                        onclick="fetch('{{ route('teacher.class-hours.join', encrypt($session->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
-                                                        <i class="fas fa-video"></i> Join
-                                                    </a>
-                                                @else
-                                                    {{-- <span class="text-muted">-</span> --}}
-                                                @endif
+                                <td>
+                                    @if($session->google_meet_link && $session->status == 'pending')
+                                        <a href="{{ $session->google_meet_link }}" target="_blank" rel="noopener"
+                                            class="btn btn-sm btn-outline-primary"
+                                            onclick="fetch('{{ route('teacher.class-hours.join', encrypt($session->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
+                                            <i class="fas fa-video"></i> Join
+                                        </a>
+                                    @else
+                                        {{-- <span class="text-muted">-</span> --}}
+                                    @endif
 
-                                                @if($session->status == 'pending')
-                                                    <button class="btn btn-sm btn-warning editClassHour" data-id="{{ $session->id }}"
-                                                        data-link="{{ $session->google_meet_link }}">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
-                                                @else
-                                                    <button class="btn btn-sm btn-secondary" disabled>
-                                                        <i class="fas fa-lock"></i>
-                                                    </button>
-                                                @endif
-                                            </td>
+                                    @if($session->status == 'pending')
+                                        <button class="btn btn-sm btn-warning editClassHour" data-id="{{ $session->id }}"
+                                            data-link="{{ $session->google_meet_link }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    @else
+                                        <button class="btn btn-sm btn-secondary" disabled>
+                                            <i class="fas fa-lock"></i>
+                                        </button>
+                                    @endif
+                                </td>
 
-                                        </tr>
+                            </tr>
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center text-muted">No sessions found</td>

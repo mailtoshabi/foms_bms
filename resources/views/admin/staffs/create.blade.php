@@ -165,4 +165,5 @@ value="{{ old('phone', $staff->phone ?? '') }}">
 <script>
 $('.select2').select2();
 </script>
+@include('components.image-compressor')
 @endsection

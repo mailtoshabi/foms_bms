@@ -89,7 +89,8 @@
                 <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Date & Time</th>
+                            <th>Date & Time </th>
+                            <th>Class Timing</th>
                             <th>Class Room</th>
                             <th>Teacher</th>
                             <th>Duration</th>
@@ -101,10 +102,28 @@
                         @forelse($data as $row)
                             <tr>
                                 <td>
+                                    <small>Created:</small><br>
+                                    {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
+
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->created_at)->format('h:i A') }}</small><br>
+                                    <small>Updated:</small><br>
                                     {{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}
-                                    <br>
+
                                     <small
                                         class="text-muted">{{ \Carbon\Carbon::parse($row->updated_at)->format('h:i A') }}</small>
+                                </td>
+                                <td>
+                                    <small>Teacher Joined:</small><br>
+                                    {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
+
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small><br>
+                                    <small>Student Joined:</small><br>
+                                    {{ \Carbon\Carbon::parse($row->join_student_at)->format('d M Y') }}
+
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->join_student_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
                                     <strong>{{ $row->classRoom->name ?? 'N/A' }}</strong>
@@ -117,6 +136,13 @@
                                     <span class="badge {{ $row->status == 'completed' ? 'bg-success' : 'bg-warning' }}">
                                         {{ ucfirst($row->status) }}
                                     </span>
+                                    @if($row->status == 'completed')
+                                        <small>at</small><br>
+                                        {{ \Carbon\Carbon::parse($row->completed_at)->format('d M Y') }}
+
+                                        <small
+                                            class="text-muted">{{ \Carbon\Carbon::parse($row->completed_at)->format('h:i A') }}</small>
+                                    @endif
                                 </td>
                                 <td>
                                     @if($row->google_meet_link)

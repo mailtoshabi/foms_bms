@@ -75,7 +75,7 @@
 
                                     <span
                                         class="badge
-                                                                            {{ $percentage >= 75 ? 'bg-success' : ($percentage >= 50 ? 'bg-warning' : 'bg-danger') }}">
+                                                                                                                                            {{ $percentage >= 75 ? 'bg-success' : ($percentage >= 50 ? 'bg-warning' : 'bg-danger') }}">
 
                                         {{ $present }}/{{ $total }} ({{ $percentage }}%)
 
@@ -106,7 +106,7 @@
 
                     <thead>
                         <tr>
-                            <th>Date</th>
+                            <th colspan="2">Date</th>
                             <!-- <th>Session Link</th> -->
                             <th>Status</th>
                             <th width="150">Action</th>
@@ -119,21 +119,30 @@
 
                             <tr>
 
-                                <td>{{ $hour->created_at->format('d M Y h:i A') }}</td>
+                                <td>
+                                    <small>Created:</small><br>
+                                    {{ \Carbon\Carbon::parse($hour->created_at)->format('d M Y') }}
 
-                                <!-- <td>
-                                                                    @if($hour->status == 'pending')
-                                                                            {{ $hour->google_meet_link }}
-                                                                            <button class="btn btn-primary"
-                                                                            onclick="navigator.clipboard.writeText('{{ $hour->google_meet_link }}')">
-                                                                            <i class="mdi mdi-content-copy"></i>
-                                                                            </button>
-                                                                            @else
-                                                                            Expired
-                                                                            @endif
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($hour->created_at)->format('h:i A') }}</small><br>
+                                    <small>Updated:</small><br>
+                                    {{ \Carbon\Carbon::parse($hour->updated_at)->format('d M Y') }}
 
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($hour->updated_at)->format('h:i A') }}</small>
+                                </td>
+                                <td>
+                                    <small>Joined:</small><br>
+                                    {{ $hour->joined_at ? \Carbon\Carbon::parse($hour->joined_at)->format('d M Y') : '-' }}
 
-                                                                </td> -->
+                                    <small
+                                        class="text-muted">{{ $hour->joined_at ? \Carbon\Carbon::parse($hour->joined_at)->format('h:i A') : '-' }}</small><br>
+                                    <small>Completed:</small><br>
+                                    {{ $hour->completed_at ? \Carbon\Carbon::parse($hour->completed_at)->format('d M Y') : '-' }}
+
+                                    <small
+                                        class="text-muted">{{ \Carbon\Carbon::parse($hour->completed_at)->format('h:i A') }}</small>
+                                </td>
 
                                 <td>
                                     @if($hour->status == 'completed')
@@ -146,8 +155,8 @@
                                 <td>
 
                                     @if($hour->google_meet_link && $hour->status == 'pending')
-                                        <a href="{{ $hour->google_meet_link }}"
-                                            target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary"
+                                        <a href="{{ $hour->google_meet_link }}" target="_blank" rel="noopener"
+                                            class="btn btn-sm btn-outline-primary"
                                             onclick="fetch('{{ route('teacher.class-hours.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
                                             <i class="fas fa-video"></i> Join
                                         </a>
@@ -455,22 +464,22 @@
                 res.students.forEach(student => {
 
                     html += `
-                                                    <div class="col-md-6 mb-2">
+                                                                                    <div class="col-md-6 mb-2">
 
-                                                        <label class="d-flex align-items-center border rounded p-2">
+                                                                                        <label class="d-flex align-items-center border rounded p-2">
 
-                                                            <input type="checkbox"
-                                                            name="attendance[${student.id}]"
-                                                            value="1"
-                                                            class="form-check-input me-2"
-                                                            checked>
+                                                                                            <input type="checkbox"
+                                                                                            name="attendance[${student.id}]"
+                                                                                            value="1"
+                                                                                            class="form-check-input me-2"
+                                                                                            checked>
 
-                                                            <span>${student.name}</span>
+                                                                                            <span>${student.name}</span>
 
-                                                        </label>
+                                                                                        </label>
 
-                                                    </div>
-                                                `;
+                                                                                    </div>
+                                                                                `;
 
                 });
 

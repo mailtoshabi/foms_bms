@@ -18,9 +18,9 @@ class TeacherOldDataImport implements ToCollection, WithHeadingRow
 
         foreach ($rows as $row) {
             // Sanitize phone to handle Excel formatting
-            $phone = trim((string)$row['phone']);
+            $phone = trim((string) $row['phone']);
             if (is_numeric($phone) && str_contains($phone, '.')) {
-                 $phone = (string)intval($phone);
+                $phone = (string) intval($phone);
             }
             $phone = preg_replace('/[^0-9]/', '', $phone);
 
@@ -31,7 +31,7 @@ class TeacherOldDataImport implements ToCollection, WithHeadingRow
             // Determine country_id
             $country = null;
             if (isset($row['country_code'])) {
-                $code = trim((string)$row['country_code']);
+                $code = trim((string) $row['country_code']);
                 if (!empty($code)) {
                     if (!str_starts_with($code, '+')) {
                         $code = '+' . $code;
@@ -49,7 +49,7 @@ class TeacherOldDataImport implements ToCollection, WithHeadingRow
 
             if ($teacher) {
                 $date = $this->transformDate($row['date']);
-                
+
                 if ($date) {
                     $teacher->timestamps = false;
                     $teacher->salary_cycle_day = $row['salary_cycle_day'];
@@ -61,13 +61,32 @@ class TeacherOldDataImport implements ToCollection, WithHeadingRow
                         'salary_cycle_day' => $row['salary_cycle_day']
                     ]);
                 }
+            } else {
+                $date = $this->transformDate($row['date']);
+
+                $newTeacher = new Teacher();
+                $newTeacher->country_id = $country->id;
+                $newTeacher->phone = $phone;
+                $newTeacher->contact_number = $phone;
+                $newTeacher->password = \Illuminate\Support\Facades\Hash::make($phone);
+                $newTeacher->name = $row['name'] ?? 'Unknown';
+                $newTeacher->salary_cycle_day = $row['salary_cycle_day'];
+
+                if ($date) {
+                    $newTeacher->created_at = $date;
+                    $newTeacher->updated_at = $date;
+                    $newTeacher->timestamps = false;
+                }
+
+                $newTeacher->save();
             }
         }
     }
 
     private function transformDate($value)
     {
-        if (!$value) return null;
+        if (!$value)
+            return null;
 
         try {
             if (is_numeric($value)) {

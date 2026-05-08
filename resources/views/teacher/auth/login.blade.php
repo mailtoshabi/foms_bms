@@ -18,8 +18,8 @@ Login
                             </div>
                             <div class="auth-content my-auto">
                                 <div class="text-center">
-                                    <h5 class="mb-0">Welcome Back !</h5>
-                                    <p class="text-muted mt-2">Sign in to continue to FOMS ACADEMY.</p>
+                                    <h5 class="mb-0">Teacher Portal</h5>
+                                    <p class="text-muted mt-2">Sign in to access your teaching dashboard.</p>
                                 </div>
                                 <form class="mt-4 pt-2" action="{{ route('teacher.login.submit') }}" method="POST">
                                     @csrf
