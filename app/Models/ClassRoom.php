@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ClassRoom extends Model
 {
     use SoftDeletes;
-    protected $table='class_rooms';
+    protected $table = 'class_rooms';
 
     protected $fillable = [
         'course_id',
@@ -28,7 +28,7 @@ class ClassRoom extends Model
     protected $casts = [
         'selected_days' => 'array',
         'starting_date' => 'date',
-        'is_completed'  => 'boolean',
+        'is_completed' => 'boolean',
     ];
 
     public function course()
@@ -46,24 +46,24 @@ class ClassRoom extends Model
         return $this->hasMany(ClassNote::class);
     }
 
-public function students()
-{
-    return $this->belongsToMany(
-        Student::class,
-        'student_class_room',
-        'class_room_id',
-        'student_id'
-    )->withPivot('assigned_date')->withTimestamps();
-}
+    public function students()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'student_class_room',
+            'class_room_id',
+            'student_id'
+        )->withPivot('assigned_date')->withTimestamps();
+    }
 
-public function teachers()
-{
-    return $this->belongsToMany(
-        Teacher::class,
-        'teacher_class_room'
-    )->withTimestamps()
-     ->withPivot('hourly_wage','assigned_at');
-}
+    public function teachers()
+    {
+        return $this->belongsToMany(
+            Teacher::class,
+            'teacher_class_room'
+        )->withTimestamps()
+            ->withPivot('hourly_wage', 'assigned_at');
+    }
 
 
     public function classHours()

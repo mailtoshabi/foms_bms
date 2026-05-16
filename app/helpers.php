@@ -224,10 +224,10 @@ if (!function_exists('allTeachersRanked')) {
 
                 // New Scoring Formula (Weights: Classes 30%, Hours 20%, Students 15%, Attendance 15%, Notes 10%, Earnings 10%)
                 $score =
-                    ($totalClasses * 0.15) +
-                    ($totalHours * 0.15) +
-                    ($studentsCount * 0.20) +
-                    ($attendancePercent * 0.30) +
+                    ($totalClasses * 0.20) +
+                    ($totalHours * 0.20) +
+                    ($studentsCount * 0.30) +
+                    ($attendancePercent * 0.10) +
                     ($notesCount * 0.10) +
                     (($earnings / 100) * 0.10);
 
@@ -327,10 +327,10 @@ if (!function_exists('allTimeTeachersRanked')) {
 
                 // New Scoring Formula (Weights: Classes 30%, Hours 20%, Students 15%, Attendance 15%, Notes 10%, Earnings 10%)
                 $score =
-                    ($totalClasses * 0.15) +
-                    ($totalHours * 0.15) +
-                    ($studentsCount * 0.20) +
-                    ($attendancePercent * 0.30) +
+                    ($totalClasses * 0.20) +
+                    ($totalHours * 0.20) +
+                    ($studentsCount * 0.30) +
+                    ($attendancePercent * 0.10) +
                     ($notesCount * 0.10) +
                     (($earnings / 100) * 0.10);
 

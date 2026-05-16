@@ -105,7 +105,7 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
                             <thead>
                                 <tr>
@@ -184,7 +184,7 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
                             <thead>
                                 <tr>
@@ -270,7 +270,7 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
                             <thead>
                                 <tr>
@@ -915,7 +915,7 @@
                     </div>
                     <div class="modal-body">
                         <p><strong>Total Paid:</strong> ₹ <span id="studentFeeTotalPaid"></span></p>
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
                             <thead>
                                 <tr>
                                     <th>Date</th>

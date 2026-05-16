@@ -117,7 +117,7 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
                             <thead>
                                 <tr>
@@ -137,7 +137,7 @@
 
                                     <tr>
 
-                                        <td>{{ $salary->teacher->name ?? '-' }}</td>
+                                        <td><a href="{{ route('staff.teachers.show', encrypt($salary->teacher->id)) }}">{{ $salary->teacher->name ?? '-' }}</a></td>
 
                                         <td>
                                             {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}

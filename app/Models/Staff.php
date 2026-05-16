@@ -10,7 +10,11 @@ class Staff extends Authenticatable
     use SoftDeletes;
     protected $table = 'staffs';
     protected $fillable = [
-        'name','email','phone','password', 'address', 'gpay_number', 'salary_amount', 'id_proof', 'photo'
+        'name', 'email', 'phone', 'password', 'address', 'gpay_number', 'salary_amount', 'id_proof', 'photo', 'last_login_at', 'last_login_ip'
+    ];
+
+    protected $casts = [
+        'last_login_at' => 'datetime',
     ];
 
     public function roles()

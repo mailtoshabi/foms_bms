@@ -1,58 +1,58 @@
 @extends('staff.layouts.master')
 
-@section('title','Invoice')
+@section('title', 'Invoice')
 
 @section('content')
 
-<div class="card">
+    <div class="card">
 
-<div class="card-header">
-<h4>Fee Invoice</h4>
-</div>
+        <div class="card-header">
+            <h4>Fee Invoice</h4>
+        </div>
 
-<div class="card-body">
+        <div class="card-body">
 
-<p><strong>Student:</strong> {{ $fee->student->name ?? '-' }}</p>
-<p><strong>Class:</strong> {{ $fee->classRoom->name ?? '-' }}</p>
+            <p><strong>Student:</strong> {{ $fee->student->name ?? '-' }}</p>
+            <p><strong>Class:</strong> {{ $fee->classRoom->name ?? '-' }}</p>
 
-<hr>
+            <hr>
 
-<p><strong>Total Fee:</strong> ₹ {{ number_format($fee->amount,2) }}</p>
+            <p><strong>Total Fee:</strong> ₹ {{ number_format($fee->amount, 2) }}</p>
 
-<p><strong>Status:</strong> {{ ucfirst($fee->status) }}</p>
+            <p><strong>Status:</strong> {{ ucfirst($fee->status) }}</p>
 
-<hr>
+            <hr>
 
-<h5>Payments</h5>
+            <h5>Payments</h5>
 
-<table class="table table-bordered">
+            <table class="table table-bordered  align-middle table-nowrap mb-0">
 
-<thead>
-<tr>
-<th>Date</th>
-<th>Amount</th>
-<th>Method</th>
-</tr>
-</thead>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                    </tr>
+                </thead>
 
-<tbody>
+                <tbody>
 
-@foreach($fee->payments as $payment)
+                    @foreach($fee->payments as $payment)
 
-<tr>
-<td>{{ $payment->paid_date }}</td>
-<td>₹ {{ number_format($payment->paid_amount,2) }}</td>
-<td>{{ ucfirst($payment->payment_method) }}</td>
-</tr>
+                        <tr>
+                            <td>{{ $payment->paid_date }}</td>
+                            <td>₹ {{ number_format($payment->paid_amount, 2) }}</td>
+                            <td>{{ ucfirst($payment->payment_method) }}</td>
+                        </tr>
 
-@endforeach
+                    @endforeach
 
-</tbody>
+                </tbody>
 
-</table>
+            </table>
 
-</div>
+        </div>
 
-</div>
+    </div>
 
 @endsection

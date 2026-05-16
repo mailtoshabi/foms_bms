@@ -77,9 +77,29 @@
     </div>
     <!-- END wrapper -->
 
-    <!-- Right Sidebar -->
-    @include('student.layouts.right-sidebar')
-    <!-- END Right Sidebar -->
+    <!-- Right Sidebars -->
+    @include('student.layouts.right-sidebar-messages')
+    @include('student.layouts.right-sidebar-sessions')
+    
+    <script>
+        document.querySelectorAll('.right-bar-toggle').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const target = this.getAttribute('data-target');
+                if (target) {
+                    // Hide all sidebars first
+                    document.querySelectorAll('.right-bar').forEach(function(bar) {
+                        bar.style.display = 'none';
+                    });
+                    // Show the target sidebar
+                    const targetBar = document.getElementById(target);
+                    if (targetBar) {
+                        targetBar.style.display = 'block';
+                    }
+                }
+            });
+        });
+    </script>
+    <!-- END Right Sidebars -->
 
     <x-pwa-install-button />
     @include('student.layouts.vendor-scripts')

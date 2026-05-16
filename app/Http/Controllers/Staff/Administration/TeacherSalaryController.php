@@ -41,7 +41,7 @@ class TeacherSalaryController extends Controller
             ->where('teacher_id', $teacher->id)
             ->where('status', 'completed')
             ->where('has_salary_calculated', false)
-            ->whereBetween('updated_at', [
+            ->whereBetween('link_updated_at', [
                 $cycleStart->startOfDay(),
                 $cycleEnd->endOfDay()
             ])

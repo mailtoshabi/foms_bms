@@ -81,6 +81,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/fee-collection/export', [ReportController::class, 'exportFeeCollection'])
             ->name('reports.fee.collection.export');
 
+        Route::delete('reports/fee/{id}', [ReportController::class, 'destroyFee'])
+            ->name('reports.fee.destroy');
+
         Route::get('reports/finance-expense', [ReportController::class, 'financeExpense'])
             ->name('reports.finance.expense');
 
@@ -178,6 +181,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 // Salary
                 Route::post('/salary/store', 'storeSalary')->name('salary.store');
                 Route::put('/salary/update', 'updateSalary')->name('salary.update');
+                Route::put('/salary/payment/update', 'updatePayment')->name('salary.payment.update');
                 Route::post('/salary/pay-balance', 'payBalance')->name('salary.pay-balance');
                 Route::put('/salary/amount/update', 'updateSalaryAmount')->name('salary.amount.update');
 

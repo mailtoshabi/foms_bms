@@ -28,19 +28,15 @@
                     <label class="form-label fw-bold">Status</label>
                     <select name="status" class="form-control select2">
                         <option value="">All Status</option>
-
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
-                            Pending
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="follow_up" {{ request('status') == 'follow_up' ? 'selected' : '' }}>Follow Up</option>
+                        <option value="no_response" {{ request('status') == 'no_response' ? 'selected' : '' }}>No Response
                         </option>
-
-                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>
-                            Approved
+                        <option value="not_interested" {{ request('status') == 'not_interested' ? 'selected' : '' }}>Not
+                            Interested</option>
+                        <option value="interested" {{ request('status') == 'interested' ? 'selected' : '' }}>Interested
                         </option>
-
-                        <option value="not_interested" {{ request('status') == 'not_interested' ? 'selected' : '' }}>
-                            Not Interested
-                        </option>
-
+                        <option value="converted" {{ request('status') == 'converted' ? 'selected' : '' }}>Converted</option>
                     </select>
                 </div>
 
@@ -83,7 +79,9 @@
 
                         <tr>
 
-                            <td>{{ $lead->name }}</td>
+                            <td>
+                                <a href="{{ route('staff.teacher-leads.edit', encrypt($lead->id)) }}">{{ $lead->name }}</a>
+                            </td>
                             <td>{{ $lead->formatted_contact_number }}
                                 @if($lead->is_whatsapp_different)
                                     <br><small class="text-success"><i class="mdi mdi-whatsapp"></i>
@@ -96,9 +94,12 @@
                             <td>
 
                                 <span class="badge
-                                                        {{ $lead->status == 'pending' ? 'bg-warning' : '' }}
-                                                        {{ $lead->status == 'approved' ? 'bg-success' : '' }}
-                                                        {{ $lead->status == 'not_interested' ? 'bg-danger' : '' }}">
+                                                    {{ $lead->status == 'pending' ? 'bg-warning' : '' }}
+                                                    {{ $lead->status == 'follow_up' ? 'bg-info' : '' }}
+                                                    {{ $lead->status == 'no_response' ? 'bg-secondary' : '' }}
+                                                    {{ $lead->status == 'not_interested' ? 'bg-danger' : '' }}
+                                                    {{ $lead->status == 'interested' ? 'bg-success' : '' }}
+                                                    {{ $lead->status == 'converted' ? 'bg-primary' : '' }}">
 
                                     {{ ucfirst(str_replace('_', ' ', $lead->status)) }}
 
@@ -112,6 +113,10 @@
                                     $staff = auth('staff')->user();
                                 @endphp
                                 <div class="d-flex gap-2">
+
+                                    <a href="#" class="viewLeadNotes" data-name="{{ $lead->name }}" data-notes="{{ json_encode($lead->notes->values()->all()) }}" title="View Notes">
+                                        <i class="mdi mdi-note-text-outline text-info"></i>
+                                    </a>
 
                                     <a href="{{ route('staff.teacher-leads.edit', encrypt($lead->id)) }}">
                                         <i class="mdi mdi-pencil text-success"></i>
@@ -149,6 +154,8 @@
 
         </div>
     </div>
+
+    <x-lead_notes_modal />
 
 @endsection
 

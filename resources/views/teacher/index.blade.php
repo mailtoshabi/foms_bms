@@ -1,84 +1,83 @@
-@extends('teacher.layouts.master')
+@extends('teacher.layouts.master-layouts-noleft')
 
-@section('title','Assigned Classes')
+@section('title', 'Assigned Classes')
 
 @section('content')
 
-<div class="card">
+    <div class="card">
 
-<div class="card-header">
-<h4>Assigned Classes</h4>
-</div>
+        <div class="card-header">
+            <h4>Assigned Classes</h4>
+        </div>
 
-<div class="card-body table-responsive">
+        <div class="card-body table-responsive">
 
-<table class="table table-bordered">
+            <table class="table table-bordered  align-middle table-nowrap mb-0">
 
-<thead>
+                <thead>
 
-<tr>
-<th>Course</th>
-<th>Class</th>
-<th>Type</th>
-<th>Schedule</th>
-<th>Action</th>
-</tr>
+                    <tr>
+                        <th>Course</th>
+                        <th>Class</th>
+                        <th>Type</th>
+                        <th>Schedule</th>
+                        <th>Action</th>
+                    </tr>
 
-</thead>
+                </thead>
 
-<tbody>
+                <tbody>
 
-@forelse($classes as $class)
+                    @forelse($classes as $class)
 
-<tr>
+                        <tr>
 
-<td>{{ $class->course->name ?? '-' }}</td>
+                            <td>{{ $class->course->name ?? '-' }}</td>
 
-<td>{{ $class->name }}</td>
+                            <td>{{ $class->name }}</td>
 
-<td>{{ $class->classType->name }}</td>
+                            <td>{{ $class->classType->name }}</td>
 
-<td>
+                            <td>
 
-{{ implode(', ',$class->selected_days ?? []) }}
+                                {{ implode(', ', $class->selected_days ?? []) }}
 
-<br>
+                                <br>
 
-{{ $class->time_slot }}
+                                {{ $class->time_slot }}
 
-</td>
+                            </td>
 
-<td>
+                            <td>
 
-<a href="{{ route('teacher.classes.show',$class->id) }}"
-class="btn btn-sm btn-primary">
+                                <a href="{{ route('teacher.classes.show', $class->id) }}" class="btn btn-sm btn-primary">
 
-View
+                                    View
 
-</a>
+                                </a>
 
-</td>
+                            </td>
 
-</tr>
+                        </tr>
 
-@empty
+                    @empty
 
-<tr>
-<td colspan="5" class="text-center">
-No Classes Assigned
-</td>
-</tr>
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No Classes Assigned
+                            </td>
+                        </tr>
 
-@endforelse
+                    @endforelse
 
-</tbody>
+                </tbody>
 
-</table>
+            </table>
 
-{{ $classes->links() }}
+            {{ $classes->links() }}
 
-</div>
+        </div>
 
-</div>
+    </div>
 
 @endsection

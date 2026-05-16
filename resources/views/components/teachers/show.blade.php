@@ -28,7 +28,7 @@
                     <h5>{{ $teacher->name }}</h5>
 
                     <p class="text-muted mb-1">
-                        {{ $teacher->phone }}
+                        {{ $teacher->formatted_phone }}
                     </p>
 
                     <p class="text-muted mb-1">
@@ -189,7 +189,7 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
                             <thead>
                                 <tr>

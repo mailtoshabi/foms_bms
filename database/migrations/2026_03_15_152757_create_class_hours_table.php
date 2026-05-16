@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->dateTime('join_teacher_at')->nullable();
             $table->dateTime('join_student_at')->nullable();
             $table->dateTime('completed_at')->nullable();
+            $table->dateTime('link_updated_at')->nullable();
 
             $table->enum('status', ['pending', 'completed'])
                 ->default('pending');

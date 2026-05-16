@@ -63,21 +63,23 @@
             </form>
 
             @if(request()->anyFilled(['class_room_id', 'teacher_id', 'status', 'from_date', 'to_date']))
-                <div class="row mb-4">
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card bg-primary bg-gradient text-white shadow-sm mb-0">
-                            <div class="card-body p-3">
-                                <h6 class="text-white-50 mb-2">Total Sessions</h6>
-                                <h4 class="mb-0 text-white"><i class="fas fa-video me-2"></i>{{ $totalClassHours }}</h4>
-                            </div>
+                <div class="portal-info-grid mb-4">
+                    <div class="portal-info-card">
+                        <div class="portal-info-card-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="portal-info-card-content">
+                            <span class="portal-info-card-label">Total Sessions</span>
+                            <span class="portal-info-card-value">{{ $totalClassHours }}</span>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card bg-success bg-gradient text-white shadow-sm mb-0">
-                            <div class="card-body p-3">
-                                <h6 class="text-white-50 mb-2">Total Duration</h6>
-                                <h4 class="mb-0 text-white"><i class="fas fa-clock me-2"></i>{{ $totalDurationFormatted }}</h4>
-                            </div>
+                    <div class="portal-info-card">
+                        <div class="portal-info-card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="portal-info-card-content">
+                            <span class="portal-info-card-label">Total Duration</span>
+                            <span class="portal-info-card-value">{{ $totalDurationFormatted }}</span>
                         </div>
                     </div>
                 </div>
@@ -88,12 +90,12 @@
                     <thead class="table-light">
                         <tr>
                             <th>Date & Time </th>
-                            <th>Class Timing</th>
-                            <th>Class Room</th>
+                            <th>Join Time</th>
+                            <th>Class</th>
                             <th>Teacher</th>
                             <th>Duration</th>
                             <th>Status</th>
-                            <th>Links / Info</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -106,29 +108,35 @@
                                     <small
                                         class="text-muted">{{ \Carbon\Carbon::parse($row->created_at)->format('h:i A') }}</small><br>
                                     <small>Updated:</small><br>
-                                    {{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($row->link_updated_at)->format('d M Y') }}
 
                                     <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->updated_at)->format('h:i A') }}</small>
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->link_updated_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
-                                    <small>Teacher Joined:</small><br>
-                                    {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
+                                    @if($row->join_teacher_at)
+                                        <small>Teacher Joined:</small><br>
+                                        {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
 
-                                    <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small><br>
-                                    <small>Student Joined:</small><br>
-                                    {{ \Carbon\Carbon::parse($row->join_student_at)->format('d M Y') }}
+                                        <small
+                                            class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small><br>
+                                        <small>Student Joined:</small><br>
+                                        {{ \Carbon\Carbon::parse($row->join_student_at)->format('d M Y') }}
 
-                                    <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->join_student_at)->format('h:i A') }}</small>
+                                        <small
+                                            class="text-muted">{{ \Carbon\Carbon::parse($row->join_student_at)->format('h:i A') }}</small>
+                                    @else
+                                        <small>Not Joined Yet</small>
+                                    @endif
                                 </td>
                                 <td>
-                                    <strong>{{ $row->classRoom->name ?? 'N/A' }}</strong>
+                                    <strong><a href="{{ route('staff.class_rooms.show', encrypt($row->classRoom->id)) }}">{{ $row->classRoom->name ?? 'N/A' }}</a></strong>
                                     <br>
                                     <small>{{ $row->classRoom->course->name ?? '' }}</small>
                                 </td>
-                                <td>{{ $row->teacher->name ?? 'N/A' }}</td>
+                                <td><a href="{{ route('staff.teachers.show', encrypt($row->teacher->id)) }}">{{ $row->teacher->name ?? 'N/A' }}</a>
+                                    <br><small>{{ $row->teacher->formatted_contact_number ?? '' }}</small>
+                                </td>
                                 <td>{{ $row->duration }} mins</td>
                                 <td>
                                     <span class="badge {{ $row->status == 'completed' ? 'bg-success' : 'bg-warning' }}">

@@ -1,3 +1,5 @@
+@import url('modern.css');
+
 body[data-topbar=dark] #page-topbar,
 body[data-topbar=dark] .navbar-brand-box {
     background-color: #1c84ee;
@@ -123,4 +125,24 @@ img.branch_logo_list {
     /* Slightly darker red */
     border-color: #c4161b !important;
     color: white !important;
+}
+
+/* Increase topbar icon sizes globally */
+.header-item svg,
+.header-item i,
+.icon-lg,
+svg.icon-lg {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 30px !important;
+}
+
+/* Thick top and bottom borders for all tables */
+table.table {
+    border-top: 2px solid #6c757d !important;
+    border-bottom: 2px solid #6c757d !important;
+}
+
+table.table td, table.table th {
+    border-color: #adb5bd !important;
 }

@@ -132,14 +132,19 @@
                     @forelse($data as $row)
 
                         <tr>
-                            <td>{{ $row->name }}
+                            <td>
+                                <a
+                                    href="{{ route('admin.reports.students.show', encrypt($row->student_id)) }}">{{ $row->name }}</a>
                                 <br><small class="text-muted">{{ $row->contact_number }}</small>
                                 @if($row->is_whatsapp_different)
                                     <br><small class="text-success" style="font-size: 11px;">WA:
                                         +{{ $row->whatsapp_number }}</small>
                                 @endif
                             </td>
-                            <td>{{ $row->class_name }}</td>
+                            <td>
+                                <a
+                                    href="{{ route('admin.class_rooms.show', encrypt($row->class_room_id)) }}">{{ $row->class_name }}</a>
+                            </td>
                             <td><span class="badge bg-info">{{ ucfirst($row->category_name) }}</span></td>
                             <td>₹ {{ number_format($row->paid_amount, 2) }}</td>
                             <td>{{ ucfirst(str_replace('_', ' ', $row->payment_method)) }}</td>

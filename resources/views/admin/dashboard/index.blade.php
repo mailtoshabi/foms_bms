@@ -130,7 +130,8 @@
     <div class="row">
 
         <div class="col-xl-3 col-md-6">
-            <a href="{{ route('admin.reports.student-leads') }}" class="text-decoration-none">
+            <a href="{{ route('admin.reports.student-leads') }}?from_date=&to_date=&status=pending"
+                class="text-decoration-none">
                 <div class="card card-h-100 border-warning">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -148,7 +149,8 @@
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <a href="{{ route('admin.reports.teacher-leads') }}" class="text-decoration-none">
+            <a href="{{ route('admin.reports.teacher-leads') }}?from_date=&to_date=&status=pending"
+                class="text-decoration-none">
                 <div class="card card-h-100 border-warning">
                     <div class="card-body">
                         <div class="d-flex align-items-center">
@@ -177,6 +179,25 @@
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="{{ route('admin.reports.fee', ['tab' => 'overdue']) }}" class="text-decoration-none">
+                <div class="card card-h-100 border-danger bg-soft-danger">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-danger fw-bold d-block">Overdue Fees</span>
+                                <h4 class="mb-0">{{ $overdueFeesCount }} <small
+                                        class="fs-6 text-danger">₹{{ number_format($overdueFeesAmount, 2) }}</small></h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-clock fa-2x text-danger"></i>
                             </div>
                         </div>
                     </div>
@@ -312,7 +333,7 @@
 
                 datasets: [{
                     data: [
-                                                    {{ $paidAmount }},
+                                                                        {{ $paidAmount }},
                         {{ $pendingAmount }}
                     ],
                     borderWidth: 1

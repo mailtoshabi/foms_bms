@@ -19,33 +19,38 @@ class DashboardController extends Controller
     {
         $teacher = Auth::guard('teacher')->user();
 
+        if (!$teacher) {
+            return redirect()->route('teacher.login');
+        }
+
         // Assigned Classes
         $classes = $teacher->classRooms()
+            ->active()
             ->with(['course', 'classType'])
             ->get();
 
-        $stats = \App\Models\ClassHour::where('teacher_id', $teacher->id)
-            ->selectRaw("
-            COUNT(*) as total,
-            SUM(status = 'completed') as completed
-        ")
-            ->first();
+        // Monthly Completed Sessions
+        $completedSessions = ClassHour::where('teacher_id', $teacher->id)
+            ->where('status', 'completed')
+            ->whereMonth('completed_at', now()->month)
+            ->whereYear('completed_at', now()->year)
+            ->count();
 
-        $completedClasses = $stats->completed;
+        // Monthly Pending Sessions
+        $pendingSessions = ClassHour::where('teacher_id', $teacher->id)
+            ->where('status', 'pending')
+            ->whereMonth('link_updated_at', now()->month)
+            ->whereYear('link_updated_at', now()->year)
+            ->count();
 
         // Total Hours
         $totalMinutes = ClassHour::where('teacher_id', $teacher->id)
             ->where('status', 'completed')
+            ->whereMonth('completed_at', now()->month)
+            ->whereYear('completed_at', now()->year)
             ->sum('duration');
 
         $totalHours = round($totalMinutes / 60, 2);
-
-        // This Month Classes
-        $thisMonthClasses = ClassHour::where('teacher_id', $teacher->id)
-            ->where('status', 'completed')
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
-            ->count();
 
         // =========================
         // EARNINGS (THIS MONTH)
@@ -53,20 +58,27 @@ class DashboardController extends Controller
 
         // Latest Earnings
         $latestEarnings = TeacherSalary::where('teacher_id', $teacher->id)
-            ->latest('cycle_start')
-            ->value('total_amount') ?? 0;
+            ->whereMonth('cycle_start', now()->month)
+            ->whereYear('cycle_start', now()->year)
+            ->sum('total_amount') ?? 0;
 
         // Salary history
         $salaries = TeacherSalary::where('teacher_id', $teacher->id)
             ->latest()
-            ->take(5)
+            ->take(12)
             ->get();
 
         // Latest class notes
         $notes = ClassNote::where('teacher_id', $teacher->id)
             ->latest()
-            ->take(5)
+            ->take(12)
             ->get();
+
+        // This Month Notes Count
+        $thisMonthNotesCount = ClassNote::where('teacher_id', $teacher->id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
 
         //Upcoming Salary (unprocessed completed class hours)
         $upcomingSalary = ClassHour::where('teacher_id', $teacher->id)
@@ -85,10 +97,10 @@ class DashboardController extends Controller
         // Earnings Graph
         $monthlyData = ClassHour::where('teacher_id', $teacher->id)
             ->where('status', 'completed')
-            ->whereYear('updated_at', now()->year)
+            ->whereYear('completed_at', now()->year)
             ->get()
             ->groupBy(function ($item) {
-                return Carbon::parse($item->updated_at)->format('M');
+                return Carbon::parse($item->completed_at)->format('M');
             });
 
         $chartLabels = [];
@@ -119,9 +131,10 @@ class DashboardController extends Controller
         return view('teacher.dashboard', compact(
 
             'classes',
-            'completedClasses',
+            'completedSessions',
+            'pendingSessions',
             'totalHours',
-            'thisMonthClasses',
+            'thisMonthNotesCount',
             'latestEarnings',
             'upcomingSalary',
             'salaries',
@@ -136,7 +149,13 @@ class DashboardController extends Controller
     public function profile()
     {
         $teacher = Auth::guard('teacher')->user();
+
+        if (!$teacher) {
+            return redirect()->route('teacher.login');
+        }
+
         $classes = $teacher->classRooms()
+            ->active()
             ->with(['course', 'classType'])
             ->get();
 

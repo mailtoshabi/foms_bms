@@ -17,7 +17,8 @@ class ClassHour extends Model
         'has_salary_calculated',
         'join_teacher_at',
         'join_student_at',
-        'completed_at'
+        'completed_at',
+        'link_updated_at',
     ];
 
     protected $casts = [
@@ -25,7 +26,8 @@ class ClassHour extends Model
         'has_salary_calculated' => 'boolean',
         'join_teacher_at' => 'datetime',
         'join_student_at' => 'datetime',
-        'completed_at' => 'datetime'
+        'completed_at' => 'datetime',
+        'link_updated_at' => 'datetime'
     ];
 
     public function classRoom()

@@ -22,7 +22,7 @@ class StudentLeadController extends Controller
     */
     public function index(Request $request)
     {
-        $leads = StudentLead::with('source');
+        $leads = StudentLead::with(['source', 'notes.staff']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -133,13 +133,16 @@ class StudentLeadController extends Controller
 
         $lead = StudentLead::findOrFail(decrypt($id));
 
+        if ($lead->status === 'converted') {
+            return redirect()->route('staff.student-leads.index')->with('error', 'Cannot update a converted lead.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'country_id' => ['required', 'exists:countries,id'],
             'contact_number' => ['required', 'string', 'digits_between:7,15', 'unique:student_leads,contact_number,' . $lead->id],
             'email' => ['nullable', 'email'],
             'source_id' => ['nullable', 'exists:sources,id'],
-            'status' => ['required', 'in:pending,follow_up,no_response,not_interested,interested,converted'],
         ]);
 
         $country = \App\Models\Country::find($request->country_id);
@@ -159,7 +162,6 @@ class StudentLeadController extends Controller
             'is_whatsapp_different' => $isWhatsappDifferent,
             'email' => $request->email,
             'source_id' => $request->source_id,
-            'status' => $request->status,
         ]);
 
         return redirect()
@@ -177,7 +179,7 @@ class StudentLeadController extends Controller
         $lead = StudentLead::withCount('notes')->with('student')->findOrFail(decrypt($id));
 
         if ($lead->student) {
-            return back()->with('error', "Cannot delete \"{$lead->name}\" — a student record is linked to this lead.");
+            return back()->with('error', "Cannot delete \"{$lead->name}\" — already converted to a student.");
         }
 
         $lead->delete();
@@ -188,9 +190,15 @@ class StudentLeadController extends Controller
 
     public function storeNote(Request $request, $leadId)
     {
+        $lead = StudentLead::findOrFail($leadId);
+
+        if ($lead->status === 'converted') {
+            return back()->with('error', 'Cannot add notes to a converted lead.');
+        }
+
         $request->validate([
             'note' => 'required|string',
-            'status' => 'required|in:pending,follow_up,no_response,not_interested,interested,converted'
+            'status' => 'required|in:pending,follow_up,no_response,not_interested,interested'
         ]);
 
         LeadNote::create([
@@ -199,6 +207,8 @@ class StudentLeadController extends Controller
             'note' => $request->note,
             'status' => $request->status,
         ]);
+
+        $lead->update(['status' => $request->status]);
 
         return back()->with('success', 'Note added successfully.');
     }
@@ -222,6 +232,7 @@ class StudentLeadController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'country_id' => 'required|exists:countries,id',
             'contact_number' => 'required|string|digits_between:7,15',
             'email' => 'nullable|email',
             'classes_per_week' => 'nullable|integer',
@@ -252,7 +263,8 @@ class StudentLeadController extends Controller
                 if ($isWhatsappDifferent) {
                     $whatsapp_number = $request->whatsapp_number;
                 } else {
-                    $countryCode = $lead->country ? preg_replace('/[^0-9]/', '', $lead->country->code) : '91';
+                    $country = \App\Models\Country::find($request->country_id);
+                    $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
                     $whatsapp_number = $countryCode . $request->contact_number;
                 }
 
@@ -261,7 +273,7 @@ class StudentLeadController extends Controller
                 Student::create([
                     'admission_no' => $admissionNo,
                     'student_lead_id' => $lead->id,
-                    'country_id' => $lead->country_id,
+                    'country_id' => $request->country_id,
                     'is_whatsapp_different' => $isWhatsappDifferent,
                     'name' => $request->name,
                     'dob' => $request->dob,
@@ -278,7 +290,7 @@ class StudentLeadController extends Controller
                     'selected_days' => $request->selected_days ?? [],
                     'time_slot' => $request->time_slot,
                     'starting_date' => $request->starting_date,
-                    'status' => $request->status ?? 'active'
+                    'status' => 'active'
                 ]);
 
                 // Update lead status

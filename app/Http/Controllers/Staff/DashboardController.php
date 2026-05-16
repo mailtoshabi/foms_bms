@@ -19,6 +19,11 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
+        $staff = auth()->guard('staff')->user();
+
+        if (!$staff) {
+            return redirect()->route('staff.login');
+        }
 
         $now = Carbon::now();
 
@@ -104,6 +109,11 @@ class DashboardController extends Controller
     public function profile()
     {
         $staff = auth()->guard('staff')->user();
+
+        if (!$staff) {
+            return redirect()->route('staff.login');
+        }
+
         $staff->load('roles');
 
         return view('staff.profile', compact('staff'));

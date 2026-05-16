@@ -75,7 +75,7 @@
                 <tbody>
                     @forelse($leads as $lead)
                         <tr>
-                            <td>{{ $lead->name }}</td>
+                            <td><a href="{{ route('staff.student-leads.edit', encrypt($lead->id)) }}">{{ $lead->name }}</a></td>
                             <td>{{ $lead->formatted_contact_number }}
                                 @if($lead->is_whatsapp_different)
                                     <br><small class="text-success"><i class="mdi mdi-whatsapp"></i>
@@ -85,8 +85,17 @@
                             <td>{{ $lead->email ?? '-' }}</td>
                             <td>{{ $lead->source->name ?? '-' }}</td>
                             <td>
-                                <span class="badge {{ $lead->status == 'pending' ? 'bg-warning' : 'bg-success' }}">
-                                    {{ ucfirst($lead->status) }}
+                                <span
+                                    class="badge
+                                                                        {{ $lead->status == 'pending' ? 'bg-warning' : '' }}
+                                                                        {{ $lead->status == 'follow_up' ? 'bg-info' : '' }}
+                                                                        {{ $lead->status == 'no_response' ? 'bg-secondary' : '' }}
+                                                                        {{ $lead->status == 'not_interested' ? 'bg-danger' : '' }}
+                                                                        {{ $lead->status == 'interested' ? 'bg-success' : '' }}
+                                                                        {{ $lead->status == 'converted' ? 'bg-primary' : '' }}">
+
+                                    {{ ucfirst(str_replace('_', ' ', $lead->status)) }}
+
                                 </span>
                             </td>
                             <td>
@@ -95,6 +104,10 @@
                                     $staff = auth('staff')->user();
                                 @endphp
                                 <div class="d-flex gap-2">
+
+                                    <a href="#" class="viewLeadNotes" data-name="{{ $lead->name }}" data-notes="{{ json_encode($lead->notes->values()->all()) }}" title="View Notes">
+                                        <i class="mdi mdi-note-text-outline text-info"></i>
+                                    </a>
 
                                     <a href="{{ route('staff.student-leads.edit', encrypt($lead->id)) }}">
                                         <i class="mdi mdi-pencil text-success"></i>
@@ -126,6 +139,8 @@
 
         </div>
     </div>
+
+    <x-lead_notes_modal />
 
 @endsection
 

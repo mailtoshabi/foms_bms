@@ -4,14 +4,25 @@ namespace App\Exports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class StudentLeadExport implements FromCollection
+class StudentLeadExport implements FromCollection, WithHeadings
 {
     protected $leads;
 
     public function __construct(Collection $leads)
     {
         $this->leads = $leads;
+    }
+
+    public function headings(): array
+    {
+        return [
+            'Name',
+            'Phone',
+            'Status',
+            'Created Date',
+        ];
     }
 
     public function collection()

@@ -97,7 +97,9 @@
                         <tr>
 
                             <td>
-                                {{ $teacher->name }}
+                                <a href="{{ route('staff.teachers.show', encrypt($teacher->id)) }}">
+                                    {{ $teacher->name }}
+                                </a>
                                 <br>
 
                                 @isset($teacher->dob)

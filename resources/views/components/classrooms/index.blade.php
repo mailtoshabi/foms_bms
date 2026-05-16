@@ -130,7 +130,9 @@ Add Class
 
 <td>{{ $class->course->name ?? '-' }}</td>
 
-<td>{{ $class->name }}</td>
+<td>
+    <a href="{{ $showRoute(encrypt($class->id)) }}">{{ $class->name }}</a>
+</td>
 
 <td>{{ ucfirst($class->classType->name ?? '-') }}</td>
 
@@ -245,7 +247,7 @@ action="{{ $deleteRoute(encrypt($class->id)) }}">
                             ->keyBy('student_id');
                 @endphp
                 <div class="table-responsive">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered  align-middle table-nowrap mb-0">
                         <thead>
                             <tr>
                                 <th>Name</th>

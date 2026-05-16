@@ -139,7 +139,10 @@
                             <tbody>
                                    @forelse($data as $row)
                                           <tr>
-                                                 <td>{{ $row->name ?? '-' }}</td>
+                                                 <td>
+                                                        <a
+                                                               href="{{ route('admin.reports.teachers.show', encrypt($row->teacher_id)) }}">{{ $row->name ?? '-' }}</a>
+                                                 </td>
 
                                                  <td>
                                                         {{ \Carbon\Carbon::parse($row->cycle_start)->format('d M Y') }}

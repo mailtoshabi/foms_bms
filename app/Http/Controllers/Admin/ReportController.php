@@ -134,20 +134,43 @@ class ReportController extends Controller
         );
     }
 
+    public function destroyFee($id)
+    {
+        $fee = Fee::with(['student', 'classRoom'])->findOrFail($id);
+
+        if ($fee->status !== 'unpaid') {
+            return back()->with('error', 'Only unpaid fees can be deleted.');
+        }
+
+        DB::transaction(function () use ($fee) {
+            // Detach student from the class room if applicable
+            // if ($fee->type === 'admission' && $fee->student && $fee->class_room_id) {
+            //     $fee->student->class_rooms()->detach($fee->class_room_id);
+            // }
+
+            $fee->delete();
+        });
+
+        return back()->with('success', 'Fee deleted successfully.');
+    }
+
     public function feeCollection(Request $request)
     {
         $query = DB::table('fee_payments')
             ->join('fees', 'fees.id', '=', 'fee_payments.fee_id')
             ->join('students', 'students.id', '=', 'fees.student_id')
+            ->leftJoin('countries', 'countries.id', '=', 'students.country_id')
             ->join('class_rooms', 'class_rooms.id', '=', 'fees.class_room_id')
             ->join('courses', 'courses.id', '=', 'class_rooms.course_id')
             ->join('course_categories', 'course_categories.id', '=', 'courses.category_id')
 
             ->select(
+                'students.id as student_id',
                 'students.name',
-                'students.contact_number',
+                DB::raw("IF(countries.id IS NOT NULL, CONCAT(countries.code, ' (', countries.name, ') ', students.contact_number), students.contact_number) as contact_number"),
                 'students.whatsapp_number',
                 'students.is_whatsapp_different',
+                'class_rooms.id as class_room_id',
                 'class_rooms.name as class_name',
                 'course_categories.name as category_name',
                 'fee_payments.paid_amount',
@@ -273,9 +296,16 @@ class ReportController extends Controller
             });
         }
 
-        $totalAmount = (clone $baseQuery)->sum('amount');
+        $totalsQuery = clone $baseQuery;
 
-        $sourceTotals = (clone $baseQuery)
+        if (!$request->filled('from_date') && !$request->filled('to_date')) {
+            $totalsQuery->whereMonth('transaction_date', date('m'))
+                        ->whereYear('transaction_date', date('Y'));
+        }
+
+        $totalAmount = (clone $totalsQuery)->sum('amount');
+
+        $sourceTotals = (clone $totalsQuery)
             ->select('source', DB::raw('SUM(amount) as total'))
             ->groupBy('source')
             ->pluck('total', 'source');
@@ -308,16 +338,19 @@ class ReportController extends Controller
     {
         $query = DB::table('student_attendance')
             ->join('students', 'students.id', '=', 'student_attendance.student_id')
+            ->leftJoin('countries', 'countries.id', '=', 'students.country_id')
             ->join('class_hours', 'class_hours.id', '=', 'student_attendance.class_hour_id')
             ->join('class_rooms', 'class_rooms.id', '=', 'class_hours.class_room_id')
 
             ->select(
+                'students.id as student_id',
                 'students.name',
-                'students.contact_number',
+                DB::raw("IF(countries.id IS NOT NULL, CONCAT(countries.code, ' (', countries.name, ') ', students.contact_number), students.contact_number) as contact_number"),
                 'students.whatsapp_number',
                 'students.is_whatsapp_different',
+                'class_rooms.id as class_id',
                 'class_rooms.name as class_name',
-                'class_hours.updated_at',
+                'class_hours.link_updated_at',
                 'student_attendance.is_present'
             );
 
@@ -331,11 +364,11 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('class_hours.updated_at', '>=', $request->from_date);
+            $query->whereDate('class_hours.link_updated_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('class_hours.updated_at', '<=', $request->to_date);
+            $query->whereDate('class_hours.link_updated_at', '<=', $request->to_date);
         }
 
         if ($request->filled('status')) {
@@ -357,7 +390,7 @@ class ReportController extends Controller
             ];
         }
 
-        $data = $query->latest('class_hours.updated_at')->paginate(utility('pagination', 50))->withQueryString();
+        $data = $query->latest('class_hours.link_updated_at')->paginate(utility('pagination', 50))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(ClassRoom::find($request->class_room_id))->name
@@ -385,6 +418,7 @@ class ReportController extends Controller
         $query = DB::table('teacher_salaries')
             ->join('teachers', 'teachers.id', '=', 'teacher_salaries.teacher_id')
             ->select(
+                'teachers.id as teacher_id',
                 'teachers.name',
                 'teachers.phone',
                 'teacher_salaries.id',
@@ -472,7 +506,7 @@ class ReportController extends Controller
 
     public function studentLeadReport(Request $request)
     {
-        $query = StudentLead::query();
+        $query = StudentLead::query()->with('notes.staff');
 
         // Date range filter (same as salary)
         if ($request->filled('from_date') && $request->filled('to_date')) {
@@ -482,12 +516,17 @@ class ReportController extends Controller
             ]);
         }
 
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $leads = $query->latest()->paginate(utility('pagination', 20));
+        $leads = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary (like salary totals)
         $totalLeads = $query->count();
@@ -512,6 +551,11 @@ class ReportController extends Controller
                 $request->from_date . ' 00:00:00',
                 $request->to_date . ' 23:59:59'
             ]);
+        }
+
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         // Status filter
@@ -541,12 +585,17 @@ class ReportController extends Controller
             ]);
         }
 
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $students = $query->latest()->paginate(utility('pagination', 20));
+        $students = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalStudents = $query->count();
@@ -573,6 +622,11 @@ class ReportController extends Controller
                 $request->from_date . ' 00:00:00',
                 $request->to_date . ' 23:59:59'
             ]);
+        }
+
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         // Status filter
@@ -661,6 +715,7 @@ class ReportController extends Controller
             ->leftJoin('staff_salary_payments', 'staff_salary_payments.staff_salary_id', '=', 'staff_salaries.id')
             ->select(
                 'staff_salaries.id',
+                'staffs.id as staff_id',
                 'staffs.name',
                 'staffs.phone',
                 'staff_salaries.salary_month',
@@ -672,6 +727,7 @@ class ReportController extends Controller
             )
             ->groupBy(
                 'staff_salaries.id',
+                'staffs.id',
                 'staffs.name',
                 'staffs.phone',
                 'staff_salaries.salary_month',
@@ -745,7 +801,7 @@ class ReportController extends Controller
 
     public function teacherLeadReport(Request $request)
     {
-        $query = TeacherLead::with('source');
+        $query = TeacherLead::with(['source', 'notes.staff']);
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [
                 $request->from_date . ' 00:00:00',
@@ -753,12 +809,17 @@ class ReportController extends Controller
             ]);
         }
 
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $leads = $query->latest()->paginate(utility('pagination', 20));
+        $leads = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalLeads = $query->count();
@@ -783,6 +844,11 @@ class ReportController extends Controller
                 $request->from_date . ' 00:00:00',
                 $request->to_date . ' 23:59:59'
             ]);
+        }
+
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         // Status filter
@@ -812,12 +878,17 @@ class ReportController extends Controller
             ]);
         }
 
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        $teachers = $query->latest()->paginate(utility('pagination', 20));
+        $teachers = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalTeachers = $query->count();
@@ -842,6 +913,11 @@ class ReportController extends Controller
                 $request->from_date . ' 00:00:00',
                 $request->to_date . ' 23:59:59'
             ]);
+        }
+
+        // Name filter
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         // Status filter
@@ -896,7 +972,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $data = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
+        $data = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         return view('admin.reports.student_lead_notes', compact('data'));
     }
@@ -925,7 +1001,7 @@ class ReportController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $data = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
+        $data = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         return view('admin.reports.teacher_lead_notes', compact('data'));
     }
@@ -962,11 +1038,11 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date')) {
-            $query->whereDate('updated_at', '>=', $request->from_date);
+            $query->whereDate('link_updated_at', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
-            $query->whereDate('updated_at', '<=', $request->to_date);
+            $query->whereDate('link_updated_at', '<=', $request->to_date);
         }
 
         $totalClassHours = $query->count();
@@ -976,7 +1052,7 @@ class ReportController extends Controller
         $remainingMins = $totalDurationMins % 60;
         $totalDurationFormatted = "{$totalDurationHours}h {$remainingMins}m";
 
-        $data = $query->latest('updated_at')->paginate(utility('pagination', 20))->withQueryString();
+        $data = $query->latest('link_updated_at')->paginate(utility('pagination', 20))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
             ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name

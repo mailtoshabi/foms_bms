@@ -191,7 +191,7 @@
                                 <th>Amount</th>
                                 <th>Due Date</th>
                                 <th>Status</th>
-                                @if($isAction == 'true')
+                                @if($isAction == 'true' || auth('admin')->check())
                                     <th>Actions</th>
                                 @endif
                             </tr>
@@ -216,9 +216,13 @@
 
                                 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">
 
-                                    <td>{{ $fee->student->name ?? 'N/A' }}</td>
+                                    <td><a href="{{ route('staff.students.show', encrypt($fee->student->id)) }}">{{ $fee->student->name ?? 'N/A' }}</a></td>
 
-                                    <td>{{ $fee->classRoom->name ?? 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">
+                                            {{ $fee->classRoom->name ?? 'N/A' }}
+                                        </a>
+                                    </td>
 
                                     <td>
                                         <span class="badge bg-info">
@@ -271,45 +275,46 @@
                                         <span
                                             class="badge {{ $badgeClasses[$fee->status] ?? 'bg-danger' }}">{{ ucfirst($fee->status) }}</span>
                                     </td>
-                                    @if($isAction == 'true')
+                                    @if($isAction == 'true' || auth('admin')->check())
                                         <td>
 
-                                            @if($tab !== 'paid')
-                                                <button class="btn btn-sm btn-success markPaidBtn" data-id="{{ $fee->id }}"
-                                                    data-amount="{{ $fee->amount }}" data-remaining="{{ $remaining }}" {{ $remaining <= 0 ? 'disabled' : '' }}>
-                                                    <i class="fas fa-check"></i>
+                                            @if($isAction == 'true')
+                                                @if($tab !== 'paid')
+                                                    <button class="btn btn-sm btn-success markPaidBtn" data-id="{{ $fee->id }}"
+                                                        data-amount="{{ $fee->amount }}" data-remaining="{{ $remaining }}" {{ $remaining <= 0 ? 'disabled' : '' }}>
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                @endif
+
+                                                <button class="btn btn-sm btn-info viewPaymentsBtn"
+                                                    data-url="{{ route('staff.fees.payments', $fee->id) }}">
+                                                    <i class="fas fa-eye"></i>
                                                 </button>
+
+                                                @if($tab === 'paid')
+                                                    <a href="{{ route('staff.fees.invoice.download', $fee->id) }}"
+                                                        class="btn btn-sm btn-danger" title="Download Invoice PDF" target="_blank">
+                                                        <i class="mdi mdi-file-pdf-box"></i>
+                                                    </a>
+                                                @endif
+
+                                                <!-- @if($tab !== 'paid')
+                                                    <button class="btn btn-sm btn-warning sendNotificationBtn" data-id="{{ $fee->id }}"
+                                                        title="Send notification">
+                                                        <i class="fas fa-bell"></i>
+                                                    </button>
+                                                @endif -->
                                             @endif
 
-                                            <button class="btn btn-sm btn-info viewPaymentsBtn"
-                                                data-url="{{ route('staff.fees.payments', $fee->id) }}">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-
-                                            @if($tab === 'paid')
-                                                <a href="{{ route('staff.fees.invoice.download', $fee->id) }}"
-                                                    class="btn btn-sm btn-danger" title="Download Invoice PDF" target="_blank">
-                                                    <i class="mdi mdi-file-pdf-box"></i>
-                                                </a>
-                                            @endif
-
-                                            @if($tab !== 'paid')
-                                                <button class="btn btn-sm btn-warning sendNotificationBtn" data-id="{{ $fee->id }}"
-                                                    title="Send notification">
-                                                    <i class="fas fa-bell"></i>
-                                                </button>
-                                            @endif
-
-                                            @if($fee->status === 'unpaid' && $fee->type === 'admission')
-                                                <button class="btn btn-sm btn-danger deleteFeeBtn" data-id="{{ $fee->id }}"
+                                            @if(auth('admin')->check() && $fee->status === 'unpaid')
+                                                <button class="btn btn-sm btn-danger deleteFeeBtnAdmin" data-id="{{ $fee->id }}"
                                                     data-student="{{ $fee->student->name ?? 'N/A' }}"
-                                                    data-class="{{ $fee->classRoom->name ?? 'N/A' }}"
                                                     data-amount="{{ number_format($fee->amount, 2) }}"
-                                                    title="Delete fee & unassign from class">
+                                                    title="Delete fee">
                                                     <i class="mdi mdi-trash-can"></i>
                                                 </button>
-                                                <form id="delete_fee_{{ $fee->id }}" method="POST"
-                                                    action="{{ route('staff.fees.destroy', $fee->id) }}">
+                                                <form id="delete_fee_admin_{{ $fee->id }}" method="POST"
+                                                    action="{{ route('admin.reports.fee.destroy', $fee->id) }}">
                                                     @csrf
                                                     @method('DELETE')
                                                 </form>
@@ -424,7 +429,7 @@
                     <div class="modal-body">
                         <p><strong>Total Paid:</strong> ₹ <span id="totalPaid"></span></p>
 
-                        <table class="table table-bordered">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
                             <thead>
                                 <tr>
@@ -556,20 +561,18 @@
                 return method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
             }
 
-            // Delete Fee Handler
-            $(document).on('click', '.deleteFeeBtn', function (e) {
+            // Delete Fee Handler (Admin only)
+            $(document).on('click', '.deleteFeeBtnAdmin', function (e) {
                 e.preventDefault();
                 var feeId = $(this).data('id');
                 var studentName = $(this).data('student');
-                var className = $(this).data('class');
                 var amount = $(this).data('amount');
 
                 Swal.fire({
-                    title: 'Delete Admission Fee?',
-                    html: '<p>You are about to delete the admission fee for <strong>' + studentName + '</strong>.</p>' +
+                    title: 'Delete Fee?',
+                    html: '<p>You are about to delete an unpaid fee for <strong>' + studentName + '</strong>.</p>' +
                         '<ul>' +
                         '<li>Fee amount: ₹ ' + amount + '</li>' +
-                        '<li>Student will be <strong>unassigned</strong> from class: <strong>' + className + '</strong></li>' +
                         '</ul>',
                     icon: 'warning',
                     showCancelButton: true,
@@ -579,7 +582,7 @@
                     cancelButtonText: 'Cancel'
                 }).then(function (result) {
                     if (result.isConfirmed) {
-                        $('#delete_fee_' + feeId).submit();
+                        $('#delete_fee_admin_' + feeId).submit();
                     }
                 });
             });
@@ -625,6 +628,36 @@
                 }
             });
 
+        </script>
+    @endif
+
+    @if(auth('admin')->check())
+        <script>
+            // Delete Fee Handler (Admin only)
+            $(document).on('click', '.deleteFeeBtnAdmin', function (e) {
+                e.preventDefault();
+                var feeId = $(this).data('id');
+                var studentName = $(this).data('student');
+                var amount = $(this).data('amount');
+
+                Swal.fire({
+                    title: 'Delete Fee?',
+                    html: '<p>You are about to delete an unpaid fee for <strong>' + studentName + '</strong>.</p>' +
+                        '<ul>' +
+                        '<li>Fee amount: ₹ ' + amount + '</li>' +
+                        '</ul>',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete',
+                    cancelButtonText: 'Cancel'
+                }).then(function (result) {
+                    if (result.isConfirmed) {
+                        $('#delete_fee_admin_' + feeId).submit();
+                    }
+                });
+            });
         </script>
     @endif
 

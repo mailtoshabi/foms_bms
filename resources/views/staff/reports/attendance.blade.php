@@ -117,15 +117,16 @@
                                         @forelse($data as $row)
 
                                                 <tr>
-                                                        <td>{{ $row->name }}
-                                                                <br><small class="text-muted">{{ $row->contact_number }}</small>
-                                                                @if($row->is_whatsapp_different)
-                                                                        <br><small class="text-success" style="font-size: 11px;">WA:
-                                                                                +{{ $row->whatsapp_number }}</small>
-                                                                @endif
+                                                        <td>
+                                                                <a href="{{ route('staff.students.show', encrypt($row->id)) }}">{{ $row->name }}
+                                                                        <br><small class="text-muted">{{ $row->contact_number }}</small>
+                                                                        @if($row->is_whatsapp_different)
+                                                                                <br><small class="text-success" style="font-size: 11px;">WA:
+                                                                                        +{{ $row->whatsapp_number }}</small>
+                                                                        @endif</a>
                                                         </td>
                                                         <td>{{ $row->class_name }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($row->link_updated_at)->format('d M Y') }}</td>
                                                         <td>
                                                                 <span class="badge {{ $row->is_present ? 'bg-success' : 'bg-danger' }}">
                                                                         {{ $row->is_present ? 'Present' : 'Absent' }}

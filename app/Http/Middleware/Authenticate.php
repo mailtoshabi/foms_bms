@@ -4,38 +4,34 @@ namespace App\Http\Middleware;
 
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
-use Illuminate\Auth\AuthenticationException;
 
 class Authenticate extends Middleware
 {
-    protected function unauthenticated($request, array $guards)
+    protected function redirectTo(Request $request): ?string
     {
-        if (! $request->expectsJson()) {
-
-            if (in_array('admin', $guards)) {
-                redirect()->route('admin.login')->send();
-                exit;
-            }
-
-            if (in_array('staff', $guards)) {
-                redirect()->route('staff.login')->send();
-                exit;
-            }
-
-            if (in_array('teacher', $guards)) {
-                redirect()->route('teacher.login')->send();
-                exit;
-            }
-
-            if (in_array('student', $guards)) {
-                redirect()->route('student.login')->send();
-                exit;
-            }
-
-            redirect()->route('admin.login')->send();
-            exit;
+        \Log::info('Auth Redirect Check', ['path' => $request->path(), 'expectsJson' => $request->expectsJson()]);
+        if ($request->expectsJson()) {
+            return null;
         }
 
-        throw new AuthenticationException('Unauthenticated.', $guards);
+        $path = $request->path();
+
+        if (str_starts_with($path, 'admin')) {
+            return route('admin.login');
+        }
+
+        if (str_starts_with($path, 'staff')) {
+            return route('staff.login');
+        }
+
+        if (str_starts_with($path, 'teacher')) {
+            return route('teacher.login');
+        }
+
+        if (str_starts_with($path, 'student')) {
+            return route('student.login');
+        }
+
+        return route('admin.login');
     }
 }

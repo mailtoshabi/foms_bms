@@ -36,7 +36,6 @@
                     </a>
 
                     <ul class="sub-menu" aria-expanded="false">
-
                         {{-- Inbox --}}
                         <li class="{{ set_active(['student.messages.index']) }}">
                             <a href="{{ route('student.messages.index') }}">
@@ -50,50 +49,12 @@
                                 New Message
                             </a>
                         </li>
-
                     </ul>
                 </li>
-
-
-                {{-- ================= Reports ================= --}}
-                <li class="{{ set_active(['admin.reports.*']) }}">
-                    {{-- <a href="{{ route('admin.reports.index') }}" class="">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Reports</span>
-                    </a> --}}
-                    <ul class="sub-menu" aria-expanded="false">
-
-                        {{-- Employee --}}
-                        {{-- @if(auth()->user() && auth()->user()->isEmployee())
-                            <li>
-                                <a href="{{ route('admin.reports.create') }}">
-                                    Create Report
-                                </a>
-                            </li>
-                            <li>
-                                <a href="{{ route('admin.reports.index') }}">
-                                    My Reports
-                                </a>
-                            </li>
-                        @endif --}}
-
-                        {{-- Super Admin --}}
-                        {{-- @if(auth()->user() && auth()->user()->isSuperAdmin())
-                            <li>
-                                <a href="{{ route('admin.reports.index') }}">
-                                    All Reports
-                                </a>
-                            </li>
-                        @endif --}}
-
-                    </ul>
-                </li>
-
-                {{-- ================= Super Admin Only ================= --}}
-
 
             </ul>
         </div>
     </div>
 </div>
 <!-- Left Sidebar End -->
+

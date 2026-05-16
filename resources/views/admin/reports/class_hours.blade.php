@@ -65,21 +65,23 @@
             </form>
 
             @if(request()->anyFilled(['class_room_id', 'teacher_id', 'status', 'from_date', 'to_date']))
-                <div class="row mb-4">
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card bg-primary bg-gradient text-white shadow-sm mb-0">
-                            <div class="card-body p-3">
-                                <h6 class="text-white-50 mb-2">Total Sessions</h6>
-                                <h4 class="mb-0 text-white"><i class="fas fa-video me-2"></i>{{ $totalClassHours }}</h4>
-                            </div>
+                <div class="portal-info-grid mb-4">
+                    <div class="portal-info-card">
+                        <div class="portal-info-card-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="portal-info-card-content">
+                            <span class="portal-info-card-label">Total Sessions</span>
+                            <span class="portal-info-card-value">{{ $totalClassHours }}</span>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-3">
-                        <div class="card bg-success bg-gradient text-white shadow-sm mb-0">
-                            <div class="card-body p-3">
-                                <h6 class="text-white-50 mb-2">Total Duration</h6>
-                                <h4 class="mb-0 text-white"><i class="fas fa-clock me-2"></i>{{ $totalDurationFormatted }}</h4>
-                            </div>
+                    <div class="portal-info-card">
+                        <div class="portal-info-card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="portal-info-card-content">
+                            <span class="portal-info-card-label">Total Duration</span>
+                            <span class="portal-info-card-value">{{ $totalDurationFormatted }}</span>
                         </div>
                     </div>
                 </div>
@@ -108,10 +110,10 @@
                                     <small
                                         class="text-muted">{{ \Carbon\Carbon::parse($row->created_at)->format('h:i A') }}</small><br>
                                     <small>Updated:</small><br>
-                                    {{ \Carbon\Carbon::parse($row->updated_at)->format('d M Y') }}
+                                    {{ \Carbon\Carbon::parse($row->link_updated_at)->format('d M Y') }}
 
                                     <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->updated_at)->format('h:i A') }}</small>
+                                        class="text-muted">{{ \Carbon\Carbon::parse($row->link_updated_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
                                     <small>Teacher Joined:</small><br>
@@ -126,11 +128,14 @@
                                         class="text-muted">{{ \Carbon\Carbon::parse($row->join_student_at)->format('h:i A') }}</small>
                                 </td>
                                 <td>
-                                    <strong>{{ $row->classRoom->name ?? 'N/A' }}</strong>
+                                    <a
+                                        href="{{ route('admin.class_rooms.show', encrypt($row->classRoom->id)) }}"><strong>{{ $row->classRoom->name ?? 'N/A' }}</strong></a>
                                     <br>
                                     <small>{{ $row->classRoom->course->name ?? '' }}</small>
                                 </td>
-                                <td>{{ $row->teacher->name ?? 'N/A' }}</td>
+                                <td><a
+                                        href="{{ route('admin.reports.teachers.show', encrypt($row->teacher->id)) }}">{{ $row->teacher->name ?? 'N/A' }}</a>
+                                </td>
                                 <td>{{ $row->duration }} mins</td>
                                 <td>
                                     <span class="badge {{ $row->status == 'completed' ? 'bg-success' : 'bg-warning' }}">

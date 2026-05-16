@@ -61,6 +61,12 @@
             <form method="GET" class="row mb-3 align-items-end">
 
                 <div class="col-md-2">
+                    <label class="form-label fw-bold">Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ request('name') }}"
+                        placeholder="Search Name">
+                </div>
+
+                <div class="col-md-2">
                     <label class="form-label fw-bold">From Date</label>
                     <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
                 </div>
@@ -85,14 +91,14 @@
                 </div>
 
                 <div class="col-md-2 text-end">
-                    <a href="{{ route('admin.reports.teachers.export', request()->all()) }}" class="btn btn-success">
+                    <button type="submit" formaction="{{ route('admin.reports.teachers.export') }}" class="btn btn-success">
                         Export
-                    </a>
+                    </button>
                 </div>
 
             </form>
 
-            <table class="table table-bordered">
+            <table class="table table-bordered  align-middle table-nowrap mb-0">
                 <thead>
                     <tr>
                         <th>Name</th>
@@ -109,7 +115,10 @@
                             $rank = teacherRankData($teacher->id);
                         @endphp
                         <tr>
-                            <td>{{ $teacher->name }}</td>
+                            <td>
+                                <a
+                                    href="{{ route('admin.reports.teachers.show', encrypt($teacher->id)) }}">{{ $teacher->name }}</a>
+                            </td>
                             <td>{{ $teacher->formatted_contact_number }}
                                 @if($teacher->is_whatsapp_different)
                                     <br><small class="text-success"><i class="mdi mdi-whatsapp"></i>

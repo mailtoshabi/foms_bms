@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->morphs('sender');
             $table->morphs('receiver');
             $table->text('message');
+
             $table->timestamps();
         });
     }

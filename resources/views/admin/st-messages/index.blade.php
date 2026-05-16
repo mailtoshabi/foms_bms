@@ -74,29 +74,46 @@
                             @foreach($messages as $msg)
                                 @php
                                     $isTeacherSender = $msg->sender_type === 'App\Models\Teacher';
+                                    $isClassReceiver = $msg->receiver_type === 'App\Models\ClassRoom';
                                     $senderRole = $isTeacherSender ? 'Teacher' : 'Student';
-                                    $receiverRole = $isTeacherSender ? 'Student' : 'Teacher';
+                                    $receiverRole = $isClassReceiver ? 'Class' : ($isTeacherSender ? 'Student' : 'Teacher');
                                 @endphp
                                 <tr>
                                     <td>{{ $messages->firstItem() + $loop->index }}</td>
                                     <td>
                                         @if($isTeacherSender)
-                                            <span class="badge bg-primary">Teacher → Student</span>
+                                            <span class="badge bg-primary">Teacher → {{ $isClassReceiver ? 'Class' : 'Student' }}</span>
                                         @else
                                             <span class="badge bg-success">Student → Teacher</span>
                                         @endif
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ $isTeacherSender ? 'primary' : 'info' }} me-1">
-                                            {{ $senderRole }}
-                                        </span>
-                                        {{ $msg->sender->name ?? '-' }}
+                                        @if($msg->sender)
+                                            <a
+                                                href="{{ $isTeacherSender ? route('admin.reports.teachers.show', encrypt($msg->sender->id)) : route('admin.reports.students.show', encrypt($msg->sender->id)) }}">
+                                                {{ $msg->sender->name }}
+                                            </a>
+                                            <span class="badge bg-{{ $isTeacherSender ? 'primary' : 'info' }} me-1">
+                                                <small>{{ $senderRole }}</small>
+                                            </span>
+                                        @else
+                                            -
+                                        @endif
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ $isTeacherSender ? 'info' : 'primary' }} me-1">
-                                            {{ $receiverRole }}
-                                        </span>
-                                        {{ $msg->receiver->name ?? '-' }}
+
+                                        @if($msg->receiver)
+                                            <a
+                                                href="{{ $isClassReceiver ? route('admin.class_rooms.show', encrypt($msg->receiver->id)) : ($isTeacherSender ? route('admin.reports.students.show', encrypt($msg->receiver->id)) : route('admin.reports.teachers.show', encrypt($msg->receiver->id))) }}">
+                                                {{ $msg->receiver->name }}
+                                            </a>
+                                            <span
+                                                class="badge bg-{{ $isClassReceiver ? 'warning text-dark' : ($isTeacherSender ? 'info' : 'primary') }} me-1">
+                                                <small>{{ $receiverRole }}</small>
+                                            </span>
+                                        @else
+                                            -
+                                        @endif
                                     </td>
                                     <td>{{ Str::limit($msg->message, 60) }}</td>
                                     <td>

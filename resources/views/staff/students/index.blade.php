@@ -13,7 +13,8 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">
-                <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                <a href="javascript:window.history.back();"
+                    class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 Students ({{ $students->total() }})
@@ -69,23 +70,24 @@
 
                         <tr>
 
-                            <td>{{ $student->name }}<br>
+                            <td><a href="{{ route('staff.students.show', encrypt($student->id)) }}">{{ $student->name }}</a><br>
                                 @isset($student->dob)
                                     <br><small>DOB: {{ $student->dob_formatted }}</small>
                                 @endisset
                             </td>
                             <td>{{ $student->formatted_contact_number }}
                                 @if($student->is_whatsapp_different)
-                                    <br><small class="text-success"><i class="mdi mdi-whatsapp"></i> {{ $student->formatted_whatsapp_number }}</small>
+                                    <br><small class="text-success"><i class="mdi mdi-whatsapp"></i>
+                                        {{ $student->formatted_whatsapp_number }}</small>
                                 @endif
                             </td>
                             <td>{{ $student->email ?? '-' }}</td>
 
                             <td>
                                 <span class="badge
-                                            {{ $student->status == 'active' ? 'bg-success' : '' }}
-                                            {{ $student->status == 'passout' ? 'bg-info' : '' }}
-                                            {{ $student->status == 'dropout' ? 'bg-danger' : '' }}">
+                                                    {{ $student->status == 'active' ? 'bg-success' : '' }}
+                                                    {{ $student->status == 'passout' ? 'bg-info' : '' }}
+                                                    {{ $student->status == 'dropout' ? 'bg-danger' : '' }}">
                                     {{ ucfirst($student->status) }}
                                 </span>
                             </td>

@@ -21,10 +21,10 @@ class MessageController extends Controller
                 // Direct messages sent/received by this teacher
                 $q->where(function ($q2) use ($teacher) {
                     $q2->where('sender_type', Teacher::class)
-                       ->where('sender_id', $teacher->id);
+                        ->where('sender_id', $teacher->id);
                 })->orWhere(function ($q2) use ($teacher) {
                     $q2->where('receiver_type', Teacher::class)
-                       ->where('receiver_id', $teacher->id);
+                        ->where('receiver_id', $teacher->id);
                 });
             })
             ->with(['sender', 'receiver', 'replies'])
@@ -55,7 +55,7 @@ class MessageController extends Controller
         if ($request->to_type === 'class') {
             $request->validate([
                 'class_room_id' => 'required|exists:class_rooms,id',
-                'message'       => 'required|string|max:2000',
+                'message' => 'required|string|max:2000',
             ]);
 
             // Ensure this teacher belongs to the selected class
@@ -65,24 +65,24 @@ class MessageController extends Controller
             }
 
             Message::create([
-                'sender_type'   => Teacher::class,
-                'sender_id'     => $teacher->id,
+                'sender_type' => Teacher::class,
+                'sender_id' => $teacher->id,
                 'receiver_type' => ClassRoom::class,
-                'receiver_id'   => $request->class_room_id,
-                'message'       => $request->message,
+                'receiver_id' => $request->class_room_id,
+                'message' => $request->message,
             ]);
         } else {
             $request->validate([
                 'student_id' => 'required|exists:students,id',
-                'message'    => 'required|string|max:2000',
+                'message' => 'required|string|max:2000',
             ]);
 
             Message::create([
-                'sender_type'   => Teacher::class,
-                'sender_id'     => $teacher->id,
+                'sender_type' => Teacher::class,
+                'sender_id' => $teacher->id,
                 'receiver_type' => Student::class,
-                'receiver_id'   => $request->student_id,
-                'message'       => $request->message,
+                'receiver_id' => $request->student_id,
+                'message' => $request->message,
             ]);
         }
 
@@ -101,6 +101,33 @@ class MessageController extends Controller
             abort(403);
         }
 
+        // Mark as read if the teacher is the receiver (direct or via classroom)
+        if (!$message->is_read) {
+            if ($message->receiver_type == Teacher::class && $message->receiver_id == $teacher->id) {
+                $message->update(['is_read' => true]);
+            } elseif ($message->receiver_type == ClassRoom::class) {
+                $classRoomIds = $teacher->classRooms()->pluck('class_rooms.id');
+                if ($classRoomIds->contains($message->receiver_id)) {
+                    $message->update(['is_read' => true]);
+                }
+            }
+        }
+
+        // Also mark all replies received by this teacher as read
+        Message::where('reply_to_id', $message->id)
+            ->where('is_read', false)
+            ->where(function ($q) use ($teacher) {
+                $q->where(function ($q2) use ($teacher) {
+                    $q2->where('receiver_type', Teacher::class)
+                        ->where('receiver_id', $teacher->id);
+                })->orWhere(function ($q2) use ($teacher) {
+                    $classRoomIds = $teacher->classRooms()->pluck('class_rooms.id');
+                    $q2->where('receiver_type', ClassRoom::class)
+                        ->whereIn('receiver_id', $classRoomIds);
+                });
+            })
+            ->update(['is_read' => true]);
+
         $isClassMessage = $message->receiver_type === ClassRoom::class;
 
         return view('teacher.messages.show', compact('message', 'teacher', 'isClassMessage'));
@@ -113,25 +140,25 @@ class MessageController extends Controller
         ]);
 
         $teacher = Auth::guard('teacher')->user();
-        $parent  = Message::findOrFail(decrypt($id));
+        $parent = Message::findOrFail(decrypt($id));
 
         // For class message: teacher replies back to the class
         // For direct message: reply to the other party
         if ($parent->sender_type == Teacher::class && $parent->sender_id == $teacher->id) {
             $receiverType = $parent->receiver_type;
-            $receiverId   = $parent->receiver_id;
+            $receiverId = $parent->receiver_id;
         } else {
             $receiverType = $parent->sender_type;
-            $receiverId   = $parent->sender_id;
+            $receiverId = $parent->sender_id;
         }
 
         Message::create([
-            'reply_to_id'   => $parent->id,
-            'sender_type'   => Teacher::class,
-            'sender_id'     => $teacher->id,
+            'reply_to_id' => $parent->id,
+            'sender_type' => Teacher::class,
+            'sender_id' => $teacher->id,
             'receiver_type' => $receiverType,
-            'receiver_id'   => $receiverId,
-            'message'       => $request->message,
+            'receiver_id' => $receiverId,
+            'message' => $request->message,
         ]);
 
         return back()->with('success', 'Reply sent successfully!');

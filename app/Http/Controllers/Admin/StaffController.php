@@ -223,6 +223,7 @@ class StaffController extends Controller
         $request->validate([
             'staff_id' => 'required|exists:staffs,id',
             'salary_month' => 'required|date_format:Y-m',
+            'salary_amount' => 'required|numeric|min:0',
             'payment_method' => 'nullable|string|in:cash,card,upi,bank_transfer',
             'payment_date' => 'nullable|date',
             'paid_amount' => 'nullable|numeric|min:0',
@@ -232,9 +233,9 @@ class StaffController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get salary_amount from staff record
+            // Get salary_amount from request
             $staff = Staff::findOrFail($request->staff_id);
-            $salaryAmount = $staff->salary_amount;
+            $salaryAmount = $request->salary_amount;
             $paidAmount = $request->paid_amount ?? 0;
 
             // Validate that paid_amount doesn't exceed salary_amount
@@ -287,6 +288,7 @@ class StaffController extends Controller
             'staff_salary_id' => 'required|exists:staff_salaries,id',
             'staff_id' => 'required|exists:staffs,id',
             'salary_month' => 'required|date_format:Y-m',
+            'salary_amount' => 'required|numeric|min:0',
             'payment_method' => 'nullable|string|in:cash,card,upi,bank_transfer',
             'payment_date' => 'nullable|date',
             'paid_amount' => 'nullable|numeric|min:0',
@@ -298,9 +300,9 @@ class StaffController extends Controller
 
             $staffSalary = StaffSalary::with('payments')->findOrFail($request->staff_salary_id);
 
-            // Get salary_amount from staff record
+            // Get salary_amount from request
             $staff = Staff::findOrFail($request->staff_id);
-            $salaryAmount = $staff->salary_amount;
+            $salaryAmount = $request->salary_amount;
             $paidAmount = $request->paid_amount ?? 0;
 
             $editablePayment = $staffSalary->payments->sortBy('id')->first();
@@ -367,6 +369,57 @@ class StaffController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Error updating salary: ' . $e->getMessage());
+        }
+    }
+
+    public function updatePayment(Request $request)
+    {
+        $request->validate([
+            'payment_id' => 'required|exists:staff_salary_payments,id',
+            'paid_amount' => 'required|numeric|min:0',
+            'payment_method' => 'nullable|string|in:cash,card,upi,bank_transfer',
+            'payment_date' => 'nullable|date',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $payment = \App\Models\StaffSalaryPayment::findOrFail($request->payment_id);
+            $staffSalary = \App\Models\StaffSalary::findOrFail($payment->staff_salary_id);
+            
+            // Check if the new paid amount + other payments exceed salary amount
+            $otherPaymentsTotal = $staffSalary->payments()->where('id', '!=', $payment->id)->sum('paid_amount');
+            $newTotalPaid = $otherPaymentsTotal + $request->paid_amount;
+
+            if ($newTotalPaid > $staffSalary->salary_amount) {
+                DB::rollBack();
+                return back()->with('error', 'Total paid amount cannot exceed salary amount (₹' . $staffSalary->salary_amount . ')')->withInput();
+            }
+
+            $payment->update([
+                'paid_amount' => $request->paid_amount,
+                'payment_method' => $request->payment_method,
+                'paid_date' => $request->payment_date,
+                'notes' => $request->notes
+            ]);
+
+            // Recalculate status
+            if ($newTotalPaid == 0) {
+                $status = 'not_paid';
+            } elseif ($newTotalPaid >= $staffSalary->salary_amount) {
+                $status = 'paid';
+            } else {
+                $status = 'partial';
+            }
+
+            $staffSalary->update(['status' => $status]);
+
+            DB::commit();
+            return back()->with('success', 'Payment updated successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Error updating payment: ' . $e->getMessage());
         }
     }
 

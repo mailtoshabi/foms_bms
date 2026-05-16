@@ -27,7 +27,7 @@
                 @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
                     <li class="{{ set_active(['staff.student-leads.*', 'staff.students.*']) }}">
                         <a href="javascript:void(0);" class="has-arrow">
-                            <i class="fas fa-user-graduate text-primary"></i>
+                            <i class="fas fa-user-graduate"></i>
                             <span>Students</span>
 
                             @if($pendingCount > 0 && ($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId)))
@@ -70,7 +70,7 @@
                 @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
                     <li class="{{ set_active(['staff.teacher-leads.*', 'staff.teachers.*']) }}">
                         <a href="javascript:void(0);" class="has-arrow">
-                            <i class="mdi mdi-teach text-primary"></i>
+                            <i class="mdi mdi-teach"></i>
 
                             <span>Teachers</span>
 
@@ -146,7 +146,7 @@
                 @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($operationRoleId))
                     <li class="{{ set_active(['staff.class-hours.index']) }}">
                         <a href="{{ route('staff.class-hours.index') }}">
-                            <i class="fas fa-history text-info"></i>
+                            <i class="fas fa-history"></i>
                             <span>Class Session</span>
                         </a>
                     </li>
@@ -155,7 +155,7 @@
                 @if($staff->hasRoleId($hrRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
                     <li class="{{ set_active(['staff.reports.attendance']) }}">
                         <a href="{{ route('staff.reports.attendance') }}">
-                            <i class="fas fa-clipboard-list text-success"></i>
+                            <i class="fas fa-clipboard-list"></i>
                             <span>Attendance</span>
                         </a>
                     </li>
@@ -175,7 +175,7 @@
                 @if($staff->hasRoleId($operationRoleId))
                     <li class="{{ set_active(['staff.old_data.*']) }}">
                         <a href="{{ route('staff.old_data.index') }}">
-                            <i class="fas fa-database text-warning"></i>
+                            <i class="fas fa-database"></i>
                             <span>Old Data</span>
                         </a>
                     </li>
@@ -206,13 +206,6 @@
 
                     </ul>
                 </li>
-
-
-
-
-
-                {{-- ================= Super Admin Only ================= --}}
-
 
             </ul>
         </div>

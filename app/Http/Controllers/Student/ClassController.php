@@ -70,6 +70,12 @@ class ClassController extends Controller
     public function joinClass(Request $request, $id)
     {
         $classHour = ClassHour::findOrFail(decrypt($id));
+        if ($classHour->status === 'completed') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'The class is already marked as completed.'], 400);
+            }
+            return back()->with('error', 'The class is already marked as completed.');
+        }
 
         $classHour->update([
             'join_student_at' => now()

@@ -24,11 +24,13 @@ class LastLoginTracker
                 $user = Auth::guard($guard)->user();
 
                 // Reduce DB writes
-                if (!$user->last_login_at || now()->diffInMinutes($user->last_login_at) >= 5) {
+                if (method_exists($user, 'getConnection') && \Illuminate\Support\Facades\Schema::hasColumn($user->getTable(), 'last_login_at')) {
+                    if (!$user->last_login_at || now()->diffInMinutes($user->last_login_at) >= 5) {
 
-                    $user->last_login_at = now();
-                    $user->last_login_ip = $request->ip();
-                    $user->save();
+                        $user->last_login_at = now();
+                        $user->last_login_ip = $request->ip();
+                        $user->save();
+                    }
                 }
 
                 break;

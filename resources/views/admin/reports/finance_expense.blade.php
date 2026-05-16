@@ -43,19 +43,35 @@
             @endif
 
             <div class="row mb-3">
+                @php
+                    $isMonthly = !request()->filled('from_date') && !request()->filled('to_date');
+                    $label = $isMonthly ? 'Monthly' : 'Filtered';
+                @endphp
                 <div class="col-md-3">
-                    <div class="card p-3">Total Expense: ₹ {{ number_format($totalAmount, 2) }}</div>
+                    <div class="card p-3">
+                        <small class="text-muted text-start mb-1">{{ $label }}</small>
+                        <div>Total Expense: ₹ {{ number_format($totalAmount, 2) }}</div>
+                    </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card p-3">Staff Salary: ₹
-                        {{ number_format((float) ($sourceTotals['staff_salary'] ?? 0), 2) }}</div>
+                    <div class="card p-3">
+                        <small class="text-muted text-start mb-1">{{ $label }}</small>
+                        <div>Staff Salary: ₹
+                            {{ number_format((float) ($sourceTotals['staff_salary'] ?? 0), 2) }}</div>
+                    </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card p-3">Teacher Salary: ₹
-                        {{ number_format((float) ($sourceTotals['teacher_salary'] ?? 0), 2) }}</div>
+                    <div class="card p-3">
+                        <small class="text-muted text-start mb-1">{{ $label }}</small>
+                        <div>Teacher Salary: ₹
+                            {{ number_format((float) ($sourceTotals['teacher_salary'] ?? 0), 2) }}</div>
+                    </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card p-3">Other Expense: ₹ {{ number_format((float) ($sourceTotals['expense'] ?? 0), 2) }}</div>
+                    <div class="card p-3">
+                        <small class="text-muted text-start mb-1">{{ $label }}</small>
+                        <div>Other Expense: ₹ {{ number_format((float) ($sourceTotals['expense'] ?? 0), 2) }}</div>
+                    </div>
                 </div>
             </div>
 

@@ -45,13 +45,13 @@ class TeacherController extends Controller
     {
         $teacher = Auth::guard('teacher')->user();
 
-        $class = ClassRoom::with([
+        $class = $teacher->classRooms()->with([
             'course',
             'classType',
             'students',
             'notes.files',
-            'classHours' => function ($query) {
-                $query->latest()->limit(10);
+            'classHours' => function ($query) use ($teacher) {
+                $query->where('teacher_id', $teacher->id)->latest()->limit(10);
             }
         ])->findOrFail(decrypt($id));
 
@@ -61,6 +61,7 @@ class TeacherController extends Controller
 
         // Get completed class hour IDs
         $classHourIds = $class->classHours()
+            ->where('teacher_id', $teacher->id)
             ->where('status', 'completed')
             ->pluck('id');
 
@@ -109,6 +110,15 @@ class TeacherController extends Controller
             return back()->with('error', 'Cannot start class. This class is already marked as completed.');
         }
 
+        $hasPending = ClassHour::where('class_room_id', $class->id)
+            ->where('teacher_id', $teacher->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($hasPending) {
+            return back()->with('error', 'Cannot start class. You already have a pending session for this class.');
+        }
+
         $hourlyWage = DB::table('teacher_class_room')
             ->where('class_room_id', $class->id)
             ->where('teacher_id', $teacher->id)
@@ -126,26 +136,10 @@ class TeacherController extends Controller
 
             'hourly_wage' => $hourlyWage,
 
-            'status' => 'pending'
+            'status' => 'pending',
+
+            'link_updated_at' => now()
         ]);
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Create Student Attendance Rows
-        |--------------------------------------------------------------------------
-        */
-
-        // foreach($class->students as $student){
-
-        //     StudentAttendance::create([
-
-        //         'class_hour_id' => $classHour->id,
-
-        //         'student_id' => $student->id
-
-        //     ]);
-        // }
 
         return back()->with('success', 'Class started successfully.');
 
@@ -164,7 +158,9 @@ class TeacherController extends Controller
         ]);
 
         $classHour->update([
-            'google_meet_link' => $request->google_meet_link
+            'google_meet_link' => $request->google_meet_link,
+
+            'link_updated_at' => now()
         ]);
 
         return back()->with('success', 'Class hour updated successfully');
@@ -182,6 +178,20 @@ class TeacherController extends Controller
     public function joinClass(Request $request, $id)
     {
         $classHour = ClassHour::findOrFail(decrypt($id));
+
+        if ($classHour->status === 'completed') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'The class is already marked as completed.'], 400);
+            }
+            return back()->with('error', 'The class is already marked as completed.');
+        }
+
+        if (!\Carbon\Carbon::parse($classHour->link_updated_at)->isToday()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Link expired. Please edit the link first.'], 400);
+            }
+            return back()->with('error', 'Link expired. Please edit the link first.');
+        }
 
         $classHour->update([
             'join_teacher_at' => now()
@@ -217,14 +227,14 @@ class TeacherController extends Controller
         }
 
         if ($request->filled('date_from')) {
-            $query->whereDate('updated_at', '>=', $request->date_from);
+            $query->whereDate('link_updated_at', '>=', $request->date_from);
         }
 
         if ($request->filled('date_to')) {
-            $query->whereDate('updated_at', '<=', $request->date_to);
+            $query->whereDate('link_updated_at', '<=', $request->date_to);
         }
 
-        $sessions = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
+        $sessions = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         return view('teacher.classes.sessions', compact('sessions'));
     }
@@ -241,6 +251,10 @@ class TeacherController extends Controller
 
         if ($classHour->status === 'completed') {
             return back()->with('error', 'Already marked as completed.');
+        }
+
+        if (is_null($classHour->join_student_at)) {
+            return back()->with('error', 'Cannot mark completed. No student has joined the class yet.');
         }
 
         $class = $classHour->classRoom;
@@ -325,7 +339,7 @@ class TeacherController extends Controller
                     $completedClassHours = ClassHour::where('class_room_id', $class->id)
                         ->where('status', 'completed')
                         ->where('has_fee_calculated', false)
-                        ->orderBy('updated_at')
+                        ->orderBy('link_updated_at')
                         ->get();
 
                     if ($completedClassHours->count() >= $requiredClasses) {
@@ -368,7 +382,7 @@ class TeacherController extends Controller
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'Attendance saved and class completed.');
+        return back()->with('success', 'Attendance saved and session completed.');
     }
 
 }

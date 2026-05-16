@@ -15,6 +15,12 @@
 
         <div class="card-body">
 
+            @if($isEdit && $lead->status === 'converted')
+                <div class="alert alert-warning">
+                    This lead has been converted. Details cannot be modified.
+                </div>
+            @endif
+
             <form method="POST"
                 action="{{ $isEdit ? route('staff.student-leads.update', encrypt($lead->id)) : route('staff.student-leads.store') }}">
                 @csrf
@@ -105,7 +111,7 @@
 
                     {{-- Status only in Edit --}}
                     @if($isEdit)
-                        <div class="col-md-6 mb-3">
+                        <!-- <div class="col-md-6 mb-3">
                             <label>Status</label>
                             <select name="status" class="form-control @error('status') is-invalid @enderror">
                                 <option value="pending" {{ old('status', $lead->status) == 'pending' ? 'selected' : '' }}>
@@ -137,17 +143,19 @@
                             @error('status')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
-                        </div>
+                        </div> -->
                     @endif
 
                 </div>
 
                 <div class="d-flex align-items-center mt-3">
 
+                    @if(!($isEdit && $lead->status === 'converted'))
                     <button type="submit" class="btn btn-primary"
                         onclick="this.disabled=true; this.innerText='Submitting...'; this.form.submit();">
                         {{ $isEdit ? 'Update' : 'Save' }}
                     </button>
+                    @endif
 
                     @if($isEdit && !$lead->hasStudent())
 
@@ -158,10 +166,11 @@
                         </button>
 
                     @endif
-
+@if(!($isEdit && $lead->status === 'converted'))
                     <a href="{{ route('staff.student-leads.index') }}" class="btn btn-light ms-2">
                         Cancel
                     </a>
+                    @endif
 
 
 
@@ -185,7 +194,7 @@
                     $link = route('admission.form', ['student', $token]);
                 @endphp
 
-                <div class="mt-2">
+                <div class="mt-2 mb-2">
                     @php
                         $countryCode = $lead->country ? preg_replace('/[^0-9]/', '', $lead->country->code) : '91';
                         $phone = $countryCode . preg_replace('/[^0-9]/', '', $lead->contact_number);
@@ -195,13 +204,13 @@
 
                     <div class="input-group">
 
-                        <input type="text" class="form-control" value="{{ $link }}" readonly>
+                        <input type="text" class="form-control mb-2" value="{{ $link }}" readonly>
 
                         <button class="btn btn-primary" onclick="navigator.clipboard.writeText('{{ $link }}')">
                             <i class="mdi mdi-content-copy"></i>
                         </button>
 
-                        <a href="{{ $waLink }}" target="_blank" class="btn btn-success">
+                        <a href="{{ $waLink }}" target="_blank" class="btn btn-success ms-2">
                             <i class="mdi mdi-whatsapp"></i>
                             Send
                         </a>
@@ -249,6 +258,7 @@
 
             <div class="card-body">
 
+                @if($lead->status !== 'converted')
                 {{-- Add Note Form --}}
                 <form method="POST" action="{{ route('staff.student-leads.notes.store', $lead->id) }}">
                     @csrf
@@ -272,8 +282,6 @@
                                 <option value="no_response">No Response</option>
                                 <option value="not_interested">Not Interested</option>
                                 <option value="interested">Interested</option>
-                                <option value="converted">Converted</option>
-
                             </select>
 
                             @error('status')
@@ -288,6 +296,11 @@
                         Add Note
                     </button>
                 </form>
+                @else
+                <div class="alert alert-info mb-3">
+                    This lead has been converted. You can no longer add notes.
+                </div>
+                @endif
 
                 <hr>
 
@@ -306,7 +319,6 @@
                                         'no_response' => 'bg-dark',
                                         'not_interested' => 'bg-danger',
                                         'interested' => 'bg-info',
-                                        'converted' => 'bg-success',
                                     ];
                                 @endphp
 
@@ -353,6 +365,21 @@
                         <div class="modal-body">
 
                             <div class="row">
+
+                                <div class="col-md-12 mb-3">
+                                    <label>Country <span class="text-danger">*</span></label>
+                                    <select name="country_id" class="form-control @error('country_id') is-invalid @enderror"
+                                        required>
+                                        @foreach($countries as $country)
+                                            <option value="{{ $country->id }}" {{ old('country_id', $lead->country_id ?? '') == $country->id ? 'selected' : '' }}>
+                                                {{ $country->name }} ({{ $country->code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
 
                                 <div class="col-md-6 mb-3">
                                     <label>Name</label>
@@ -420,15 +447,6 @@
                                     @error('parent_name')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
-                                </div>
-
-                                <div class="col-md-6 mb-3">
-                                    <label>Status</label>
-                                    <select name="status" class="form-control">
-                                        <option value="active">Active</option>
-                                        <option value="passout">Passout</option>
-                                        <option value="dropout">Dropout</option>
-                                    </select>
                                 </div>
 
                                 <div class="col-md-12 mb-3">

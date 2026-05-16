@@ -1,64 +1,74 @@
 <header id="page-topbar">
     <div class="navbar-header">
-        <div class="d-flex">
+        <div class="d-flex align-items-center">
             <!-- LOGO -->
-            <div class="navbar-brand-box">
-                <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
+            <div class="">
+                <!-- <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
                     <span class="logo-sm">
-                        <i class="fas fa-graduation-cap" style="font-size: 24px;"></i>
+                        <i class="fas fa-graduation-cap text-primary" style="font-size: 22px;"></i>
                     </span>
-                    <span class="logo-lg">
-                        <i class="fas fa-graduation-cap" style="font-size: 24px;"></i> <span class="logo-txt">FOMS ACADEMY Business Management System</span>
+                    <span class="logo-lg d-flex align-items-center gap-2">
+                        <i class="fas fa-graduation-cap text-primary" style="font-size: 22px;"></i> 
+                        <span class="logo-txt">FOMS ACADEMY</span>
                     </span>
-                </a>
+                </a> -->
 
                 <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
                     <span class="logo-sm">
-                        <i class="fas fa-graduation-cap" style="font-size: 24px; color: #fff;"></i>
+                        <!-- <i class="fas fa-graduation-cap text-white" style="font-size: 22px;"></i> -->
+                        <span class="logo-txt">FOMS</span>
                     </span>
-                    <span class="logo-lg">
-                        {{-- <img src="{{ URL::asset('assets/images/logo-sm.svg') }}" alt="" height="24"> --}}
-                         <span class="logo-txt">FOMS ACADEMY BMS</span>
+                    <span class="logo-lg align-items-center gap-2">
+                        <!-- <i class="fas fa-graduation-cap text-white" style="font-size: 22px;"></i> -->
+                        <span class="logo-txt">FOMS ACADEMY</span>
                     </span>
                 </a>
             </div>
 
-            <button type="button" class="btn btn-sm px-3 font-size-16 header-item" id="vertical-menu-btn">
+            <button type="button" class="btn btn-sm px-3 font-size-16 header-item ms-2" id="vertical-menu-btn">
                 <i class="fa fa-fw fa-bars"></i>
             </button>
         </div>
 
-        <div class="d-flex">
-
-
+        <div class="d-flex align-items-center gap-2">
 
             <div class="dropdown d-none d-sm-inline-block">
                 <button type="button" class="btn header-item" id="mode-setting-btn">
-                    <i data-feather="moon" class="icon-lg layout-mode-dark"></i>
                     <i data-feather="sun" class="icon-lg layout-mode-light"></i>
                 </button>
             </div>
 
-
-
             <div class="dropdown d-inline-block">
-                <button type="submit" onclick="goLink('')" class="btn header-item  me-2"> {{-- right-bar-toggle href="{{ route('admin.settings.index') }}"  --}}
+                <button type="button" onclick="goLink('')" class="btn header-item me-2">
                     <i data-feather="settings" class="icon-lg"></i>
                 </button>
             </div>
 
             <div class="dropdown d-inline-block">
-                <button type="button" class="btn header-item bg-soft-light border-start border-end" id="page-header-user-dropdown"
-                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img class="rounded-circle header-profile-user" src="@if (Auth::user()->photo != ''){{ URL::asset('images/'. Auth::user()->photo) }}@else https://ui-avatars.com/api/?name=FA&size=200 @endif" alt="Header Avatar">
-                    <span class="d-none d-xl-inline-block ms-1 fw-medium">{{ Auth::user()->name }}</span>
-                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
+                <button type="button" class="btn d-flex align-items-center gap-2 border-0"
+                    id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <img class="rounded-circle header-profile-user"
+                        src="@if (Auth::user()->photo != ''){{ URL::asset('images/' . Auth::user()->photo) }}@else https://ui-avatars.com/api/?name=FA&size=200 @endif"
+                        alt="Header Avatar">
+                    <span class="d-none d-xl-inline-block ms-1 fw-bold text-dark">{{ Auth::user()->name }}</span>
+                    <i class="mdi mdi-chevron-down d-none d-xl-inline-block text-muted"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- item-->
-                    <a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="mdi mdi-face-profile font-size-16 align-middle me-1"></i> Profile</a>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.dashboard') }}">
+                        <i class="mdi mdi-view-dashboard font-size-16 align-middle text-primary"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('admin.profile') }}">
+                        <i class="mdi mdi-face-profile font-size-16 align-middle text-primary"></i>
+                        <span>Profile</span>
+                    </a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item " href="javascript:void();" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><i class="bx bx-power-off font-size-16 align-middle me-1"></i> <span key="t-logout">Logout</span></a>
+                    <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:void(0);"
+                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="bx bx-power-off font-size-16 align-middle text-danger"></i>
+                        <span>Logout</span>
+                    </a>
                     <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>

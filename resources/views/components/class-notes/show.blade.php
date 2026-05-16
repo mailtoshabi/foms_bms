@@ -8,11 +8,13 @@
         <div class="card">
 
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ $note->title }}</h5>
-                <div>
-                    <a href="{{ route($routePrefix.'.notes.index') }}" class="btn btn-sm btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back
+                <div class="d-flex align-items-center">
+                    <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle" title="Go Back" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-chevron-left"></i>
                     </a>
+                    <h5 class="mb-0">{{ $note->title }}</h5>
+                </div>
+                <div>
                     @if($isTeacher=='true')
                     <form action="{{ route($routePrefix.'.notes.destroy', $note->id) }}"
                           method="POST"

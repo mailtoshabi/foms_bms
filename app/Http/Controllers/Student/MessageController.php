@@ -84,6 +84,31 @@ class MessageController extends Controller
             abort(403);
         }
 
+        // Mark as read if the student is the receiver (direct or via classroom)
+        if (!$message->is_read) {
+            if ($message->receiver_type == Student::class && $message->receiver_id == $student->id) {
+                $message->update(['is_read' => true]);
+            } elseif ($message->receiver_type == ClassRoom::class) {
+                if ($classRoomIds->contains($message->receiver_id)) {
+                    $message->update(['is_read' => true]);
+                }
+            }
+        }
+
+        // Also mark all replies received by this student as read
+        Message::where('reply_to_id', $message->id)
+            ->where('is_read', false)
+            ->where(function ($q) use ($student, $classRoomIds) {
+                $q->where(function ($q2) use ($student) {
+                    $q2->where('receiver_type', Student::class)
+                        ->where('receiver_id', $student->id);
+                })->orWhere(function ($q2) use ($classRoomIds) {
+                    $q2->where('receiver_type', ClassRoom::class)
+                        ->whereIn('receiver_id', $classRoomIds);
+                });
+            })
+            ->update(['is_read' => true]);
+
         $isClassMessage = $message->receiver_type === ClassRoom::class;
 
         // Filter replies: for class messages students only see their own replies + the parent

@@ -65,7 +65,7 @@ class SalaryService
         $classHours = ClassHour::where('teacher_id', $teacher->id)
             ->where('status', 'completed')
             ->where('has_salary_calculated', false)
-            ->whereBetween('updated_at', [
+            ->whereBetween('link_updated_at', [
                 $cycleStart,
                 $cycleEnd
             ])
@@ -99,7 +99,7 @@ class SalaryService
                 'cycle_end' => $cycleEnd,
                 'total_hours' => $totalHours,
                 'total_amount' => round($totalAmount, 2),
-                'credit_date' => $cycleStart->copy()->addDays(10),
+                'credit_date' => $cycleEnd->copy()->addDays(11),
             ]);
 
             ClassHour::whereIn('id', $classHours->pluck('id'))

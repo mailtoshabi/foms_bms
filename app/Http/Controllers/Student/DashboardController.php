@@ -15,9 +15,13 @@ class DashboardController extends Controller
 {
     public function dashboard()
     {
+        $id = auth()->guard('student')->id();
 
-    $id = auth()->guard('student')->id();
-    $student = Student::with([
+        if (!$id) {
+            return redirect()->route('student.login');
+        }
+
+        $student = Student::with([
             'class_rooms.course',
             'class_rooms.classType',
             'class_rooms.teachers',
@@ -115,6 +119,11 @@ class DashboardController extends Controller
     public function profile()
     {
         $id = auth()->guard('student')->id();
+
+        if (!$id) {
+            return redirect()->route('student.login');
+        }
+
         $student = Student::with([
             'class_rooms.course',
             'class_rooms.classType',

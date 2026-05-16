@@ -20,7 +20,6 @@
                     <ul class="sub-menu">
                         <li><a href="{{ route('admin.staffs.index') }}">List Staff</a></li>
                         <li><a href="{{ route('admin.staffs.create') }}">Add Staff</a></li>
-                        {{-- <li><a href="{{ route('admin.roles.index') }}">Roles</a></li> --}}
                     </ul>
                 </li>
 
@@ -56,15 +55,6 @@
                 </li>
 
                 {{-- ================= Messages ================= --}}
-                <!-- <li class="{{ set_active(['admin.salaries.*']) }}">
-                    <a href="{{ route('admin.salaries.index', ['tab' => 'unpaid']) }}" >
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span>Teacher Salaries</span>
-                    </a>
-
-                </li> -->
-
-                {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['admin.messages.*', 'staff.messages.*', 'admin.st-messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-envelope"></i>
@@ -72,7 +62,6 @@
                     </a>
 
                     <ul class="sub-menu" aria-expanded="false">
-
                         {{-- Inbox --}}
                         <li class="{{ set_active(['admin.messages.index']) }}">
                             <a href="{{ route('admin.messages.index') }}">
@@ -80,20 +69,12 @@
                             </a>
                         </li>
 
-                        {{-- New Message --}}
-                        {{-- <li class="{{ set_active(['admin.messages.create']) }}">
-                            <a href="{{ route('admin.messages.create') }}">
-                                New Message
-                            </a>
-                        </li> --}}
-
                         {{-- Student-Teacher Messages --}}
                         <li class="{{ set_active(['admin.st-messages.*']) }}">
                             <a href="{{ route('admin.st-messages.index') }}">
                                 Student-Teacher
                             </a>
                         </li>
-
                     </ul>
                 </li>
 
@@ -131,7 +112,6 @@
                     </a>
 
                     <ul class="sub-menu" aria-expanded="false">
-
                         <li class="{{ set_active(['admin.reports.teacher-leads']) }}">
                             <a href="{{ route('admin.reports.teacher-leads') }}">
                                 Leads
@@ -155,7 +135,6 @@
                                 Salary
                             </a>
                         </li>
-
                     </ul>
                 </li>
 
@@ -167,8 +146,6 @@
                     </a>
 
                     <ul class="sub-menu" aria-expanded="false">
-
-                        {{-- Inbox --}}
                         <li class="{{ set_active(['admin.reports.student-leads']) }}">
                             <a href="{{ route('admin.reports.student-leads') }}">
                                 Leads
@@ -181,7 +158,6 @@
                             </a>
                         </li>
 
-                        {{-- New Message --}}
                         <li class="{{ set_active(['admin.reports.students']) }}">
                             <a href="{{ route('admin.reports.students') }}">
                                 Students
@@ -193,7 +169,6 @@
                                 <span>Attendance</span>
                             </a>
                         </li>
-
                     </ul>
                 </li>
 
@@ -218,46 +193,9 @@
                     </ul>
                 </li>
 
-
-                {{-- ================= Reports ================= --}}
-                <li class="{{ set_active(['admin.reports.*']) }}">
-                    {{-- <a href="{{ route('admin.reports.index') }}" class="">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Reports</span>
-                    </a> --}}
-                    <ul class="sub-menu" aria-expanded="false">
-
-                        {{-- Employee --}}
-                        {{-- @if(auth()->user() && auth()->user()->isEmployee())
-                        <li>
-                            <a href="{{ route('admin.reports.create') }}">
-                                Create Report
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.reports.index') }}">
-                                My Reports
-                            </a>
-                        </li>
-                        @endif --}}
-
-                        {{-- Super Admin --}}
-                        {{-- @if(auth()->user() && auth()->user()->isSuperAdmin())
-                        <li>
-                            <a href="{{ route('admin.reports.index') }}">
-                                All Reports
-                            </a>
-                        </li>
-                        @endif --}}
-
-                    </ul>
-                </li>
-
-                {{-- ================= Super Admin Only ================= --}}
-
-
             </ul>
         </div>
     </div>
 </div>
 <!-- Left Sidebar End -->
+

@@ -18,7 +18,7 @@ class TeacherLeadController extends Controller
 
     public function index(Request $request)
     {
-        $leads = TeacherLead::query()->with('country');
+        $leads = TeacherLead::query()->with(['country', 'notes.staff']);
 
         if ($request->filled('status')) {
             $leads->where('status', $request->status);
@@ -102,6 +102,10 @@ class TeacherLeadController extends Controller
 
         $lead = TeacherLead::findOrFail(decrypt($id));
 
+        if ($lead->status === 'converted') {
+            return redirect()->route('staff.teacher-leads.index')->with('error', 'Cannot update a converted lead.');
+        }
+
         $request->validate([
             'name' => 'required',
             'country_id' => 'required|exists:countries,id',
@@ -137,17 +141,29 @@ class TeacherLeadController extends Controller
 
     public function destroy($id)
     {
-        TeacherLead::findOrFail(decrypt($id))->delete();
+        $lead = TeacherLead::withCount('notes')->with('teacher')->findOrFail(decrypt($id));
 
-        return back()->with('success', 'Lead deleted.');
+        if ($lead->teacher) {
+            return back()->with('error', "Cannot delete \"{$lead->name}\" — a teacher record is linked to this lead.");
+        }
+
+        $lead->delete();
+
+        return back()->with('success', 'Lead deleted successfully.');
     }
 
 
     public function storeNote(Request $request, $leadId)
     {
+        $lead = TeacherLead::findOrFail($leadId);
+
+        if ($lead->status === 'converted') {
+            return back()->with('error', 'Cannot add notes to a converted lead.');
+        }
+
         $request->validate([
             'note' => 'required|string',
-            'status' => 'required|in:pending,follow_up,no_response,not_interested,interested,converted'
+            'status' => 'required|in:pending,follow_up,no_response,not_interested,interested'
         ]);
 
         TeacherLeadNote::create([
@@ -156,6 +172,8 @@ class TeacherLeadController extends Controller
             'note' => $request->note,
             'status' => $request->status,
         ]);
+
+        $lead->update(['status' => $request->status]);
 
         return back()->with('success', 'Note added successfully.');
     }
@@ -177,6 +195,7 @@ class TeacherLeadController extends Controller
 
         $request->validate([
             'name' => 'required',
+            'country_id' => 'required|exists:countries,id',
             'contact_number' => 'required|string|digits_between:7,15',
             'email' => 'nullable|email'
         ]);
@@ -200,14 +219,15 @@ class TeacherLeadController extends Controller
             if ($isWhatsappDifferent) {
                 $whatsapp_number = $request->whatsapp_number;
             } else {
-                $countryCode = $lead->country ? preg_replace('/[^0-9]/', '', $lead->country->code) : '91';
+                $country = Country::find($request->country_id);
+                $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
                 $whatsapp_number = $countryCode . $request->contact_number;
             }
 
             Teacher::create([
 
                 'teacher_lead_id' => $lead->id,
-                'country_id' => $lead->country_id,
+                'country_id' => $request->country_id,
                 'is_whatsapp_different' => $isWhatsappDifferent,
 
                 'name' => $request->name,

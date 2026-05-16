@@ -8,7 +8,7 @@
 <!-- pace js -->
 <script src="{{ URL::asset('assets/libs/pace-js/pace-js.min.js') }}"></script>
 <script src="{{ URL::asset('assets/libs/sweetalert2/sweetalert2.min.js') }}"></script>
-<script src="{{ URL::asset('assets/js/global.js') }}"></script>
+<script src="{{ URL::asset('assets/js/global.js') }}?v={{ filemtime(public_path('assets/js/global.js')) }}"></script>
 <script src="{{ URL::asset('assets/libs/select2/select2.min.js') }}"></script>
 @yield('script')
 @yield('script-bottom')

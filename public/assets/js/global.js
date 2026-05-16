@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
 
     /*X-CSRF-TOKEN*/
     $.ajaxSetup({
@@ -7,22 +7,22 @@ $(document).ready(function() {
 
     $('input[id="name"]').focus();
 
-    $(document).on('click','[data-plugin="delete-data"]',function(e) {
-		e.preventDefault();
+    $(document).on('click', '[data-plugin="delete-data"]', function (e) {
+        e.preventDefault();
         var targetForm = $(this).data('target-form');
         if (!confirm('Are you sure you want to delete?')) return;
         e.preventDefault();
         $(targetForm).submit();
-	});
+    });
 
-    $(document).on('click','[data-plugin="submit-form"]',function(e) {
-		e.preventDefault();
+    $(document).on('click', '[data-plugin="submit-form"]', function (e) {
+        e.preventDefault();
         var targetForm = $(this).data('target-form');
         var confMessage = $(this).data('conf');
         if (!confirm(confMessage)) return;
         e.preventDefault();
         $(targetForm).submit();
-	});
+    });
 
     // $(document).on('click','.btn-close',function(e) {
     //     e.preventDefault();
@@ -32,8 +32,8 @@ $(document).ready(function() {
     //     $(item_container).remove();
     // });
 
-    $(document).on('click','[data-plugin="confirm-data"]',function(e) {
-		e.preventDefault();
+    $(document).on('click', '[data-plugin="confirm-data"]', function (e) {
+        e.preventDefault();
         var targetUrl = $(this).attr('href');
         var confirmText = $(this).data('confirmtext');
         // console.log(confirmText);
@@ -70,7 +70,7 @@ $(document).ready(function() {
         // if (!confirm('Are you sure you want to delete?')) return;
         // e.preventDefault();
         // $(targetForm).submit();
-	});
+    });
 
     table_min_height();
 
@@ -98,3 +98,7 @@ function table_min_height() {
     $("div.table-responsive").addClass("table_min_height");
 }
 
+// Global restriction for phone fields to accept only numbers
+$(document).on('input', 'input[name="contact_number"], input[name="whatsapp_number"], input[name="phone"], input[name="upi_number"]', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});

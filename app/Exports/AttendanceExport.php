@@ -25,7 +25,7 @@ class AttendanceExport implements FromCollection, WithHeadings
             ->select(
                 'students.name',
                 'class_rooms.name as class_name',
-                'class_hours.updated_at',
+                'class_hours.link_updated_at',
                 DB::raw("CASE WHEN student_attendance.is_present = 1 THEN 'Present' ELSE 'Absent' END as status")
             );
 
@@ -53,14 +53,14 @@ class AttendanceExport implements FromCollection, WithHeadings
         }
 
         if (!empty($this->filters['from_date'])) {
-            $query->whereDate('class_hours.updated_at', '>=', $this->filters['from_date']);
+            $query->whereDate('class_hours. link_updated_at', '>=', $this->filters['from_date']);
         }
 
         if (!empty($this->filters['to_date'])) {
-            $query->whereDate('class_hours.updated_at', '<=', $this->filters['to_date']);
+            $query->whereDate('class_hours.link_updated_at', '<=', $this->filters['to_date']);
         }
 
-        return $query->orderByDesc('class_hours.updated_at')->get();
+        return $query->orderByDesc('class_hours.link_updated_at')->get();
     }
 
     public function headings(): array

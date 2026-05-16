@@ -26,7 +26,8 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">
-                <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                <a href="javascript:window.history.back();"
+                    class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                     <i class="fas fa-chevron-left"></i>
                 </a>
                 Staff Salary Report
@@ -123,7 +124,7 @@
                 <tbody>
                     @forelse($data as $row)
                         <tr>
-                            <td>{{ $row->name }}</td>
+                            <td><a href="{{ route('admin.staffs.show', encrypt($row->staff_id)) }}">{{ $row->name }}</a></td>
                             <td>{{ $row->phone ?? 'N/A' }}</td>
                             <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $row->salary_month)->format('M Y') }}</td>
                             <td>₹ {{ number_format($row->salary_amount, 2) }}</td>

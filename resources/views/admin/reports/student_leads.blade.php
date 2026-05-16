@@ -56,6 +56,12 @@
             <form method="GET" class="row mb-3 align-items-end">
 
                 <div class="col-md-2">
+                    <label class="form-label fw-bold">Name</label>
+                    <input type="text" name="name" class="form-control" value="{{ request('name') }}"
+                        placeholder="Search Name">
+                </div>
+
+                <div class="col-md-2">
                     <label class="form-label fw-bold">From Date</label>
                     <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
                 </div>
@@ -87,21 +93,23 @@
                 </div>
 
                 <div class="col-md-2 text-end">
-                    <a href="{{ route('admin.reports.student-leads.export', request()->all()) }}" class="btn btn-success">
+                    <button type="submit" formaction="{{ route('admin.reports.student-leads.export') }}"
+                        class="btn btn-success">
                         Export
-                    </a>
+                    </button>
                 </div>
 
             </form>
 
-            <table class="table table-bordered">
-                <thead>
+            <table class="table table-bordered table-hover align-middle table-nowrap mb-0">
+                <thead class="table-light">
                     <tr>
                         <th>Name</th>
                         <th>Phone</th>
                         <th>Source</th>
                         <th>Status</th>
                         <th>Date</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,8 +123,24 @@
                                 @endif
                             </td>
                             <td>{{ $lead->source->name ?? '-' }}</td>
-                            <td>{{ ucfirst($lead->status) }}</td>
+                            <td>
+                                <span class="badge
+                                                {{ $lead->status == 'pending' ? 'bg-warning' : '' }}
+                                                {{ $lead->status == 'follow_up' ? 'bg-info' : '' }}
+                                                {{ $lead->status == 'no_response' ? 'bg-secondary' : '' }}
+                                                {{ $lead->status == 'not_interested' ? 'bg-danger' : '' }}
+                                                {{ $lead->status == 'interested' ? 'bg-success' : '' }}
+                                                {{ $lead->status == 'converted' ? 'bg-primary' : '' }}">
+                                    {{ ucfirst(str_replace('_', ' ', $lead->status)) }}
+                                </span>
+                            </td>
                             <td>{{ $lead->created_at->format('d M Y') }}</td>
+                            <td>
+                                <a href="#" class="viewLeadNotes" data-name="{{ $lead->name }}"
+                                    data-notes="{{ json_encode($lead->notes->values()->all()) }}" title="View Notes">
+                                    <i class="mdi mdi-note-text-outline text-info"></i>
+                                </a>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -126,5 +150,7 @@
 
         </div>
     </div>
+
+    <x-lead_notes_modal />
 
 @endsection

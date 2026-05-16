@@ -5,6 +5,30 @@
 @section('content')
 
     <div class="row">
+        <div class="col-12 mb-3">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
 
         {{-- =========================
         STAFF PROFILE
@@ -68,14 +92,16 @@
 
                     <hr>
 
-                    <p><strong>Default Salary Amount (₹):</strong></p>
-                    <div class="input-group input-group-sm mb-2">
-                        <input type="number" step="0.01" id="salaryAmountInput" class="form-control"
-                            value="{{ $staff->salary_amount ?? 0 }}" placeholder="0.00">
-                        <button class="btn btn-primary" type="button" id="updateSalaryBtn"
-                            onclick="this.disabled=true; this.innerText='Saving...';">
-                            <i class="fas fa-save"></i>
-                        </button>
+                    <div class="mb-2 text-start">
+                        <small class="fw-bold text-nowrap">Default Salary (₹):</small>
+                        <div class="input-group input-group-sm mt-1 flex-nowrap">
+                            <input type="number" step="0.01" id="salaryAmountInput" class="form-control"
+                                value="{{ $staff->salary_amount ?? 0 }}" placeholder="0.00">
+                            <button class="btn btn-primary" type="button" id="updateSalaryBtn"
+                                onclick="this.disabled=true; this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i>';">
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -107,9 +133,9 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
+                        <table class="table table-bordered table-hover align-middle table-nowrap mb-0" style="border-color: #e9ecef;">
 
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th>Salary Month</th>
                                     <th>Salary Amount</th>
@@ -144,19 +170,7 @@
                                                                 <td>{{ optional($salary->paid_date)->format('d M Y') ?? '-' }}</td>
 
                                                                 <td>
-                                                                    @if($salary->status != 'paid')
-                                                                        <button class="btn btn-sm editSalary" title="Edit Salary"
-                                                                            data-id="{{ $salary->id }}" data-month="{{ $salary->salary_month }}"
-                                                                            data-salary_amount="{{ $salary->salary_amount }}"
-                                                                            data-paid_amount="{{ $salary->paid_amount }}"
-                                                                            data-paid_date="{{ optional($salary->paid_date)->format('Y-m-d') }}"
-                                                                            data-payment_method="{{ $salary->payments->first()?->payment_method ?? '' }}"
-                                                                            data-remarks="{{ $salary->remarks }}">
 
-                                                                            <i class="fas fa-pencil-alt text-primary"></i>
-
-                                                                        </button>
-                                                                    @endif
 
                                                                     <button class="btn btn-sm viewPaymentHistory" title="View Payment History"
                                                                         data-id="{{ $salary->id }}"
@@ -164,7 +178,7 @@
                                                                         data-salary_amount="{{ $salary->salary_amount }}"
                                                                         data-paid_amount="{{ $salary->paid_amount }}"
                                                                         data-payments="{{ json_encode($salary->payments->map(function ($p) {
-                                        return ['id' => $p->id, 'amount' => $p->paid_amount, 'method' => $p->payment_method, 'date' => optional($p->paid_date)->format('d M Y'), 'notes' => $p->notes]; })->values()->all()) }}">
+                                        return ['id' => $p->id, 'amount' => $p->paid_amount, 'method' => $p->payment_method, 'date' => optional($p->paid_date)->format('d M Y'), 'date_raw' => optional($p->paid_date)->format('Y-m-d'), 'notes' => $p->notes]; })->values()->all()) }}">
 
                                                                         <i class="fas fa-history text-info"></i>
 
@@ -267,6 +281,15 @@
                             <label class="form-label">Salary Month</label>
 
                             <input type="month" name="salary_month" class="form-control" required>
+
+                        </div>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">Salary Amount (₹)</label>
+
+                            <input type="number" step="0.01" name="salary_amount" id="salaryAmountField" class="form-control"
+                                value="{{ $staff->salary_amount ?? 0 }}" required>
 
                         </div>
 
@@ -508,7 +531,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm">
+                        <table class="table table-bordered table-hover align-middle mb-0" style="border-color: #e9ecef;">
 
                             <thead class="table-light">
                                 <tr>
@@ -516,12 +539,13 @@
                                     <th>Payment Method</th>
                                     <th>Payment Date</th>
                                     <th>Notes</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
 
                             <tbody id="paymentHistoryTable">
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">No payments recorded</td>
+                                    <td colspan="5" class="text-center text-muted">No payments recorded</td>
                                 </tr>
                             </tbody>
 
@@ -544,6 +568,51 @@
 
         </div>
 
+    </div>
+
+    {{-- ================= EDIT SINGLE PAYMENT MODAL ================= --}}
+    <div class="modal fade" id="editSinglePaymentModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" action="{{ route('admin.staffs.salary.payment.update') }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Payment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="payment_id" id="editPaymentId" value="">
+                        <div class="mb-3">
+                            <label class="form-label">Payment Amount (₹)</label>
+                            <input type="number" step="0.01" name="paid_amount" id="editPaymentAmount" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <select name="payment_method" id="editPaymentMethod" class="form-control">
+                                <option value="">- Select -</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="upi">UPI</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Payment Date</label>
+                            <input type="date" name="payment_date" id="editPaymentDate" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Remarks</label>
+                            <textarea name="notes" id="editPaymentNotes" class="form-control" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
 @endsection
@@ -676,7 +745,7 @@
 
             // If no payments, show empty message
             if (!payments || payments.length === 0) {
-                $('#paymentHistoryTable').html('<tr><td colspan="4" class="text-center text-muted">No payments recorded</td></tr>');
+                $('#paymentHistoryTable').html('<tr><td colspan="5" class="text-center text-muted">No payments recorded</td></tr>');
             } else {
                 // Add payment rows
                 let html = '';
@@ -686,12 +755,23 @@
                     html += '<td><span class="badge bg-secondary">' + (payment.method ? payment.method.charAt(0).toUpperCase() + payment.method.slice(1).replace('_', ' ') : 'N/A') + '</span></td>';
                     html += '<td>' + (payment.date || '-') + '</td>';
                     html += '<td>' + (payment.notes || '-') + '</td>';
+                    html += '<td><button class="btn btn-sm text-primary editSinglePaymentBtn" data-id="'+payment.id+'" data-amount="'+payment.amount+'" data-method="'+(payment.method||'')+'" data-date="'+(payment.date_raw||payment.date)+'" data-notes="'+(payment.notes||'')+'"><i class="fas fa-pencil-alt"></i></button></td>';
                     html += '</tr>';
                 });
                 $('#paymentHistoryTable').html(html);
             }
 
             $('#paymentHistoryModal').modal('show');
+        });
+
+        $(document).on('click', '.editSinglePaymentBtn', function() {
+            $('#paymentHistoryModal').modal('hide');
+            $('#editPaymentId').val($(this).data('id'));
+            $('#editPaymentAmount').val($(this).data('amount'));
+            $('#editPaymentMethod').val($(this).data('method'));
+            $('#editPaymentDate').val($(this).data('date'));
+            $('#editPaymentNotes').val($(this).data('notes'));
+            $('#editSinglePaymentModal').modal('show');
         });
 
         // Validate balance payment amount on input change

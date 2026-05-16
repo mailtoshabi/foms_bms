@@ -16,7 +16,7 @@ class StudentTeacherMessageController extends Controller
             ->with(['sender', 'receiver', 'replies'])
             ->where(function ($q) {
                 $q->where('sender_type', Teacher::class)
-                  ->orWhere('sender_type', Student::class);
+                    ->orWhere('sender_type', Student::class);
             });
 
         if ($request->filled('search')) {
@@ -33,14 +33,14 @@ class StudentTeacherMessageController extends Controller
         if ($request->filled('direction')) {
             if ($request->direction === 'teacher_to_student') {
                 $query->where('sender_type', Teacher::class)
-                      ->where('receiver_type', Student::class);
+                    ->where('receiver_type', Student::class);
             } elseif ($request->direction === 'student_to_teacher') {
                 $query->where('sender_type', Student::class)
-                      ->where('receiver_type', Teacher::class);
+                    ->where('receiver_type', Teacher::class);
             }
         }
 
-        $messages = $query->latest()->paginate(utility('pagination', 15))->withQueryString();
+        $messages = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         return view('admin.st-messages.index', compact('messages'));
     }
