@@ -74,7 +74,7 @@
 
                             <span>Teachers</span>
 
-                            @if($pendingCount_t > 0 && $staff->hasRoleId($operationRoleId))
+                            @if($pendingCount_t > 0 && ($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId)))
                                 <span class="badge bg-warning float-end">
                                     {{ $pendingCount_t }}
                                 </span>
@@ -83,7 +83,7 @@
 
                         <ul class="sub-menu" aria-expanded="false">
 
-                            @if($staff->hasRoleId($operationRoleId))
+                            @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))
                                 <li class="{{ set_active(['staff.teacher-leads.*']) }}">
                                     <a href="{{ route('staff.teacher-leads.index') }}">
                                         Teacher Leads

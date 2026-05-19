@@ -35,6 +35,7 @@
                     $staff = auth('staff')->user();
                     $isAdmin = auth('admin')->check();
                     $isOperation = $staff && $staff->hasRoleId(utility('id_operation_dept'));
+                    $isAdministrator = $staff && $staff->hasRoleId(utility('id_administrator_dept'));
                 @endphp
 
                 @if($isAdmin || $isOperation)
@@ -77,11 +78,13 @@
 
                 <h5>Teachers</h5>
                 @if(!$class->is_completed)
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignTeacherModal" {{ $class->teachers->count() ? 'disabled' : '' }}>
+                    @if($isAdmin || $isOperation || $isAdministrator)
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignTeacherModal" {{ $class->teachers->count() ? 'disabled' : '' }}>
 
-                        <i class="fas fa-plus"></i> Assign Teacher
+                            <i class="fas fa-plus"></i> Assign Teacher
 
-                    </button>
+                        </button>
+                    @endif
                 @endif
             </div>
 
@@ -96,7 +99,9 @@
                                 <th>Phone</th>
                                 <th>Wage/Hour</th>
                                 @if(!$class->is_completed)
-                                <th>Action</th> @endif
+                                    @if($isAdmin || $isOperation || $isAdministrator)
+                                    <th>Action</th> @endif
+                                @endif
                             </tr>
                         </thead>
 
@@ -112,22 +117,24 @@
                                         ₹ {{ number_format($teacher->pivot->hourly_wage, 2) }}
                                     </td>
                                     @if(!$class->is_completed)
-                                        <td>
+                                        @if($isAdmin || $isOperation || $isAdministrator)
+                                            <td>
 
-                                            <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
-                                                onsubmit="return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.')">
+                                                <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
+                                                    onsubmit="return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.')">
 
-                                                @csrf
+                                                    @csrf
 
-                                                <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
-                                                <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
-                                                <button class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                    <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
+                                                    <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
 
-                                            </form>
+                                                </form>
 
-                                        </td>
+                                            </td>
+                                        @endif
                                     @endif
 
                                 </tr>
@@ -174,23 +181,23 @@
 
                 <div class="table-responsive">
                     <table class="table table-bordered  align-middle table-nowrap mb-0">
-
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Contact</th>
-                                <th>Assigned Date</th>
-                                @if(!$class->is_completed)
-                                <th>Remove from Class</th> @endif
-                            </tr>
-                        </thead>
-
                         @php
                             $administratorRoleId = utility('id_administrator_dept');
                             $operationRoleId = utility('id_operation_dept');
                             $staff = auth('staff')->user();
                             $isAdmin = auth('admin')->check();
                         @endphp
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Contact</th>
+                                <th>Assigned Date</th>
+                                @if($isAdmin || $isOperation || $isAdministrator)
+                                    @if(!$class->is_completed)
+                                    <th>Remove from Class</th> @endif
+                                @endif
+                            </tr>
+                        </thead>
 
                         <tbody>
 
@@ -203,7 +210,7 @@
                                     <td>{{ $student->pivot->assigned_date ? \Carbon\Carbon::parse($student->pivot->assigned_date)->format('d M Y') : '-' }}
                                     </td>
 
-                                    @if($isAdmin || ($staff && ($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($operationRoleId))))
+                                    @if($isAdmin || $isOperation || $isAdministrator)
                                         @if(!$class->is_completed)
                                             <td>
 
@@ -372,10 +379,10 @@
 
                 selectedStudents.forEach((name, id) => {
                     badgesHtml += `
-                                            <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
-                                                ${name}
-                                                <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
-                                            </span>`;
+                                                                                                                        <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
+                                                                                                                            ${name}
+                                                                                                                            <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
+                                                                                                                        </span>`;
                     inputsHtml += `<input type="hidden" name="student_ids[]" value="${id}">`;
                 });
 
@@ -395,7 +402,7 @@
                     }
                 @endif
 
-                                    if ($(this).is(':checked')) {
+                                                                                                                if ($(this).is(':checked')) {
                     selectedStudents.set(id, name);
                 } else {
                     selectedStudents.delete(id);
@@ -419,10 +426,10 @@
                 if (q.length < 2) {
                     if (q.length === 0) {
                         $('#studentList').html(`
-                                                <div class="col-12 text-center py-4 text-muted">
-                                                    <i class="fas fa-search fa-2x mb-2"></i>
-                                                    <p>Start typing to find students to add...</p>
-                                                </div>`);
+                                                                                                                            <div class="col-12 text-center py-4 text-muted">
+                                                                                                                                <i class="fas fa-search fa-2x mb-2"></i>
+                                                                                                                                <p>Start typing to find students to add...</p>
+                                                                                                                            </div>`);
                     }
                     return;
                 }
@@ -446,13 +453,13 @@
                                 response.results.forEach(student => {
                                     let isChecked = selectedStudents.has(student.id.toString()) ? 'checked' : '';
                                     html += `
-                                                            <div class="col-md-6 mb-2">
-                                                                <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
-                                                                    <input type="checkbox" value="${student.id}" data-name="${student.name}" 
-                                                                        class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
-                                                                    <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
-                                                                </label>
-                                                            </div>`;
+                                                                                                                                        <div class="col-md-6 mb-2">
+                                                                                                                                            <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
+                                                                                                                                                <input type="checkbox" value="${student.id}" data-name="${student.name}" 
+                                                                                                                                                    class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
+                                                                                                                                                <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
+                                                                                                                                            </label>
+                                                                                                                                        </div>`;
                                 });
                             }
                             $('#studentList').html(html);

@@ -2,17 +2,7 @@
     <div class="navbar-header">
         <div class="d-flex">
             <!-- LOGO -->
-            <div class=""><!-- navbar-brand-box -->
-                <!-- <a href="{{ route('student.dashboard') }}" class="logo logo-dark">
-                    <span class="logo-sm">
-                        <i class="fas fa-graduation-cap" style="font-size: 24px;"></i>
-                    </span>
-                    <span class="logo-lg">
-                        <i class="fas fa-graduation-cap" style="font-size: 24px;"></i> <span class="logo-txt">FOMS
-                            ONLINE ACADEMY</span>
-                    </span>
-                </a> -->
-
+            <div class="">
                 <a href="{{ route('student.dashboard') }}" class="logo logo-light">
                     <span class="logo-sm">
                         <!-- <i class="fas fa-graduation-cap" style="font-size: 24px; color: #fff;"></i> -->
@@ -21,7 +11,7 @@
                     <span class="logo-lg">
                         <!-- <i class="fas fa-graduation-cap" style="font-size: 24px; color: #fff;"></i> -->
 
-                        <span class="logo-txt">FOMS ACADEMY</span>
+                        <span class="logo-txt">FOMS BMS</span>
                     </span>
                 </a>
             </div>
@@ -38,7 +28,8 @@
             </div>
 
             <div class="dropdown d-inline-block">
-                <button type="button" class="btn header-item noti-icon me-2 right-bar-toggle" data-target="messages-sidebar">
+                <button type="button" class="btn header-item noti-icon me-2 right-bar-toggle"
+                    data-target="messages-sidebar">
                     <i data-feather="mail" class="icon-lg"></i>
                     @if (isset($studentMessagesUnreadCount) && $studentMessagesUnreadCount > 0)
                         <span class="badge bg-danger rounded-pill">{{ $studentMessagesUnreadCount }}</span>
@@ -49,7 +40,8 @@
 
 
             <div class="dropdown d-inline-block">
-                <button type="button" class="btn header-item noti-icon me-2 right-bar-toggle" data-target="sessions-sidebar">
+                <button type="button" class="btn header-item noti-icon me-2 right-bar-toggle"
+                    data-target="sessions-sidebar">
                     <i data-feather="clock" class="icon-lg"></i>
                     @if(isset($pendingClassHoursCount) && $pendingClassHoursCount > 0)
                         <span class="badge bg-danger rounded-pill">{{ $pendingClassHoursCount }}</span>

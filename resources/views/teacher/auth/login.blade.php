@@ -59,56 +59,28 @@
             line-height: 1.5;
         }
 
-        /* Floating form inputs styling */
-        .form-floating-custom .form-control {
-            background-color: #f8fafc !important;
-            border: 1.5px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            color: #1e293b !important;
-            font-weight: 600 !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-
-        body[data-layout-mode="dark"] .form-floating-custom .form-control {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            color: #f8fafc !important;
-        }
-
         #input-country {
             padding-top: 0 !important;
             padding-bottom: 0 !important;
             height: 58px !important;
         }
 
-        /* Focused State */
+        /* Active theme colors on focus for Teacher Portal */
         .form-floating-custom .form-control:focus {
             border-color: #10b981 !important;
-            background-color: #ffffff !important;
             box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1) !important;
         }
 
         body[data-layout-mode="dark"] .form-floating-custom .form-control:focus {
-            background-color: #0f172a !important;
             box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18) !important;
         }
 
-        /* Active label color on focus */
         .form-floating-custom .form-control:focus~label {
             color: #10b981 !important;
-            font-weight: 700 !important;
         }
 
-        /* Floating icons */
-        .form-floating-icon {
-            color: #94a3b8;
-            transition: all 0.3s ease;
-        }
-
-        /* Active icon color on focus */
         .form-floating-custom .form-control:focus~.form-floating-icon {
             color: #10b981 !important;
-            transform: translateY(-50%) scale(1.05);
         }
 
         /* Password addon button positioning and hover */

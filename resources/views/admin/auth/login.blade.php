@@ -59,51 +59,7 @@
             line-height: 1.5;
         }
 
-        /* Floating form inputs styling */
-        .form-floating-custom .form-control {
-            background-color: #f8fafc !important;
-            border: 1.5px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            color: #1e293b !important;
-            font-weight: 600 !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
 
-        body[data-layout-mode="dark"] .form-floating-custom .form-control {
-            background-color: #1e293b !important;
-            border-color: #334155 !important;
-            color: #f8fafc !important;
-        }
-
-        /* Focused State */
-        .form-floating-custom .form-control:focus {
-            border-color: #4f46e5 !important;
-            background-color: #ffffff !important;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important;
-        }
-
-        body[data-layout-mode="dark"] .form-floating-custom .form-control:focus {
-            background-color: #0f172a !important;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.18) !important;
-        }
-
-        /* Active label color on focus */
-        .form-floating-custom .form-control:focus~label {
-            color: #4f46e5 !important;
-            font-weight: 700 !important;
-        }
-
-        /* Floating icons */
-        .form-floating-icon {
-            color: #94a3b8;
-            transition: all 0.3s ease;
-        }
-
-        /* Active icon color on focus */
-        .form-floating-custom .form-control:focus~.form-floating-icon {
-            color: #4f46e5 !important;
-            transform: translateY(-50%) scale(1.05);
-        }
 
         /* Password addon button positioning and hover */
         #password-addon {
@@ -346,11 +302,25 @@
         }
 
         @keyframes heartPulse {
-            0% { transform: scale(1); }
-            14% { transform: scale(1.15); }
-            28% { transform: scale(1); }
-            42% { transform: scale(1.15); }
-            70% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            14% {
+                transform: scale(1.15);
+            }
+
+            28% {
+                transform: scale(1);
+            }
+
+            42% {
+                transform: scale(1.15);
+            }
+
+            70% {
+                transform: scale(1);
+            }
         }
 
         /* Responsive adjustments */
@@ -380,13 +350,13 @@
                                 <div class="auth-content my-auto">
                                     <div class="text-center">
                                         <h5 class="portal-title mb-0">Admin Portal</h5>
-                                        <p class="portal-subtitle text-muted mt-2">Sign in to manage and configure your system.</p>
+                                        <p class="portal-subtitle text-muted mt-2">Sign in to manage and configure your
+                                            system.</p>
                                     </div>
                                     <form class="mt-4 pt-2" action="{{ route('admin.login.submit') }}" method="POST">
                                         @csrf
                                         <div class="form-floating form-floating-custom mb-4">
-                                            <input type="text"
-                                                class="form-control @error('phone') is-invalid @enderror"
+                                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
                                                 value="{{ old('phone', '') }}" id="input-username"
                                                 placeholder="Enter User Name" name="phone" required>
                                             @error('phone')
@@ -431,13 +401,17 @@
                                         </div>
                                         <div class="mb-3">
                                             <button class="btn btn-zopa w-100 waves-effect waves-light" type="submit"
-                                                onclick="this.disabled=true; this.innerText='Logging in...'; this.form.submit();">Log In</button>
+                                                onclick="this.disabled=true; this.innerText='Logging in...'; this.form.submit();">Log
+                                                In</button>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
                                     <p class="mb-0 text-muted" style="font-size: 0.85rem; font-weight: 500;">©
-                                        <script>document.write(new Date().getFullYear())</script> FOMS ACADEMY Business Management System<br> Crafted with <i class="mdi mdi-heart text-danger"></i> by <a target="_blank" href="https://webmahal.com" class="text-primary fw-semibold">Web Mahal</a>
+                                        <script>document.write(new Date().getFullYear())</script> FOMS ACADEMY Business
+                                        Management System<br> Crafted with <i class="mdi mdi-heart text-danger"></i> by <a
+                                            target="_blank" href="https://webmahal.com" class="text-primary fw-semibold">Web
+                                            Mahal</a>
                                     </p>
                                 </div>
                             </div>
@@ -467,10 +441,12 @@
                                             <div class="carousel-item active">
                                                 <div class="testi-contain text-center text-white">
                                                     <i class="bx bxs-quote-alt-left text-info display-4 mb-3"></i>
-                                                    <h4 class="mt-2 fw-medium lh-base text-white">“From daily updates to big insights — manage everything with confidence.”</h4>
+                                                    <h4 class="mt-2 fw-medium lh-base text-white">“From daily updates to big
+                                                        insights — manage everything with confidence.”</h4>
                                                     <div class="mt-4 pt-1">
                                                         <h5 class="font-size-16 text-white mb-0">FOMS Academy</h5>
-                                                        <p class="mb-0 text-white-50 small mt-1">Administrative & Operations Portal</p>
+                                                        <p class="mb-0 text-white-50 small mt-1">Administrative & Operations
+                                                            Portal</p>
                                                     </div>
                                                 </div>
                                             </div>

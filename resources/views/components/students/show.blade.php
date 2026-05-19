@@ -465,18 +465,20 @@
 
                 <h5 class="mb-0">Fee Exemption & Discount</h5>
                 @if($showButtons == 'true')
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#feeExemptionModal">
+                    @if(auth('staff')->user()->hasRoleId(utility('id_enrolment_dept')) || auth('staff')->user()->hasRoleId(utility('id_operation_dept')))
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#feeExemptionModal">
 
-                            <i class="fas fa-ban"></i> Exemption
+                                <i class="fas fa-ban"></i> Exemption
 
-                        </button>
-                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#discountModal">
+                            </button>
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#discountModal">
 
-                            <i class="fas fa-tag"></i> Discount
+                                <i class="fas fa-tag"></i> Discount
 
-                        </button>
-                    </div>
+                            </button>
+                        </div>
+                    @endif
                 @endif
             </div>
 

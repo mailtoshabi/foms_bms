@@ -361,6 +361,15 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::get('/search', 'search')->name('search');
             });
 
+        Route::get(
+            '/students/{id}',
+            [StudentController::class, 'show']
+        )->name('students.show');
+        Route::get(
+            '/teachers/{id}',
+            [TeacherController::class, 'show']
+        )->name('teachers.show');
+
         Route::middleware('role:id_enrolment_dept,id_operation_dept')
             ->group(function () {
 
@@ -403,7 +412,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
             });
 
-        Route::middleware('role:id_administrator_dept,id_operation_dept')
+        Route::middleware('role:id_operation_dept')
             ->group(function () {
 
                 Route::controller(EnrolmentClassRoomController::class)
@@ -414,6 +423,16 @@ Route::prefix('departments')->name('staff.')->group(function () {
                         Route::delete('/delete/{id}', 'destroy')->name('destroy');
 
                         Route::get('/status/{id}', 'changeStatus')->name('changeStatus');
+                    });
+            });
+
+        Route::middleware('role:id_administrator_dept,id_operation_dept')
+            ->group(function () {
+
+                Route::controller(EnrolmentClassRoomController::class)
+                    ->prefix('class_rooms')
+                    ->name('class_rooms.')
+                    ->group(function () {
 
                         Route::post(
                             '/class-rooms/assign-teacher',
@@ -583,17 +602,12 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
             });
 
-        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_hr_dept,id_operation_dept,id_finance_dept')
+        Route::middleware('role:id_enrolment_dept,id_administrator_dept,id_hr_dept,id_finance_dept,id_operation_dept')
             ->group(function () {
                 Route::get(
                     '/students',
                     [StudentController::class, 'index']
                 )->name('students.index');
-
-                Route::get(
-                    '/students/{id}',
-                    [StudentController::class, 'show']
-                )->name('students.show');
 
                 Route::post(
                     '/students/assign-class',
@@ -627,7 +641,7 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     ->name('teachers.search');
 
                 Route::resource('teachers', TeacherController::class)
-                    ->names('teachers');
+                    ->names('teachers')->except(['show']);
             });
 
         Route::middleware('role:id_operation_dept')->group(function () {

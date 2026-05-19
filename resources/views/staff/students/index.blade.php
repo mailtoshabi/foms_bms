@@ -19,10 +19,11 @@
                 </a>
                 Students ({{ $students->total() }})
             </h4>
-
-            <a href="{{ route('staff.students.create') }}" class="btn btn-primary">
-                Add Student
-            </a>
+            @if(auth('staff')->user()->hasRoleId(utility('id_enrolment_dept')) || auth('staff')->user()->hasRoleId(utility('id_operation_dept')))
+                <a href="{{ route('staff.students.create') }}" class="btn btn-primary">
+                    Add Student
+                </a>
+            @endif
         </div>
 
         <div class="card-body table-responsive">
@@ -84,10 +85,8 @@
                             <td>{{ $student->email ?? '-' }}</td>
 
                             <td>
-                                <span class="badge
-                                                    {{ $student->status == 'active' ? 'bg-success' : '' }}
-                                                    {{ $student->status == 'passout' ? 'bg-info' : '' }}
-                                                    {{ $student->status == 'dropout' ? 'bg-danger' : '' }}">
+                                <span
+                                    class="badge {{ $student->status == 'active' ? 'bg-success' : '' }} {{ $student->status == 'passout' ? 'bg-info' : '' }} {{ $student->status == 'dropout' ? 'bg-danger' : '' }}">
                                     {{ ucfirst($student->status) }}
                                 </span>
                             </td>

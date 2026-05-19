@@ -216,10 +216,14 @@
 
                                 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">
 
-                                    <td><a href="{{ route('staff.students.show', encrypt($fee->student->id)) }}">{{ $fee->student->name ?? 'N/A' }}</a></td>
+                                    <td>
+                                        <a href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($fee->student->id)) : route('staff.students.show', encrypt($fee->student->id)) }}">
+                                            {{ $fee->student->name ?? 'N/A' }}
+                                        </a>
+                                    </td>
 
                                     <td>
-                                        <a href="{{ route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">
+                                        <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">
                                             {{ $fee->classRoom->name ?? 'N/A' }}
                                         </a>
                                     </td>

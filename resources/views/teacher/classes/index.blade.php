@@ -69,7 +69,7 @@
 
                             <td>
                                 <a href="{{ route('teacher.classes.show', encrypt($class->id)) }}"
-                                    class="portal-btn portal-btn-primary">
+                                    class="portal-btn portal-btn-primary enter-class-btn">
                                     <i class="fas fa-sign-in-alt"></i> Enter
                                 </a>
                             </td>
@@ -101,5 +101,39 @@
     <div class="mt-3">
         {{ $classes->links() }}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const enterButtons = document.querySelectorAll('.enter-class-btn');
+            enterButtons.forEach(function(button) {
+                button.addEventListener('click', function(event) {
+                    if (this.classList.contains('disabled')) {
+                        event.preventDefault();
+                        return false;
+                    }
+
+                    // Disable all enter buttons to prevent double-clicking or navigating to multiple classes
+                    enterButtons.forEach(function(btn) {
+                        btn.classList.add('disabled');
+                        btn.style.pointerEvents = 'none';
+                        btn.style.opacity = '0.6';
+                    });
+
+                    // Update the clicked button text to "Entering" with a loading spinner
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Entering';
+                });
+            });
+
+            // Reset buttons state on pageshow (e.g., when clicking back button from cache)
+            window.addEventListener('pageshow', function(event) {
+                enterButtons.forEach(function(btn) {
+                    btn.classList.remove('disabled');
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.opacity = '1';
+                    btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Enter';
+                });
+            });
+        });
+    </script>
 
 @endsection

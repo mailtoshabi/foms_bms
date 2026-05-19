@@ -21,7 +21,7 @@
                     </span>
                     <span class="logo-lg align-items-center gap-2">
                         <!-- <i class="fas fa-graduation-cap text-white" style="font-size: 22px;"></i> -->
-                        <span class="logo-txt">FOMS ACADEMY</span>
+                        <span class="logo-txt">FOMS BMS</span>
                     </span>
                 </a>
             </div>

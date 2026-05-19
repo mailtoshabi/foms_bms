@@ -1,7 +1,12 @@
 @section('title', 'Teacher Details')
 
 @section('content')
-
+    @php
+        $staff = auth('staff')->user();
+        $isAdmin = auth('admin')->check();
+        $isOperation = $staff && $staff->hasRoleId(utility('id_operation_dept'));
+        $isAdministrator = $staff && $staff->hasRoleId(utility('id_administrator_dept'));
+    @endphp
     <div class="row">
 
         {{-- =========================
@@ -129,19 +134,19 @@
                                         <td>{{ $salary->status }}</td>
 
                                         <td>
+                                            @if($isAdmin || $isOperation || $isAdministrator)
+                                                <button
+                                                    class="btn btn-sm  editSalary {{ $salary->status == 'paid' ? 'disabled' : '' }}"
+                                                    title="Make Payment" data-id="{{ $salary->id }}"
+                                                    data-total_amount="{{ $salary->total_amount }}"
+                                                    data-method="{{ $salary->payment_method }}"
+                                                    data-date="{{ optional($salary->payment_date)->format('d M Y') }}"
+                                                    data-notes="{{ $salary->notes }}">
 
-                                            <button
-                                                class="btn btn-sm  editSalary {{ $salary->status == 'paid' ? 'disabled' : '' }}"
-                                                title="Make Payment" data-id="{{ $salary->id }}"
-                                                data-total_amount="{{ $salary->total_amount }}"
-                                                data-method="{{ $salary->payment_method }}"
-                                                data-date="{{ optional($salary->payment_date)->format('d M Y') }}"
-                                                data-notes="{{ $salary->notes }}">
+                                                    <i class="fas fa-money-bill-wave text-success"></i>
 
-                                                <i class="fas fa-money-bill-wave text-success"></i>
-
-                                            </button>
-
+                                                </button>
+                                            @endif
                                         </td>
 
                                     </tr>
@@ -178,11 +183,13 @@
 
                     <h5 class="mb-0">Assigned Classes</h5>
                     @if($showButtons == 'true')
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignClassModal">
+                        @if($isAdmin || $isOperation || $isAdministrator)
+                            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#assignClassModal">
 
-                            <i class="fas fa-plus"></i> Assign Classes
+                                <i class="fas fa-plus"></i> Assign Classes
 
-                        </button>
+                            </button>
+                        @endif
                     @endif
                 </div>
 
@@ -198,7 +205,9 @@
                                     <th>Type</th>
                                     <th>Days</th>
                                     <th>Hourly Wage</th>
-                                    <th width="100">Action</th>
+                                    @if($isAdmin || $isOperation || $isAdministrator)
+                                        <th width="100">Action</th>
+                                    @endif
                                 </tr>
                             </thead>
 
@@ -244,33 +253,34 @@
                                                 <input type="number" step="0.01" name="hourly_wage"
                                                     value="{{ $class->pivot->hourly_wage }}"
                                                     class="form-control form-control-sm me-2" style="width:120px">
-
-                                                <button class="btn btn-sm btn-success" type="submit"
-                                                    onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
-                                                    <i class="fas fa-save"></i>
-                                                </button>
-
-                                            </form>
-
-                                        </td>
-
-                                        <td>
-
-                                            <form method="POST"
-                                                action="{{ route('staff.teachers.classrooms.destroy', [$teacher->id, $class->id]) }}"
-                                                onsubmit="return confirm('Remove Teacher From the class?')">
-
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <button class="btn btn-sm btn-danger">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
+                                                @if($isAdmin || $isOperation || $isAdministrator)
+                                                    <button class="btn btn-sm btn-success" type="submit"
+                                                        onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">
+                                                        <i class="fas fa-save"></i>
+                                                    </button>
+                                                @endif
 
                                             </form>
 
                                         </td>
+                                        @if($isAdmin || $isOperation || $isAdministrator)
+                                            <td>
 
+                                                <form method="POST"
+                                                    action="{{ route('staff.teachers.classrooms.destroy', [$teacher->id, $class->id]) }}"
+                                                    onsubmit="return confirm('Remove Teacher From the class?')">
+
+                                                    @csrf
+                                                    @method('DELETE')
+
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+
+                                                </form>
+
+                                            </td>
+                                        @endif
                                     </tr>
 
                                 @empty

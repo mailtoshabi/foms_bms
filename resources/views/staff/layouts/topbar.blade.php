@@ -3,24 +3,14 @@
         <div class="d-flex align-items-center">
             <!-- LOGO -->
             <div class="">
-                <!-- <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
-                    <span class="logo-sm">
-                        <i class="fas fa-graduation-cap text-primary" style="font-size: 22px;"></i>
-                    </span>
-                    <span class="logo-lg d-flex align-items-center gap-2">
-                        <i class="fas fa-graduation-cap text-primary" style="font-size: 22px;"></i> 
-                        <span class="logo-txt">FOMS ACADEMY</span>
-                    </span>
-                </a> -->
-
-                <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
+                <a href="{{ route('staff.dashboard') }}" class="logo logo-light">
                     <span class="logo-sm">
                         <!-- <i class="fas fa-graduation-cap text-white" style="font-size: 22px;"></i> -->
                         <span class="logo-txt">FOMS</span>
                     </span>
                     <span class="logo-lg align-items-center gap-2">
                         <!-- <i class="fas fa-graduation-cap text-white" style="font-size: 22px;"></i> -->
-                        <span class="logo-txt">FOMS ACADEMY</span>
+                        <span class="logo-txt">FOMS BMS</span>
                     </span>
                 </a>
             </div>
