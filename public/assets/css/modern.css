@@ -177,7 +177,7 @@ body[data-layout-mode="dark"] .vertical-menu {
 
 #sidebar-menu ul li a {
     border-radius: 10px !important;
-    padding: 12px 16px !important;
+    padding: 12px 6px !important;
     color: #475569 !important;
     font-weight: 550 !important;
     font-size: 0.875rem !important;
@@ -186,7 +186,7 @@ body[data-layout-mode="dark"] .vertical-menu {
     display: flex !important;
     align-items: center !important;
     gap: 12px !important;
-    margin-bottom: 4px !important;
+    margin-bottom: 0px !important;
 }
 
 #sidebar-menu ul li a i {
@@ -237,7 +237,7 @@ body[data-layout-mode="dark"] #sidebar-menu ul li a:hover i {
 /* Submenu layout overrides */
 #sidebar-menu ul li ul.sub-menu {
     padding-left: 12px !important;
-    background: transparent !important;
+    background: #fff !important;
 }
 
 #sidebar-menu ul li ul.sub-menu li a {

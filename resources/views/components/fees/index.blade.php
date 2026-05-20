@@ -1,5 +1,97 @@
 @section('title', 'Fees')
 
+@php
+    $studentIds = $fees->pluck('student_id')->unique()->filter();
+    $classRoomIds = $fees->pluck('class_room_id')->unique()->filter();
+
+    if ($studentIds->isNotEmpty() && $classRoomIds->isNotEmpty()) {
+        // Fetch all monthly fees for these students and classrooms to locate previous fees in memory
+        $allMonthlyFees = DB::table('fees')
+            ->whereIn('student_id', $studentIds)
+            ->whereIn('class_room_id', $classRoomIds)
+            ->where('type', 'monthly')
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->student_id . '-' . $item->class_room_id;
+            });
+
+        // Fetch all completed class hours and their attendance for these students & classrooms
+        $allAttendances = DB::table('student_attendance')
+            ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
+            ->select(
+                'student_attendance.student_id',
+                'class_hours.class_room_id',
+                'class_hours.completed_at',
+                'student_attendance.is_present'
+            )
+            ->whereIn('student_attendance.student_id', $studentIds)
+            ->whereIn('class_hours.class_room_id', $classRoomIds)
+            ->where('class_hours.status', 'completed')
+            ->orderBy('class_hours.completed_at', 'asc')
+            ->get()
+            ->groupBy(function ($item) {
+                return $item->student_id . '-' . $item->class_room_id;
+            });
+
+        // Map through each fee in the current pagination and attach attendance calculations
+        foreach ($fees as $fee) {
+            if ($fee->type !== 'monthly') {
+                continue;
+            }
+
+            $key = $fee->student_id . '-' . $fee->class_room_id;
+
+            // Find the previous monthly fee for this student and classroom
+            $previousFee = null;
+            $studentClassFees = isset($allMonthlyFees[$key]) ? $allMonthlyFees[$key] : null;
+            if ($studentClassFees) {
+                $index = $studentClassFees->search(function ($item) use ($fee) {
+                    return (int)$item->id === (int)$fee->id;
+                });
+                if ($index !== false && $index > 0) {
+                    $previousFee = $studentClassFees->get($index - 1);
+                }
+            }
+
+            // Filter the attendances based on the interval
+            $total = 0;
+            $present = 0;
+
+            $studentClassAttendances = isset($allAttendances[$key]) ? $allAttendances[$key] : null;
+            if ($studentClassAttendances) {
+                $feeCreatedAt = \Carbon\Carbon::parse($fee->created_at);
+                $prevFeeCreatedAt = $previousFee ? \Carbon\Carbon::parse($previousFee->created_at) : null;
+
+                foreach ($studentClassAttendances as $att) {
+                    $completedAt = \Carbon\Carbon::parse($att->completed_at);
+
+                    if ($prevFeeCreatedAt) {
+                        // Classes completed after the previous fee up to the current fee
+                        $inInterval = $completedAt->gt($prevFeeCreatedAt) && $completedAt->lte($feeCreatedAt);
+                    } else {
+                        // If no previous fee exists, all classes up to the current fee
+                        $inInterval = $completedAt->lte($feeCreatedAt);
+                    }
+
+                    if ($inInterval) {
+                        $total++;
+                        if ($att->is_present) {
+                            $present++;
+                        }
+                    }
+                }
+            }
+
+            $fee->attendance_total = $total;
+            $fee->attendance_present = $present;
+            $fee->attendance_percent = $total > 0 ? round(($present / $total) * 100) : 0;
+            $fee->has_attendance = $total > 0;
+        }
+    }
+@endphp
+
 @section('content')
 
     @if(session('success'))
@@ -187,6 +279,7 @@
                             <tr>
                                 <th>Student</th>
                                 <th>Class</th>
+                                <th>Attendance</th>
                                 <th>Type</th>
                                 <th>Amount</th>
                                 <th>Due Date</th>
@@ -225,7 +318,18 @@
                                     <td>
                                         <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">
                                             {{ $fee->classRoom->name ?? 'N/A' }}
+                                            <br><small>Type: {{ ucfirst($fee->classRoom->classType->name ?? 'N/A') }}</small>
                                         </a>
+                                    </td>
+
+                                    <td>
+                                    @if($fee->type == 'monthly' && isset($fee->has_attendance) && $fee->has_attendance)
+                                        <span class="badge {{ $fee->attendance_percent >= 85 ? 'bg-success' : ($fee->attendance_percent >= 75 ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                            {{ $fee->attendance_present }}/{{ $fee->attendance_total }} ({{ $fee->attendance_percent }}%)
+                                        </span>
+                                    @else
+                                        <span class="text-muted small">N/A</span>
+                                    @endif
                                     </td>
 
                                     <td>
@@ -332,7 +436,7 @@
                             @empty
 
                                 <tr>
-                                    <td colspan="8" class="text-center">
+                                    <td colspan="9" class="text-center">
                                         No Fees
                                     </td>
                                 </tr>

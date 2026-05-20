@@ -318,6 +318,7 @@ class TeacherController extends Controller
                 // =========================
                 $previousClassHours = ClassHour::where('class_room_id', $class->id)
                     ->where('id', '!=', $classHour->id)
+                    ->where('status', 'completed')
                     ->exists();
 
                 if (!$previousClassHours && is_null($class->starting_date)) {

@@ -361,15 +361,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::get('/search', 'search')->name('search');
             });
 
-        Route::get(
-            '/students/{id}',
-            [StudentController::class, 'show']
-        )->name('students.show');
-        Route::get(
-            '/teachers/{id}',
-            [TeacherController::class, 'show']
-        )->name('teachers.show');
-
         Route::middleware('role:id_enrolment_dept,id_operation_dept')
             ->group(function () {
 
@@ -659,6 +650,15 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::get('/reports/attendance', [StaffReportController::class, 'attendance'])
                     ->name('reports.attendance');
             });
+
+        Route::get(
+            '/students/{id}',
+            [StudentController::class, 'show']
+        )->name('students.show');
+        Route::get(
+            '/teachers/{id}',
+            [TeacherController::class, 'show']
+        )->name('teachers.show');
 
     });
 
