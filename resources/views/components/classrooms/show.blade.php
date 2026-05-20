@@ -252,6 +252,64 @@
 
         </div>
 
+
+        {{-- ================= RECENT SESSIONS ================= --}}
+        <div class="card">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5>Recent Sessions</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle table-nowrap mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Teacher</th>
+                                <th>Duration</th>
+                                <th>Wage / Hour</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @forelse($class->classHours->take(10) as $hour)
+                                <tr>
+                                    <td>
+                                        <span class="fw-bold">{{ $hour->created_at ? $hour->created_at->format('d M Y') : '-' }}</span>
+                                        <br>
+                                        <small class="text-muted">{{ $hour->created_at ? $hour->created_at->format('h:i A') : '-' }}</small>
+                                    </td>
+                                    <td>{{ $hour->teacher->name ?? 'Not Assigned' }}</td>
+                                    <td>{{ $hour->duration ? $hour->duration . ' mins' : '-' }}</td>
+                                    <td>₹ {{ number_format($hour->hourly_wage, 2) }}</td>
+                                    <td>
+                                        @if($hour->status == 'completed')
+                                            <span class="badge bg-success">Completed</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        No recent sessions found
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>

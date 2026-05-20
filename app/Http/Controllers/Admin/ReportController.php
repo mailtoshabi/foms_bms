@@ -351,7 +351,8 @@ class ReportController extends Controller
                 'class_rooms.id as class_id',
                 'class_rooms.name as class_name',
                 'class_hours.link_updated_at',
-                'student_attendance.is_present'
+                'student_attendance.is_present',
+                'student_attendance.created_at'
             );
 
         if ($request->filled('search')) {
