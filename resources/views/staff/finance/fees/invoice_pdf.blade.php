@@ -1,3 +1,10 @@
+@php
+    $logoPath = public_path('images/logo.png');
+    $logoData = '';
+    if (file_exists($logoPath)) {
+        $logoData = base64_encode(file_get_contents($logoPath));
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +20,7 @@
         }
 
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 13px;
             color: #2d2d2d;
             background: #fff;
@@ -59,6 +66,18 @@
             font-size: 11px;
             color: #666;
             margin-top: 3px;
+        }
+
+        .institute-address {
+            font-size: 11px;
+            color: #555;
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .rupee {
+            font-family: DejaVu Sans !important;
+            font-weight: normal !important;
         }
 
         .invoice-label {
@@ -272,11 +291,36 @@
             transform: rotate(-15deg);
             letter-spacing: 4px;
         }
+
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            margin-top: -200px;
+            margin-left: -200px;
+            opacity: 0.05;
+            z-index: -1000;
+            text-align: center;
+        }
+        .watermark img {
+            width: 100%;
+            height: auto;
+        }
     </style>
 </head>
 
 <body>
     <div class="invoice-wrapper" style="position:relative;">
+
+        {{-- Watermark logo --}}
+        <div class="watermark">
+            @if(!empty($logoData))
+                <img src="data:image/png;base64,{{ $logoData }}" alt="Watermark Logo" />
+            @endif
+        </div>
 
         {{-- PAID watermark stamp --}}
         <div class="paid-stamp">PAID</div>
@@ -285,15 +329,18 @@
         <div class="header">
             <div class="header-top">
                 <div class="header-left">
-                    <div class="institute-name">{{ config('app.name') }}</div>
-                    <div class="institute-sub">Fee Receipt / Invoice</div>
+                    <div class="institute-name">FOMS ACADEMY</div>
+                    <div class="institute-address">
+                        Heavenly Plaza,<br>
+                        Vazhakkala,<br>
+                        Kakkanad,<br>
+                        Kochi - 682021
+                    </div>
                 </div>
                 <div class="header-right">
-                    <div class="invoice-label">INVOICE</div>
-                    <div class="invoice-id"># INV-{{ str_pad($fee->id, 5, '0', STR_PAD_LEFT) }}</div>
-                    <div style="margin-top:6px;">
-                        <span class="status-badge">PAID</span>
-                    </div>
+                    @if(!empty($logoData))
+                        <img src="data:image/png;base64,{{ $logoData }}" style="max-height: 70px; width: auto;" alt="Logo" />
+                    @endif
                 </div>
             </div>
         </div>
@@ -332,8 +379,8 @@
                 <div class="info-box-title">Invoice Details</div>
                 <table>
                     <tr>
-                        <td>Invoice No.</td>
-                        <td>INV-{{ str_pad($fee->id, 5, '0', STR_PAD_LEFT) }}</td>
+                        <td>Receipt No.</td>
+                        <td>{{ $fee->receipt_no ?? 'REC-' . str_pad($fee->id, 5, '0', STR_PAD_LEFT) }}</td>
                     </tr>
                     <tr>
                         <td>Fee Type</td>
@@ -344,8 +391,13 @@
                         <td>{{ \Carbon\Carbon::parse($fee->due_date)->format('d M Y') }}</td>
                     </tr>
                     <tr>
-                        <td>Generated On</td>
-                        <td>{{ now()->format('d M Y') }}</td>
+                        @php
+                            $lastPaymentDate = $fee->payments()->max('paid_date');
+                        @endphp
+                        @if($lastPaymentDate)
+                            <td>Receipted On</td>
+                            <td>{{ \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') }}</td>
+                        @endif
                     </tr>
                 </table>
             </div>
@@ -363,17 +415,17 @@
 
             <div class="summary-row">
                 <div class="summary-label">Total Fee Amount</div>
-                <div class="summary-value">₹ {{ number_format($fee->amount, 2) }}</div>
+                <div class="summary-value"><span class="rupee">&#8377;</span> {{ number_format($fee->amount, 2) }}</div>
             </div>
 
             <div class="summary-row">
                 <div class="summary-label">Amount Paid</div>
-                <div class="summary-value" style="color:#1cc88a;">₹ {{ number_format($totalPaid, 2) }}</div>
+                <div class="summary-value" style="color:#1cc88a;"><span class="rupee">&#8377;</span> {{ number_format($totalPaid, 2) }}</div>
             </div>
 
             <div class="summary-row summary-total">
                 <div class="summary-label">Balance</div>
-                <div class="summary-value">₹ {{ number_format(max(0, $remaining), 2) }}</div>
+                <div class="summary-value"><span class="rupee">&#8377;</span> {{ number_format(max(0, $remaining), 2) }}</div>
             </div>
         </div>
 
@@ -395,7 +447,7 @@
                     <tr>
                         <td>{{ $i + 1 }}</td>
                         <td>{{ \Carbon\Carbon::parse($payment->paid_date)->format('d M Y') }}</td>
-                        <td><strong>₹ {{ number_format($payment->paid_amount, 2) }}</strong></td>
+                        <td><strong><span class="rupee">&#8377;</span> {{ number_format($payment->paid_amount, 2) }}</strong></td>
                         <td>
                             <span class="method-badge">
                                 {{ ucwords(str_replace('_', ' ', $payment->payment_method)) }}
@@ -413,8 +465,11 @@
 
         {{-- FOOTER --}}
         <div class="footer">
-            <div class="footer-note">This is a system-generated invoice. No signature required.</div>
-            <div>{{ config('app.name') }} &mdash; Generated on {{ now()->format('d M Y, h:i A') }}</div>
+            <div class="footer-note" style="color: #c9302c; font-weight: bold; margin-bottom: 6px; font-size: 11px;">
+                Admission Fee once paid is strictly non-refundable under any circumstances.
+            </div>
+            <div class="footer-note">This is a system-generated Receipt. No signature required.</div>
+            <div>FOMS ACADEMY &mdash; PDF Generated on {{ now()->format('d M Y, h:i A') }}</div>
         </div>
 
     </div>

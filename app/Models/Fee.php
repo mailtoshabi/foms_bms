@@ -11,8 +11,30 @@ class Fee extends Model
         'type',
         'amount',
         'due_date',
-        'status'
+        'status',
+        'receipt_no'
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($fee) {
+            if (empty($fee->receipt_no)) {
+                $createdAt = $fee->created_at ? \Carbon\Carbon::parse($fee->created_at) : now();
+                $startOfMonth = $createdAt->copy()->startOfMonth();
+                $endOfMonth = $createdAt->copy()->endOfMonth();
+                
+                // Count fees created in the same month
+                $count = self::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
+                
+                $fee->receipt_no = sprintf(
+                    'REC-%s-%s-%d',
+                    $createdAt->format('m'),
+                    $createdAt->format('y'),
+                    $count + 1
+                );
+            }
+        });
+    }
 
     // ✅ One Fee has many payments
     public function payments()
