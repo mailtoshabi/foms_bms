@@ -20,7 +20,7 @@ class Authenticate extends Middleware
             return route('admin.login');
         }
 
-        if (str_starts_with($path, 'staff')) {
+        if (str_starts_with($path, 'staff') || str_starts_with($path, 'departments')) {
             return route('staff.login');
         }
 

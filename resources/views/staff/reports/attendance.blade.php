@@ -107,7 +107,7 @@
                                         <tr>
                                                 <th>Student</th>
                                                 <th>Class</th>
-                                                <th>Date</th>
+                                                <th>Attendance Date</th>
                                                 <th>Status</th>
                                         </tr>
                                 </thead>
@@ -125,7 +125,13 @@
                                                                                         +{{ $row->whatsapp_number }}</small>
                                                                         @endif</a>
                                                         </td>
-                                                        <td>{{ $row->class_name }}</td>
+                                                        <td>
+                                                                {{ $row->class_name }}
+                                                                @if(!empty($row->google_meet_link))
+                                                                        <br>
+                                                                        <small class="text-muted">{{ $row->google_meet_link }}</small>
+                                                                @endif
+                                                        </td>
                                                         <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}</td>
                                                         <td>
                                                                 <span class="badge {{ $row->is_present ? 'bg-success' : 'bg-danger' }}">

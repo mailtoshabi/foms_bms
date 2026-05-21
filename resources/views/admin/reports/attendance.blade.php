@@ -118,7 +118,7 @@
                                         <tr>
                                                 <th>Student</th>
                                                 <th>Class</th>
-                                                <th>Date</th>
+                                                <th>Attendance Date</th>
                                                 <th>Status</th>
                                         </tr>
                                 </thead>
@@ -143,6 +143,10 @@
                                                                 <a href="{{ route('admin.class_rooms.show', encrypt($row->class_id)) }}">
                                                                         {{ $row->class_name }}
                                                                 </a>
+                                                                @if(!empty($row->google_meet_link))
+                                                                        <br>
+                                                                        <small class="text-muted">{{ $row->google_meet_link }}</small>
+                                                                @endif
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}</td>
                                                         <td>

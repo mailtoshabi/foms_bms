@@ -25,6 +25,7 @@ class ReportController extends Controller
                 'students.is_whatsapp_different',
                 'class_rooms.name as class_name',
                 'class_hours.link_updated_at',
+                'class_hours.google_meet_link',
                 'student_attendance.is_present',
                 'student_attendance.created_at'
             );

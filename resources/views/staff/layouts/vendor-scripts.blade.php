@@ -54,7 +54,33 @@ $(document).ready(function() {
     });
 
     // Auto prepend https:// to google meet link
-    $(document).on('blur', 'input[name="google_meet_link"]', function() {
+    $(document).on('input', 'input[name="google_meet_link"]', function () {
+        var val = $(this).val();
+        if (val) {
+            var lowerVal = val.toLowerCase();
+            var target = 'https://';
+            var shouldPrepend = false;
+            
+            if (!lowerVal.startsWith('h')) {
+                shouldPrepend = true;
+            } else {
+                var isPrefixOfHttps = target.startsWith(lowerVal);
+                var isPrefixOfHttp = 'http://'.startsWith(lowerVal);
+                if (!isPrefixOfHttps && !isPrefixOfHttp && !lowerVal.startsWith('http://') && !lowerVal.startsWith('https://')) {
+                    shouldPrepend = true;
+                }
+            }
+            
+            if (shouldPrepend) {
+                var start = this.selectionStart;
+                var end = this.selectionEnd;
+                $(this).val(target + val);
+                this.setSelectionRange(start + target.length, end + target.length);
+            }
+        }
+    });
+
+    $(document).on('blur', 'input[name="google_meet_link"]', function () {
         var val = $(this).val().trim();
         if (val && !/^https?:\/\//i.test(val)) {
             $(this).val('https://' + val);

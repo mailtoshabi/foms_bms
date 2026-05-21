@@ -331,7 +331,6 @@
                 <div class="header-left">
                     <div class="institute-name">FOMS ACADEMY</div>
                     <div class="institute-address">
-                        Heavenly Plaza,<br>
                         Vazhakkala,<br>
                         Kakkanad,<br>
                         Kochi - 682021
