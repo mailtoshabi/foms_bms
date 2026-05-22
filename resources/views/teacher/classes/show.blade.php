@@ -135,7 +135,7 @@
                                     <td class="text-end">
                                         <span
                                             class="portal-badge {{ $percentage >= 75 ? 'portal-badge-success' : ($percentage >= 50 ? 'portal-badge-warning' : 'portal-badge-danger') }}">
-                                            {{ $present }}/{{ $total }} ({{ $percentage }}%)
+                                            {{ $present }}/{{ $totalClasses }} ({{ $percentage }}%)
                                         </span>
                                     </td>
                                 </tr>
@@ -166,7 +166,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($class->classHours->take(5) as $hour)
+                            @forelse($class->classHours->sortByDesc(function ($hour) {
+                                return [
+                                    $hour->status === 'pending' ? 1 : 0,
+                                    $hour->id
+                                ];
+                            })->take(5) as $hour)
                                 <tr>
                                     <td>
                                         <div class="d-flex flex-column">

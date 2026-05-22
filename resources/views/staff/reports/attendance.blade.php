@@ -132,7 +132,7 @@
                                                                         <small class="text-muted">{{ $row->google_meet_link }}</small>
                                                                 @endif
                                                         </td>
-                                                        <td>{{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($row->link_updated_at ?? $row->created_at)->format('d M Y') }}</td>
                                                         <td>
                                                                 <span class="badge {{ $row->is_present ? 'bg-success' : 'bg-danger' }}">
                                                                         {{ $row->is_present ? 'Present' : 'Absent' }}

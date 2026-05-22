@@ -51,24 +51,66 @@ class TeacherController extends Controller
             'students',
             'notes.files',
             'classHours' => function ($query) use ($teacher) {
-                $query->where('teacher_id', $teacher->id)->latest()->limit(10);
+                $query->where('teacher_id', $teacher->id)
+                    ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+                    ->latest()
+                    ->limit(15);
             }
         ])->findOrFail(decrypt($id));
 
         // =========================
-        // Attendance Calculation
+        // Attendance Calculation (Current Cycle Only)
         // =========================
 
-        // Get completed class hour IDs
-        $classHourIds = $class->classHours()
+        // Get completed class hour IDs for the current billing cycle
+        $classHourQuery = $class->classHours()
             ->where('teacher_id', $teacher->id)
             ->where('status', 'completed')
-            ->pluck('id');
+            ->where('has_fee_calculated', false);
 
-        // Total completed classes
+        if ($class->classType && strtolower($class->classType->name) === 'group' && $class->starting_date) {
+            // Determine current billing cycle dates based on starting_date day of month
+            $startingDate = Carbon::parse($class->starting_date);
+            $targetDay = $startingDate->day;
+
+            $today = now();
+            // Get start of this month
+            $currentCycleStart = $today->copy()->startOfMonth();
+            // Capped to the number of days in the current month
+            $daysInMonth = $currentCycleStart->daysInMonth;
+            $dayToUse = min($targetDay, $daysInMonth);
+            $currentCycleStart->day($dayToUse);
+
+            if ($today->lt($currentCycleStart)) {
+                // If today is before this month's billing day, the cycle started in the previous month
+                $currentCycleStart->subMonth()->startOfMonth();
+                $daysInPrevMonth = $currentCycleStart->daysInMonth;
+                $dayToUsePrev = min($targetDay, $daysInPrevMonth);
+                $currentCycleStart->day($dayToUsePrev);
+            }
+
+            if ($currentCycleStart->lt($startingDate)) {
+                $currentCycleStart = $startingDate->copy();
+            }
+
+            // Capped billing cycle end date (next month's billing day)
+            $currentCycleEnd = $currentCycleStart->copy()->addMonth()->startOfMonth();
+            $daysInNextMonth = $currentCycleEnd->daysInMonth;
+            $dayToUseNext = min($targetDay, $daysInNextMonth);
+            $currentCycleEnd->day($dayToUseNext);
+
+            $classHourQuery->whereBetween('completed_at', [
+                $currentCycleStart->toDateTimeString(),
+                $currentCycleEnd->toDateTimeString()
+            ]);
+        }
+
+        $classHourIds = $classHourQuery->pluck('id');
+
+        // Total completed classes in current cycle
         $totalClasses = $classHourIds->count();
 
-        // Attendance stats per student
+        // Attendance stats per student in current cycle
         $attendanceStats = DB::table('student_attendance')
             ->select(
                 'student_id',
@@ -108,6 +150,55 @@ class TeacherController extends Controller
 
         if ($class->is_completed) {
             return back()->with('error', 'Cannot start class. This class is already marked as completed.');
+        }
+
+        // Check group class hour limits for each monthly billing cycle
+        if ($class->classType && strtolower($class->classType->name) === 'group') {
+            $limit = ($class->classes_per_week ?? 0) * 4;
+            if ($limit > 0 && $class->starting_date) {
+                // Determine current billing cycle dates based on starting_date day of month
+                $startingDate = Carbon::parse($class->starting_date);
+                $targetDay = $startingDate->day;
+
+                $today = now();
+                // Get start of this month
+                $currentCycleStart = $today->copy()->startOfMonth();
+                // Capped to the number of days in the current month
+                $daysInMonth = $currentCycleStart->daysInMonth;
+                $dayToUse = min($targetDay, $daysInMonth);
+                $currentCycleStart->day($dayToUse);
+
+                if ($today->lt($currentCycleStart)) {
+                    // If today is before this month's billing day, the cycle started in the previous month
+                    $currentCycleStart->subMonth()->startOfMonth();
+                    $daysInPrevMonth = $currentCycleStart->daysInMonth;
+                    $dayToUsePrev = min($targetDay, $daysInPrevMonth);
+                    $currentCycleStart->day($dayToUsePrev);
+                }
+
+                if ($currentCycleStart->lt($startingDate)) {
+                    $currentCycleStart = $startingDate->copy();
+                }
+
+                // Capped billing cycle end date (next month's billing day)
+                $currentCycleEnd = $currentCycleStart->copy()->addMonth()->startOfMonth();
+                $daysInNextMonth = $currentCycleEnd->daysInMonth;
+                $dayToUseNext = min($targetDay, $daysInNextMonth);
+                $currentCycleEnd->day($dayToUseNext);
+
+                $classHoursCount = ClassHour::where('class_room_id', $class->id)
+                    ->where('status', 'completed')
+                    ->where('has_fee_calculated', false)
+                    ->whereBetween('completed_at', [
+                        $currentCycleStart->toDateTimeString(),
+                        $currentCycleEnd->toDateTimeString()
+                    ])
+                    ->count();
+
+                if ($classHoursCount >= $limit) {
+                    return back()->with('error', 'Cannot start class. You have already completed the maximum allowed ' . $limit . ' classes for the current monthly billing cycle.');
+                }
+            }
         }
 
         $hasPending = ClassHour::where('class_room_id', $class->id)
@@ -336,11 +427,12 @@ class TeacherController extends Controller
 
                     $requiredClasses = $class->classes_per_week * 4;
 
-                    // Get unprocessed completed class hours
+                    // Get unprocessed completed class hours chronologically
                     $completedClassHours = ClassHour::where('class_room_id', $class->id)
                         ->where('status', 'completed')
                         ->where('has_fee_calculated', false)
-                        ->orderBy('link_updated_at')
+                        ->orderBy('completed_at')
+                        ->orderBy('id')
                         ->get();
 
                     if ($completedClassHours->count() >= $requiredClasses) {
@@ -350,6 +442,11 @@ class TeacherController extends Controller
 
                         // Generate fees for each student
                         foreach ($students as $student) {
+
+                            // Skip inactive or monthly fee exempted students
+                            if ($student->status !== 'active' || $student->is_monthly_fee_exempted) {
+                                continue;
+                            }
 
                             $amount = max(0, $class->monthly_fee - ($student->monthly_fee_discount ?? 0));
 
