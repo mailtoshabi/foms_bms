@@ -10,8 +10,11 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Carbon\Carbon;
 
+use App\Imports\Concerns\TransformsDates;
+
 class StudentBulkCreateImport implements ToCollection, WithHeadingRow
 {
+    use TransformsDates;
     public function collection(Collection $rows)
     {
         // Cache the default country to avoid repeated queries
@@ -184,18 +187,4 @@ class StudentBulkCreateImport implements ToCollection, WithHeadingRow
         }
     }
 
-    private function transformDate($value)
-    {
-        if (!$value)
-            return null;
-
-        try {
-            if (is_numeric($value)) {
-                return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
-            }
-            return Carbon::parse($value);
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
 }

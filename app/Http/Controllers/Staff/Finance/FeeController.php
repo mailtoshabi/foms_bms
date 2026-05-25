@@ -61,12 +61,24 @@ class FeeController extends Controller
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('from_date')) {
-            $query->whereDate('due_date', '>=', $request->from_date);
-        }
-
-        if ($request->filled('to_date')) {
-            $query->whereDate('due_date', '<=', $request->to_date);
+        if ($request->filled('from_date') || $request->filled('to_date')) {
+            if ($tab === 'paid') {
+                $query->whereHas('payments', function ($q) use ($request) {
+                    if ($request->filled('from_date')) {
+                        $q->whereDate('paid_date', '>=', $request->from_date);
+                    }
+                    if ($request->filled('to_date')) {
+                        $q->whereDate('paid_date', '<=', $request->to_date);
+                    }
+                });
+            } else {
+                if ($request->filled('from_date')) {
+                    $query->whereDate('due_date', '>=', $request->from_date);
+                }
+                if ($request->filled('to_date')) {
+                    $query->whereDate('due_date', '<=', $request->to_date);
+                }
+            }
         }
 
         // Check if any filter is applied

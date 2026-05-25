@@ -220,12 +220,12 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">From Due Date</label>
+                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'From Payment Date' : 'From Due Date' }}</label>
                                 <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">To Due Date</label>
+                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'To Payment Date' : 'To Due Date' }}</label>
                                 <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
                             </div>
 

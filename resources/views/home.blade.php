@@ -290,11 +290,24 @@
 
     // ── Service Worker Registration ──────────────────────────────────────────
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker
-            .register('{{ url('sw.js') }}', { scope: '/' })
-            .catch(function (err) {
-                console.error('[PWA] SW registration failed:', err);
+        @if(config('app.env') === 'local')
+            // Unregister any active service worker in local development to avoid stale caching & false offline errors
+            navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                for (var registration of registrations) {
+                    registration.unregister().then(function (unregistered) {
+                        if (unregistered) {
+                            console.log('[PWA] Unregistered service worker in local development:', registration);
+                        }
+                    });
+                }
             });
+        @else
+            navigator.serviceWorker
+                .register('{{ url('sw.js') }}', { scope: '/' })
+                .catch(function (err) {
+                    console.error('[PWA] SW registration failed:', err);
+                });
+        @endif
     }
 
     if (isStandalone) return;

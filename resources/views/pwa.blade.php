@@ -13,38 +13,51 @@
     // ── 1. Service Worker Registration ───────────────────────────────────────
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () {
-            navigator.serviceWorker
-                .register('{{ url('sw.js') }}', { scope: '/' })
-                .then(function (registration) {
-                    // Listen for an updated SW being installed in the background
-                    registration.addEventListener('updatefound', function () {
-                        var newWorker = registration.installing;
-                        if (!newWorker) return;
-
-                        newWorker.addEventListener('statechange', function () {
-                            // When new SW is installed and old SW is still controlling,
-                            // send skipWaiting so new SW activates immediately.
-                            if (
-                                newWorker.state === 'installed' &&
-                                navigator.serviceWorker.controller
-                            ) {
-                                newWorker.postMessage({ action: 'skipWaiting' });
+            @if(config('app.env') === 'local')
+                // Unregister any active service worker in local development to avoid stale caching & false offline errors
+                navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    for (var registration of registrations) {
+                        registration.unregister().then(function (unregistered) {
+                            if (unregistered) {
+                                console.log('[PWA] Unregistered service worker in local development:', registration);
                             }
                         });
-                    });
-                })
-                .catch(function (err) {
-                    console.error('[PWA] Service Worker registration failed:', err);
+                    }
                 });
+            @else
+                navigator.serviceWorker
+                    .register('{{ url('sw.js') }}', { scope: '/' })
+                    .then(function (registration) {
+                        // Listen for an updated SW being installed in the background
+                        registration.addEventListener('updatefound', function () {
+                            var newWorker = registration.installing;
+                            if (!newWorker) return;
 
-            // When a new SW takes control, reload so users get the latest version
-            var refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', function () {
-                if (!refreshing) {
-                    refreshing = true;
-                    window.location.reload();
-                }
-            });
+                            newWorker.addEventListener('statechange', function () {
+                                // When new SW is installed and old SW is still controlling,
+                                // send skipWaiting so new SW activates immediately.
+                                if (
+                                    newWorker.state === 'installed' &&
+                                    navigator.serviceWorker.controller
+                                ) {
+                                    newWorker.postMessage({ action: 'skipWaiting' });
+                                }
+                            });
+                        });
+                    })
+                    .catch(function (err) {
+                        console.error('[PWA] Service Worker registration failed:', err);
+                    });
+
+                // When a new SW takes control, reload so users get the latest version
+                var refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', function () {
+                    if (!refreshing) {
+                        refreshing = true;
+                        window.location.reload();
+                    }
+                });
+            @endif
         });
     }
 

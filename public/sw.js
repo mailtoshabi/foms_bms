@@ -124,6 +124,15 @@ self.addEventListener('activate', (event) => {
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
+    // Bypass service worker entirely in local development to avoid stale caching & false offline errors
+    if (
+        location.hostname === 'localhost' ||
+        location.hostname === '127.0.0.1' ||
+        location.hostname.endsWith('.local')
+    ) {
+        return;
+    }
+
     const req = event.request;
     const url = new URL(req.url);
 
@@ -136,6 +145,7 @@ self.addEventListener('fetch', (event) => {
     if (isNeverCache(url.pathname)) {
         event.respondWith(
             fetch(req).catch((error) => {
+                console.error('[SW] Fetch failed for sensitive route:', error, req.url);
                 if (req.mode === 'navigate') {
                     return caches.match('/offline.html');
                 }
@@ -191,6 +201,7 @@ self.addEventListener('fetch', (event) => {
     // ── Everything else → network-first, offline fallback ────────────────
     event.respondWith(
         fetch(req).catch((error) => {
+            console.error('[SW] Fetch failed:', error, req.url);
             if (req.mode === 'navigate') {
                 return caches.match('/offline.html');
             }
