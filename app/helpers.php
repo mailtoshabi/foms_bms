@@ -222,14 +222,15 @@ if (!function_exists('allTeachersRanked')) {
                 $notesCount = $ns->total_notes ?? 0;
                 $studentsCount = $ss->total_students ?? 0;
 
-                // New Scoring Formula (Weights: Classes 30%, Hours 20%, Students 15%, Attendance 15%, Notes 10%, Earnings 10%)
-                $score =
-                    ($totalClasses * 0.20) +
-                    ($totalHours * 0.20) +
-                    ($studentsCount * 0.30) +
+                // New Scoring Formula (Weights: Classes 15%, Hours 10%, Students 40%, Attendance 10%, Notes 10%, Earnings 15%)
+                $score = (
+                    ($totalClasses * 0.15) +
+                    ($totalHours * 0.10) +
+                    ($studentsCount * 0.40) +
                     ($attendancePercent * 0.10) +
                     ($notesCount * 0.10) +
-                    (($earnings / 100) * 0.10);
+                    (($earnings / 100) * 0.15)
+                ) / 4;
 
                 $data[] = [
                     'teacher' => $teacher,
@@ -325,14 +326,15 @@ if (!function_exists('allTimeTeachersRanked')) {
                 $notesCount = $ns->total_notes ?? 0;
                 $studentsCount = $ss->total_students ?? 0;
 
-                // New Scoring Formula (Weights: Classes 30%, Hours 20%, Students 15%, Attendance 15%, Notes 10%, Earnings 10%)
-                $score =
-                    ($totalClasses * 0.20) +
-                    ($totalHours * 0.20) +
-                    ($studentsCount * 0.30) +
+                // New Scoring Formula (Weights: Classes 15%, Hours 10%, Students 40%, Attendance 10%, Notes 10%, Earnings 15%)
+                $score = (
+                    ($totalClasses * 0.15) +
+                    ($totalHours * 0.10) +
+                    ($studentsCount * 0.40) +
                     ($attendancePercent * 0.10) +
                     ($notesCount * 0.10) +
-                    (($earnings / 100) * 0.10);
+                    (($earnings / 100) * 0.15)
+                ) / 4;
 
                 $data[] = [
                     'teacher' => $teacher,
