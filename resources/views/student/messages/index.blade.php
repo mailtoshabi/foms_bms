@@ -4,13 +4,19 @@
 
 @section('content')
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Inbox</h4>
-            <a href="{{ route('student.messages.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> New Message
+    <div class="portal-page-header">
+        <div class="d-flex align-items-center">
+            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle" title="Go Back" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-chevron-left"></i>
             </a>
+            <h4 class="m-0 fw-bold text-dark">Inbox</h4>
         </div>
+        <a href="{{ route('student.messages.create') }}" class="portal-btn portal-btn-primary">
+            <i class="fas fa-plus"></i> New Message
+        </a>
+    </div>
+
+    <div class="card">
         <div class="card-body">
             @if(session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>

@@ -3,12 +3,18 @@
 @section('title', 'My Classes')
 
 @section('content')
+    <div class="portal-page-header">
+        <div class="d-flex align-items-center">
+            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle" title="Go Back" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <h4 class="m-0 fw-bold text-dark">My Classes</h4>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header">
-                    <h4>My Classes</h4>
-                </div>
                 <div class="card-body">
                     @if($classes->isEmpty())
                         <p class="text-muted">No classes assigned yet.</p>

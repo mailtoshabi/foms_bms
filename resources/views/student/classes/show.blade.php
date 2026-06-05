@@ -4,21 +4,27 @@
 
 @section('content')
 
-    <div class="card">
-        <div class="card-header">
-            <div class="d-flex align-items-center gap-3">
-                <h4 class="mb-0">{{ $class->name }}</h4>
+    <div class="portal-page-header">
+        <div class="d-flex align-items-center">
+            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle" title="Go Back" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-chevron-left"></i>
+            </a>
+            <h4 class="m-0 fw-bold text-dark">
+                {{ $class->name }}
                 @if ($class->is_completed)
-                    <span class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-1 font-size-12">
+                    <span class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-1 font-size-12 ms-2">
                         <i class="fas fa-check-circle me-1"></i> Completed
                     </span>
                 @else
-                    <span class="badge bg-soft-primary text-primary border border-primary rounded-pill px-3 py-1 font-size-12">
+                    <span class="badge bg-soft-primary text-primary border border-primary rounded-pill px-3 py-1 font-size-12 ms-2">
                         <i class="fas fa-play-circle me-1"></i> Active
                     </span>
                 @endif
-            </div>
+            </h4>
         </div>
+    </div>
+
+    <div class="card">
         <div class="card-body">
 
             <div class="row">
