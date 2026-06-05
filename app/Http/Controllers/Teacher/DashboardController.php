@@ -128,8 +128,9 @@ class DashboardController extends Controller
             $earnings[] = round($total, 2);
         }
 
-        return view('teacher.dashboard', compact(
+        $rankData = teacherRankData($teacher->id);
 
+        return view('teacher.dashboard', compact(
             'classes',
             'completedSessions',
             'pendingSessions',
@@ -142,7 +143,8 @@ class DashboardController extends Controller
             'pendingSalary',
             'chartLabels',
             'classCounts',
-            'earnings'
+            'earnings',
+            'rankData'
         ));
     }
 
@@ -160,5 +162,115 @@ class DashboardController extends Controller
             ->get();
 
         return view('teacher.profile', compact('teacher', 'classes'));
+    }
+
+    public function updatePhoto(Request $request)
+    {
+        $teacher = Auth::guard('teacher')->user();
+
+        if (!$teacher) {
+            return redirect()->route('teacher.login');
+        }
+
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:10240',
+        ]);
+
+        if ($request->hasFile('photo')) {
+            $photo = $request->file('photo');
+
+            // Delete old photo if exists
+            if ($teacher->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($teacher->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->photo);
+            }
+
+            if (!extension_loaded('gd')) {
+                // Fallback: save directly if GD is not available
+                $path = $photo->store('teachers/photos', 'public');
+                $teacher->update(['photo' => $path]);
+                return back()->with('success', 'Profile picture updated successfully (uncompressed).');
+            }
+
+            $mime = $photo->getMimeType();
+            
+            // Create image resource based on type
+            if ($mime === 'image/jpeg' || $mime === 'image/jpg') {
+                $srcImage = @imagecreatefromjpeg($photo->getRealPath());
+            } elseif ($mime === 'image/png') {
+                $srcImage = @imagecreatefrompng($photo->getRealPath());
+            } elseif ($mime === 'image/gif') {
+                $srcImage = @imagecreatefromgif($photo->getRealPath());
+            } elseif ($mime === 'image/webp') {
+                $srcImage = @imagecreatefromwebp($photo->getRealPath());
+            } else {
+                $srcImage = false;
+            }
+
+            if (!$srcImage) {
+                // Fallback if image loading fails
+                $path = $photo->store('teachers/photos', 'public');
+                $teacher->update(['photo' => $path]);
+                return back()->with('success', 'Profile picture updated successfully (uncompressed).');
+            }
+
+            // Get original dimensions
+            $width = imagesx($srcImage);
+            $height = imagesy($srcImage);
+
+            // Determine target dimensions (max 800px width/height)
+            $maxDim = 800;
+            if ($width > $maxDim || $height > $maxDim) {
+                if ($width > $height) {
+                    $newWidth = $maxDim;
+                    $newHeight = (int)($height * ($maxDim / $width));
+                } else {
+                    $newHeight = $maxDim;
+                    $newWidth = (int)($width * ($maxDim / $height));
+                }
+            } else {
+                $newWidth = $width;
+                $newHeight = $height;
+            }
+
+            // Create target truecolor image and fill with white background (handles transparent png/gif)
+            $dstImage = imagecreatetruecolor($newWidth, $newHeight);
+            $white = imagecolorallocate($dstImage, 255, 255, 255);
+            imagefill($dstImage, 0, 0, $white);
+
+            // Copy and scale the original image
+            imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+            imagedestroy($srcImage);
+
+            // Determine destination file name & path
+            $filename = 'teachers/photos/' . uniqid() . '.jpg';
+            $targetPath = storage_path('app/public/' . $filename);
+
+            // Ensure destination directory exists
+            $dir = dirname($targetPath);
+            if (!file_exists($dir)) {
+                @mkdir($dir, 0755, true);
+            }
+
+            // Save with progressive quality compression until file size is below 200KB
+            $quality = 85;
+            $maxSizeBytes = 200 * 1024;
+            
+            do {
+                ob_start();
+                imagejpeg($dstImage, null, $quality);
+                $imageData = ob_get_clean();
+                $fileSize = strlen($imageData);
+                $quality -= 5;
+            } while ($fileSize > $maxSizeBytes && $quality >= 30);
+
+            file_put_contents($targetPath, $imageData);
+            imagedestroy($dstImage);
+
+            $teacher->update(['photo' => $filename]);
+
+            return back()->with('success', 'Profile picture updated and compressed below 200KB successfully.');
+        }
+
+        return back()->with('error', 'Failed to update profile picture.');
     }
 }

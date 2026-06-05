@@ -92,6 +92,30 @@ class DashboardController extends Controller
 
         $topTeachers = topTeachers();
 
+        $isFinanceDept = $staff->hasRoleId(utility('id_finance_dept')) || $staff->hasRoleId(utility('id_operation_dept'));
+        $paidAmount = 0;
+        $pendingAmount = 0;
+
+        if ($isFinanceDept) {
+            $paidAmount = \Illuminate\Support\Facades\DB::table('fee_payments')
+                ->whereMonth('paid_date', $now->month)
+                ->whereYear('paid_date', $now->year)
+                ->sum('paid_amount');
+
+            $totalFees = \Illuminate\Support\Facades\DB::table('fees')
+                ->whereMonth('due_date', $now->month)
+                ->whereYear('due_date', $now->year)
+                ->sum('amount');
+
+            $totalPaidAgainstFees = \Illuminate\Support\Facades\DB::table('fee_payments')
+                ->join('fees', 'fees.id', '=', 'fee_payments.fee_id')
+                ->whereMonth('fees.due_date', $now->month)
+                ->whereYear('fees.due_date', $now->year)
+                ->sum('fee_payments.paid_amount');
+
+            $pendingAmount = max($totalFees - $totalPaidAgainstFees, 0);
+        }
+
         return view('staff.dashboard.index', compact(
             'stats',
             'topTeachers',
@@ -102,7 +126,10 @@ class DashboardController extends Controller
             'overdueFeesCount',
             'overdueFeesAmount',
             'unpaidTeacherSalariesCount',
-            'unpaidTeacherSalariesAmount'
+            'unpaidTeacherSalariesAmount',
+            'isFinanceDept',
+            'paidAmount',
+            'pendingAmount'
         ));
     }
 

@@ -86,7 +86,7 @@ if (!function_exists('runDailySalaryFeeProcess')) {
 
     function runDailySalaryFeeProcess()
     {
-        $today = Carbon::today()->toDateString();
+        $todayStr = Carbon::today()->toDateString();
 
         $utility = Utility::firstOrCreate(
             ['key' => 'daily_process_last_run'],
@@ -94,35 +94,49 @@ if (!function_exists('runDailySalaryFeeProcess')) {
         );
 
         // ✅ Already ran today
-        if ($utility->value === $today) {
+        if ($utility->value === $todayStr) {
             return;
         }
 
-        DB::transaction(function () use ($utility, $today) {
+        DB::transaction(function () use ($utility, $todayStr) {
 
             $utility->refresh();
 
-            if ($utility->value === $today) {
+            if ($utility->value === $todayStr) {
                 return;
             }
 
-            // ============================
-            // 🔹 1. Teacher Salary
-            // ============================
-            foreach (Teacher::cursor() as $teacher) {
-                app(SalaryService::class)
-                    ->processTeacherSalary($teacher->id);
+            // Determine the starting date for catch up
+            if ($utility->value) {
+                $startDate = Carbon::parse($utility->value)->addDay();
+            } else {
+                $startDate = Carbon::today();
             }
 
-            // ============================
-            // 🔹 2. Group Class Fees
-            // ============================
-            app(FeeService::class)
-                ->generateGroupFeesForToday();
+            $endDate = Carbon::today();
+
+            // Run process sequentially for every missed date up to today
+            for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+                $dateStr = $date->toDateString();
+
+                // ============================
+                // 🔹 1. Teacher Salary
+                // ============================
+                foreach (Teacher::cursor() as $teacher) {
+                    app(SalaryService::class)
+                        ->processTeacherSalary($teacher->id, $dateStr);
+                }
+
+                // ============================
+                // 🔹 2. Group Class Fees
+                // ============================
+                app(FeeService::class)
+                    ->generateGroupFeesForToday($dateStr);
+            }
 
             // ✅ Mark completed
             $utility->update([
-                'value' => $today
+                'value' => $todayStr
             ]);
         });
     }
@@ -409,7 +423,7 @@ if (!function_exists('teacherRankData')) {
         $label = $tier['label'];
         $color = $tier['color'];
 
-        return compact('score', 'stars', 'label', 'color', 'totalClasses', 'totalHours', 'attendancePercent', 'totalNotes', 'studentsCount', 'rank');
+        return compact('score', 'stars', 'label', 'color', 'totalClasses', 'totalHours', 'attendancePercent', 'totalNotes', 'studentsCount', 'rank', 'earnings');
     }
 }
 

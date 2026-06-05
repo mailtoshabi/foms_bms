@@ -21,6 +21,11 @@
             <form method="GET" class="row mb-3">
 
                 <div class="col-md-3">
+                    <label class="form-label fw-bold">Search</label>
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Name or contact">
+                </div>
+
+                <div class="col-md-3">
                     <label class="form-label fw-bold">Status</label>
                     <select name="status" class="form-control select2">
                         <option value="">All Status</option>
@@ -36,7 +41,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label fw-bold">Source</label>
                     <select name="source_id" class="form-control select2">
                         <option value="">All Sources</option>
@@ -48,12 +53,12 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label fw-bold">Date</label>
                     <input type="date" name="date" value="{{ request('date') }}" class="form-control" placeholder="Date">
                 </div>
 
-                <div class="col-md-3 d-flex align-items-end gap-2">
+                <div class="col-md-2 d-flex align-items-end gap-2">
                     <button class="btn btn-primary">Filter</button>
                     <a href="{{ route('staff.student-leads.index') }}" class="btn btn-light">Reset</a>
                 </div>

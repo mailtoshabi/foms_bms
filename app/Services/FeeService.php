@@ -25,11 +25,11 @@ class FeeService
         ]);
     }
 
-    public function generateGroupFeesForToday()
+    public function generateGroupFeesForToday($date = null)
     {
-        $today = now();
+        $today = $date ? Carbon::parse($date) : now();
         $dayOfMonth = $today->day;
-        $isLastDayOfMonth = $today->copy()->endOfMonth()->isToday();
+        $isLastDayOfMonth = $today->copy()->isLastOfMonth();
 
         // 1. Only active classrooms (is_completed = false)
         // 2. Only if at least one month is complete from the classroom's starting date (prior to current month)
@@ -85,7 +85,7 @@ class FeeService
                         'student_id' => $student->id,
                         'class_room_id' => $classRoom->id,
                         'amount' => $amount,
-                        'due_date' => now()->addDays(7),
+                        'due_date' => $today->copy()->addDays(7),
                         'status' => 'unpaid',
                         'type' => 'monthly',
                     ]);

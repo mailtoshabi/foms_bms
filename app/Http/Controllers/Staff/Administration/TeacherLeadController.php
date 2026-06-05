@@ -20,6 +20,16 @@ class TeacherLeadController extends Controller
     {
         $leads = TeacherLead::query()->with(['country', 'notes.staff']);
 
+        // Search by name or contact
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $leads->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('contact_number', 'like', "%{$search}%")
+                  ->orWhere('whatsapp_number', 'like', "%{$search}%");
+            });
+        }
+
         if ($request->filled('status')) {
             $leads->where('status', $request->status);
         }
@@ -28,7 +38,7 @@ class TeacherLeadController extends Controller
             $leads->whereDate('created_at', $request->date);
         }
 
-        $leads = $leads->latest()->paginate(utility('pagination', 50));
+        $leads = $leads->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         return view('staff.teacher_leads.index', compact('leads'));
     }

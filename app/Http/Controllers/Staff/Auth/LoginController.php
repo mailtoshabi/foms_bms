@@ -38,6 +38,15 @@ class LoginController extends Controller
         $credentials = $request->only('phone', 'password');
 
         if (Auth::guard('staff')->attempt($credentials, $request->boolean('remember'))) {
+            $staff = Auth::guard('staff')->user();
+            if ($staff->is_blocked) {
+                Auth::guard('staff')->logout();
+                return back()
+                    ->withErrors([
+                        'phone' => 'Your account is blocked. Please contact administration.',
+                    ])
+                    ->onlyInput('phone');
+            }
 
             $request->session()->regenerate(); // Prevent session fixation
 

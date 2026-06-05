@@ -317,6 +317,10 @@ class TeacherController extends Controller
             };
         }
 
+        if ($request->filled('class_room_id')) {
+            $query->where('class_room_id', $request->class_room_id);
+        }
+
         if ($request->filled('date_from')) {
             $query->whereDate('link_updated_at', '>=', $request->date_from);
         }
@@ -327,7 +331,9 @@ class TeacherController extends Controller
 
         $sessions = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
-        return view('teacher.classes.sessions', compact('sessions'));
+        $classRooms = $teacher->classRooms()->with('course')->get();
+
+        return view('teacher.classes.sessions', compact('sessions', 'classRooms'));
     }
 
 

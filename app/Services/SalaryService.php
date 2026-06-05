@@ -21,7 +21,7 @@ class SalaryService
         return StaffSalary::create($data);
     }
 
-    public function processTeacherSalary($teacherId)
+    public function processTeacherSalary($teacherId, $date = null)
     {
         $teacher = Teacher::findOrFail($teacherId);
 
@@ -29,7 +29,7 @@ class SalaryService
             return;
         }
 
-        $today = now();
+        $today = $date ? Carbon::parse($date) : now();
 
         // ✅ Safe cycle day
         $cycleDay = min($teacher->salary_cycle_day, $today->daysInMonth);

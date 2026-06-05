@@ -74,6 +74,16 @@ $(document).ready(function () {
 
     table_min_height();
 
+    // Automatically focus search input when Select2 is opened (native DOM focus to bypass jQuery 3.6.0+ focus interception)
+    $(document).on('select2:open', function () {
+        setTimeout(function () {
+            var searchField = document.querySelector('.select2-container--open .select2-search__field');
+            if (searchField) {
+                searchField.focus();
+            }
+        }, 50);
+    });
+
 });
 
 

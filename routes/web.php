@@ -694,6 +694,8 @@ Route::prefix('teacher')
             ->name('dashboard');
         Route::get('/profile', [TeacherDashboardController::class, 'profile'])
             ->name('profile');
+        Route::post('/profile/update-photo', [TeacherDashboardController::class, 'updatePhoto'])
+            ->name('profile.update-photo');
 
         Route::get(
             'classes',

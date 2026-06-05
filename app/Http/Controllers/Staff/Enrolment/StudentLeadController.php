@@ -24,6 +24,16 @@ class StudentLeadController extends Controller
     {
         $leads = StudentLead::with(['source', 'notes.staff']);
 
+        // Search by name or contact
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $leads->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('contact_number', 'like', "%{$search}%")
+                  ->orWhere('whatsapp_number', 'like', "%{$search}%");
+            });
+        }
+
         // Filter by status
         if ($request->filled('status')) {
             $leads->where('status', $request->status);
@@ -39,7 +49,7 @@ class StudentLeadController extends Controller
             $leads->whereDate('created_at', $request->date);
         }
 
-        $leads = $leads->latest()->paginate(utility('pagination', 50));
+        $leads = $leads->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         // Needed for filter dropdown
         $sources = Source::where('is_active', true)->get();

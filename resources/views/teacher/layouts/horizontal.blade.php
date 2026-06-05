@@ -50,7 +50,7 @@
                 <button type="button" class="btn d-flex align-items-center gap-2 border-0"
                     id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <img class="rounded-circle header-profile-user"
-                        src="@if ((Auth::guard('teacher')->user()->photo == '') || (empty(Auth::guard('teacher')->user()->photo))) https://ui-avatars.com/api/?name={{ Auth::guard('teacher')->user()->name }}&size=200 @else {{ URL::asset('images/' . Auth::guard('teacher')->user()->photo) }} @endif"
+                        src="@if(Auth::guard('teacher')->user()->photo){{ asset('storage/' . Auth::guard('teacher')->user()->photo) }}@else https://ui-avatars.com/api/?name={{ urlencode(Auth::guard('teacher')->user()->name) }}&size=150 @endif"
                         alt="Header Avatar">
                     <span
                         class="d-none d-xl-inline-block ms-1 fw-bold text-dark">{{ Auth::guard('teacher')->user()->name }}</span>

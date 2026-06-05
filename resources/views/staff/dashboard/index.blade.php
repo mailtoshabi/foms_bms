@@ -198,27 +198,41 @@
         {{-- Expenses this month: hr | operation --}}
         @if($isHr)
             <!-- <div class="col-xl-3 col-md-6">
-                        <a href="{{ route('staff.expenses.index') }}" class="text-decoration-none">
-                            <div class="card card-h-100">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center">
-                                        <div class="flex-grow-1">
-                                            <span class="text-muted d-block">Total Expenses <small class="text-muted">(this
-                                                    month)</small></span>
-                                            <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <i class="fas fa-receipt fa-2x text-danger"></i>
+                                <a href="{{ route('staff.expenses.index') }}" class="text-decoration-none">
+                                    <div class="card card-h-100">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <span class="text-muted d-block">Total Expenses <small class="text-muted">(this
+                                                            month)</small></span>
+                                                    <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <i class="fas fa-receipt fa-2x text-danger"></i>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div> -->
+                                </a>
+                            </div> -->
         @endif
 
     </div>
 
+    @if($isFinance)
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Fee Status (This Month)</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="feeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 
     {{-- ===== Top Performing Teachers: administrator | hr | operation ===== --}}
     @if($isAdministrator || $isHr)
@@ -234,4 +248,32 @@
     <!-- dashboard init -->
     <script src="{{ URL::asset('/assets/js/pages/dashboard.init.js') }}"></script>
 
+    @if($isFinance)
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctxFee = document.getElementById('feeChart');
+            if (ctxFee) {
+                new Chart(ctxFee, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Paid', 'Pending'],
+                        datasets: [{
+                            data: [
+                                        {{ $paidAmount }},
+                                {{ $pendingAmount }}
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+    @endif
 @endsection

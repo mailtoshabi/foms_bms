@@ -29,6 +29,18 @@
             <form method="GET" class="row g-3 mb-4">
 
                 <div class="col-md-3">
+                    <label class="portal-label">Class</label>
+                    <select name="class_room_id" class="portal-select">
+                        <option value="">All Classes</option>
+                        @foreach($classRooms as $classRoom)
+                            <option value="{{ $classRoom->id }}" {{ request('class_room_id') == $classRoom->id ? 'selected' : '' }}>
+                                {{ $classRoom->name }} {{ $classRoom->course ? '(' . $classRoom->course->name . ')' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-3">
                     <label class="portal-label">Status</label>
                     <select name="filter" class="portal-select">
                         <option value="">All Statuses</option>
@@ -47,17 +59,17 @@
                     </select>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="portal-label">From Date</label>
                     <input type="date" name="date_from" class="portal-input" value="{{ request('date_from') }}">
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="portal-label">To Date</label>
                     <input type="date" name="date_to" class="portal-input" value="{{ request('date_to') }}">
                 </div>
 
-                <div class="col-md-3 d-flex align-items-end gap-2">
+                <div class="col-md-2 d-flex align-items-end gap-2">
                     <button class="portal-btn portal-btn-primary w-100 justify-content-center">
                         <i class="fas fa-filter"></i> Filter
                     </button>

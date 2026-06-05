@@ -66,7 +66,7 @@
 
                 <p><strong>Duration:</strong> {{ $class->slot_duration }} mins</p>
                 <p><strong>Classes :</strong> {{ $class->classes_per_week }} per week</p>
-                <p><strong>Started From:</strong> {{ \Carbon\Carbon::parse($class->starting_date)->format('d F, Y') }}</p>
+                <p><strong>Started From:</strong> {{ $class->starting_date ? \Carbon\Carbon::parse($class->starting_date)->format('d F, Y') : '-' }}</p>
 
             </div>
 

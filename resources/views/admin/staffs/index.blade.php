@@ -143,6 +143,7 @@
                                         </a>
 
                                         <a href="{{ route('admin.staffs.toggleBlock', encrypt($staff->id)) }}"
+                                            onclick="return confirm('Are you sure you want to {{ $staff->is_blocked ? 'unblock' : 'block' }} this staff member?');"
                                             data-bs-toggle="tooltip"
                                             title="{{ $staff->is_blocked ? 'Unblock Staff' : 'Block Staff' }}">
                                             <i
