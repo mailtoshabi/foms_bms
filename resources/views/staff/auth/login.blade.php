@@ -267,11 +267,25 @@
         }
 
         @keyframes heartPulse {
-            0% { transform: scale(1); }
-            14% { transform: scale(1.15); }
-            28% { transform: scale(1); }
-            42% { transform: scale(1.15); }
-            70% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            14% {
+                transform: scale(1.15);
+            }
+
+            28% {
+                transform: scale(1);
+            }
+
+            42% {
+                transform: scale(1.15);
+            }
+
+            70% {
+                transform: scale(1);
+            }
         }
 
         /* Responsive adjustments */
@@ -301,15 +315,15 @@
                                 <div class="auth-content my-auto">
                                     <div class="text-center">
                                         <h5 class="portal-title mb-0">Department Portal</h5>
-                                        <p class="portal-subtitle text-muted mt-2">Sign in to continue to Department Panel.</p>
+                                        <p class="portal-subtitle text-muted mt-2">Sign in to continue to Department Panel.
+                                        </p>
                                     </div>
                                     <form class="mt-4 pt-2" action="{{ route('staff.login.submit') }}" method="POST">
                                         @csrf
                                         <div class="form-floating form-floating-custom mb-4">
-                                            <input type="text"
-                                                class="form-control @error('phone') is-invalid @enderror"
-                                                value="{{ old('phone') }}" id="input-username"
-                                                placeholder="Enter Phone" name="phone" required>
+                                            <input type="text" class="form-control @error('phone') is-invalid @enderror"
+                                                value="{{ old('phone') }}" id="input-username" placeholder="Enter Phone"
+                                                name="phone" required>
                                             @error('phone')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
@@ -324,16 +338,17 @@
                                         <div class="form-floating form-floating-custom mb-4 auth-pass-inputgroup">
                                             <input type="password"
                                                 class="form-control pe-5 @error('password') is-invalid @enderror"
-                                                name="password" id="password-input" placeholder="Enter Password" value="" required>
+                                                name="password" id="password-input" placeholder="Enter Password" value=""
+                                                required>
                                             @error('password')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
                                             @enderror
-                                            <button type="button" class="btn btn-link position-absolute h-100 end-0 top-0"
-                                                id="password-addon">
-                                                <i class="mdi mdi-eye-outline font-size-18 text-muted"></i>
-                                            </button>
+                                            <!-- <button type="button" class="btn btn-link position-absolute h-100 end-0 top-0"
+                                                    id="password-addon">
+                                                    <i class="mdi mdi-eye-outline font-size-18 text-muted"></i>
+                                                </button> -->
                                             <label for="password-input">Password</label>
                                             <div class="form-floating-icon">
                                                 <i data-feather="lock"></i>
@@ -342,13 +357,17 @@
 
                                         <div class="mb-3">
                                             <button class="btn btn-zopa w-100 waves-effect waves-light" type="submit"
-                                                onclick="this.disabled=true; this.innerText='Logging in...'; this.form.submit();">Log In</button>
+                                                onclick="this.disabled=true; this.innerText='Logging in...'; this.form.submit();">Log
+                                                In</button>
                                         </div>
                                     </form>
                                 </div>
                                 <div class="mt-4 mt-md-5 text-center">
                                     <p class="mb-0 text-muted" style="font-size: 0.85rem; font-weight: 500;">©
-                                        <script>document.write(new Date().getFullYear())</script> FOMS ACADEMY Business Management System<br> Crafted with <i class="mdi mdi-heart text-danger"></i> by <a target="_blank" href="https://webmahal.com" class="text-primary fw-semibold">Web Mahal</a>
+                                        <script>document.write(new Date().getFullYear())</script> FOMS ACADEMY Business
+                                        Management System<br> Crafted with <i class="mdi mdi-heart text-danger"></i> by <a
+                                            target="_blank" href="https://webmahal.com" class="text-primary fw-semibold">Web
+                                            Mahal</a>
                                     </p>
                                 </div>
                             </div>
@@ -378,10 +397,12 @@
                                             <div class="carousel-item active">
                                                 <div class="testi-contain text-center text-white">
                                                     <i class="bx bxs-quote-alt-left text-info display-4 mb-3"></i>
-                                                    <h4 class="mt-2 fw-medium lh-base text-white">“From daily updates to big insights — manage everything with confidence.”</h4>
+                                                    <h4 class="mt-2 fw-medium lh-base text-white">“From daily updates to big
+                                                        insights — manage everything with confidence.”</h4>
                                                     <div class="mt-4 pt-1">
                                                         <h5 class="font-size-16 text-white mb-0">FOMS Academy</h5>
-                                                        <p class="mb-0 text-white-50 small mt-1">Department & Staff Operations Portal</p>
+                                                        <p class="mb-0 text-white-50 small mt-1">Department & Staff
+                                                            Operations Portal</p>
                                                     </div>
                                                 </div>
                                             </div>
