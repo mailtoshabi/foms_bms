@@ -430,4 +430,83 @@ class GroupFeeGenerationTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_receipt_number_generation_handles_deleted_fees(): void
+    {
+        [$course, $classType] = $this->setupDependencies();
+
+        $classRoom = ClassRoom::create([
+            'course_id' => $course->id,
+            'class_type_id' => $classType->id,
+            'name' => 'Receipt Number Test Class',
+            'admission_fee' => 100,
+            'monthly_fee' => 500,
+            'classes_per_week' => 2,
+            'is_completed' => false,
+            'starting_date' => '2026-04-10',
+        ]);
+
+        $student = Student::create([
+            'admission_no' => 'S777',
+            'phone' => '1234567777',
+            'name' => 'Test Student for Receipt Suffix',
+            'contact_number' => '1234567777',
+            'whatsapp_number' => '1234567777',
+            'status' => 'active'
+        ]);
+
+        // Fix time to June 10, 2026
+        Carbon::setTestNow('2026-06-10 12:00:00');
+
+        // Create 3 fee entries with different due dates to avoid unique constraint
+        $fee1 = Fee::create([
+            'student_id' => $student->id,
+            'class_room_id' => $classRoom->id,
+            'type' => 'monthly',
+            'amount' => 500,
+            'due_date' => '2026-06-17',
+            'status' => 'unpaid',
+        ]);
+
+        $fee2 = Fee::create([
+            'student_id' => $student->id,
+            'class_room_id' => $classRoom->id,
+            'type' => 'monthly',
+            'amount' => 500,
+            'due_date' => '2026-06-18',
+            'status' => 'unpaid',
+        ]);
+
+        $fee3 = Fee::create([
+            'student_id' => $student->id,
+            'class_room_id' => $classRoom->id,
+            'type' => 'monthly',
+            'amount' => 500,
+            'due_date' => '2026-06-19',
+            'status' => 'unpaid',
+        ]);
+
+        $this->assertEquals('REC-06-26-1', $fee1->receipt_no);
+        $this->assertEquals('REC-06-26-2', $fee2->receipt_no);
+        $this->assertEquals('REC-06-26-3', $fee3->receipt_no);
+
+        // Delete the middle fee entry
+        $fee2->delete();
+
+        // Create a fourth fee entry
+        $fee4 = Fee::create([
+            'student_id' => $student->id,
+            'class_room_id' => $classRoom->id,
+            'type' => 'monthly',
+            'amount' => 500,
+            'due_date' => '2026-06-20',
+            'status' => 'unpaid',
+        ]);
+
+        // With old logic, count would be 2, next receipt_no would be REC-06-26-3 (duplicate of fee3) -> DB Error
+        // With new logic, next receipt_no should be REC-06-26-4
+        $this->assertEquals('REC-06-26-4', $fee4->receipt_no);
+
+        Carbon::setTestNow();
+    }
 }

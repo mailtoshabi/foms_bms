@@ -13,7 +13,60 @@ class FeeService
 {
     public function createFee(array $data)
     {
-        return Fee::create($data);
+        $fee = Fee::create($data);
+        $this->applyWalletBalance($fee);
+        return $fee;
+    }
+
+    public function applyWalletBalance(Fee $fee)
+    {
+        $student = $fee->student;
+        if (!$student || !$student->is_wallet_autopay_enabled || $student->wallet_balance <= 0) {
+            return;
+        }
+
+        DB::transaction(function () use ($fee, $student) {
+            $student->refresh();
+            if ($student->wallet_balance <= 0) {
+                return;
+            }
+
+            $totalPaid = FeePayment::where('fee_id', $fee->id)->sum('paid_amount');
+            $remaining = $fee->amount - $totalPaid;
+            if ($remaining <= 0) {
+                return;
+            }
+
+            $applyAmount = min($remaining, $student->wallet_balance);
+            if ($applyAmount <= 0) {
+                return;
+            }
+
+            // Deduct from student wallet
+            $student->decrement('wallet_balance', $applyAmount);
+
+            // Record wallet transaction
+            $student->walletTransactions()->create([
+                'fee_id' => $fee->id,
+                'amount' => -$applyAmount,
+                'type' => 'fee_payment',
+                'notes' => 'Applied wallet balance to ' . ucfirst($fee->type) . ' fee (REC: ' . $fee->receipt_no . ')',
+            ]);
+
+            // Record fee payment
+            FeePayment::create([
+                'fee_id' => $fee->id,
+                'paid_amount' => $applyAmount,
+                'payment_method' => 'wallet',
+                'paid_date' => now()->toDateString(),
+                'notes' => 'Paid using wallet balance (Autopay)'
+            ]);
+
+            // Update fee status
+            $newPaid = $totalPaid + $applyAmount;
+            $status = ($newPaid >= $fee->amount) ? 'paid' : 'partial';
+            $fee->update(['status' => $status]);
+        });
     }
 
     public function recordPayment($feeId, $amount)
@@ -81,7 +134,7 @@ class FeeService
                 $amount = max(0, ($classRoom->monthly_fee ?? 0) - ($student->monthly_fee_discount ?? 0));
 
                 if ($amount > 0) {
-                    Fee::create([
+                    $fee = Fee::create([
                         'student_id' => $student->id,
                         'class_room_id' => $classRoom->id,
                         'amount' => $amount,
@@ -89,6 +142,7 @@ class FeeService
                         'status' => 'unpaid',
                         'type' => 'monthly',
                     ]);
+                    $this->applyWalletBalance($fee);
                 }
             }
 

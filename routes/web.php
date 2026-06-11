@@ -392,6 +392,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [StudentController::class, 'saveDiscount']
                 )->name('students.discount');
 
+                Route::post(
+                    '/students/{id}/wallet/toggle-autopay',
+                    [StudentController::class, 'toggleWalletAutopay']
+                )->name('students.wallet.toggle-autopay');
+
                 Route::get(
                     '/students/{id}/check-related',
                     [StudentController::class, 'checkRelated']
@@ -519,6 +524,16 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     '/fees/send-bulk-notifications',
                     [FeeController::class, 'sendBulkNotifications']
                 )->name('fees.send-bulk-notifications');
+
+                Route::post(
+                    '/fees/wallet/deposit',
+                    [FeeController::class, 'depositWallet']
+                )->name('fees.wallet.deposit');
+
+                Route::post(
+                    '/fees/wallet/refund',
+                    [FeeController::class, 'refundWallet']
+                )->name('fees.wallet.refund');
 
                 Route::delete(
                     '/fees/{id}',

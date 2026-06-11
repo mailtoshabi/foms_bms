@@ -175,7 +175,7 @@ class ClassService
                 }
 
                 if ($feeAmount > 0) {
-                    Fee::create([
+                    $fee = Fee::create([
                         'student_id' => $student->id,
                         'class_room_id' => $class->id,
                         'type' => $feeType,
@@ -183,6 +183,7 @@ class ClassService
                         'due_date' => now()->addDays(7),
                         'status' => 'unpaid',
                     ]);
+                    app(FeeService::class)->applyWalletBalance($fee);
                 }
             }
 

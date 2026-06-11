@@ -47,6 +47,46 @@
                         {{ ucfirst($student->status) }}
                     </span>
 
+                    @if($showButtons == 'true')
+                        <div class="mt-4 p-3 bg-light rounded text-start shadow-sm border border-2 border-soft-primary">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-uppercase text-muted font-size-11 fw-bold tracking-wider">Wallet Balance</span>
+                                <span class="badge bg-info font-size-10">Advance</span>
+                            </div>
+                            <h3 class="mb-3 text-primary">₹ {{ number_format($student->wallet_balance ?? 0, 2) }}</h3>
+
+                            <!-- Autopay Toggle Form -->
+                            <form method="POST" action="{{ route('staff.students.wallet.toggle-autopay', encrypt($student->id)) }}" class="mb-3">
+                                @csrf
+                                <div class="form-check form-switch d-flex align-items-center justify-content-between p-0">
+                                    <label class="form-check-label text-muted font-size-12 cursor-pointer" for="autopaySwitch">
+                                        <i class="fas fa-magic text-primary me-1"></i> Fee Autopay from Balance
+                                    </label>
+                                    <input class="form-check-input ms-0 cursor-pointer" type="checkbox" id="autopaySwitch" 
+                                           style="width: 2.2em; height: 1.1em;"
+                                           {{ $student->is_wallet_autopay_enabled ? 'checked' : '' }} 
+                                           onchange="this.form.submit()">
+                                </div>
+                            </form>
+
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletDepositModal">
+                                    <i class="fas fa-plus-circle me-1"></i> Deposit
+                                </button>
+                                @if(($student->wallet_balance ?? 0) > 0)
+                                    <button class="btn btn-sm btn-outline-danger flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletRefundModal">
+                                        <i class="fas fa-arrow-alt-circle-down me-1"></i> Refund
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+                    @else
+                        <div class="mt-3 p-2 bg-light rounded text-start border">
+                            <small class="text-muted d-block uppercase font-size-10 fw-bold">Wallet Balance</small>
+                            <span class="text-primary fw-bold">₹ {{ number_format($student->wallet_balance ?? 0, 2) }}</span>
+                        </div>
+                    @endif
+
                     <hr>
 
                     <p><strong>Parent:</strong> {{ $student->parent_name ?? '-' }}</p>
@@ -347,7 +387,7 @@
                                                 @if($fee->status !== 'paid')
                                                     <button class="btn btn-sm btn-success studentFeeMarkPaidBtn"
                                                         data-id="{{ $fee->id }}" data-amount="{{ $fee->amount }}"
-                                                        data-remaining="{{ $feeRemaining }}" {{ $feeRemaining <= 0 ? 'disabled' : '' }}>
+                                                        data-remaining="{{ $feeRemaining }}" data-wallet="{{ $student->wallet_balance ?? 0 }}" {{ $feeRemaining <= 0 ? 'disabled' : '' }}>
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 @endif
@@ -377,6 +417,82 @@
 
                                 @endforeach
 
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- =========================
+        WALLET TRANSACTION HISTORY
+        ========================= --}}
+        <div class="col-md-12 mt-4">
+
+            <div class="card">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Wallet / Advance Payment Ledger</h5>
+                    @if($student->wallet_balance > 0)
+                        <span class="badge bg-info">Current Advance: ₹ {{ number_format($student->wallet_balance, 2) }}</span>
+                    @endif
+                </div>
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle table-nowrap mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Payment Method</th>
+                                    <th>Reference/Invoice</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @forelse($student->walletTransactions as $tx)
+                                    <tr>
+                                        <td>{{ $tx->created_at->format('d M Y h:i A') }}</td>
+                                        <td>
+                                            @if($tx->type === 'deposit')
+                                                <span class="badge bg-success">Deposit</span>
+                                            @elseif($tx->type === 'refund')
+                                                <span class="badge bg-danger">Refund</span>
+                                            @else
+                                                <span class="badge bg-primary">Fee Payment</span>
+                                            @endif
+                                        </td>
+                                        <td class="{{ $tx->amount > 0 ? 'text-success' : 'text-danger' }}">
+                                            <strong>{{ $tx->amount > 0 ? '+' : '' }} ₹ {{ number_format($tx->amount, 2) }}</strong>
+                                        </td>
+                                        <td>
+                                            {{ $tx->payment_method ? ucfirst(str_replace('_', ' ', $tx->payment_method)) : '-' }}
+                                        </td>
+                                        <td>
+                                            @if($tx->fee_id && $tx->fee)
+                                                <a href="{{ route('staff.fees.invoice', encrypt($tx->fee_id)) }}" target="_blank">
+                                                    {{ $tx->fee->receipt_no }}
+                                                </a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+                                        <td>{{ $tx->notes ?? '-' }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No wallet transactions recorded.</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
 
                         </table>
@@ -876,6 +992,10 @@
                                 <input type="text" id="studentFeeTotalFee" class="form-control" readonly>
                             </div>
                             <div class="mb-3">
+                                <label>Balance to Pay</label>
+                                <input type="text" id="studentFeeBalanceToPay" class="form-control" readonly>
+                            </div>
+                            <div class="mb-3">
                                 <label>Amount Paying</label>
                                 <input type="number" step="0.01" name="paid_amount" class="form-control" required>
                             </div>
@@ -1004,16 +1124,118 @@
 
     </div>
 
+    {{-- Wallet Deposit Modal --}}
+    @if($showButtons == 'true')
+        <div class="modal fade" id="walletDepositModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('staff.fees.wallet.deposit') }}">
+                        @csrf
+                        <input type="hidden" name="student_id" value="{{ $student->id }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Record Advance Payment</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Amount (₹)</label>
+                                <input type="number" step="0.01" name="amount" class="form-control" required min="1">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Payment Method</label>
+                                <select name="payment_method" class="form-control" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="upi">UPI</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Notes</label>
+                                <textarea name="notes" class="form-control" placeholder="e.g. Advance payment for upcoming fees"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-success" type="submit"
+                                onclick="this.disabled=true; this.innerText='Processing...'; this.form.submit();">
+                                Record Deposit
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- Wallet Refund Modal --}}
+        <div class="modal fade" id="walletRefundModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('staff.fees.wallet.refund') }}">
+                        @csrf
+                        <input type="hidden" name="student_id" value="{{ $student->id }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Record Wallet Refund</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i> Available balance for refund: <strong>₹ {{ number_format($student->wallet_balance ?? 0, 2) }}</strong>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Amount (₹)</label>
+                                <input type="number" step="0.01" name="amount" class="form-control" required min="1" max="{{ $student->wallet_balance ?? 0 }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Refund Method</label>
+                                <select name="payment_method" class="form-control" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="upi">UPI</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Notes</label>
+                                <textarea name="notes" class="form-control" placeholder="e.g. Refund of remaining advance balance"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-danger" type="submit"
+                                onclick="this.disabled=true; this.innerText='Processing...'; this.form.submit();">
+                                Record Refund
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
     @if($showButtons == 'true')
         @section('script')
             <script>
-                $('.studentFeeMarkPaidBtn').click(function () {
-                    let feeId = $(this).data('id');
-                    let amount = $(this).data('amount');
-                    $('#studentFeeId').val(feeId);
-                    $('#studentFeeTotalFee').val(amount);
-                    $('#studentFeePaymentModal').modal('show');
-                });
+                 $('.studentFeeMarkPaidBtn').click(function () {
+                     let feeId = $(this).data('id');
+                     let amount = $(this).data('amount');
+                     let remaining = $(this).data('remaining');
+                     let walletBalance = parseFloat($(this).data('wallet') || 0);
+
+                     $('#studentFeeId').val(feeId);
+                     $('#studentFeeTotalFee').val(amount);
+                     $('#studentFeeBalanceToPay').val(remaining);
+
+                     let select = $('#studentFeePaymentModal select[name="payment_method"]');
+                     select.find('option[value="wallet"]').remove();
+                     if (walletBalance > 0) {
+                         select.append(`<option value="wallet">Wallet Balance (Available: ₹${walletBalance.toFixed(2)})</option>`);
+                     }
+
+                     $('#studentFeePaymentModal input[name="paid_amount"]').val(remaining).attr('max', remaining);
+
+                     $('#studentFeePaymentModal').modal('show');
+                 });
 
                 $('.studentFeeViewPaymentsBtn').click(function () {
                     let url = $(this).data('url');

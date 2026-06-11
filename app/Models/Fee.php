@@ -22,15 +22,28 @@ class Fee extends Model
                 $createdAt = $fee->created_at ? \Carbon\Carbon::parse($fee->created_at) : now();
                 $startOfMonth = $createdAt->copy()->startOfMonth();
                 $endOfMonth = $createdAt->copy()->endOfMonth();
-                
-                // Count fees created in the same month
-                $count = self::whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
-                
+
+                // Get all receipt numbers for the same month to find the maximum suffix
+                $receiptNos = self::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                    ->whereNotNull('receipt_no')
+                    ->pluck('receipt_no');
+
+                $maxNum = 0;
+                foreach ($receiptNos as $rNo) {
+                    $parts = explode('-', $rNo);
+                    if (count($parts) >= 4) {
+                        $num = intval(end($parts));
+                        if ($num > $maxNum) {
+                            $maxNum = $num;
+                        }
+                    }
+                }
+
                 $fee->receipt_no = sprintf(
                     'REC-%s-%s-%d',
                     $createdAt->format('m'),
                     $createdAt->format('y'),
-                    $count + 1
+                    $maxNum + 1
                 );
             }
         });
@@ -46,6 +59,12 @@ class Fee extends Model
     public function notifications()
     {
         return $this->hasMany(FeeNotification::class);
+    }
+
+    // ✅ One Fee has many wallet transactions
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
     }
 
     // Optional: Student relation
@@ -70,7 +89,8 @@ class Fee extends Model
         $paid = $this->paid_amount ?? 0;
         $remaining = $this->amount - $paid;
 
-        if ($remaining <= 0) return 0;
+        if ($remaining <= 0)
+            return 0;
 
         $dueDate = \Carbon\Carbon::parse($this->due_date);
 

@@ -298,13 +298,17 @@
                                     ₹{{ number_format($feeDue, 2) }}
                                 </span>
                             </div>
-                            <div class="mb-2">
+                            <div class="mb-2 d-flex flex-wrap gap-2">
                                 @if($feeDue > 0)
                                     <span class="badge badge-premium badge-premium-danger px-3 py-2 fw-bold"><i
                                             class="fas fa-exclamation-circle me-1"></i> Payment Pending</span>
                                 @else
                                     <span class="badge badge-premium badge-premium-success px-3 py-2 fw-bold"><i
                                             class="fas fa-check-circle me-1"></i> Fully Paid</span>
+                                @endif
+                                @if(isset($student->wallet_balance) && $student->wallet_balance > 0)
+                                    <span class="badge badge-premium badge-premium-success px-3 py-2 fw-bold" style="background-color: rgba(16, 185, 129, 0.15) !important; color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important;"><i
+                                            class="fas fa-plus-circle me-1"></i> Advance Wallet: ₹{{ number_format($student->wallet_balance, 2) }}</span>
                                 @endif
                             </div>
                         </div>

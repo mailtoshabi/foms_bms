@@ -128,16 +128,46 @@ class FeeController extends Controller
                     throw new \Exception('Payment cannot be recorded for a deleted student.');
                 }
 
+                $student = $fee->student;
+                $amountToPay = $validated['paid_amount'];
+
                 // Total paid so far
                 $totalPaid = FeePayment::where('fee_id', $fee->id)
                     ->sum('paid_amount');
 
-                $newTotal = $totalPaid + $validated['paid_amount'];
+                $remaining = $fee->amount - $totalPaid;
+
+                if ($validated['payment_method'] === 'wallet') {
+                    if ($student->wallet_balance < $amountToPay) {
+                        throw new \Exception('Insufficient wallet balance. Available: ₹' . number_format($student->wallet_balance, 2));
+                    }
+                    if ($amountToPay > $remaining) {
+                        throw new \Exception('Cannot pay more than the remaining fee amount of ₹' . number_format($remaining, 2) . ' using wallet.');
+                    }
+
+                    // Deduct from student's wallet
+                    $student->decrement('wallet_balance', $amountToPay);
+
+                    // Record wallet transaction
+                    $student->walletTransactions()->create([
+                        'fee_id' => $fee->id,
+                        'amount' => -$amountToPay,
+                        'type' => 'fee_payment',
+                        'notes' => 'Manually paid fee using wallet balance (REC: ' . $fee->receipt_no . ')',
+                    ]);
+                } else {
+                    // For non-wallet payments, validate that paid_amount doesn't exceed remaining
+                    if ($amountToPay > $remaining) {
+                        throw new \Exception('Payment amount of ₹' . number_format($amountToPay, 2) . ' exceeds the remaining fee amount of ₹' . number_format($remaining, 2) . '.');
+                    }
+                }
+
+                $newTotal = $totalPaid + $amountToPay;
 
                 // Save payment
                 FeePayment::create([
                     'fee_id' => $fee->id,
-                    'paid_amount' => $validated['paid_amount'],
+                    'paid_amount' => $amountToPay,
                     'payment_method' => $validated['payment_method'],
                     'paid_date' => $validated['paid_date'],
                     'notes' => $request->notes
@@ -189,7 +219,7 @@ class FeeController extends Controller
     public function invoice($id)
     {
         $fee = Fee::with(['student', 'classRoom', 'payments'])
-            ->findOrFail($id);
+            ->findOrFail(decrypt($id));
 
         return view('staff.finance.fees.invoice', compact('fee'));
     }
@@ -337,6 +367,129 @@ class FeeController extends Controller
                 'message' => 'Error processing bulk notifications: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function depositWallet(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                $student = Student::findOrFail($validated['student_id']);
+                $amount = $validated['amount'];
+
+                // 1. Record deposit in wallet transactions
+                $student->walletTransactions()->create([
+                    'amount' => $amount,
+                    'type' => 'deposit',
+                    'payment_method' => $validated['payment_method'],
+                    'notes' => $validated['notes'] ?? 'Wallet deposit'
+                ]);
+
+                // 2. Add to student wallet balance
+                $student->increment('wallet_balance', $amount);
+
+                // 3. Auto-allocate if autopay is enabled
+                if ($student->is_wallet_autopay_enabled) {
+                    $student->refresh();
+
+                    // Fetch unpaid or partial fees sorted by due date ascending
+                    $fees = Fee::where('student_id', $student->id)
+                        ->whereIn('status', ['unpaid', 'partial'])
+                        ->orderBy('due_date', 'asc')
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    foreach ($fees as $fee) {
+                        if ($student->wallet_balance <= 0) {
+                            break;
+                        }
+
+                        $totalPaid = FeePayment::where('fee_id', $fee->id)->sum('paid_amount');
+                        $remaining = $fee->amount - $totalPaid;
+
+                        if ($remaining <= 0) {
+                            continue;
+                        }
+
+                        $applyAmount = min($remaining, $student->wallet_balance);
+                        if ($applyAmount <= 0) {
+                            continue;
+                        }
+
+                        // Deduct from wallet
+                        $student->decrement('wallet_balance', $applyAmount);
+
+                        // Record wallet transaction
+                        $student->walletTransactions()->create([
+                            'fee_id' => $fee->id,
+                            'amount' => -$applyAmount,
+                            'type' => 'fee_payment',
+                            'notes' => 'Auto-allocated wallet balance to ' . ucfirst($fee->type) . ' fee (REC: ' . $fee->receipt_no . ')',
+                        ]);
+
+                        // Record fee payment
+                        FeePayment::create([
+                            'fee_id' => $fee->id,
+                            'paid_amount' => $applyAmount,
+                            'payment_method' => 'wallet',
+                            'paid_date' => now()->toDateString(),
+                            'notes' => 'Paid using wallet balance (Autopay)'
+                        ]);
+
+                        // Update fee status
+                        $newPaid = $totalPaid + $applyAmount;
+                        $status = ($newPaid >= $fee->amount) ? 'paid' : 'partial';
+                        $fee->update(['status' => $status]);
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Wallet deposited successfully.');
+    }
+
+    public function refundWallet(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                $student = Student::findOrFail($validated['student_id']);
+                $amount = $validated['amount'];
+
+                if ($student->wallet_balance < $amount) {
+                    throw new \Exception('Insufficient wallet balance for refund. Available: ₹' . number_format($student->wallet_balance, 2));
+                }
+
+                // 1. Record refund in wallet transactions (negative amount)
+                $student->walletTransactions()->create([
+                    'amount' => -$amount,
+                    'type' => 'refund',
+                    'payment_method' => $validated['payment_method'],
+                    'notes' => $validated['notes'] ?? 'Wallet refund'
+                ]);
+
+                // 2. Deduct from student wallet balance
+                $student->decrement('wallet_balance', $amount);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Wallet balance refunded successfully.');
     }
 }
 

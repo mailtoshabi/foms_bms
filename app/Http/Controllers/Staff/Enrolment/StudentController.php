@@ -263,7 +263,8 @@ class StudentController extends Controller
             'class_rooms.course',
             'class_rooms.classType',
             'fees',
-            'attendances'
+            'attendances',
+            'walletTransactions.fee'
         ])->findOrFail(decrypt($id));
 
         $teachers = Teacher::whereHas('classRooms', function ($q) use ($student) {
@@ -372,7 +373,7 @@ class StudentController extends Controller
         // Only create fee if amount > 0
         if ($amount > 0) {
 
-            Fee::create([
+            $fee = Fee::create([
                 'student_id' => $student->id,
                 'class_room_id' => $class->id,
                 'type' => $type,
@@ -380,6 +381,8 @@ class StudentController extends Controller
                 'due_date' => now()->addDays(7),
                 'status' => 'unpaid'
             ]);
+
+            app(\App\Services\FeeService::class)->applyWalletBalance($fee);
 
         }
 
@@ -581,5 +584,15 @@ class StudentController extends Controller
             ->get();
 
         return response()->json(['results' => $results]);
+    }
+
+    public function toggleWalletAutopay(Request $request, $id)
+    {
+        $this->checkManagementRole();
+        $student = Student::findOrFail(decrypt($id));
+        $student->update([
+            'is_wallet_autopay_enabled' => !$student->is_wallet_autopay_enabled
+        ]);
+        return back()->with('success', 'Wallet autopay setting updated successfully.');
     }
 }

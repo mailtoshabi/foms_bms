@@ -460,7 +460,7 @@ class TeacherController extends Controller
                                 continue;
 
                             // 🔒 Avoid duplicate monthly fee for same cycle
-                            Fee::create([
+                            $fee = Fee::create([
                                 'student_id' => $student->id,
                                 'class_room_id' => $class->id,
                                 'type' => 'monthly',
@@ -468,6 +468,8 @@ class TeacherController extends Controller
                                 'due_date' => now()->addDays(7),
                                 'status' => 'unpaid'
                             ]);
+
+                            app(\App\Services\FeeService::class)->applyWalletBalance($fee);
 
                         }
 

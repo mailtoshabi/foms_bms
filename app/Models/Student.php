@@ -43,7 +43,9 @@ class Student extends Authenticatable
         'monthly_fee_discount',
 
         'status',
-        'is_whatsapp_different'
+        'is_whatsapp_different',
+        'wallet_balance',
+        'is_wallet_autopay_enabled'
     ];
 
     protected $hidden = [
@@ -56,6 +58,8 @@ class Student extends Authenticatable
         'starting_date' => 'date',
         'last_login_at' => 'datetime',
         'selected_days' => 'array',
+        'wallet_balance' => 'decimal:2',
+        'is_wallet_autopay_enabled' => 'boolean',
     ];
 
     public function country()
@@ -80,6 +84,11 @@ class Student extends Authenticatable
     public function fees()
     {
         return $this->hasMany(Fee::class)->latest();
+    }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class)->latest();
     }
 
     public function attendances()

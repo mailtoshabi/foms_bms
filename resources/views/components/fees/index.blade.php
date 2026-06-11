@@ -389,7 +389,9 @@
                                             @if($isAction == 'true')
                                                 @if($tab !== 'paid')
                                                     <button class="btn btn-sm btn-success markPaidBtn" data-id="{{ $fee->id }}"
-                                                        data-amount="{{ $fee->amount }}" data-remaining="{{ $remaining }}" {{ $remaining <= 0 ? 'disabled' : '' }}>
+                                                        data-amount="{{ $fee->amount }}" data-remaining="{{ $remaining }}"
+                                                        data-wallet="{{ $fee->student->wallet_balance ?? 0 }}"
+                                                        {{ $remaining <= 0 ? 'disabled' : '' }}>
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 @endif
@@ -481,6 +483,11 @@
                             <div class="mb-3">
                                 <label>Total Fee</label>
                                 <input type="text" id="total_fee" class="form-control" readonly>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Balance to Pay</label>
+                                <input type="text" id="balance_to_pay" class="form-control" readonly>
                             </div>
 
                             <div class="mb-3">
@@ -588,9 +595,20 @@
 
                 let feeId = $(this).data('id');
                 let amount = $(this).data('amount');
+                let remaining = $(this).data('remaining');
+                let walletBalance = parseFloat($(this).data('wallet') || 0);
 
                 $('#fee_id').val(feeId);
                 $('#total_fee').val(amount);
+                $('#balance_to_pay').val(remaining);
+
+                let select = $('#paymentModal select[name="payment_method"]');
+                select.find('option[value="wallet"]').remove();
+                if (walletBalance > 0) {
+                    select.append('<option value="wallet">Wallet Balance (Available: ₹ ' + walletBalance.toFixed(2) + ')</option>');
+                }
+
+                $('#paymentModal input[name="paid_amount"]').val(remaining).attr('max', remaining);
 
                 $('#paymentModal').modal('show');
 
