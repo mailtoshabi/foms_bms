@@ -182,7 +182,7 @@
                                 <div class="flex-grow-1">
                                     <span class="text-muted d-block">Unpaid Teacher Salaries</span>
                                     <h4 class="mb-0">{{ $unpaidTeacherSalariesCount }} <small
-                                            class="fs-6 text-danger">₹{{ number_format($unpaidTeacherSalariesAmount, 2) }}</small>
+                                            class="fs-6 text-danger">₹{{ number_format(round($unpaidTeacherSalariesAmount), 0) }}</small>
                                     </h4>
                                 </div>
                                 <div class="flex-shrink-0">
@@ -198,23 +198,23 @@
         {{-- Expenses this month: hr | operation --}}
         @if($isHr)
             <!-- <div class="col-xl-3 col-md-6">
-                                <a href="{{ route('staff.expenses.index') }}" class="text-decoration-none">
-                                    <div class="card card-h-100">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center">
-                                                <div class="flex-grow-1">
-                                                    <span class="text-muted d-block">Total Expenses <small class="text-muted">(this
-                                                            month)</small></span>
-                                                    <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
-                                                </div>
-                                                <div class="flex-shrink-0">
-                                                    <i class="fas fa-receipt fa-2x text-danger"></i>
+                                        <a href="{{ route('staff.expenses.index') }}" class="text-decoration-none">
+                                            <div class="card card-h-100">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <span class="text-muted d-block">Total Expenses <small class="text-muted">(this
+                                                                    month)</small></span>
+                                                            <h4 class="mb-0">₹{{ number_format($stats['expense'], 2) }}</h4>
+                                                        </div>
+                                                        <div class="flex-shrink-0">
+                                                            <i class="fas fa-receipt fa-2x text-danger"></i>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div> -->
+                                        </a>
+                                    </div> -->
         @endif
 
     </div>
@@ -259,7 +259,7 @@
                         labels: ['Paid', 'Pending'],
                         datasets: [{
                             data: [
-                                        {{ $paidAmount }},
+                                                {{ $paidAmount }},
                                 {{ $pendingAmount }}
                             ],
                             borderWidth: 1

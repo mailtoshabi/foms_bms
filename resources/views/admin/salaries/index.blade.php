@@ -155,7 +155,7 @@
 
                                         <td>
                                             <strong class="{{ $salary->status == 'paid' ? 'text-success' : 'text-danger' }}">
-                                                ₹ {{ number_format($salary->total_amount, 2) }}
+                                                ₹ {{ number_format(round($salary->total_amount), 0) }}
                                             </strong>
                                             @if($salary->status == 'paid')
                                                 <br><small class="text-muted">

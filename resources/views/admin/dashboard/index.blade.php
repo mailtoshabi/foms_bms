@@ -213,7 +213,7 @@
                             <div class="flex-grow-1">
                                 <span class="text-muted d-block">Unpaid Teacher Salaries</span>
                                 <h4 class="mb-0">{{ $unpaidTeacherSalariesCount }} <small
-                                        class="fs-6 text-danger">₹{{ number_format($unpaidTeacherSalariesAmount, 2) }}</small>
+                                        class="fs-6 text-danger">₹{{ number_format(round($unpaidTeacherSalariesAmount), 0) }}</small>
                                 </h4>
                             </div>
                             <div class="flex-shrink-0">
