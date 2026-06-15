@@ -261,7 +261,7 @@ class TeacherLeadController extends Controller
             ]);
 
             $lead->update([
-                'status' => 'approved'
+                'status' => 'converted'
             ]);
 
         });

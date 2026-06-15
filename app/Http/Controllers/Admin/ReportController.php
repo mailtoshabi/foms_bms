@@ -837,7 +837,7 @@ class ReportController extends Controller
 
         // Summary
         $totalLeads = $query->count();
-        $convertedLeads = $query->clone()->where('status', 'approved')->count();
+        $convertedLeads = $query->clone()->where('status', 'converted')->count();
         $pendingLeads = $query->clone()->where('status', 'pending')->count();
 
         return view('admin.reports.teacher_leads', compact(
