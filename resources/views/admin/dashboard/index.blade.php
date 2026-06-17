@@ -371,7 +371,7 @@
 
                 datasets: [{
                     data: [
-                                                                        {{ $paidAmount }},
+                                                                            {{ $paidAmount }},
                         {{ $pendingAmount }}
                     ],
                     borderWidth: 1

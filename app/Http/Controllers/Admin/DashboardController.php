@@ -103,27 +103,27 @@ class DashboardController extends Controller
 
             $months[] = $monthName;
 
-            $fees[] = FeePayment::whereMonth('created_at', $date->month)
-                ->whereYear('created_at', $date->year)
+            $fees[] = FeePayment::whereMonth('paid_date', $date->month)
+                ->whereYear('paid_date', $date->year)
                 ->sum('paid_amount');
 
             $expenses[] =
-                Expense::whereMonth('created_at', $date->month)
-                    ->whereYear('created_at', $date->year)
+                Expense::whereMonth('expense_date', $date->month)
+                    ->whereYear('expense_date', $date->year)
                     ->sum('amount')
 
                 +
 
                 TeacherSalary::where('status', 'paid')
-                    ->whereMonth('created_at', $date->month)
-                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('payment_date', $date->month)
+                    ->whereYear('payment_date', $date->year)
                     ->sum('total_amount')
 
                 +
 
                 StaffSalary::where('status', 'paid')
-                    ->whereMonth('created_at', $date->month)
-                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('paid_date', $date->month)
+                    ->whereYear('paid_date', $date->year)
                     ->sum('salary_amount');
         }
 

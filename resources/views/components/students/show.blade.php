@@ -69,7 +69,19 @@
                                 </div>
                             </form>
 
-                            <div class="d-flex gap-2">
+                            <style>
+                                @media (max-width: 376px) {
+                                    .wallet-action-buttons {
+                                        flex-direction: column !important;
+                                        align-items: center !important;
+                                    }
+                                    .wallet-action-buttons button {
+                                        width: 150px !important;
+                                        flex-grow: 0 !important;
+                                    }
+                                }
+                            </style>
+                            <div class="d-flex gap-2 wallet-action-buttons">
                                 <button class="btn btn-sm btn-primary flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletDepositModal">
                                     <i class="fas fa-plus-circle me-1"></i> Record Advance
                                 </button>
@@ -115,24 +127,24 @@
 
             <div class="card">
 
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
 
                     <h5 class="mb-0">Course & Class Details</h5>
                     @if($showButtons == 'true' && auth('staff')->check())
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignClassModal">
+                        <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+                            <button class="btn btn-sm btn-primary w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#assignClassModal">
 
                                 <i class="fas fa-plus"></i> Assign Class
 
                             </button>
 
-                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#changeClassModal">
+                            <button class="btn btn-sm btn-info w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#changeClassModal">
 
                                 <i class="fas fa-exchange-alt"></i> Change Class
 
                             </button>
 
-                            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#promoteClassModal">
+                            <button class="btn btn-sm btn-success w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#promoteClassModal">
 
                                 <i class="fas fa-arrow-up"></i> Promote Class
 

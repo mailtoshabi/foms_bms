@@ -54,9 +54,9 @@
             <form method="GET" class="row mb-3 align-items-end">
 
                 <div class="col-md-2">
-                    <label class="form-label fw-bold">Name</label>
+                    <label class="form-label fw-bold">Name/Phone</label>
                     <input type="text" name="name" class="form-control" value="{{ request('name') }}"
-                        placeholder="Search Name">
+                        placeholder="Search Name/Phone">
                 </div>
 
                 <div class="col-md-2">

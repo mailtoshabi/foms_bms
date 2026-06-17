@@ -548,9 +548,13 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -585,9 +589,13 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -617,9 +625,14 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -656,9 +669,14 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -841,9 +859,13 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -878,9 +900,13 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -910,9 +936,14 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
@@ -947,9 +978,14 @@ class ReportController extends Controller
             ]);
         }
 
-        // Name filter
+        // Name / Phone filter
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+            });
         }
 
         // Status filter
