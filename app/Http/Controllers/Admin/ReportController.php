@@ -47,7 +47,7 @@ class ReportController extends Controller
 
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student', 'classRoom']);
+        $query = Fee::with(['student', 'classRoom', 'refunds']);
         // ->withSum('payments as paid_amount', 'paid_amount');
 
         // Tab logic
@@ -190,37 +190,55 @@ class ReportController extends Controller
                 'fee_payments.paid_date'
             );
 
+        $refundsQuery = DB::table('fee_refunds')
+            ->join('fees', 'fees.id', '=', 'fee_refunds.fee_id')
+            ->join('students', 'students.id', '=', 'fees.student_id')
+            ->leftJoin('countries', 'countries.id', '=', 'students.country_id')
+            ->join('class_rooms', 'class_rooms.id', '=', 'fees.class_room_id')
+            ->join('courses', 'courses.id', '=', 'class_rooms.course_id')
+            ->join('course_categories', 'course_categories.id', '=', 'courses.category_id');
+
         // Filters
         if ($request->filled('search')) {
             $query->where('students.name', 'like', '%' . $request->search . '%');
+            $refundsQuery->where('students.name', 'like', '%' . $request->search . '%');
         }
 
         if ($request->filled('payment_method')) {
             $query->where('fee_payments.payment_method', $request->payment_method);
+            $refundsQuery->where('fee_refunds.payment_method', $request->payment_method);
         }
 
         if ($request->filled('from_date')) {
             $query->whereDate('fee_payments.paid_date', '>=', $request->from_date);
+            $refundsQuery->whereDate('fee_refunds.refund_date', '>=', $request->from_date);
         }
 
         if ($request->filled('to_date')) {
             $query->whereDate('fee_payments.paid_date', '<=', $request->to_date);
+            $refundsQuery->whereDate('fee_refunds.refund_date', '<=', $request->to_date);
         }
 
         if ($request->filled('category_id')) {
             $query->where('course_categories.id', $request->category_id);
+            $refundsQuery->where('course_categories.id', $request->category_id);
         }
 
         if ($request->filled('class_room_id')) {
             $query->where('class_rooms.id', $request->class_room_id);
+            $refundsQuery->where('class_rooms.id', $request->class_room_id);
         }
 
         // Check if any filter is applied
         $isFiltered = $request->anyFilled(['search', 'category_id', 'class_room_id', 'payment_method', 'from_date', 'to_date']);
 
-        $totalAmount = 0;
+        $totalGross = 0;
+        $totalRefunded = 0;
+        $totalNet = 0;
         if ($isFiltered) {
-            $totalAmount = (clone $query)->sum('fee_payments.paid_amount');
+            $totalGross = (clone $query)->sum('fee_payments.paid_amount');
+            $totalRefunded = $refundsQuery->sum('fee_refunds.amount');
+            $totalNet = $totalGross - $totalRefunded;
         }
 
         $data = $query->latest('fee_payments.paid_date')->paginate(utility('pagination', 50))->withQueryString();
@@ -232,7 +250,7 @@ class ReportController extends Controller
             ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
             : null;
 
-        return view('admin.reports.fee_collection', compact('data', 'categories', 'selectedClassName', 'totalAmount', 'isFiltered'));
+        return view('admin.reports.fee_collection', compact('data', 'categories', 'selectedClassName', 'totalGross', 'totalRefunded', 'totalNet', 'isFiltered'));
     }
 
     public function exportFeeCollection(Request $request)
@@ -1083,5 +1101,206 @@ class ReportController extends Controller
             'totalClassHours',
             'totalDurationFormatted'
         ));
+    }
+
+    public function toggleWalletAutopay(Request $request, $id)
+    {
+        $student = Student::findOrFail(decrypt($id));
+        $student->update([
+            'is_wallet_autopay_enabled' => !$student->is_wallet_autopay_enabled
+        ]);
+        return back()->with('success', 'Wallet autopay setting updated successfully.');
+    }
+
+    public function depositWallet(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                $student = Student::findOrFail($validated['student_id']);
+                $amount = $validated['amount'];
+
+                // 1. Record deposit in wallet transactions
+                $student->walletTransactions()->create([
+                    'amount' => $amount,
+                    'type' => 'deposit',
+                    'payment_method' => $validated['payment_method'],
+                    'notes' => $validated['notes'] ?? 'Wallet deposit'
+                ]);
+
+                // 2. Add to student wallet balance
+                $student->increment('wallet_balance', $amount);
+
+                // 3. Auto-allocate if autopay is enabled
+                if ($student->is_wallet_autopay_enabled) {
+                    $student->refresh();
+
+                    // Fetch unpaid or partial fees sorted by due date ascending
+                    $fees = Fee::where('student_id', $student->id)
+                        ->whereIn('status', ['unpaid', 'partial'])
+                        ->orderBy('due_date', 'asc')
+                        ->orderBy('id', 'asc')
+                        ->get();
+
+                    foreach ($fees as $fee) {
+                        if ($student->wallet_balance <= 0) {
+                            break;
+                        }
+
+                        $totalPaid = \App\Models\FeePayment::where('fee_id', $fee->id)->sum('paid_amount');
+                        $remaining = $fee->amount - $totalPaid;
+
+                        if ($remaining <= 0) {
+                            continue;
+                        }
+
+                        $applyAmount = min($remaining, $student->wallet_balance);
+                        if ($applyAmount <= 0) {
+                            continue;
+                        }
+
+                        // Deduct from wallet
+                        $student->decrement('wallet_balance', $applyAmount);
+
+                        // Record wallet transaction
+                        $student->walletTransactions()->create([
+                            'fee_id' => $fee->id,
+                            'amount' => -$applyAmount,
+                            'type' => 'fee_payment',
+                            'notes' => 'Auto-allocated wallet balance to ' . ucfirst($fee->type) . ' fee (REC: ' . $fee->receipt_no . ')',
+                        ]);
+
+                        // Record fee payment
+                        \App\Models\FeePayment::create([
+                            'fee_id' => $fee->id,
+                            'paid_amount' => $applyAmount,
+                            'payment_method' => 'wallet',
+                            'paid_date' => now()->toDateString(),
+                            'notes' => 'Paid using wallet balance (Autopay)'
+                        ]);
+
+                        // Update fee status
+                        $newPaid = $totalPaid + $applyAmount;
+                        $status = ($newPaid >= $fee->amount) ? 'paid' : 'partial';
+                        $fee->update(['status' => $status]);
+                    }
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Wallet deposited successfully.');
+    }
+
+    public function refundWallet(Request $request)
+    {
+        $validated = $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string',
+            'notes' => 'nullable|string'
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                $student = Student::findOrFail($validated['student_id']);
+                $amount = $validated['amount'];
+
+                if ($student->wallet_balance < $amount) {
+                    throw new \Exception('Insufficient wallet balance for refund. Available: ₹' . number_format($student->wallet_balance, 2));
+                }
+
+                // 1. Record refund in wallet transactions (negative amount)
+                $student->walletTransactions()->create([
+                    'amount' => -$amount,
+                    'type' => 'refund',
+                    'payment_method' => $validated['payment_method'],
+                    'notes' => $validated['notes'] ?? 'Wallet refund'
+                ]);
+
+                // 2. Deduct from student wallet balance
+                $student->decrement('wallet_balance', $amount);
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Wallet balance refunded successfully.');
+    }
+
+    public function refundFee(Request $request)
+    {
+        $validated = $request->validate([
+            'fee_id' => 'required|exists:fees,id',
+            'amount' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string|in:cash,card,upi,bank_transfer',
+            'notes' => 'nullable|string',
+            'refund_date' => 'required|date'
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated) {
+                $fee = Fee::findOrFail($validated['fee_id']);
+                
+                // Calculate total paid so far
+                $totalPaid = $fee->payments()->sum('paid_amount');
+                // Calculate total refunded so far
+                $totalRefunded = \App\Models\FeeRefund::where('fee_id', $fee->id)->sum('amount');
+                
+                $maxRefundable = $totalPaid - $totalRefunded;
+                
+                if ($validated['amount'] > $maxRefundable) {
+                    throw new \Exception('Refund amount of ₹' . number_format($validated['amount'], 2) . ' exceeds the max refundable amount of ₹' . number_format($maxRefundable, 2));
+                }
+
+                $lastPaymentDate = $fee->payments()->max('paid_date');
+                if (!$lastPaymentDate) {
+                    throw new \Exception('Cannot refund a fee with no recorded payments.');
+                }
+                if (\Carbon\Carbon::parse($lastPaymentDate)->addMonths(2)->isPast()) {
+                    throw new \Exception('Refund is only allowed within 2 months of the last payment date (Last payment: ' . \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') . ').');
+                }
+                
+                // Create refund record
+                \App\Models\FeeRefund::create([
+                    'fee_id' => $fee->id,
+                    'amount' => $validated['amount'],
+                    'payment_method' => $validated['payment_method'],
+                    'refund_date' => $validated['refund_date'],
+                    'notes' => $validated['notes']
+                ]);
+                
+                // Calculate net paid amount after this refund
+                $netPaid = $totalPaid - ($totalRefunded + $validated['amount']);
+                
+                // Update fee status based on net paid
+                if ($netPaid <= 0) {
+                    $fee->update(['status' => 'unpaid']);
+                } elseif ($netPaid < $fee->amount) {
+                    $fee->update(['status' => 'partial']);
+                } else {
+                    $fee->update(['status' => 'paid']);
+                }
+            });
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'Refund recorded successfully.');
+    }
+
+    public function getRefunds($id)
+    {
+        $fee = Fee::with('refunds')->findOrFail($id);
+        return response()->json([
+            'refunds' => $fee->refunds
+        ]);
     }
 }

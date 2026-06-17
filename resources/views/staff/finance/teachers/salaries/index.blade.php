@@ -171,10 +171,13 @@
                                         </td>
 
                                         <td>
-                                            <span class="badge
-                                                    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
-                                                {{ ucfirst($salary->status) }}
-                                            </span>
+                                            @if($salary->status == 'paid')
+                                                <span class="badge bg-success">Paid</span>
+                                            @elseif($salary->status == 'deposit')
+                                                <span class="badge bg-danger">Deposit</span>
+                                            @else
+                                                <span class="badge bg-warning text-dark">Unpaid</span>
+                                            @endif
                                         </td>
 
                                         <td>

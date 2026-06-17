@@ -13,6 +13,7 @@ use App\Models\StudentLead;
 use App\Models\TeacherLead;
 use App\Models\StaffSalary;
 use App\Models\TeacherSalary;
+use App\Models\TeacherDeposit;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -43,6 +44,10 @@ class DashboardController extends Controller
             ->whereYear('paid_date', $now->year)
             ->sum('paid_amount');
 
+        $totalRefund = \App\Models\FeeRefund::whereMonth('refund_date', $now->month)
+            ->whereYear('refund_date', $now->year)
+            ->sum('amount');
+
         $totalExpense =
             Expense::whereMonth('expense_date', $now->month)
                 ->whereYear('expense_date', $now->year)
@@ -67,6 +72,7 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         | 📊 Stats
         |--------------------------------------------------------------------------
+        |
         */
 
         $stats = [
@@ -75,7 +81,8 @@ class DashboardController extends Controller
             'teachers' => Teacher::count(),
             'fee' => $totalFee,
             'expense' => $totalExpense,
-            'balanceSheet' => $totalFee - $totalExpense,
+            'refund' => $totalRefund,
+            'balanceSheet' => $totalFee - $totalExpense - $totalRefund,
         ];
 
         /*
@@ -185,6 +192,11 @@ class DashboardController extends Controller
         $unpaidTeacherSalariesCount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->count();
         $unpaidTeacherSalariesAmount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->sum('total_amount');
 
+        $unpaidDepositsCount = TeacherDeposit::where('status', 'not paid')->count();
+        $unpaidDepositsAmount = TeacherDeposit::where('status', 'not paid')->get()->sum(function ($d) {
+            return $d->amount - $d->paid_amount;
+        });
+
         $topTeachers = topTeachers();
 
         return view('admin.dashboard.index', compact(
@@ -202,7 +214,9 @@ class DashboardController extends Controller
             'overdueFeesCount',
             'overdueFeesAmount',
             'unpaidTeacherSalariesCount',
-            'unpaidTeacherSalariesAmount'
+            'unpaidTeacherSalariesAmount',
+            'unpaidDepositsCount',
+            'unpaidDepositsAmount'
         ));
     }
 

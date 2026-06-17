@@ -97,15 +97,21 @@
                 <div class="row mb-4">
                     <div class="col-md-12">
                         <div class="card bg-soft-info border-info">
-                            <div class="card-body d-flex justify-content-between align-items-center p-3">
-                                <div>
-                                    <h5 class="text-info mb-1"><i class="mdi mdi-information-outline me-1"></i> Filtering
-                                        Summary</h5>
-                                    <p class="text-muted mb-0 small">Showing total results based on your selected criteria.</p>
-                                </div>
-                                <div class="text-end">
-                                    <p class="text-muted mb-1 small uppercase fw-bold">Total Collection</p>
-                                    <h3 class="text-primary mb-0 fw-bold">₹ {{ number_format($totalAmount, 2) }}</h3>
+                            <div class="card-body p-3">
+                                <h5 class="text-info mb-3"><i class="mdi mdi-information-outline me-1"></i> Filtering Summary</h5>
+                                <div class="row text-center">
+                                    <div class="col-md-4 border-end">
+                                        <p class="text-muted mb-1 small uppercase fw-bold">Gross Collection</p>
+                                        <h3 class="text-success mb-0 fw-bold">₹ {{ number_format($totalGross, 2) }}</h3>
+                                    </div>
+                                    <div class="col-md-4 border-end">
+                                        <p class="text-muted mb-1 small uppercase fw-bold">Total Refunded</p>
+                                        <h3 class="text-danger mb-0 fw-bold">₹ {{ number_format($totalRefunded, 2) }}</h3>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="text-muted mb-1 small uppercase fw-bold">Net Collection</p>
+                                        <h3 class="text-primary mb-0 fw-bold">₹ {{ number_format($totalNet, 2) }}</h3>
+                                    </div>
                                 </div>
                             </div>
                         </div>

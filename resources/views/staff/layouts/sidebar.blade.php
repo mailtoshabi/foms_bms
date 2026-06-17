@@ -68,7 +68,7 @@
 
                 {{-- Teachers: administrator | hr | operation | finance --}}
                 @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId) || $staff->hasRoleId($financeRoleId))
-                    <li class="{{ set_active(['staff.teacher-leads.*', 'staff.teachers.*']) }}">
+                    <li class="{{ set_active(['staff.teacher-leads.*', 'staff.teachers.*', 'staff.deposits.*']) }}">
                         <a href="javascript:void(0);" class="has-arrow">
                             <i class="mdi mdi-teach"></i>
 
@@ -101,6 +101,14 @@
                                 <li class="{{ set_active(['staff.teachers.*']) }}">
                                     <a href="{{ route('staff.teachers.index') }}">
                                         Teachers
+                                    </a>
+                                </li>
+                            @endif
+
+                            @if($staff->hasRoleId($administratorRoleId) || $staff->hasRoleId($financeRoleId) || $staff->hasRoleId($hrRoleId) || $staff->hasRoleId($operationRoleId))
+                                <li class="{{ set_active(['staff.deposits.*']) }}">
+                                    <a href="{{ route('staff.deposits.index') }}">
+                                        Deposits
                                     </a>
                                 </li>
                             @endif

@@ -47,7 +47,7 @@
                         {{ ucfirst($student->status) }}
                     </span>
 
-                    @if($showButtons == 'true')
+                    @if($showButtons == 'true' && auth('admin')->check())
                         <div class="mt-4 p-3 bg-light rounded text-start shadow-sm border border-2 border-soft-primary">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="text-uppercase text-muted font-size-11 fw-bold tracking-wider">Wallet Balance</span>
@@ -56,7 +56,7 @@
                             <h3 class="mb-3 text-primary">₹ {{ number_format($student->wallet_balance ?? 0, 2) }}</h3>
 
                             <!-- Autopay Toggle Form -->
-                            <form method="POST" action="{{ route('staff.students.wallet.toggle-autopay', encrypt($student->id)) }}" class="mb-3">
+                            <form method="POST" action="{{ route('admin.students.wallet.toggle-autopay', encrypt($student->id)) }}" class="mb-3">
                                 @csrf
                                 <div class="form-check form-switch d-flex align-items-center justify-content-between p-0">
                                     <label class="form-check-label text-muted font-size-12 cursor-pointer" for="autopaySwitch">
@@ -71,7 +71,7 @@
 
                             <div class="d-flex gap-2">
                                 <button class="btn btn-sm btn-primary flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletDepositModal">
-                                    <i class="fas fa-plus-circle me-1"></i> Deposit
+                                    <i class="fas fa-plus-circle me-1"></i> Record Advance
                                 </button>
                                 @if(($student->wallet_balance ?? 0) > 0)
                                     <button class="btn btn-sm btn-outline-danger flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletRefundModal">
@@ -118,7 +118,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
 
                     <h5 class="mb-0">Course & Class Details</h5>
-                    @if($showButtons == 'true')
+                    @if($showButtons == 'true' && auth('staff')->check())
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#assignClassModal">
 
@@ -319,7 +319,7 @@
                                     <th>Type</th>
                                     <th>Amount</th>
                                     <th>Status</th>
-                                    @if($showButtons == 'true')
+                                    @if($showButtons == 'true' && auth('staff')->check())
                                         <th>Actions</th>
                                     @endif
                                 </tr>
@@ -378,7 +378,7 @@
                                             </span>
                                         </td>
 
-                                        @if($showButtons == 'true')
+                                        @if($showButtons == 'true' && auth('staff')->check())
                                             @php
                                                 $feePaid = $fee->paid_amount ?? 0;
                                                 $feeRemaining = $fee->amount - $feePaid;
@@ -580,7 +580,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
 
                 <h5 class="mb-0">Fee Exemption & Discount</h5>
-                @if($showButtons == 'true')
+                @if($showButtons == 'true' && auth('staff')->check())
                     @if(auth('staff')->user()->hasRoleId(utility('id_enrolment_dept')) || auth('staff')->user()->hasRoleId(utility('id_operation_dept')))
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#feeExemptionModal">
@@ -975,7 +975,7 @@
     {{-- Discount Modal End --}}
 
     {{-- Student Fee Payment Modal --}}
-    @if($showButtons == 'true')
+    @if($showButtons == 'true' && auth('staff')->check())
         <div class="modal fade" id="studentFeePaymentModal">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -1125,11 +1125,11 @@
     </div>
 
     {{-- Wallet Deposit Modal --}}
-    @if($showButtons == 'true')
+    @if($showButtons == 'true' && auth('admin')->check())
         <div class="modal fade" id="walletDepositModal">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form method="POST" action="{{ route('staff.fees.wallet.deposit') }}">
+                    <form method="POST" action="{{ route('admin.fees.wallet.deposit') }}">
                         @csrf
                         <input type="hidden" name="student_id" value="{{ $student->id }}">
                         <div class="modal-header">
@@ -1159,7 +1159,7 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button class="btn btn-success" type="submit"
                                 onclick="this.disabled=true; this.innerText='Processing...'; this.form.submit();">
-                                Record Deposit
+                                Record Advance
                             </button>
                         </div>
                     </form>
@@ -1171,7 +1171,7 @@
         <div class="modal fade" id="walletRefundModal">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form method="POST" action="{{ route('staff.fees.wallet.refund') }}">
+                    <form method="POST" action="{{ route('admin.fees.wallet.refund') }}">
                         @csrf
                         <input type="hidden" name="student_id" value="{{ $student->id }}">
                         <div class="modal-header">
@@ -1213,7 +1213,7 @@
         </div>
     @endif
 
-    @if($showButtons == 'true')
+    @if($showButtons == 'true' && auth('staff')->check())
         @section('script')
             <script>
                  $('.studentFeeMarkPaidBtn').click(function () {

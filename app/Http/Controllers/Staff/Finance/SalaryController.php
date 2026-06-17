@@ -20,7 +20,7 @@ class SalaryController extends Controller
         if ($tab === 'paid') {
             $query->where('status', 'paid');
         } else {
-            $query->where('status', 'unpaid');
+            $query->whereIn('status', ['unpaid', 'deposit']);
         }
 
         // 🔍 Filters
@@ -43,7 +43,7 @@ class SalaryController extends Controller
         $teachers = Teacher::pluck('name', 'id');
 
         $counts = TeacherSalary::selectRaw("
-        SUM(status = 'unpaid') as unpaid,
+        SUM(status = 'unpaid' OR status = 'deposit') as unpaid,
         SUM(status = 'paid') as paid
     ")->first();
 
@@ -77,3 +77,4 @@ class SalaryController extends Controller
         return back()->with('success', 'Salary marked as paid');
     }
 }
+

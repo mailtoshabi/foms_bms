@@ -67,6 +67,12 @@ class Fee extends Model
         return $this->hasMany(WalletTransaction::class);
     }
 
+    // ✅ One Fee has many refunds
+    public function refunds()
+    {
+        return $this->hasMany(FeeRefund::class);
+    }
+
     // Optional: Student relation
     public function student()
     {

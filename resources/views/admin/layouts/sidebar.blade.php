@@ -79,7 +79,7 @@
                 </li>
 
                 <li class="menu-title">Reports</li>
-                <li class="{{ set_active(['admin.reports.fee.*', 'admin.reports.finance.expense']) }}">
+                <li class="{{ set_active(['admin.reports.fee.*', 'admin.reports.finance.expense', 'admin.fees.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-cash-check"></i>
                         <span>Finance</span>
@@ -96,6 +96,11 @@
                                 <span>Pending Fee</span>
                             </a>
                         </li>
+                        <li class="{{ set_active(['admin.fees.create']) }}">
+                            <a href="{{ route('admin.fees.create') }}">
+                                <span>Add Manual Fee</span>
+                            </a>
+                        </li>
                         <li class="{{ set_active(['admin.reports.finance.expense']) }}">
                             <a href="{{ route('admin.reports.finance.expense') }}">
                                 <span>Expense Report</span>
@@ -105,7 +110,7 @@
                 </li>
 
                 <li
-                    class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher-lead-notes', 'admin.reports.teacher.salary']) }}">
+                    class="{{ set_active(['admin.reports.teachers.*', 'admin.reports.teacher-leads', 'admin.reports.teacher-lead-notes', 'admin.reports.teacher.salary', 'admin.deposits.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="mdi mdi-account-tie"></i>
                         <span>Teachers</span>
@@ -133,6 +138,12 @@
                         <li class="{{ set_active(['admin.reports.teacher.salary']) }}">
                             <a href="{{ route('admin.reports.teacher.salary') }}">
                                 Salary
+                            </a>
+                        </li>
+
+                        <li class="{{ set_active(['admin.deposits.*']) }}">
+                            <a href="{{ route('admin.deposits.index') }}">
+                                Deposits
                             </a>
                         </li>
                     </ul>

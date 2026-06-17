@@ -15,6 +15,7 @@ use App\Models\Utility;
 use App\Models\WalletTransaction;
 use App\Services\FeeService;
 use Carbon\Carbon;
+use App\Models\Admin;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -28,6 +29,7 @@ class StudentWalletTest extends TestCase
     private Role $roleOperations;
     private Role $roleFinance;
     private Role $roleEnrolment;
+    private Admin $admin;
 
     protected function setUp(): void
     {
@@ -79,6 +81,14 @@ class StudentWalletTest extends TestCase
             'password' => bcrypt('password'),
         ]);
         $this->staffOperations->roles()->attach($this->roleOperations->id);
+
+        // Create admin user
+        $this->admin = Admin::create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'phone' => '9999999999',
+            'password' => bcrypt('password'),
+        ]);
     }
 
     private function createStudent(array $attributes = []): Student
@@ -109,38 +119,31 @@ class StudentWalletTest extends TestCase
         return [$course, $classType];
     }
 
-    public function test_staff_can_toggle_wallet_autopay(): void
+    public function test_admin_can_toggle_wallet_autopay(): void
     {
         $student = $this->createStudent(['is_wallet_autopay_enabled' => true]);
 
-        // Access via Enrolment staff (should be authorized)
-        $response = $this->actingAs($this->staffEnrolment, 'staff')
-            ->post(route('staff.students.wallet.toggle-autopay', ['id' => encrypt($student->id)]));
+        // Toggle via Admin
+        $response = $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.students.wallet.toggle-autopay', ['id' => encrypt($student->id)]));
 
         $response->assertStatus(302);
         $this->assertFalse($student->refresh()->is_wallet_autopay_enabled);
 
-        // Toggle back via Operations staff (should be authorized)
-        $response = $this->actingAs($this->staffOperations, 'staff')
-            ->post(route('staff.students.wallet.toggle-autopay', ['id' => encrypt($student->id)]));
+        // Toggle back via Admin
+        $response = $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.students.wallet.toggle-autopay', ['id' => encrypt($student->id)]));
 
         $response->assertStatus(302);
         $this->assertTrue($student->refresh()->is_wallet_autopay_enabled);
-
-        // Toggle attempt via unauthorized staff (e.g. finance department only, not enrolment or operations)
-        // Wait, Finance is not in checkManagementRole's allowed list
-        $response = $this->actingAs($this->staffFinance, 'staff')
-            ->post(route('staff.students.wallet.toggle-autopay', ['id' => encrypt($student->id)]));
-
-        $response->assertStatus(403);
     }
 
-    public function test_staff_can_deposit_money_into_wallet(): void
+    public function test_admin_can_deposit_money_into_wallet(): void
     {
         $student = $this->createStudent(['wallet_balance' => 50.00]);
 
-        $response = $this->actingAs($this->staffFinance, 'staff')
-            ->post(route('staff.fees.wallet.deposit'), [
+        $response = $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.fees.wallet.deposit'), [
                 'student_id' => $student->id,
                 'amount' => 150.00,
                 'payment_method' => 'cash',
@@ -162,13 +165,13 @@ class StudentWalletTest extends TestCase
         ]);
     }
 
-    public function test_staff_can_refund_money_from_wallet(): void
+    public function test_admin_can_refund_money_from_wallet(): void
     {
         $student = $this->createStudent(['wallet_balance' => 200.00]);
 
         // Attempt refund of 80
-        $response = $this->actingAs($this->staffFinance, 'staff')
-            ->post(route('staff.fees.wallet.refund'), [
+        $response = $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.fees.wallet.refund'), [
                 'student_id' => $student->id,
                 'amount' => 80.00,
                 'payment_method' => 'bank_transfer',
@@ -190,12 +193,12 @@ class StudentWalletTest extends TestCase
         ]);
     }
 
-    public function test_refund_cannot_exceed_available_wallet_balance(): void
+    public function test_admin_refund_cannot_exceed_available_wallet_balance(): void
     {
         $student = $this->createStudent(['wallet_balance' => 50.00]);
 
-        $response = $this->actingAs($this->staffFinance, 'staff')
-            ->post(route('staff.fees.wallet.refund'), [
+        $response = $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.fees.wallet.refund'), [
                 'student_id' => $student->id,
                 'amount' => 100.00,
                 'payment_method' => 'cash',
@@ -205,6 +208,34 @@ class StudentWalletTest extends TestCase
         $response->assertStatus(302);
         $response->assertSessionHas('error');
         $this->assertEquals(50.00, $student->refresh()->wallet_balance);
+    }
+
+    public function test_staff_cannot_access_admin_wallet_routes(): void
+    {
+        $student = $this->createStudent(['wallet_balance' => 100.00]);
+
+        // 1. Toggle autopay
+        $response = $this->actingAs($this->staffEnrolment, 'staff')
+            ->post(route('admin.students.wallet.toggle-autopay', ['id' => encrypt($student->id)]));
+        $response->assertRedirect(route('admin.login'));
+
+        // 2. Deposit
+        $response = $this->actingAs($this->staffFinance, 'staff')
+            ->post(route('admin.fees.wallet.deposit'), [
+                'student_id' => $student->id,
+                'amount' => 150.00,
+                'payment_method' => 'cash',
+            ]);
+        $response->assertRedirect(route('admin.login'));
+
+        // 3. Refund
+        $response = $this->actingAs($this->staffFinance, 'staff')
+            ->post(route('admin.fees.wallet.refund'), [
+                'student_id' => $student->id,
+                'amount' => 50.00,
+                'payment_method' => 'cash',
+            ]);
+        $response->assertRedirect(route('admin.login'));
     }
 
     public function test_wallet_autopay_allocation_on_fee_generation(): void

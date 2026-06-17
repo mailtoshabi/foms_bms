@@ -165,8 +165,7 @@
                                         </td>
 
                                         <td>
-                                            <span class="badge
-                                                    {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
+                                            <span class="badge {{ $salary->status == 'paid' ? 'bg-success' : 'bg-warning text-dark' }}">
                                                 {{ ucfirst($salary->status) }}
                                             </span>
                                         </td>

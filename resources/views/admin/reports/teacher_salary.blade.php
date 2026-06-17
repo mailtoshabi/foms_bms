@@ -62,6 +62,9 @@
                                                         <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>
                                                                Partial
                                                         </option>
+                                                        <option value="deposit" {{ request('status') == 'deposit' ? 'selected' : '' }}>
+                                                               Deposit
+                                                        </option>
                                                  @endif
                                           </select>
                                    </div>
@@ -176,24 +179,44 @@
                                                         @endif
                                                  </td>
                                                  <td>
-                                                        <span
-                                                               class="badge {{ $row->status == 'paid' ? 'bg-success' : 'bg-warning' }}">
-                                                               {{ ucfirst($row->status) }}
-                                                        </span>
-                                                 </td>
-                                                 <td>
-                                                        <button class="btn btn-sm btn-primary paySalaryBtn {{ $row->status == 'paid' ? 'disabled' : '' }}"
-                                                               data-id="{{ $row->id }}" data-amount="{{ $row->total_amount }}"
-                                                               data-status="{{ $row->status }}"
-                                                               data-date="{{ optional($row->payment_date)->format('Y-m-d') }}"
-                                                               data-method="{{ $row->payment_method }}"
-                                                               data-ref="{{ $row->reference_number }}" data-notes="{{ $row->notes }}">
+                                                         @if($row->status == 'paid')
+                                                                <span class="badge bg-success">Paid</span>
+                                                         @elseif($row->status == 'deposit')
+                                                                <span class="badge bg-danger">Deposit</span>
+                                                         @else
+                                                                <span class="badge bg-warning text-dark">Unpaid</span>
+                                                         @endif
+                                                  </td>
+                                                  <td>
+                                                         @if($row->status == 'deposit')
+                                                                <form action="{{ route('admin.salaries.release', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to release this deposit back to salary?')">
+                                                                       @csrf
+                                                                       <button type="submit" class="btn btn-sm btn-info" title="Release Deposit">
+                                                                              <i class="fas fa-hand-holding-usd"></i>
+                                                                       </button>
+                                                                </form>
+                                                         @else
+                                                                <button class="btn btn-sm btn-primary paySalaryBtn {{ $row->status == 'paid' ? 'disabled' : '' }}"
+                                                                       data-id="{{ $row->id }}" data-amount="{{ $row->total_amount }}"
+                                                                       data-status="{{ $row->status }}"
+                                                                       data-date="{{ $row->payment_date ? \Carbon\Carbon::parse($row->payment_date)->format('Y-m-d') : '' }}"
+                                                                       data-method="{{ $row->payment_method }}"
+                                                                       data-ref="{{ $row->reference_number }}" data-notes="{{ $row->notes }}">
 
-                                                               <i class="fas fa-money-bill"></i>
+                                                                       <i class="fas fa-money-bill"></i>
 
-                                                        </button>
+                                                                </button>
+                                                         @endif
 
-                                                 </td>
+                                                         @if($row->status == 'unpaid' && !App\Models\TeacherSalary::where('teacher_id', $row->teacher_id)->where('id', '<', $row->id)->exists())
+                                                                <form action="{{ route('admin.salaries.deposit', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to move this first month salary to deposit?')">
+                                                                       @csrf
+                                                                       <button type="submit" class="btn btn-sm btn-warning" title="Move to Deposit">
+                                                                              <i class="fas fa-university"></i>
+                                                                       </button>
+                                                                </form>
+                                                         @endif
+                                                  </td>
                                           </tr>
                                    @empty
                                           <tr>

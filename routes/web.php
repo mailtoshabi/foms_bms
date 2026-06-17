@@ -152,6 +152,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/students/{id}', [ReportController::class, 'showStudent'])
             ->name('reports.students.show');
 
+        Route::post('/students/{id}/wallet/toggle-autopay', [ReportController::class, 'toggleWalletAutopay'])
+            ->name('students.wallet.toggle-autopay');
+
+        Route::post('/fees/wallet/deposit', [ReportController::class, 'depositWallet'])
+            ->name('fees.wallet.deposit');
+
+        Route::post('/fees/wallet/refund', [ReportController::class, 'refundWallet'])
+            ->name('fees.wallet.refund');
+
+        Route::post('/fees/refund', [ReportController::class, 'refundFee'])
+            ->name('fees.refund');
+
+        Route::get('/fees/{id}/refunds', [ReportController::class, 'getRefunds'])
+            ->name('fees.refunds');
+
         Route::get('reports/class-hours', [ReportController::class, 'classHours'])
             ->name('reports.class-hours');
 
@@ -290,7 +305,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::get('/', 'index')->name('index');
                 Route::post('/pay', 'pay')->name('pay');
+                Route::post('/{salary}/deposit', 'moveToDeposit')->name('deposit');
+                Route::post('/{salary}/release', 'releaseDeposit')->name('release');
 
+            });
+
+        Route::controller(\App\Http\Controllers\Admin\DepositController::class)
+            ->prefix('deposits')
+            ->name('deposits.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::post('/pay', 'pay')->name('pay');
+            });
+
+        Route::controller(\App\Http\Controllers\Admin\FeeController::class)
+            ->prefix('fees')
+            ->name('fees.')
+            ->group(function () {
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+                Route::get('/students/search', 'searchStudents')->name('students.search');
             });
 
     });
@@ -392,10 +426,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [StudentController::class, 'saveDiscount']
                 )->name('students.discount');
 
-                Route::post(
-                    '/students/{id}/wallet/toggle-autopay',
-                    [StudentController::class, 'toggleWalletAutopay']
-                )->name('students.wallet.toggle-autopay');
 
                 Route::get(
                     '/students/{id}/check-related',
@@ -515,6 +545,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [FeeController::class, 'getPayments']
                 )->name('fees.payments');
 
+                Route::get(
+                    '/fees/{id}/refunds',
+                    [FeeController::class, 'getRefunds']
+                )->name('fees.refunds');
+
                 Route::post(
                     '/fees/send-notification',
                     [FeeController::class, 'sendNotification']
@@ -525,15 +560,6 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [FeeController::class, 'sendBulkNotifications']
                 )->name('fees.send-bulk-notifications');
 
-                Route::post(
-                    '/fees/wallet/deposit',
-                    [FeeController::class, 'depositWallet']
-                )->name('fees.wallet.deposit');
-
-                Route::post(
-                    '/fees/wallet/refund',
-                    [FeeController::class, 'refundWallet']
-                )->name('fees.wallet.refund');
 
                 Route::delete(
                     '/fees/{id}',
@@ -648,6 +674,9 @@ Route::prefix('departments')->name('staff.')->group(function () {
 
                 Route::resource('teachers', TeacherController::class)
                     ->names('teachers')->except(['show']);
+
+                Route::get('/deposits', [\App\Http\Controllers\Staff\Finance\DepositController::class, 'index'])
+                    ->name('deposits.index');
             });
 
         Route::middleware('role:id_operation_dept')->group(function () {

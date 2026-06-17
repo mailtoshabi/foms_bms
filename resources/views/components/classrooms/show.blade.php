@@ -66,7 +66,9 @@
 
                 <p><strong>Duration:</strong> {{ $class->slot_duration }} mins</p>
                 <p><strong>Classes :</strong> {{ $class->classes_per_week }} per week</p>
-                <p><strong>Started From:</strong> {{ $class->starting_date ? \Carbon\Carbon::parse($class->starting_date)->format('d F, Y') : '-' }}</p>
+                <p><strong>Started From:</strong>
+                    {{ $class->starting_date ? \Carbon\Carbon::parse($class->starting_date)->format('d F, Y') : '-' }}
+                </p>
 
             </div>
 
@@ -102,7 +104,7 @@
                                 <th>Wage/Hour</th>
                                 @if(!$class->is_completed)
                                     @if($isAdmin || $isOperation || $isAdministrator)
-                                    <th>Action</th> @endif
+                                    <th>Remove From Class</th> @endif
                                 @endif
                             </tr>
                         </thead>
@@ -130,7 +132,7 @@
                                                     <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
                                                     <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
                                                     <button class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="fas fa-times"></i>
                                                     </button>
 
                                                 </form>
@@ -225,7 +227,7 @@
                                                     <input type="hidden" name="student_id" value="{{ encrypt($student->id) }}">
 
                                                     <button class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i>
+                                                        <i class="fas fa-times"></i>
                                                     </button>
 
                                                 </form>
@@ -281,9 +283,11 @@
                             @forelse($class->classHours->take(10) as $hour)
                                 <tr>
                                     <td>
-                                        <span class="fw-bold">{{ $hour->created_at ? $hour->created_at->format('d M Y') : '-' }}</span>
+                                        <span
+                                            class="fw-bold">{{ $hour->created_at ? $hour->created_at->format('d M Y') : '-' }}</span>
                                         <br>
-                                        <small class="text-muted">{{ $hour->created_at ? $hour->created_at->format('h:i A') : '-' }}</small>
+                                        <small
+                                            class="text-muted">{{ $hour->created_at ? $hour->created_at->format('h:i A') : '-' }}</small>
                                     </td>
                                     <td>{{ $hour->teacher->name ?? 'Not Assigned' }}</td>
                                     <td>{{ $hour->duration ? $hour->duration . ' mins' : '-' }}</td>
@@ -439,10 +443,10 @@
 
                 selectedStudents.forEach((name, id) => {
                     badgesHtml += `
-                                                                                                                        <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
-                                                                                                                            ${name}
-                                                                                                                            <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
-                                                                                                                        </span>`;
+                                                                                                                                    <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
+                                                                                                                                        ${name}
+                                                                                                                                        <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
+                                                                                                                                    </span>`;
                     inputsHtml += `<input type="hidden" name="student_ids[]" value="${id}">`;
                 });
 
@@ -462,7 +466,7 @@
                     }
                 @endif
 
-                                                                                                                if ($(this).is(':checked')) {
+                                                                                                                            if ($(this).is(':checked')) {
                     selectedStudents.set(id, name);
                 } else {
                     selectedStudents.delete(id);
@@ -486,10 +490,10 @@
                 if (q.length < 2) {
                     if (q.length === 0) {
                         $('#studentList').html(`
-                                                                                                                            <div class="col-12 text-center py-4 text-muted">
-                                                                                                                                <i class="fas fa-search fa-2x mb-2"></i>
-                                                                                                                                <p>Start typing to find students to add...</p>
-                                                                                                                            </div>`);
+                                                                                                                                        <div class="col-12 text-center py-4 text-muted">
+                                                                                                                                            <i class="fas fa-search fa-2x mb-2"></i>
+                                                                                                                                            <p>Start typing to find students to add...</p>
+                                                                                                                                        </div>`);
                     }
                     return;
                 }
@@ -513,13 +517,13 @@
                                 response.results.forEach(student => {
                                     let isChecked = selectedStudents.has(student.id.toString()) ? 'checked' : '';
                                     html += `
-                                                                                                                                        <div class="col-md-6 mb-2">
-                                                                                                                                            <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
-                                                                                                                                                <input type="checkbox" value="${student.id}" data-name="${student.name}" 
-                                                                                                                                                    class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
-                                                                                                                                                <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
-                                                                                                                                            </label>
-                                                                                                                                        </div>`;
+                                                                                                                                                    <div class="col-md-6 mb-2">
+                                                                                                                                                        <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
+                                                                                                                                                            <input type="checkbox" value="${student.id}" data-name="${student.name}" 
+                                                                                                                                                                class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
+                                                                                                                                                            <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
+                                                                                                                                                        </label>
+                                                                                                                                                    </div>`;
                                 });
                             }
                             $('#studentList').html(html);

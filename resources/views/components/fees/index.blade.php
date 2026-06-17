@@ -297,7 +297,9 @@
 
                                 @php
                                     $paid = $fee->paid_amount ?? 0;
-                                    $remaining = $fee->amount - $paid;
+                                    $totalRefunded = $fee->refunds->sum('amount');
+                                    $netPaid = $paid - $totalRefunded;
+                                    $remaining = $fee->amount - $netPaid;
 
                                     $dueDate = \Carbon\Carbon::parse($fee->due_date);
 
@@ -305,6 +307,8 @@
                                     $daysOverdue = ($remaining > 0 && $dueDate->isPast())
                                         ? $dueDate->startOfDay()->diffInDays(now()->startOfDay())
                                         : 0;
+
+                                    $lastPaymentDate = $fee->payments()->max('paid_date');
                                 @endphp
 
                                 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">
@@ -345,14 +349,20 @@
                                             Paid: ₹ {{ number_format($paid, 2) }}
                                         </small><br>
 
+                                        @if($totalRefunded > 0)
+                                            <small class="text-warning">
+                                                Refunded: ₹ {{ number_format($totalRefunded, 2) }}
+                                            </small><br>
+                                        @endif
+
                                         <small class="text-danger">
                                             Remaining: ₹ {{ number_format($remaining, 2) }}
                                         </small>
                                         @php
-                                            $percentage = $fee->amount > 0 ? ($paid / $fee->amount) * 100 : 0;
+                                            $percentage = $fee->amount > 0 ? (max(0, $netPaid) / $fee->amount) * 100 : 0;
                                         @endphp
 
-                                        <div class="progress mt-1" style="height:6px;" title="{{ round($percentage) }}% paid">
+                                        <div class="progress mt-1" style="height:6px;" title="{{ round($percentage) }}% net paid">
                                             <div class="progress-bar bg-success" style="width: {{ $percentage }}%">
                                             </div>
                                         </div>
@@ -360,9 +370,6 @@
 
                                     <td>
                                         {{ \Carbon\Carbon::parse($fee->due_date)->format('d M Y') }}
-                                        @php
-                                            $lastPaymentDate = $fee->payments()->max('paid_date');
-                                        @endphp
                                         @if($lastPaymentDate)
                                             <br><small class="text-muted" title="Last Payment Date">Last paid:
                                                 {{ \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') }}</small>
@@ -382,6 +389,14 @@
                                         @endphp
                                         <span
                                             class="badge {{ $badgeClasses[$fee->status] ?? 'bg-danger' }}">{{ ucfirst($fee->status) }}</span>
+                                        @if($totalRefunded > 0)
+                                            <br>
+                                            <a href="javascript:void(0)" class="badge bg-secondary viewRefundsBtn mt-1" 
+                                               data-url="{{ auth('admin')->check() ? route('admin.fees.refunds', $fee->id) : route('staff.fees.refunds', $fee->id) }}"
+                                               title="View refund history">
+                                                <i class="fas fa-undo-alt me-1"></i> Refunded
+                                            </a>
+                                        @endif
                                     </td>
                                     @if($isAction == 'true' || auth('admin')->check())
                                         <td>
@@ -414,6 +429,17 @@
                                                         <i class="fas fa-bell"></i>
                                                     </button>
                                                 @endif -->
+                                            @endif
+
+                                            @if(auth('admin')->check() && $netPaid > 0 && $lastPaymentDate && !\Carbon\Carbon::parse($lastPaymentDate)->addMonths(2)->isPast())
+                                                <button class="btn btn-sm btn-warning refundFeeBtn" 
+                                                    data-id="{{ $fee->id }}"
+                                                    data-student="{{ $fee->student->name ?? 'N/A' }}"
+                                                    data-amount="{{ $fee->amount }}"
+                                                    data-netpaid="{{ $netPaid }}"
+                                                    title="Refund Fee">
+                                                    <i class="fas fa-undo"></i>
+                                                </button>
                                             @endif
 
                                             @if(auth('admin')->check() && $fee->status === 'unpaid')
@@ -574,8 +600,119 @@
 
         </div>
 
-        {{-- Payment History Modal End --}}
     @endif
+
+    @if(auth('admin')->check())
+        {{-- Refund Fee Modal --}}
+        <div class="modal fade" id="refundFeeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('admin.fees.refund') }}">
+                        @csrf
+                        <input type="hidden" name="fee_id" id="refund_fee_id">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Record Fee Refund</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Student Name</label>
+                                <input type="text" id="refund_student_name" class="form-control-plaintext border-bottom p-0 fw-bold text-dark" readonly style="font-size: 1.1rem;">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Total Fee Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="text" id="refund_total_fee" class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Net Paid Amount (Max Refundable)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="text" id="refund_net_paid" class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Refund Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" step="0.01" min="0.01" name="amount" id="refund_amount" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Payment Method</label>
+                                <select name="payment_method" class="form-control" required>
+                                    <option value="cash">Cash</option>
+                                    <option value="card">Card</option>
+                                    <option value="upi">UPI</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Refund Date</label>
+                                <input type="date" name="refund_date" class="form-control" value="{{ date('Y-m-d') }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Notes</label>
+                                <textarea name="notes" class="form-control" placeholder="Optional notes..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-danger" type="submit"
+                                onclick="this.disabled=true; this.innerText='Processing...'; this.form.submit();">
+                                Process Refund
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Refund History Modal --}}
+    <div class="modal fade" id="refundHistoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Refund History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p><strong>Total Refunded:</strong> ₹ <span id="totalRefundedAmount">0.00</span></p>
+
+                    <table class="table table-bordered align-middle table-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="refundsTableBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Loading...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -784,7 +921,88 @@
                     }
                 });
             });
+
+            // Refund Fee Handler (Admin only)
+            $(document).on('click', '.refundFeeBtn', function () {
+                let feeId = $(this).data('id');
+                let student = $(this).data('student');
+                let amount = parseFloat($(this).data('amount'));
+                let netPaid = parseFloat($(this).data('netpaid'));
+
+                $('#refund_fee_id').val(feeId);
+                $('#refund_student_name').val(student);
+                $('#refund_total_fee').val(amount.toFixed(2));
+                $('#refund_net_paid').val(netPaid.toFixed(2));
+                $('#refund_amount').val(netPaid.toFixed(2)).attr('max', netPaid);
+
+                $('#refundFeeModal').modal('show');
+            });
         </script>
     @endif
+
+    <script>
+        $(document).on('click', '.viewRefundsBtn', function () {
+            let url = $(this).data('url');
+
+            $('#refundsTableBody').html(`
+                <tr>
+                    <td colspan="4" class="text-center">Loading...</td>
+                </tr>
+            `);
+            $('#totalRefundedAmount').text('0.00');
+
+            $.get(url, function (res) {
+                let rows = '';
+                let total = 0;
+
+                if (!res.refunds || res.refunds.length === 0) {
+                    rows = `
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                No refunds found
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    res.refunds.forEach(r => {
+                        let amount = parseFloat(r.amount);
+                        total += amount;
+
+                        rows += `
+                            <tr>
+                                <td>${formatDate(r.refund_date)}</td>
+                                <td>₹ ${amount.toFixed(2)}</td>
+                                <td>${formatMethod(r.payment_method)}</td>
+                                <td>${r.notes ?? '-'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                $('#refundsTableBody').html(rows);
+                $('#totalRefundedAmount').text(total.toFixed(2));
+                $('#refundHistoryModal').modal('show');
+            });
+        });
+
+        // Date helper if not defined in this scope
+        if (typeof formatDate !== 'function') {
+            window.formatDate = function(dateStr) {
+                let d = new Date(dateStr);
+                return d.toLocaleDateString('en-IN', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+        }
+
+        // Method helper if not defined in this scope
+        if (typeof formatMethod !== 'function') {
+            window.formatMethod = function(method) {
+                return method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            }
+        }
+    </script>
 
 @endsection

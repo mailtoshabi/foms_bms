@@ -17,7 +17,7 @@ class FeeController extends Controller
     {
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student', 'classRoom'])
+        $query = Fee::with(['student', 'classRoom', 'refunds'])
             ->whereHas('student');
 
         // Enrolment dept sees admission fees only
@@ -490,6 +490,14 @@ class FeeController extends Controller
         }
 
         return back()->with('success', 'Wallet balance refunded successfully.');
+    }
+
+    public function getRefunds($id)
+    {
+        $fee = Fee::with('refunds')->findOrFail($id);
+        return response()->json([
+            'refunds' => $fee->refunds
+        ]);
     }
 }
 

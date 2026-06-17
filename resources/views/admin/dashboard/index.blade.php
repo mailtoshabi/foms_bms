@@ -70,7 +70,7 @@
     {{-- ===== Row 2: Finance ===== --}}
     <div class="row">
 
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <a href="{{ route('admin.reports.fee.collection') }}" class="text-decoration-none">
                 <div class="card card-h-100">
                     <div class="card-body">
@@ -88,7 +88,25 @@
             </a>
         </div>
 
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
+            <a href="{{ route('admin.reports.fee.collection') }}" class="text-decoration-none">
+                <div class="card card-h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-muted d-block">Refunds <small>(this month)</small></span>
+                                <h4 class="mb-0">₹{{ number_format($stats['refund'], 2) }}</h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-undo fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
             <a href="{{ route('admin.reports.finance.expense') }}" class="text-decoration-none">
                 <div class="card card-h-100">
                     <div class="card-body">
@@ -106,7 +124,7 @@
             </a>
         </div>
 
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <div class="card card-h-100">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
@@ -218,6 +236,26 @@
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-money-bill-wave fa-2x text-danger"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <a href="{{ route('admin.deposits.index') }}" class="text-decoration-none">
+                <div class="card card-h-100 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-grow-1">
+                                <span class="text-muted d-block">Total Deposits</span>
+                                <h4 class="mb-0">{{ $unpaidDepositsCount }} <small
+                                        class="fs-6 text-primary">₹{{ number_format($unpaidDepositsAmount, 2) }}</small>
+                                </h4>
+                            </div>
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-university fa-2x text-primary"></i>
                             </div>
                         </div>
                     </div>
