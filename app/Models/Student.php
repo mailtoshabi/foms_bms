@@ -45,7 +45,8 @@ class Student extends Authenticatable
         'status',
         'is_whatsapp_different',
         'wallet_balance',
-        'is_wallet_autopay_enabled'
+        'is_wallet_autopay_enabled',
+        'is_blocked'
     ];
 
     protected $hidden = [
@@ -60,6 +61,7 @@ class Student extends Authenticatable
         'selected_days' => 'array',
         'wallet_balance' => 'decimal:2',
         'is_wallet_autopay_enabled' => 'boolean',
+        'is_blocked' => 'boolean',
     ];
 
     public function country()

@@ -50,6 +50,9 @@
                     <span class="badge bg-success">
                         {{ ucfirst($student->status) }}
                     </span>
+                    @if($student->is_blocked)
+                        <span class="badge bg-danger">Blocked</span>
+                    @endif
 
                     @if($showButtons == 'true' && auth('admin')->check())
                         <div class="mt-4 p-3 bg-light rounded text-start shadow-sm border border-2 border-soft-primary">
@@ -685,6 +688,40 @@
 
         </div>
 
+        @if(auth('admin')->check())
+            {{-- =========================
+            BLOCK / UNBLOCK STUDENT
+            ========================= --}}
+            <div class="col-md-12 mb-5">
+                <div class="card border border-danger">
+                    <div class="card-header bg-soft-danger d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-danger"><i class="fas fa-user-shield me-1"></i> Student Access Control</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>Account Status:</strong>
+                                @if($student->is_blocked)
+                                    <span class="badge bg-danger ms-2">Blocked</span>
+                                    <p class="text-muted mt-2 mb-0 font-size-13">This student is currently blocked. They are unable to log in, and fee generation is suspended.</p>
+                                @else
+                                    <span class="badge bg-success ms-2">Unblocked / Active</span>
+                                    <p class="text-muted mt-2 mb-0 font-size-13">This student has active access. They can log in and fees will generate normally.</p>
+                                @endif
+                            </div>
+                            <div>
+                                <a href="{{ route('admin.reports.students.toggleBlock', encrypt($student->id)) }}" 
+                                   class="btn {{ $student->is_blocked ? 'btn-success' : 'btn-danger' }}"
+                                   onclick="return confirm('Are you sure you want to {{ $student->is_blocked ? 'unblock' : 'block' }} this student?')">
+                                    <i class="fas {{ $student->is_blocked ? 'fa-unlock' : 'fa-ban' }} me-1"></i>
+                                    {{ $student->is_blocked ? 'Unblock Student' : 'Block Student' }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
 
     </div>
 

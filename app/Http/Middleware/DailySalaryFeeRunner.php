@@ -19,11 +19,13 @@ class DailySalaryFeeRunner
                 ]);
             }
 
-            if (!session()->has('salary_checked')) {
+            $today = now()->toDateString();
+
+            if (session('salary_checked') !== $today) {
 
                 runDailySalaryFeeProcess();
 
-                session(['salary_checked' => true]);
+                session(['salary_checked' => $today]);
             }
         }
 

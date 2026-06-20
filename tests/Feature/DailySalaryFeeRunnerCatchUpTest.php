@@ -129,4 +129,38 @@ class DailySalaryFeeRunnerCatchUpTest extends TestCase
 
         Carbon::setTestNow();
     }
+
+    public function test_middleware_checks_daily_process_correctly_over_multiple_days(): void
+    {
+        // 1. Create a Staff user
+        $staff = \App\Models\Staff::create([
+            'name' => 'Test Staff',
+            'email' => 'staff@example.com',
+            'phone' => '1234567890',
+            'password' => bcrypt('password'),
+            'is_blocked' => false
+        ]);
+
+        // 2. Set current date to May 10th
+        Carbon::setTestNow('2026-05-10 12:00:00');
+
+        // 3. Request dashboard as staff and verify session is updated
+        $response = $this->actingAs($staff, 'staff')
+            ->get(route('staff.dashboard'));
+
+        $response->assertStatus(200);
+        $this->assertEquals('2026-05-10', session('salary_checked'));
+
+        // 4. Move to May 11th (next day)
+        Carbon::setTestNow('2026-05-11 12:00:00');
+
+        // 5. Request dashboard again, verify session updates to the new date
+        $response = $this->actingAs($staff, 'staff')
+            ->get(route('staff.dashboard'));
+
+        $response->assertStatus(200);
+        $this->assertEquals('2026-05-11', session('salary_checked'));
+
+        Carbon::setTestNow();
+    }
 }

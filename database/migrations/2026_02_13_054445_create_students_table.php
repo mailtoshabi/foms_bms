@@ -37,6 +37,7 @@ return new class extends Migration
             $table->timestamp('last_login_at')->nullable();
             $table->string('last_login_ip')->nullable();
             $table->enum('status',['active','passout','dropout'])->default('active');
+            $table->boolean('is_blocked')->default(false);
             $table->timestamps();
         });
     }

@@ -640,6 +640,11 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Blocked filter
+        if ($request->filled('is_blocked')) {
+            $query->where('is_blocked', $request->is_blocked);
+        }
+
         $students = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
@@ -682,6 +687,11 @@ class ReportController extends Controller
         // Status filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
+        }
+
+        // Blocked filter
+        if ($request->filled('is_blocked')) {
+            $query->where('is_blocked', $request->is_blocked);
         }
 
         $students = $query->latest()->get();
@@ -847,6 +857,17 @@ class ReportController extends Controller
         )->latest()->get();
 
         return view('admin.reports.show_student', compact('student', 'teachers', 'attendance', 'notes'));
+    }
+
+    public function toggleBlockStudent($id)
+    {
+        $student = Student::findOrFail(decrypt($id));
+        $student->update([
+            'is_blocked' => !$student->is_blocked
+        ]);
+
+        $statusStr = $student->is_blocked ? 'blocked' : 'unblocked';
+        return back()->with('success', "Student \"{$student->name}\" {$statusStr} successfully.");
     }
 
     public function teacherLeadReport(Request $request)

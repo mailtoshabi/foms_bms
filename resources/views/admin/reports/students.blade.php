@@ -35,6 +35,9 @@
                 </a>
                 Students Report
             </h4>
+            <button type="submit" form="filter-form" formaction="{{ route('admin.reports.students.export') }}" class="btn btn-success">
+                <i class="fas fa-file-excel me-1"></i> Export Excel
+            </button>
         </div>
 
         <div class="card-body table-responsive">
@@ -51,7 +54,7 @@
                 </div>
             </div>
 
-            <form method="GET" class="row mb-3 align-items-end">
+            <form method="GET" id="filter-form" class="row mb-3 align-items-end">
 
                 <div class="col-md-2">
                     <label class="form-label fw-bold">Name/Phone</label>
@@ -80,14 +83,17 @@
                 </div>
 
                 <div class="col-md-2">
-                    <button class="btn btn-primary">Filter</button>
-                    <a href="{{ route('admin.reports.students') }}" class="btn btn-secondary">Reset</a>
+                    <label class="form-label fw-bold">Blocked Status</label>
+                    <select name="is_blocked" class="form-control">
+                        <option value="">All</option>
+                        <option value="1" {{ request('is_blocked') == '1' ? 'selected' : '' }}>Blocked</option>
+                        <option value="0" {{ request('is_blocked') == '0' ? 'selected' : '' }}>Unblocked</option>
+                    </select>
                 </div>
 
-                <div class="col-md-2 text-end">
-                    <button type="submit" formaction="{{ route('admin.reports.students.export') }}" class="btn btn-success">
-                        Export
-                    </button>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    <a href="{{ route('admin.reports.students') }}" class="btn btn-secondary w-100">Reset</a>
                 </div>
 
             </form>
@@ -129,6 +135,9 @@
                                     class="badge bg-{{ $student->status == 'active' ? 'success' : ($student->status == 'passout' ? 'info' : 'danger') }}">
                                     {{ ucfirst($student->status) }}
                                 </span>
+                                @if($student->is_blocked)
+                                    <span class="badge bg-danger">Blocked</span>
+                                @endif
                             </td>
                             <td>{{ $student->created_at->format('d M Y') }}</td>
                             <td>

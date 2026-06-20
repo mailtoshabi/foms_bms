@@ -570,28 +570,30 @@
                     <div class="modal-body">
                         <p><strong>Total Paid:</strong> ₹ <span id="totalPaid"></span></p>
 
-                        <table class="table table-bordered  align-middle table-nowrap mb-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered  align-middle table-nowrap mb-0">
 
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Amount</th>
-                                    <th>Method</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Method</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
 
-                            <tbody id="paymentsTableBody">
+                                <tbody id="paymentsTableBody">
 
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">
-                                        Loading...
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            Loading...
+                                        </td>
+                                    </tr>
 
-                            </tbody>
+                                </tbody>
 
-                        </table>
+                            </table>
+                        </div>
 
                     </div>
 
@@ -692,23 +694,25 @@
                 <div class="modal-body">
                     <p><strong>Total Refunded:</strong> ₹ <span id="totalRefundedAmount">0.00</span></p>
 
-                    <table class="table table-bordered align-middle table-nowrap mb-0">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody id="refundsTableBody">
-                            <tr>
-                                <td colspan="4" class="text-center text-muted">
-                                    Loading...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle table-nowrap mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="refundsTableBody">
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        Loading...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

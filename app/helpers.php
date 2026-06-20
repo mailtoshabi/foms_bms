@@ -34,7 +34,7 @@ if (!function_exists('utility')) {
     {
         static $settings;
 
-        if (!$settings) {
+        if (!$settings || app()->runningUnitTests()) {
             $settings = Utility::pluck('value', 'key')->toArray();
         }
 

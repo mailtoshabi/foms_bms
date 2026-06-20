@@ -449,8 +449,8 @@ class TeacherController extends Controller
                         // Generate fees for each student
                         foreach ($students as $student) {
 
-                            // Skip inactive or monthly fee exempted students
-                            if ($student->status !== 'active' || $student->is_monthly_fee_exempted) {
+                            // Skip inactive, blocked, or monthly fee exempted students
+                            if ($student->status !== 'active' || $student->is_blocked || $student->is_monthly_fee_exempted) {
                                 continue;
                             }
 

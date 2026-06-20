@@ -30,7 +30,7 @@
 
             <form method="GET" class="row mb-3">
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label fw-bold">Search</label>
                     <input type="text" name="search" value="{{ request('search') }}" class="form-control"
                         placeholder="Search name or contact">
@@ -43,6 +43,15 @@
                         <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                         <option value="passout" {{ request('status') == 'passout' ? 'selected' : '' }}>Passout</option>
                         <option value="dropout" {{ request('status') == 'dropout' ? 'selected' : '' }}>Dropout</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Blocked Status</label>
+                    <select name="is_blocked" class="form-control select2">
+                        <option value="">All</option>
+                        <option value="1" {{ request('is_blocked') == '1' ? 'selected' : '' }}>Blocked</option>
+                        <option value="0" {{ request('is_blocked') == '0' ? 'selected' : '' }}>Unblocked</option>
                     </select>
                 </div>
 
@@ -89,6 +98,9 @@
                                     class="badge {{ $student->status == 'active' ? 'bg-success' : '' }} {{ $student->status == 'passout' ? 'bg-info' : '' }} {{ $student->status == 'dropout' ? 'bg-danger' : '' }}">
                                     {{ ucfirst($student->status) }}
                                 </span>
+                                @if($student->is_blocked)
+                                    <span class="badge bg-danger">Blocked</span>
+                                @endif
                             </td>
 
                             <td>
@@ -101,14 +113,18 @@
                                     $staff = auth('staff')->user();
                                 @endphp
 
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 align-items-center">
 
-                                    <a href="{{ route('staff.students.show', encrypt($student->id)) }}">
-                                        <i class="mdi mdi-eye text-primary"></i>
+                                    <a href="{{ route('staff.students.show', encrypt($student->id)) }}" title="View Student Details">
+                                        <i class="mdi mdi-eye text-primary font-size-16"></i>
                                     </a>
                                     @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
-                                        <a href="{{ route('staff.students.edit', encrypt($student->id)) }}">
-                                            <i class="mdi mdi-pencil text-success"></i>
+                                        <a href="{{ route('staff.students.edit', encrypt($student->id)) }}" title="Edit Student">
+                                            <i class="mdi mdi-pencil text-success font-size-16"></i>
+                                        </a>
+                                        <a href="{{ route('staff.students.toggleBlock', encrypt($student->id)) }}" 
+                                           title="{{ $student->is_blocked ? 'Unblock Student' : 'Block Student' }}">
+                                            <i class="mdi {{ $student->is_blocked ? 'mdi-lock-open text-warning' : 'mdi-lock text-danger' }} font-size-16"></i>
                                         </a>
                                     @endif
                                     @if($staff->hasRoleId($operationRoleId))

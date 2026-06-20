@@ -152,6 +152,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/students/{id}', [ReportController::class, 'showStudent'])
             ->name('reports.students.show');
 
+        Route::get('reports/students/{id}/toggle-block', [ReportController::class, 'toggleBlockStudent'])
+            ->name('reports.students.toggleBlock');
+
         Route::post('/students/assign-class', [ReportController::class, 'assignClass'])
             ->name('students.assign.class');
 
@@ -653,6 +656,11 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [StudentController::class, 'index']
                 )->name('students.index');
 
+                Route::get(
+                    '/students/{id}/toggle-block',
+                    [StudentController::class, 'toggleBlock']
+                )->name('students.toggleBlock');
+
                 Route::post(
                     '/students/assign-class',
                     [StudentController::class, 'assignClass']
@@ -838,7 +846,10 @@ Route::prefix('student')->name('student.')->group(function () {
 });
 
 Route::prefix('student')
-    ->middleware('auth:student')
+    ->middleware([
+        'auth:student',
+        \App\Http\Middleware\CheckStudentBlocked::class
+    ])
     ->name('student.')
     ->group(function () {
         Route::post('/logout', [StudentLoginController::class, 'logout'])->name('logout');

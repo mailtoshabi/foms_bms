@@ -48,6 +48,10 @@ class StudentController extends Controller
             $students->where('status', $request->status);
         }
 
+        if ($request->filled('is_blocked')) {
+            $students->where('is_blocked', $request->is_blocked);
+        }
+
         if ($request->filled('search')) {
             $students->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
@@ -349,12 +353,9 @@ class StudentController extends Controller
         // Fee Logic Starts Here
         // =========================
 
-        $isAdmissionExempted = $student->is_admission_fee_exempted;
-
-
-        // Case: No admission fee if exempted
-        if ($isAdmissionExempted) {
-            return back()->with('success', 'Class assigned (Admission fee exempted)');
+        // Case: No admission fee if exempted or student is blocked
+        if ($student->is_admission_fee_exempted || $student->is_blocked) {
+            return back()->with('success', 'Class assigned ' . ($student->is_blocked ? '(Student is blocked)' : '(Admission fee exempted)'));
         }
 
         $type = 'admission';
@@ -594,5 +595,17 @@ class StudentController extends Controller
             'is_wallet_autopay_enabled' => !$student->is_wallet_autopay_enabled
         ]);
         return back()->with('success', 'Wallet autopay setting updated successfully.');
+    }
+
+    public function toggleBlock($id)
+    {
+        $this->checkManagementRole();
+        $student = Student::findOrFail(decrypt($id));
+        $student->update([
+            'is_blocked' => !$student->is_blocked
+        ]);
+
+        $statusStr = $student->is_blocked ? 'blocked' : 'unblocked';
+        return back()->with('success', "Student \"{$student->name}\" {$statusStr} successfully.");
     }
 }

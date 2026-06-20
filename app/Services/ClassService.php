@@ -156,8 +156,8 @@ class ClassService
 
                 $isAdmissionExempted = $student->is_admission_fee_exempted;
 
-                // Skip if admission exempted
-                if ($isAdmissionExempted) {
+                // Skip if admission exempted or student is blocked
+                if ($isAdmissionExempted || $student->is_blocked) {
                     continue;
                 }
 
