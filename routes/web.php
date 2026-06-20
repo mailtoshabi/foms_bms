@@ -152,6 +152,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/students/{id}', [ReportController::class, 'showStudent'])
             ->name('reports.students.show');
 
+        Route::post('/students/assign-class', [ReportController::class, 'assignClass'])
+            ->name('students.assign.class');
+
+        Route::post('/students/change-class', [ReportController::class, 'changeClass'])
+            ->name('students.change.class');
+
+        Route::post('/students/promote-class', [ReportController::class, 'promoteClass'])
+            ->name('students.promote.class');
+
+        Route::get('/students-active-classes/search', [ReportController::class, 'searchActiveClasses'])
+            ->name('students.active-classes.search');
+
         Route::post('/students/{id}/wallet/toggle-autopay', [ReportController::class, 'toggleWalletAutopay'])
             ->name('students.wallet.toggle-autopay');
 

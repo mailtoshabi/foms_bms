@@ -1339,4 +1339,184 @@ class ReportController extends Controller
             'refunds' => $fee->refunds
         ]);
     }
+
+    public function assignClass(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'class_room_id' => 'required|exists:class_rooms,id'
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+        $class = ClassRoom::with('classType', 'students')->findOrFail($request->class_room_id);
+
+        if ($class->classType?->name === 'individual') {
+            if ($class->students()->count() > 0) {
+                return back()->with('error', 'Only one student allowed for individual class.');
+            }
+        }
+
+        if ($student->class_rooms()->where('class_room_id', $class->id)->exists()) {
+            return back()->with('error', 'Student already assigned to this class.');
+        }
+
+        $student->class_rooms()->attach($class->id, [
+            'assigned_date' => now()
+        ]);
+
+        $isAdmissionExempted = $student->is_admission_fee_exempted;
+
+        if ($isAdmissionExempted) {
+            return back()->with('success', 'Class assigned (Admission fee exempted)');
+        }
+
+        $type = 'admission';
+        $amount = max(0, $class->admission_fee - $student->admission_fee_discount);
+
+        if (
+            Fee::where('student_id', $student->id)
+                ->where('class_room_id', $class->id)
+                ->where('type', $type)
+                ->exists()
+        ) {
+            return back()->with('warning', 'Class assigned, fee already exists.');
+        }
+
+        if ($amount > 0) {
+            $fee = Fee::create([
+                'student_id' => $student->id,
+                'class_room_id' => $class->id,
+                'type' => $type,
+                'amount' => $amount,
+                'due_date' => now()->addDays(7),
+                'status' => 'unpaid'
+            ]);
+
+            app(\App\Services\FeeService::class)->applyWalletBalance($fee);
+        }
+
+        return back()->with('success', 'Class assigned and fee generated successfully.');
+    }
+
+    public function changeClass(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'from_class_id' => 'required|exists:class_rooms,id',
+            'to_class_id' => 'required|exists:class_rooms,id|different:from_class_id'
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+
+        if (!$student->class_rooms()->where('class_room_id', $request->from_class_id)->exists()) {
+            return back()->with('error', 'Student is not assigned to the selected "From Class".');
+        }
+
+        if ($student->class_rooms()->where('class_room_id', $request->to_class_id)->exists()) {
+            return back()->with('error', 'Student is already assigned to the selected "To Class".');
+        }
+
+        DB::transaction(function () use ($student, $request) {
+            DB::table('class_change_logs')->insert([
+                'student_id' => $student->id,
+                'class_room_id_from' => $request->from_class_id,
+                'class_room_id_to' => $request->to_class_id,
+                'type' => 'change',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            Fee::where('student_id', $student->id)
+                ->where('class_room_id', $request->from_class_id)
+                ->where('status', 'unpaid')
+                ->update(['class_room_id' => $request->to_class_id]);
+
+            $student->class_rooms()->detach($request->from_class_id);
+            $student->class_rooms()->attach($request->to_class_id, [
+                'assigned_date' => now()
+            ]);
+        });
+
+        return back()->with('success', 'Class changed successfully. Unpaid fees have been transferred.');
+    }
+
+    public function promoteClass(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'from_class_id' => 'required|exists:class_rooms,id',
+            'to_class_id' => 'required|exists:class_rooms,id|different:from_class_id'
+        ]);
+
+        $student = Student::findOrFail($request->student_id);
+
+        if (!$student->class_rooms()->where('class_room_id', $request->from_class_id)->exists()) {
+            return back()->with('error', 'Student is not assigned to the selected "From Class".');
+        }
+
+        if ($student->class_rooms()->where('class_room_id', $request->to_class_id)->exists()) {
+            return back()->with('error', 'Student is already assigned to the selected "To Class".');
+        }
+
+        $hasUnpaidFees = Fee::where('student_id', $student->id)
+            ->where('class_room_id', $request->from_class_id)
+            ->where('status', '!=', 'paid')
+            ->exists();
+
+        if ($hasUnpaidFees) {
+            return back()->with('error', 'Cannot promote student. There are unpaid fees in the current class.');
+        }
+
+        DB::transaction(function () use ($student, $request) {
+            DB::table('class_change_logs')->insert([
+                'student_id' => $student->id,
+                'class_room_id_from' => $request->from_class_id,
+                'class_room_id_to' => $request->to_class_id,
+                'type' => 'promote',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $student->class_rooms()->attach($request->to_class_id, [
+                'assigned_date' => now()
+            ]);
+
+            ClassRoom::where('id', $request->from_class_id)->update(['is_completed' => true]);
+        });
+
+        return back()->with('success', 'Student promoted to new class successfully.');
+    }
+
+    public function searchActiveClasses(Request $request)
+    {
+        $term = $request->input('q', '');
+        $query = ClassRoom::with('course')
+            ->where('is_completed', false);
+
+        if ($request->filled('type')) {
+            $types = explode(',', $request->type);
+            $query->whereHas('classType', function ($q) use ($types) {
+                $q->whereIn('name', $types);
+            });
+        }
+
+        if ($request->filled('exclude_student_id')) {
+            $query->whereDoesntHave('students', function ($q) use ($request) {
+                $q->where('students.id', $request->exclude_student_id);
+            });
+        }
+
+        $results = $query->where(function ($q) use ($term) {
+            $q->where('name', 'like', "%{$term}%")
+                ->orWhereHas('course', fn($c) => $c->where('name', 'like', "%{$term}%"));
+        })
+            ->limit(30)
+            ->get()
+            ->map(fn($c) => [
+                'id' => $c->id,
+                'text' => $c->name . ($c->course ? ' (' . $c->course->name . ')' : ''),
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
 }

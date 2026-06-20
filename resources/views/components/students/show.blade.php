@@ -2,6 +2,10 @@
 
 @section('content')
 
+    @if(auth('admin')->check())
+        <x-alerts />
+    @endif
+
     <div class="row">
 
         {{-- =========================
@@ -130,7 +134,8 @@
                 <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
 
                     <h5 class="mb-0">Course & Class Details</h5>
-                    @if($showButtons == 'true' && auth('staff')->check())
+                    @php $routePrefix = auth('admin')->check() ? 'admin' : 'staff'; @endphp
+                    @if($showButtons == 'true' && (auth('staff')->check() || auth('admin')->check()))
                         <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
                             <button class="btn btn-sm btn-primary w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#assignClassModal">
 
@@ -690,7 +695,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
 
-                <form method="POST" action="{{ route('staff.students.assign.class') }}">
+                <form method="POST" action="{{ route($routePrefix . '.students.assign.class') }}">
 
                     @csrf
 
@@ -711,7 +716,7 @@
                             <label class="form-label">Select Class</label>
 
                             <select name="class_room_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.students.active-classes.search') }}?exclude_student_id={{ $student->id }}"
+                                data-ajax-url="{{ route($routePrefix . '.students.active-classes.search') }}?exclude_student_id={{ $student->id }}"
                                 required>
 
                                 <option value="">Search active class...</option>
@@ -753,7 +758,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
 
-                <form method="POST" action="{{ route('staff.students.change.class') }}">
+                <form method="POST" action="{{ route($routePrefix . '.students.change.class') }}">
 
                     @csrf
 
@@ -805,7 +810,7 @@
                             <label class="form-label">To Class</label>
 
                             <select name="to_class_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.students.active-classes.search') }}?type=group&exclude_student_id={{ $student->id }}"
+                                data-ajax-url="{{ route($routePrefix . '.students.active-classes.search') }}?type=group&exclude_student_id={{ $student->id }}"
                                 required>
 
                                 <option value="">Search new class...</option>
@@ -850,7 +855,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
 
-                <form method="POST" action="{{ route('staff.students.promote.class') }}">
+                <form method="POST" action="{{ route($routePrefix . '.students.promote.class') }}">
 
                     @csrf
 
@@ -888,7 +893,7 @@
                             <label class="form-label">To Class (Promotion)</label>
 
                             <select name="to_class_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.students.active-classes.search') }}?type=group,individual&exclude_student_id={{ $student->id }}"
+                                data-ajax-url="{{ route($routePrefix . '.students.active-classes.search') }}?type=group,individual&exclude_student_id={{ $student->id }}"
                                 required>
 
                                 <option value="">Search new class...</option>
