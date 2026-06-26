@@ -124,6 +124,7 @@
                                             <i class="mdi mdi-pencil text-success font-size-16"></i>
                                         </a>
                                         <a href="{{ route('staff.students.toggleBlock', encrypt($student->id)) }}"
+                                            onclick="return confirm('Are you sure you want to {{ $student->is_blocked ? 'unblock' : 'block' }} this student?')"
                                             title="{{ $student->is_blocked ? 'Unblock Student' : 'Block Student' }}">
                                             <i
                                                 class="mdi {{ $student->is_blocked ? 'mdi-lock-open text-warning' : 'mdi-lock text-danger' }} font-size-16"></i>
