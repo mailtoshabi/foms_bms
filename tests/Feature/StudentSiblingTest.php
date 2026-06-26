@@ -372,7 +372,7 @@ class StudentSiblingTest extends TestCase
         $student2->relatedStudents()->attach($student1->id);
 
         $response = $this->actingAs($admin, 'admin')
-            ->delete(route('admin.reports.students.relations.destroy', [
+            ->delete(route('admin.students.relations.destroy', [
                 'id' => encrypt($student1->id),
                 'related_id' => encrypt($student2->id)
             ]), [

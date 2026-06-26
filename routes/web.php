@@ -159,13 +159,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('reports.students.toggleBlock');
 
         Route::delete('reports/students/{id}/relations/{related_id}', [ReportController::class, 'removeRelation'])
-            ->name('reports.students.relations.destroy');
+            ->name('students.relations.destroy');
 
         Route::post('reports/students/{id}/relations', [ReportController::class, 'addRelation'])
-            ->name('reports.students.relations.store');
+            ->name('students.relations.store');
 
         Route::get('reports/students/{id}/search-relations', [ReportController::class, 'searchStudentsForRelations'])
-            ->name('reports.students.search-relations');
+            ->name('students.search-relations');
 
         Route::post('/students/assign-class', [ReportController::class, 'assignClass'])
             ->name('students.assign.class');
