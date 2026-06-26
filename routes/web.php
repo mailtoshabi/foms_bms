@@ -152,6 +152,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reports/students/leads/notes', [ReportController::class, 'studentLeadNotes'])
             ->name('reports.student-lead-notes');
 
+        Route::get('reports/students/create', [ReportController::class, 'createStudent'])
+            ->name('students.create');
+
+        Route::post('reports/students', [ReportController::class, 'storeStudent'])
+            ->name('students.store');
+
         Route::get('reports/students/{id}', [ReportController::class, 'showStudent'])
             ->name('reports.students.show');
 

@@ -560,4 +560,70 @@ class StudentSiblingTest extends TestCase
         $this->assertEquals('11234567890', $student2->whatsapp_number);
         $this->assertEquals($student1->country_id, $student2->country_id);
     }
+
+    public function test_admin_can_register_sibling_successfully(): void
+    {
+        $country = new Country();
+        $country->name = 'United States';
+        $country->code = '1';
+        $country->save();
+
+        // Create original student
+        $student1 = Student::create([
+            'admission_no' => 'S001',
+            'country_id' => $country->id,
+            'phone' => '1234567890',
+            'password' => bcrypt('password123'),
+            'name' => 'John Doe',
+            'contact_number' => '1234567890',
+            'whatsapp_number' => '11234567890',
+            'status' => 'active',
+            'is_blocked' => false
+        ]);
+
+        // Create admin
+        $admin = Admin::create([
+            'name' => 'Admin Member',
+            'phone' => '9999999999',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
+        ]);
+
+        // 1. Get creation page
+        $response = $this->actingAs($admin, 'admin')
+            ->get(route('admin.students.create', ['relative_of' => encrypt($student1->id)]));
+
+        $response->assertStatus(200);
+
+        // 2. Submit sibling form
+        $response = $this->actingAs($admin, 'admin')
+            ->post(route('admin.students.store'), [
+                'name' => 'Jane Doe',
+                'admission_no' => 'S002',
+                'country_id' => $country->id,
+                'phone' => '1234567890',
+                'contact_number' => '1234567890',
+                'whatsapp_number' => '11234567890',
+                'password' => 'newpassword456',
+                'password_confirmation' => 'newpassword456',
+                'status' => 'active',
+                'relative_of' => encrypt($student1->id),
+                'selected_days' => ['Monday']
+            ]);
+
+        $response->assertRedirect();
+        $targetUrl = $response->headers->get('Location');
+        $parts = explode('/', $targetUrl);
+        $encryptedId = end($parts);
+        $decryptedId = decrypt($encryptedId);
+        $this->assertEquals($student1->id, $decryptedId);
+        $this->assertEquals(2, Student::count());
+
+        $student2 = Student::orderBy('id', 'desc')->first();
+        $this->assertNotNull($student2);
+
+        // Verify bidirectional relation
+        $this->assertTrue($student1->relatedStudents->contains($student2->id));
+        $this->assertTrue($student2->relatedStudents->contains($student1->id));
+    }
 }

@@ -1,7 +1,8 @@
-@extends('staff.layouts.master')
+@extends(auth('admin')->check() ? 'admin.layouts.master' : 'staff.layouts.master')
 
 @php
     $isEdit = isset($student);
+    $routePrefix = auth('admin')->check() ? 'admin' : 'staff';
 @endphp
 
 @section('title', $isEdit ? 'Edit Student' : 'Add Student')
@@ -11,7 +12,7 @@
     <div class="row">
 
         <form method="POST"
-            action="{{ $isEdit ? route('staff.students.update', encrypt($student->id)) : route('staff.students.store') }}"
+            action="{{ $isEdit ? (Route::has($routePrefix . '.students.update') ? route($routePrefix . '.students.update', encrypt($student->id)) : '#') : route($routePrefix . '.students.store') }}"
             enctype="multipart/form-data">
 
             @csrf
@@ -321,7 +322,7 @@
                             {{ $isEdit ? 'Update Student' : 'Save Student' }}
                         </button>
 
-                        <a href="{{ route('staff.students.index') }}" class="btn btn-secondary">
+                        <a href="{{ auth('admin')->check() ? route('admin.reports.students') : route('staff.students.index') }}" class="btn btn-secondary">
                             Cancel
                         </a>
 

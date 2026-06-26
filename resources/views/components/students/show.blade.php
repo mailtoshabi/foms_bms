@@ -129,7 +129,12 @@
                         @if(auth('staff')->check())
                             <a href="{{ route('staff.students.create', ['relative_of' => encrypt($student->id)]) }}" 
                                class="btn btn-sm btn-outline-primary w-100">
-                                <i class="fas fa-user-plus me-1"></i> Add Sibling/Family Member
+                                <i class="fas fa-user-plus me-1"></i> Add Family Member
+                            </a>
+                        @elseif(auth('admin')->check())
+                            <a href="{{ route('admin.students.create', ['relative_of' => encrypt($student->id)]) }}" 
+                               class="btn btn-sm btn-outline-primary w-100">
+                                <i class="fas fa-user-plus me-1"></i> Add Family Member
                             </a>
                         @endif
 

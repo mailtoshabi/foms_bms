@@ -897,6 +897,170 @@ class ReportController extends Controller
         );
     }
 
+    public function createStudent(Request $request)
+    {
+        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        
+        $relativeOfStudent = null;
+        if ($request->filled('relative_of')) {
+            try {
+                $relativeOfStudent = Student::findOrFail(decrypt($request->relative_of));
+            } catch (\Exception $e) {
+                // Ignore decrypt failure
+            }
+        }
+
+        return view('staff.students.create', compact('countries', 'relativeOfStudent'));
+    }
+
+    public function storeStudent(Request $request)
+    {
+        $request->merge([
+            'contact_number' => preg_replace('/[^0-9]/', '', $request->contact_number),
+            'whatsapp_number' => preg_replace('/[^0-9]/', '', $request->whatsapp_number),
+        ]);
+
+        $request->merge(['phone' => $request->contact_number]);
+
+        $relativeOfStudent = null;
+        if ($request->filled('relative_of')) {
+            try {
+                $relativeOfStudent = Student::with('relatedStudents')->findOrFail(decrypt($request->relative_of));
+            } catch (\Exception $e) {
+                return back()->with('error', 'Invalid sibling reference.')->withInput();
+            }
+        }
+
+        if ($relativeOfStudent) {
+            // Force same contact details as main student
+            $request->merge([
+                'country_id' => $relativeOfStudent->country_id,
+                'contact_number' => $relativeOfStudent->contact_number,
+                'phone' => $relativeOfStudent->phone,
+            ]);
+
+            $request->validate([
+                'name' => 'required',
+                'password' => 'required|min:6',
+                'selected_days' => 'required|array|min:1'
+            ]);
+
+            // Enforce password is not the same as any family member
+            $familyIds = \DB::table('student_relations')
+                ->where('student_id', $relativeOfStudent->id)
+                ->orWhere('related_student_id', $relativeOfStudent->id)
+                ->get()
+                ->flatMap(function ($row) {
+                    return [$row->student_id, $row->related_student_id];
+                })
+                ->unique()
+                ->toArray();
+            $allFamilyIds = array_unique(array_merge($familyIds, [$relativeOfStudent->id]));
+
+            $familyHashedPasswords = Student::whereIn('id', $allFamilyIds)->pluck('password')->filter();
+
+            foreach ($familyHashedPasswords as $hashedPassword) {
+                if (\Illuminate\Support\Facades\Hash::check($request->password, $hashedPassword)) {
+                    return back()->withErrors([
+                        'password' => 'The password cannot be the same as another related family member. Please choose a different password.'
+                    ])->withInput();
+                }
+            }
+        } else {
+            // Standard validation (must be unique phone)
+            $request->validate([
+                'name' => 'required',
+                'country_id' => 'required|exists:countries,id',
+                'contact_number' => 'required|string|digits_between:7,15',
+                'phone' => 'required|unique:students,phone,NULL,id,country_id,' . $request->country_id,
+                'email' => 'nullable|email',
+                'password' => 'required|min:6',
+                'selected_days' => 'required|array|min:1'
+            ]);
+        }
+
+        try {
+            // Enforce consistency
+            $classesPerWeek = count($request->selected_days ?? []);
+
+            $photo = null;
+            $idProof = null;
+
+            if ($request->hasFile('photo')) {
+                $photo = $request->file('photo')
+                    ->store('students/photos', 'public');
+            }
+
+            if ($request->hasFile('id_proof')) {
+                $idProof = $request->file('id_proof')
+                    ->store('students/id_proofs', 'public');
+            }
+
+            $country = \App\Models\Country::find($request->country_id);
+            $isWhatsappDifferent = $request->has('is_whatsapp_different');
+            if ($isWhatsappDifferent) {
+                $whatsapp_number = $request->whatsapp_number;
+            } else {
+                $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+                $whatsapp_number = $countryCode . $request->contact_number;
+            }
+
+            $admissionNo = generateAdmissionNo();
+
+            $newStudent = Student::create([
+                'admission_no' => $admissionNo,
+                'student_lead_id' => null,
+                'country_id' => $request->country_id,
+                'is_whatsapp_different' => $isWhatsappDifferent,
+                'name' => $request->name,
+                'dob' => $request->dob,
+                'email' => $request->email,
+                'contact_number' => $request->contact_number,
+                'whatsapp_number' => $whatsapp_number,
+                'parent_name' => $request->parent_name,
+                'address' => $request->address,
+                'phone' => $request->phone,
+                'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+                'photo' => $photo,
+                'id_proof' => $idProof,
+                'classes_per_week' => $classesPerWeek,
+                'selected_days' => $request->selected_days ?? [],
+                'time_slot' => $request->time_slot,
+                'starting_date' => $request->starting_date,
+                'status' => $request->status ?? 'active'
+            ]);
+
+            if ($relativeOfStudent) {
+                // Form clique of all family members
+                $familyIds = $relativeOfStudent->relatedStudents()->pluck('students.id')->toArray();
+                $allFamilyIds = array_unique(array_merge($familyIds, [$relativeOfStudent->id, $newStudent->id]));
+
+                foreach ($allFamilyIds as $id) {
+                    $member = Student::find($id);
+                    if ($member) {
+                        $otherIds = array_diff($allFamilyIds, [$id]);
+                        $member->relatedStudents()->sync($otherIds);
+                    }
+                }
+
+                return redirect()
+                    ->route('admin.reports.students.show', encrypt($relativeOfStudent->id))
+                    ->with('success', 'Sibling account registered and linked successfully.');
+            }
+
+            return redirect()
+                ->route('admin.reports.students')
+                ->with('success', 'Student created successfully.');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Student Creation Failed: " . $e->getMessage(), [
+                'request' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withInput()->with('error', 'Error creating student: ' . $e->getMessage());
+        }
+    }
+
     public function showStudent($id)
     {
         $student = Student::with([
@@ -1639,7 +1803,7 @@ class ReportController extends Controller
             'contact_number' => $newNumber,
             'phone' => $newNumber,
             'whatsapp_number' => $whatsapp_number,
-            'password' => Hash::make($newNumber),
+            'password' => \Illuminate\Support\Facades\Hash::make($newNumber),
         ]);
 
         $relatedStudent->relatedStudents()->detach();
