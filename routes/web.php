@@ -134,6 +134,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/reports/students/export', [ReportController::class, 'exportStudents'])
             ->name('reports.students.export');
 
+        Route::get('/reports/student-advances', [ReportController::class, 'studentAdvances'])
+            ->name('reports.student-advances');
+
         Route::get('/reports/staffs', [ReportController::class, 'staffReport'])
             ->name('reports.staffs');
 
@@ -154,6 +157,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('reports/students/{id}/toggle-block', [ReportController::class, 'toggleBlockStudent'])
             ->name('reports.students.toggleBlock');
+
+        Route::delete('reports/students/{id}/relations/{related_id}', [ReportController::class, 'removeRelation'])
+            ->name('reports.students.relations.destroy');
+
+        Route::post('reports/students/{id}/relations', [ReportController::class, 'addRelation'])
+            ->name('reports.students.relations.store');
+
+        Route::get('reports/students/{id}/search-relations', [ReportController::class, 'searchStudentsForRelations'])
+            ->name('reports.students.search-relations');
 
         Route::post('/students/assign-class', [ReportController::class, 'assignClass'])
             ->name('students.assign.class');
@@ -661,6 +673,21 @@ Route::prefix('departments')->name('staff.')->group(function () {
                     [StudentController::class, 'toggleBlock']
                 )->name('students.toggleBlock');
 
+                Route::delete(
+                    '/students/{id}/relations/{related_id}',
+                    [StudentController::class, 'removeRelation']
+                )->name('students.relations.destroy');
+
+                Route::post(
+                    '/students/{id}/relations',
+                    [StudentController::class, 'addRelation']
+                )->name('students.relations.store');
+
+                Route::get(
+                    '/students/{id}/search-relations',
+                    [StudentController::class, 'searchStudentsForRelations']
+                )->name('students.search-relations');
+
                 Route::post(
                     '/students/assign-class',
                     [StudentController::class, 'assignClass']
@@ -813,6 +840,7 @@ Route::prefix('teacher')
                 Route::post('/store', 'store')->name('store');
                 Route::delete('/destroy/{id}', 'destroy')->name('destroy');
                 Route::get('/show/{id}', 'show')->name('show');
+                Route::get('/file/{id}', 'downloadFile')->name('file.download');
                 Route::get('/class-rooms/search', 'searchClassRooms')->name('class_rooms.search');
             });
 
@@ -853,6 +881,7 @@ Route::prefix('student')
     ->name('student.')
     ->group(function () {
         Route::post('/logout', [StudentLoginController::class, 'logout'])->name('logout');
+        Route::post('/switch/{id}', [StudentLoginController::class, 'switchAccount'])->name('switch');
         Route::get('/dashboard', [StudentDashboardController::class, 'dashboard'])
             ->name('dashboard');
         Route::get('/profile', [StudentDashboardController::class, 'profile'])

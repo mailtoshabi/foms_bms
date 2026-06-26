@@ -1,5 +1,5 @@
 @extends('admin.layouts.master')
-@section('title', 'Students Report')
+@section('title', 'Student Advances Report')
 
 @section('content')
 
@@ -34,52 +34,66 @@
 
     <div class="card">
 
-        <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h4 class="mb-0">
                 <a href="javascript:window.history.back();"
                     class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                     <i class="fas fa-chevron-left"></i>
                 </a>
-                Students Report
+                Student Advances Report
             </h4>
-            <a href="{{ route('admin.reports.students.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
-                <i class="fas fa-file-excel me-1"></i> Export Excel
-            </a>
         </div>
 
         <div class="card-body table-responsive">
 
+            {{-- Stat Cards --}}
             <div class="row mb-3">
-                <div class="col-md-4">
-                    <div class="card p-3">Total Students: {{ $totalStudents }}</div>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border border-success">
+                        <span class="text-muted small d-block">Overall Advance Amount</span>
+                        <h4 class="text-success mb-0 fw-bold">₹{{ number_format($totalSystemAdvance, 2) }}</h4>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card p-3">Active: {{ $activeStudents }}</div>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border border-success">
+                        <span class="text-muted small d-block">Overall Students with Advance</span>
+                        <h4 class="text-success mb-0 fw-bold">{{ $studentsWithAdvanceCount }}</h4>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="card p-3">Inactive: {{ $inactiveStudents }}</div>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border border-info">
+                        <span class="text-muted small d-block">Filtered Advance Amount</span>
+                        <h4 class="text-info mb-0 fw-bold">₹{{ number_format($filteredAdvanceAmount, 2) }}</h4>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card p-3 shadow-sm border border-info">
+                        <span class="text-muted small d-block">Filtered Students Count</span>
+                        <h4 class="text-info mb-0 fw-bold">{{ $filteredStudentsCount }}</h4>
+                    </div>
                 </div>
             </div>
 
+            {{-- Filter Form --}}
             <form method="GET" id="filter-form" class="row mb-3 align-items-end">
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Name/Phone</label>
+                <div class="col-md-2 mb-2">
+                    <label class="form-label fw-bold">Search</label>
                     <input type="text" name="name" class="form-control" value="{{ request('name') }}"
-                        placeholder="Search Name/Phone">
+                        placeholder="Search Name/Phone/Adm No">
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-2 mb-2">
                     <label class="form-label fw-bold">From Date</label>
                     <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-2 mb-2">
                     <label class="form-label fw-bold">To Date</label>
                     <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
                 </div>
 
-                <div class="col-md-2">
+                <div class="col-md-2 mb-2">
                     <label class="form-label fw-bold">Status</label>
                     <select name="status" class="form-control">
                         <option value="">All Status</option>
@@ -89,36 +103,37 @@
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Blocked Status</label>
-                    <select name="is_blocked" class="form-control">
-                        <option value="">All</option>
-                        <option value="1" {{ request('is_blocked') == '1' ? 'selected' : '' }}>Blocked</option>
-                        <option value="0" {{ request('is_blocked') == '0' ? 'selected' : '' }}>Unblocked</option>
+                <div class="col-md-2 mb-2">
+                    <label class="form-label fw-bold">Wallet Option</label>
+                    <select name="balance_option" class="form-control">
+                        <option value="has_balance" {{ $balanceOption == 'has_balance' ? 'selected' : '' }}>With Balance Only</option>
+                        <option value="no_balance" {{ $balanceOption == 'no_balance' ? 'selected' : '' }}>No Balance Only</option>
+                        <option value="all" {{ $balanceOption == 'all' ? 'selected' : '' }}>All Students</option>
                     </select>
                 </div>
 
-                <div class="col-md-2 d-flex gap-2">
+                <div class="col-md-2 mb-2 d-flex gap-2">
                     <button type="submit" class="btn btn-primary w-100">Filter</button>
-                    <a href="{{ route('admin.reports.students') }}" class="btn btn-secondary w-100">Reset</a>
+                    <a href="{{ route('admin.reports.student-advances') }}" class="btn btn-secondary w-100">Reset</a>
                 </div>
 
             </form>
 
-            <table class="table table-bordered  align-middle table-nowrap mb-0">
-                <thead>
+            {{-- Table --}}
+            <table class="table table-bordered align-middle table-nowrap mb-0">
+                <thead class="table-light">
                     <tr>
                         <th>Admission No</th>
                         <th>Name</th>
                         <th>Phone</th>
-                        <th>Email</th>
                         <th>Status</th>
                         <th>Date Joined</th>
-                        <th>Action</th>
+                        <th class="text-end">Wallet Balance</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($students as $student)
+                    @forelse($students as $student)
                         <tr>
                             <td>
                                 <a href="{{ route('admin.reports.students.show', encrypt($student->id)) }}">
@@ -136,7 +151,6 @@
                                         {{ $student->formatted_whatsapp_number }}</small>
                                 @endif
                             </td>
-                            <td>{{ $student->email ?? 'N/A' }}</td>
                             <td>
                                 <span
                                     class="badge bg-{{ $student->status == 'active' ? 'success' : ($student->status == 'passout' ? 'info' : 'danger') }}">
@@ -147,17 +161,31 @@
                                 @endif
                             </td>
                             <td>{{ $student->created_at->format('d M Y') }}</td>
-                            <td>
+                            <td class="text-end fw-bold">
+                                @if($student->wallet_balance > 0)
+                                    <span class="text-success">₹{{ number_format($student->wallet_balance, 2) }}</span>
+                                @else
+                                    <span class="text-muted">₹{{ number_format($student->wallet_balance, 2) }}</span>
+                                @endif
+                            </td>
+                            <td class="text-center">
                                 <a href="{{ route('admin.reports.students.show', encrypt($student->id)) }}"
                                     class="btn btn-sm btn-primary">
-                                    View
+                                    <i class="fas fa-eye"></i> View Profile
                                 </a>
+                            </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No students found with selected filter.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
 
-            {{ $students->links() }}
+            <div class="mt-3">
+                {{ $students->links() }}
+            </div>
 
         </div>
     </div>

@@ -146,3 +146,9 @@ table.table {
 table.table td, table.table th {
     border-color: #adb5bd !important;
 }
+
+@media (min-width: 576px) {
+    .w-sm-auto {
+        width: auto !important;
+    }
+}

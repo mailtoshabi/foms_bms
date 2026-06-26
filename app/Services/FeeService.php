@@ -20,6 +20,10 @@ class FeeService
 
     public function applyWalletBalance(Fee $fee)
     {
+        if ($fee->status === 'paid') {
+            return;
+        }
+
         $student = $fee->student;
         if (!$student || !$student->is_wallet_autopay_enabled || $student->wallet_balance <= 0) {
             return;

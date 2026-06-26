@@ -54,7 +54,7 @@
                                         @forelse($tab['data'] as $index => $t)
                                             @php
                                                 $score = $t['score'];
-                                                $tier = getTeacherRankTier($score);
+                                                $tier = getTeacherRankTier($score / 4);
                                                 $stars = $tier['stars'];
                                                 $rankLabel = $tier['label'];
                                                 $rankColor = $tier['color'];
@@ -79,7 +79,11 @@
                                                         @endfor
                                                     </small>
                                                 </td>
-                                                <td>{{ $t['teacher']->name }}</td>
+                                                <td>
+                                                    <a href="{{ auth('admin')->check() ? route('admin.reports.teachers.show', encrypt($t['teacher']->id)) : route('staff.teachers.show', encrypt($t['teacher']->id)) }}">
+                                                        {{ $t['teacher']->name }}
+                                                    </a>
+                                                </td>
                                                 <td>{{ $t['classes'] }}</td>
                                                 <td>{{ $t['hours'] }}</td>
                                                 <td>{{ $t['students'] ?? 0 }}</td>

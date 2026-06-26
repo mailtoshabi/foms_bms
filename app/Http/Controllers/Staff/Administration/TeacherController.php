@@ -26,7 +26,7 @@ class TeacherController extends Controller
             });
         }
 
-        $teachers = $teachers->latest()->paginate(utility('pagination', 50));
+        $teachers = $teachers->latest('id')->paginate(utility('pagination', 50));
 
         return view('staff.teachers.index', compact('teachers'));
     }

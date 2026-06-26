@@ -73,15 +73,25 @@
                                 </select>
                             </div>
 
+                            {{-- Date Type --}}
+                            <div class="col-md-2 mb-2">
+                                <label class="form-label fw-bold">Date Type</label>
+                                <select name="date_type" class="form-control">
+                                    <option value="cycle_date" {{ request('date_type') == 'cycle_date' || !request('date_type') ? 'selected' : '' }}>Cycle Date</option>
+                                    <option value="credit_date" {{ request('date_type') == 'credit_date' ? 'selected' : '' }}>
+                                        Credit Date</option>
+                                </select>
+                            </div>
+
                             {{-- From Date --}}
-                            <div class="col-md-3 mb-2">
+                            <div class="col-md-2 mb-2">
                                 <label class="form-label fw-bold">From Date</label>
                                 <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}"
                                     placeholder="From Date">
                             </div>
 
                             {{-- To Date --}}
-                            <div class="col-md-3 mb-2">
+                            <div class="col-md-2 mb-2">
                                 <label class="form-label fw-bold">To Date</label>
                                 <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}"
                                     placeholder="To Date">
@@ -137,7 +147,9 @@
 
                                     <tr>
 
-                                        <td><a href="{{ route('staff.teachers.show', encrypt($salary->teacher->id)) }}">{{ $salary->teacher->name ?? '-' }}</a></td>
+                                        <td><a
+                                                href="{{ route('staff.teachers.show', encrypt($salary->teacher->id)) }}">{{ $salary->teacher->name ?? '-' }}</a>
+                                        </td>
 
                                         <td>
                                             {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}
@@ -250,7 +262,9 @@
 
                         <div class="mb-3">
                             <label>Payment Date</label>
-                            <input type="date" name="payment_date" id="payment_date" class="form-control @error('payment_date') is-invalid @enderror" value="{{ old('payment_date') }}">
+                            <input type="date" name="payment_date" id="payment_date"
+                                class="form-control @error('payment_date') is-invalid @enderror"
+                                value="{{ old('payment_date') }}">
                             @error('payment_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -258,7 +272,8 @@
 
                         <div class="mb-3">
                             <label>Payment Method</label>
-                            <select name="payment_method" id="payment_method" class="form-control @error('payment_method') is-invalid @enderror">
+                            <select name="payment_method" id="payment_method"
+                                class="form-control @error('payment_method') is-invalid @enderror">
                                 <option value="cash" {{ old('payment_method') == 'cash' ? 'selected' : '' }}>Cash</option>
                                 <option value="upi" {{ old('payment_method') == 'upi' ? 'selected' : '' }}>UPI</option>
                                 <option value="bank_transfer" {{ old('payment_method') == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
@@ -270,7 +285,9 @@
 
                         <div class="mb-3">
                             <label>Reference Number</label>
-                            <input type="text" name="reference_number" id="reference_number" class="form-control @error('reference_number') is-invalid @enderror" value="{{ old('reference_number') }}">
+                            <input type="text" name="reference_number" id="reference_number"
+                                class="form-control @error('reference_number') is-invalid @enderror"
+                                value="{{ old('reference_number') }}">
                             @error('reference_number')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -278,7 +295,8 @@
 
                         <div class="mb-3">
                             <label>Notes</label>
-                            <textarea name="notes" id="notes" class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
+                            <textarea name="notes" id="notes"
+                                class="form-control @error('notes') is-invalid @enderror">{{ old('notes') }}</textarea>
                             @error('notes')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror

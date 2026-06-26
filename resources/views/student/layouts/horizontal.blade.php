@@ -70,6 +70,12 @@
                         <i class="mdi mdi-face-profile font-size-16 align-middle text-primary"></i>
                         <span>Profile</span>
                     </a>
+                    @if(Auth::guard('student')->user()->relatedStudents()->count() > 0)
+                        <a class="dropdown-item d-flex align-items-center gap-2" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#switchAccountModal">
+                            <i class="bx bx-transfer font-size-16 align-middle text-success"></i>
+                            <span>Switch Account</span>
+                        </a>
+                    @endif
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="javascript:void(0);"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -85,3 +91,37 @@
         </div>
     </div>
 </header>
+
+@if(Auth::guard('student')->user()->relatedStudents()->count() > 0)
+<div class="modal fade" id="switchAccountModal" tabindex="-1" aria-labelledby="switchAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="switchAccountModalLabel">Switch Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush">
+                    @foreach(Auth::guard('student')->user()->relatedStudents as $relatedStudent)
+                        <form method="POST" action="{{ route('student.switch', encrypt($relatedStudent->id)) }}">
+                            @csrf
+                            <button type="submit" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3 border-0 border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img class="rounded-circle" width="40" height="40"
+                                         src="@if (($relatedStudent->photo == '') || (empty($relatedStudent->photo))) https://ui-avatars.com/api/?name={{ urlencode($relatedStudent->name) }}&size=200 @else {{ URL::asset('storage/' . $relatedStudent->photo) }} @endif"
+                                         alt="Avatar">
+                                    <div class="text-start">
+                                        <h6 class="mb-0 fw-bold">{{ $relatedStudent->name }}</h6>
+                                        <small class="text-muted">{{ $relatedStudent->admission_no }}</small>
+                                    </div>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </button>
+                        </form>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif

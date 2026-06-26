@@ -60,17 +60,27 @@ class StudentController extends Controller
             });
         }
 
-        $students = $students->latest()->paginate(utility('pagination', 50));
+        $students = $students->latest('id')->paginate(utility('pagination', 50));
 
         return view('staff.students.index', compact('students'));
     }
 
 
-    public function create()
+    public function create(Request $request)
     {
         $this->checkManagementRole();
         $countries = \App\Models\Country::orderBy('name', 'asc')->get();
-        return view('staff.students.create', compact('countries'));
+        
+        $relativeOfStudent = null;
+        if ($request->filled('relative_of')) {
+            try {
+                $relativeOfStudent = Student::findOrFail(decrypt($request->relative_of));
+            } catch (\Exception $e) {
+                // Ignore decrypt failure
+            }
+        }
+
+        return view('staff.students.create', compact('countries', 'relativeOfStudent'));
     }
 
 
@@ -87,15 +97,62 @@ class StudentController extends Controller
 
         $request->merge(['phone' => $request->contact_number]);
 
-        $request->validate([
-            'name' => 'required',
-            'country_id' => 'required|exists:countries,id',
-            'contact_number' => 'required|string|digits_between:7,15',
-            'phone' => 'required|unique:students,phone,NULL,id,country_id,' . $request->country_id,
-            'email' => 'nullable|email',
-            'password' => 'required|min:6',
-            'selected_days' => 'required|array|min:1'
-        ]);
+        $relativeOfStudent = null;
+        if ($request->filled('relative_of')) {
+            try {
+                $relativeOfStudent = Student::with('relatedStudents')->findOrFail(decrypt($request->relative_of));
+            } catch (\Exception $e) {
+                return back()->with('error', 'Invalid sibling reference.')->withInput();
+            }
+        }
+
+        if ($relativeOfStudent) {
+            // Force same contact details as main student
+            $request->merge([
+                'country_id' => $relativeOfStudent->country_id,
+                'contact_number' => $relativeOfStudent->contact_number,
+                'phone' => $relativeOfStudent->phone,
+            ]);
+
+            $request->validate([
+                'name' => 'required',
+                'password' => 'required|min:6',
+                'selected_days' => 'required|array|min:1'
+            ]);
+
+            // Enforce password is not the same as any family member
+            $familyIds = \DB::table('student_relations')
+                ->where('student_id', $relativeOfStudent->id)
+                ->orWhere('related_student_id', $relativeOfStudent->id)
+                ->get()
+                ->flatMap(function ($row) {
+                    return [$row->student_id, $row->related_student_id];
+                })
+                ->unique()
+                ->toArray();
+            $allFamilyIds = array_unique(array_merge($familyIds, [$relativeOfStudent->id]));
+
+            $familyHashedPasswords = Student::whereIn('id', $allFamilyIds)->pluck('password')->filter();
+
+            foreach ($familyHashedPasswords as $hashedPassword) {
+                if (\Illuminate\Support\Facades\Hash::check($request->password, $hashedPassword)) {
+                    return back()->withErrors([
+                        'password' => 'The password cannot be the same as another related family member. Please choose a different password.'
+                    ])->withInput();
+                }
+            }
+        } else {
+            // Standard validation (must be unique phone)
+            $request->validate([
+                'name' => 'required',
+                'country_id' => 'required|exists:countries,id',
+                'contact_number' => 'required|string|digits_between:7,15',
+                'phone' => 'required|unique:students,phone,NULL,id,country_id,' . $request->country_id,
+                'email' => 'nullable|email',
+                'password' => 'required|min:6',
+                'selected_days' => 'required|array|min:1'
+            ]);
+        }
 
         try {
             // Enforce consistency
@@ -125,7 +182,7 @@ class StudentController extends Controller
 
             $admissionNo = generateAdmissionNo();
 
-            Student::create([
+            $newStudent = Student::create([
                 'admission_no' => $admissionNo,
                 'student_lead_id' => null,
                 'country_id' => $request->country_id,
@@ -147,6 +204,24 @@ class StudentController extends Controller
                 'starting_date' => $request->starting_date,
                 'status' => $request->status ?? 'active'
             ]);
+
+            if ($relativeOfStudent) {
+                // Form clique of all family members
+                $familyIds = $relativeOfStudent->relatedStudents()->pluck('students.id')->toArray();
+                $allFamilyIds = array_unique(array_merge($familyIds, [$relativeOfStudent->id, $newStudent->id]));
+
+                foreach ($allFamilyIds as $id) {
+                    $member = Student::find($id);
+                    if ($member) {
+                        $otherIds = array_diff($allFamilyIds, [$id]);
+                        $member->relatedStudents()->sync($otherIds);
+                    }
+                }
+
+                return redirect()
+                    ->route('staff.students.show', encrypt($relativeOfStudent->id))
+                    ->with('success', 'Sibling account registered and linked successfully.');
+            }
 
             return redirect()
                 ->route('staff.students.index')
@@ -186,14 +261,42 @@ class StudentController extends Controller
 
         $request->merge(['phone' => $request->contact_number]);
 
+        $relatedIds = \DB::table('student_relations')
+            ->where('student_id', $student->id)
+            ->orWhere('related_student_id', $student->id)
+            ->get()
+            ->flatMap(function ($row) {
+                return [$row->student_id, $row->related_student_id];
+            })
+            ->unique()
+            ->filter(fn($id) => $id != $student->id)
+            ->toArray();
+
+        $excludedIds = array_merge([$student->id], $relatedIds);
+
+        $phoneRule = \Illuminate\Validation\Rule::unique('students', 'phone')
+            ->where('country_id', $request->country_id)
+            ->whereNotIn('id', $excludedIds);
+
         $request->validate([
             'name' => 'required',
             'country_id' => 'required|exists:countries,id',
             'contact_number' => 'required|string|digits_between:7,15',
-            'phone' => 'required|unique:students,phone,' . $student->id . ',id,country_id,' . $request->country_id,
+            'phone' => ['required', $phoneRule],
             'email' => 'nullable|email',
             'selected_days' => 'required|array|min:1'
         ]);
+
+        if ($request->password && count($relatedIds) > 0) {
+            $familyHashedPasswords = Student::whereIn('id', $relatedIds)->pluck('password')->filter();
+            foreach ($familyHashedPasswords as $hashedPassword) {
+                if (\Illuminate\Support\Facades\Hash::check($request->password, $hashedPassword)) {
+                    return back()->withErrors([
+                        'password' => 'The password cannot be the same as another related family member. Please choose a different password.'
+                    ])->withInput();
+                }
+            }
+        }
 
         // Enforce consistency
         $classesPerWeek = count($request->selected_days ?? []);
@@ -255,6 +358,26 @@ class StudentController extends Controller
             'status' => $request->status ?? 'active'
 
         ]);
+
+        if (count($relatedIds) > 0) {
+            $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+
+            foreach ($relatedIds as $rId) {
+                $relatedStudent = Student::find($rId);
+                if ($relatedStudent) {
+                    $relatedWhatsapp = $relatedStudent->is_whatsapp_different 
+                        ? $relatedStudent->whatsapp_number 
+                        : ($countryCode . $request->contact_number);
+
+                    $relatedStudent->update([
+                        'country_id' => $request->country_id,
+                        'contact_number' => $request->contact_number,
+                        'phone' => $request->phone,
+                        'whatsapp_number' => $relatedWhatsapp,
+                    ]);
+                }
+            }
+        }
 
         return redirect()
             ->route('staff.students.index')
@@ -607,5 +730,158 @@ class StudentController extends Controller
 
         $statusStr = $student->is_blocked ? 'blocked' : 'unblocked';
         return back()->with('success', "Student \"{$student->name}\" {$statusStr} successfully.");
+    }
+
+    public function removeRelation(Request $request, $id, $related_id)
+    {
+        $this->checkManagementRole();
+        
+        $student = Student::findOrFail(decrypt($id));
+        $relatedStudent = Student::findOrFail(decrypt($related_id));
+
+        $request->validate([
+            'new_contact_number' => 'required|string|digits_between:7,15',
+        ]);
+
+        $newNumber = preg_replace('/[^0-9]/', '', $request->new_contact_number);
+
+        // Check unique constraint for the new number
+        $exists = Student::where('phone', $newNumber)
+            ->where('country_id', $relatedStudent->country_id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'new_contact_number' => 'The contact number is already registered under this country.'
+            ])->withInput();
+        }
+
+        // Update details and password
+        $country = $relatedStudent->country;
+        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+        $whatsapp_number = $relatedStudent->is_whatsapp_different 
+            ? $relatedStudent->whatsapp_number 
+            : ($countryCode . $newNumber);
+
+        $relatedStudent->update([
+            'contact_number' => $newNumber,
+            'phone' => $newNumber,
+            'whatsapp_number' => $whatsapp_number,
+            'password' => Hash::make($newNumber),
+        ]);
+
+        $relatedStudent->relatedStudents()->detach();
+        
+        \DB::table('student_relations')
+            ->where('related_student_id', $relatedStudent->id)
+            ->delete();
+
+        return redirect()->route('staff.students.show', encrypt($student->id))
+            ->with('success', 'Sibling account unlinked, contact details updated, and password reset successfully.');
+    }
+
+    public function searchStudentsForRelations(Request $request, $id)
+    {
+        $this->checkManagementRole();
+        $student = Student::findOrFail(decrypt($id));
+        $term = $request->input('q', '');
+
+        $relatedIds = \DB::table('student_relations')
+            ->where('student_id', $student->id)
+            ->orWhere('related_student_id', $student->id)
+            ->get()
+            ->flatMap(function ($row) {
+                return [$row->student_id, $row->related_student_id];
+            })
+            ->unique()
+            ->toArray();
+
+        $excludeIds = array_merge([$student->id], $relatedIds);
+
+        $results = Student::whereNotIn('id', $excludeIds)
+            ->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('contact_number', 'like', "%{$term}%")
+                    ->orWhere('admission_no', 'like', "%{$term}%");
+            })
+            ->limit(20)
+            ->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'text' => $s->name . ' (' . $s->admission_no . ') - ' . $s->phone,
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
+
+    public function addRelation(Request $request, $id)
+    {
+        $this->checkManagementRole();
+        
+        $studentA = Student::findOrFail(decrypt($id));
+        $relatedStudentId = $request->input('related_student_id');
+        
+        if (!$relatedStudentId) {
+            return back()->with('error', 'Please select a student to link.');
+        }
+
+        $studentB = Student::findOrFail($relatedStudentId);
+
+        if ($studentA->id == $studentB->id) {
+            return back()->with('error', 'Cannot link a student to themselves.');
+        }
+
+        // Get A's family clique
+        $familyIdsA = \DB::table('student_relations')
+            ->where('student_id', $studentA->id)
+            ->orWhere('related_student_id', $studentA->id)
+            ->get()
+            ->flatMap(fn($row) => [$row->student_id, $row->related_student_id])
+            ->unique()
+            ->toArray();
+        $allFamilyIdsA = array_unique(array_merge($familyIdsA, [$studentA->id]));
+
+        // Get B's family clique
+        $familyIdsB = \DB::table('student_relations')
+            ->where('student_id', $studentB->id)
+            ->orWhere('related_student_id', $studentB->id)
+            ->get()
+            ->flatMap(fn($row) => [$row->student_id, $row->related_student_id])
+            ->unique()
+            ->toArray();
+        $allFamilyIdsB = array_unique(array_merge($familyIdsB, [$studentB->id]));
+
+        // Check if there are any intersecting IDs
+        if (count(array_intersect($allFamilyIdsA, $allFamilyIdsB)) > 0) {
+            return back()->with('error', 'These students are already linked.');
+        }
+
+        // Update all members of B's clique to use A's contact details
+        foreach ($allFamilyIdsB as $mId) {
+            $member = Student::find($mId);
+            if ($member) {
+                $member->update([
+                    'country_id' => $studentA->country_id,
+                    'contact_number' => $studentA->contact_number,
+                    'phone' => $studentA->phone,
+                    'whatsapp_number' => $studentA->whatsapp_number,
+                    'is_whatsapp_different' => $studentA->is_whatsapp_different,
+                ]);
+            }
+        }
+
+        // Merge cliques
+        $combinedFamilyIds = array_unique(array_merge($allFamilyIdsA, $allFamilyIdsB));
+
+        // Sync relationships bidirectionally for all members of the combined clique
+        foreach ($combinedFamilyIds as $mId) {
+            $member = Student::find($mId);
+            if ($member) {
+                $otherIds = array_diff($combinedFamilyIds, [$mId]);
+                $member->relatedStudents()->sync($otherIds);
+            }
+        }
+
+        return back()->with('success', 'Student linked as family member successfully.');
     }
 }

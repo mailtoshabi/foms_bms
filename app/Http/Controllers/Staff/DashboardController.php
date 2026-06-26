@@ -87,8 +87,12 @@ class DashboardController extends Controller
             return $fee->amount - $fee->payments->sum('paid_amount');
         });
 
-        $unpaidTeacherSalariesCount  = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->count();
-        $unpaidTeacherSalariesAmount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])->sum('total_amount');
+        $unpaidTeacherSalariesCount  = TeacherSalary::whereIn('status', ['unpaid', 'partial'])
+            ->whereDate('credit_date', '<=', now())
+            ->count();
+        $unpaidTeacherSalariesAmount = TeacherSalary::whereIn('status', ['unpaid', 'partial'])
+            ->whereDate('credit_date', '<=', now())
+            ->sum('total_amount');
 
         $topTeachers = topTeachers();
 

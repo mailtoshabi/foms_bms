@@ -24,7 +24,7 @@
     </div>
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
             <h4 class="mb-0">
                 <a href="javascript:window.history.back();"
                     class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
@@ -32,6 +32,9 @@
                 </a>
                 Staff Report
             </h4>
+            <a href="{{ route('admin.reports.staffs.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+                <i class="fas fa-file-excel me-1"></i> Export Excel
+            </a>
         </div>
 
         <div class="card-body table-responsive">
@@ -65,11 +68,9 @@
                     <input type="date" name="to_date" class="form-control" value="{{ request('to_date') }}">
                 </div>
 
-                <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-primary">Filter</button>
-                    <a href="{{ route('admin.reports.staffs') }}" class="btn btn-secondary">Reset</a>
-                    <a href="{{ route('admin.reports.staffs.export', request()->all()) }}"
-                        class="btn btn-success">Export</a>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary w-100">Filter</button>
+                    <a href="{{ route('admin.reports.staffs') }}" class="btn btn-secondary w-100">Reset</a>
                 </div>
             </form>
 

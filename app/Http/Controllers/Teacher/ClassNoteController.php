@@ -110,6 +110,27 @@ class ClassNoteController extends Controller
     }
 
 
+    public function downloadFile($id)
+    {
+        $file = ClassNoteFile::findOrFail(decrypt($id));
+
+        $note = auth('teacher')->user()->notes()->find($file->class_note_id);
+        if (!$note) {
+            abort(403, 'Unauthorized access to this file.');
+        }
+
+        $path = storage_path('app/public/' . $file->file_path);
+
+        if (!file_exists($path)) {
+            abort(404, 'File not found on server.');
+        }
+
+        return response()->file($path, [
+            'Content-Disposition' => 'inline; filename="' . $file->file_name . '"'
+        ]);
+    }
+
+
     public function destroy($id)
     {
         $note = auth('teacher')->user()->notes()->findOrFail(decrypt($id));

@@ -119,6 +119,27 @@
                         {{ $student->address ?? '-' }}
                     </p>
 
+                    <hr>
+
+                    <div class="d-flex flex-column gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-info w-100" data-bs-toggle="modal" data-bs-target="#familyMembersModal">
+                            <i class="fas fa-users me-1"></i> View Family Members ({{ $student->relatedStudents->count() }})
+                        </button>
+
+                        @if(auth('staff')->check())
+                            <a href="{{ route('staff.students.create', ['relative_of' => encrypt($student->id)]) }}" 
+                               class="btn btn-sm btn-outline-primary w-100">
+                                <i class="fas fa-user-plus me-1"></i> Add Sibling/Family Member
+                            </a>
+                        @endif
+
+                        @if(auth('staff')->check() || auth('admin')->check())
+                            <button type="button" class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#linkExistingFamilyModal">
+                                <i class="fas fa-link me-1"></i> Link Existing Student
+                            </button>
+                        @endif
+                    </div>
+
                 </div>
 
             </div>
@@ -187,7 +208,9 @@
                                         <td>{{ $class->course->name ?? '-' }}</td>
 
                                         <td>
-                                            {{ $class->name }}
+                                            <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($class->id)) : route('staff.class_rooms.show', encrypt($class->id)) }}">
+                                                {{ $class->name }}
+                                            </a>
                                             @if($class->is_completed)
                                                 <span class="badge bg-success">Completed</span>
                                             @endif
@@ -260,7 +283,11 @@
 
                                     <tr>
 
-                                        <td>{{ $teacher->name }}</td>
+                                        <td>
+                                            <a href="{{ auth('admin')->check() ? route('admin.reports.teachers.show', encrypt($teacher->id)) : route('staff.teachers.show', encrypt($teacher->id)) }}">
+                                                {{ $teacher->name }}
+                                            </a>
+                                        </td>
                                         <td>{{ $teacher->formatted_phone }}</td>
                                         <td>{{ $teacher->email }}</td>
 
@@ -361,7 +388,8 @@
                                     <tr>
 
                                         <td>{{ $fee->created_at->format('d M Y') }}</td>
-                                        <td>{{ $fee->classRoom->name ?? '-' }}</td>
+                                        <td>
+                                            <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">{{ $fee->classRoom->name ?? '-' }}</a></td>
                                         <td>{{ ucfirst($fee->type) . ' Fee' }}</td>
 
                                         <td>
@@ -1267,9 +1295,130 @@
         </div>
     @endif
 
-    @if($showButtons == 'true' && auth('staff')->check())
-        @section('script')
-            <script>
+    {{-- Family Members Modal --}}
+    <div class="modal fade" id="familyMembersModal" tabindex="-1" aria-labelledby="familyMembersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="familyMembersModalLabel">Family Members / Siblings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    @if($student->relatedStudents->count() > 0)
+                        <div class="list-group list-group-flush">
+                            @foreach($student->relatedStudents as $relatedStudent)
+                                <div class="list-group-item d-flex align-items-center justify-content-between p-3 border-0 border-bottom">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img class="rounded-circle" width="40" height="40"
+                                             src="@if (($relatedStudent->photo == '') || (empty($relatedStudent->photo))) https://ui-avatars.com/api/?name={{ urlencode($relatedStudent->name) }}&size=200 @else {{ URL::asset('storage/' . $relatedStudent->photo) }} @endif"
+                                             alt="Avatar">
+                                        <div>
+                                            <h6 class="mb-0 fw-bold">
+                                                <a href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($relatedStudent->id)) : route('staff.students.show', encrypt($relatedStudent->id)) }}">
+                                                    {{ $relatedStudent->name }}
+                                                </a>
+                                            </h6>
+                                            <small class="text-muted">{{ $relatedStudent->admission_no }}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    {{-- Unlink button triggers modal --}}
+                                    <button type="button" class="btn btn-sm btn-outline-danger unlink-sibling-btn"
+                                            data-id="{{ encrypt($relatedStudent->id) }}"
+                                            data-name="{{ $relatedStudent->name }}"
+                                            data-action="{{ route($routePrefix . '.students.relations.destroy', ['id' => encrypt($student->id), 'related_id' => encrypt($relatedStudent->id)]) }}"
+                                            title="Unlink Sibling">
+                                        <i class="fas fa-unlink"></i>
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <p class="mb-0">No family members linked.</p>
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Link Existing Family Modal --}}
+    @if(auth('staff')->check() || auth('admin')->check())
+        <div class="modal fade" id="linkExistingFamilyModal" tabindex="-1" aria-labelledby="linkExistingFamilyModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route($routePrefix . '.students.relations.store', encrypt($student->id)) }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="linkExistingFamilyModalLabel">Link Existing Student as Family Member</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Select Student to Link</label>
+                                <select name="related_student_id" id="related_student_id" class="form-control select2-relations-ajax" required>
+                                    <option value="">Search student by name, admission no, or phone...</option>
+                                </select>
+                                <small class="text-muted d-block mt-2">
+                                    <i class="fas fa-info-circle text-primary me-1"></i> 
+                                    <strong>Important:</strong> The linked student's contact number, WhatsApp number, country, and login phone will be automatically updated to match <strong>{{ $student->name }}</strong>'s contact details.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-success" type="submit"
+                                onclick="this.disabled=true; this.innerText='Linking...'; this.form.submit();">
+                                <i class="fas fa-link me-1"></i> Link Student
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {{-- Unlink Sibling Modal --}}
+        <div class="modal fade" id="unlinkSiblingModal" tabindex="-1" aria-labelledby="unlinkSiblingModalLabel" aria-hidden="true" style="z-index: 1060;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="POST" id="unlinkSiblingForm" action="">
+                        @csrf
+                        @method('DELETE')
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="unlinkSiblingModalLabel">Unlink Sibling / Family Member</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>You are unlinking <strong id="unlinkSiblingName"></strong> from the family group.</p>
+                            <p class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i> Since they will no longer share the family's phone number, you must assign a new unique contact number for this student.</p>
+                            
+                            <div class="mb-3">
+                                <label for="new_contact_number" class="form-label fw-bold">New Contact Number</label>
+                                <input type="text" name="new_contact_number" id="new_contact_number" class="form-control" required placeholder="e.g. 9876543210" maxlength="15">
+                                <small class="text-muted">The student's password will also be automatically reset to this new number for login.</small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button class="btn btn-danger" type="submit"
+                                onclick="this.disabled=true; this.innerText='Unlinking...'; this.form.submit();">
+                                <i class="fas fa-unlink me-1"></i> Unlink Sibling
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    @section('script')
+        <script>
+            @if($showButtons == 'true' && auth('staff')->check())
                  $('.studentFeeMarkPaidBtn').click(function () {
                      let feeId = $(this).data('id');
                      let amount = $(this).data('amount');
@@ -1346,8 +1495,45 @@
                         });
                     }
                 });
-            </script>
-        @endsection
-    @endif
+            @endif
+
+            @if(auth('staff')->check() || auth('admin')->check())
+                $(document).on('show.bs.modal', '#linkExistingFamilyModal', function() {
+                    var $el = $('#related_student_id');
+                    if ($el.hasClass('select2-hidden-accessible')) { $el.select2('destroy'); }
+                    $el.select2({
+                        placeholder: 'Search student...', 
+                        allowClear: true, 
+                        width: '100%',
+                        dropdownParent: $('#linkExistingFamilyModal'),
+                        minimumInputLength: 1,
+                        ajax: { 
+                            url: '{{ route($routePrefix . ".students.search-relations", encrypt($student->id)) }}', 
+                            dataType: 'json', 
+                            delay: 250,
+                            data: function(p) { return { q: p.term || '' }; },
+                            processResults: function(d) { return { results: d.results }; },
+                            cache: true
+                        }
+                    });
+                });
+
+                $(document).on('click', '.unlink-sibling-btn', function() {
+                    var actionUrl = $(this).data('action');
+                    var siblingName = $(this).data('name');
+                    
+                    $('#unlinkSiblingForm').attr('action', actionUrl);
+                    $('#unlinkSiblingName').text(siblingName);
+                    $('#new_contact_number').val('');
+                    
+                    $('#familyMembersModal').modal('hide');
+                    
+                    setTimeout(function() {
+                        $('#unlinkSiblingModal').modal('show');
+                    }, 300);
+                });
+            @endif
+        </script>
+    @endsection
 
 @endsection

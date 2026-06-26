@@ -76,7 +76,7 @@ class AdminManualFeeTest extends TestCase
             ->get(route('admin.fees.create'));
 
         $response->assertStatus(200);
-        $response->assertSee('Enter Fee Manually');
+        $response->assertSee('Generate Manual Fee');
     }
 
     public function test_staff_cannot_access_create_manual_fee_page(): void
@@ -111,6 +111,7 @@ class AdminManualFeeTest extends TestCase
                 'type' => 'monthly',
                 'amount' => 1200.00,
                 'date' => $feeDate,
+                'status' => 'unpaid'
             ]);
 
         $response->assertRedirect(route('admin.reports.fee'));
@@ -139,6 +140,7 @@ class AdminManualFeeTest extends TestCase
                 'type' => 'monthly',
                 'amount' => 1200.00,
                 'date' => $feeDate,
+                'status' => 'unpaid'
             ]);
 
         // Attempt duplicate creation
@@ -150,6 +152,7 @@ class AdminManualFeeTest extends TestCase
                 'type' => 'monthly',
                 'amount' => 1200.00,
                 'date' => $feeDate,
+                'status' => 'unpaid'
             ]);
 
         $response->assertRedirect(route('admin.fees.create'));

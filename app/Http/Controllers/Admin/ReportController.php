@@ -330,7 +330,7 @@ class ReportController extends Controller
 
         if (!$request->filled('from_date') && !$request->filled('to_date')) {
             $totalsQuery->whereMonth('transaction_date', date('m'))
-                        ->whereYear('transaction_date', date('Y'));
+                ->whereYear('transaction_date', date('Y'));
         }
 
         $totalAmount = (clone $totalsQuery)->sum('amount');
@@ -499,11 +499,17 @@ class ReportController extends Controller
             $query->where('teacher_salaries.status', $request->status);
         }
 
+        $dateType = $request->get('date_type', 'cycle_date');
+
         if ($request->filled('from_date') && $request->filled('to_date')) {
-            $query->where(function ($q) use ($request) {
-                $q->whereBetween('cycle_start', [$request->from_date, $request->to_date])
-                    ->orWhereBetween('cycle_end', [$request->from_date, $request->to_date]);
-            });
+            if ($dateType === 'credit_date') {
+                $query->whereBetween('teacher_salaries.credit_date', [$request->from_date, $request->to_date]);
+            } else {
+                $query->where(function ($q) use ($request) {
+                    $q->whereBetween('cycle_start', [$request->from_date, $request->to_date])
+                        ->orWhereBetween('cycle_end', [$request->from_date, $request->to_date]);
+                });
+            }
         }
 
         // Payment date filter (optional)
@@ -552,8 +558,8 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -593,8 +599,8 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -629,9 +635,9 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('phone', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -645,7 +651,7 @@ class ReportController extends Controller
             $query->where('is_blocked', $request->is_blocked);
         }
 
-        $students = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
+        $students = $query->latest('id')->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalStudents = $query->count();
@@ -678,9 +684,9 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('phone', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -694,7 +700,7 @@ class ReportController extends Controller
             $query->where('is_blocked', $request->is_blocked);
         }
 
-        $students = $query->latest()->get();
+        $students = $query->latest('id')->get();
 
         $fileName = 'students_report_' . now()->format('Y-m-d_H-i') . '.xlsx';
 
@@ -702,6 +708,65 @@ class ReportController extends Controller
             new StudentExport($students),
             $fileName
         );
+    }
+
+    public function studentAdvances(Request $request)
+    {
+        $query = Student::query();
+
+        // Name / Phone / Admission No filter
+        if ($request->filled('name')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->name . '%')
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('phone', 'like', '%' . $request->name . '%')
+                    ->orWhere('admission_no', 'like', '%' . $request->name . '%');
+            });
+        }
+
+        // Date range filter
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $query->whereBetween('created_at', [
+                $request->from_date . ' 00:00:00',
+                $request->to_date . ' 23:59:59'
+            ]);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Wallet Balance filter
+        $balanceOption = $request->get('balance_option', 'has_balance');
+        if ($balanceOption === 'has_balance') {
+            $query->where('wallet_balance', '>', 0);
+        } elseif ($balanceOption === 'no_balance') {
+            $query->where('wallet_balance', '<=', 0);
+        }
+
+        // Calculate totals based on filtered query
+        $filteredAdvanceAmount = (clone $query)->sum('wallet_balance');
+        $filteredStudentsCount = (clone $query)->count();
+
+        // Overall stats
+        $totalSystemAdvance = Student::sum('wallet_balance');
+        $studentsWithAdvanceCount = Student::where('wallet_balance', '>', 0)->count();
+
+        // Paginate results
+        $students = $query->orderByDesc('wallet_balance')
+            ->paginate(utility('pagination', 20))
+            ->withQueryString();
+
+        return view('admin.reports.student_advances', compact(
+            'students',
+            'filteredAdvanceAmount',
+            'filteredStudentsCount',
+            'totalSystemAdvance',
+            'studentsWithAdvanceCount',
+            'balanceOption'
+        ));
     }
 
     public function staffReport(Request $request)
@@ -884,8 +949,8 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -925,8 +990,8 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -961,9 +1026,9 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('phone', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -972,7 +1037,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $teachers = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
+        $teachers = $query->latest('id')->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalTeachers = $query->count();
@@ -1003,9 +1068,9 @@ class ReportController extends Controller
         if ($request->filled('name')) {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->name . '%')
-                  ->orWhere('contact_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
-                  ->orWhere('phone', 'like', '%' . $request->name . '%');
+                    ->orWhere('contact_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('whatsapp_number', 'like', '%' . $request->name . '%')
+                    ->orWhere('phone', 'like', '%' . $request->name . '%');
             });
         }
 
@@ -1014,7 +1079,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $teachers = $query->latest()->get();
+        $teachers = $query->latest('id')->get();
 
         $fileName = 'teachers_report_' . now()->format('Y-m-d_H-i') . '.xlsx';
 
@@ -1305,14 +1370,14 @@ class ReportController extends Controller
         try {
             DB::transaction(function () use ($validated) {
                 $fee = Fee::findOrFail($validated['fee_id']);
-                
+
                 // Calculate total paid so far
                 $totalPaid = $fee->payments()->sum('paid_amount');
                 // Calculate total refunded so far
                 $totalRefunded = \App\Models\FeeRefund::where('fee_id', $fee->id)->sum('amount');
-                
+
                 $maxRefundable = $totalPaid - $totalRefunded;
-                
+
                 if ($validated['amount'] > $maxRefundable) {
                     throw new \Exception('Refund amount of ₹' . number_format($validated['amount'], 2) . ' exceeds the max refundable amount of ₹' . number_format($maxRefundable, 2));
                 }
@@ -1324,7 +1389,7 @@ class ReportController extends Controller
                 if (\Carbon\Carbon::parse($lastPaymentDate)->addMonths(2)->isPast()) {
                     throw new \Exception('Refund is only allowed within 2 months of the last payment date (Last payment: ' . \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') . ').');
                 }
-                
+
                 // Create refund record
                 \App\Models\FeeRefund::create([
                     'fee_id' => $fee->id,
@@ -1333,10 +1398,10 @@ class ReportController extends Controller
                     'refund_date' => $validated['refund_date'],
                     'notes' => $validated['notes']
                 ]);
-                
+
                 // Calculate net paid amount after this refund
                 $netPaid = $totalPaid - ($totalRefunded + $validated['amount']);
-                
+
                 // Update fee status based on net paid
                 if ($netPaid <= 0) {
                     $fee->update(['status' => 'unpaid']);
@@ -1539,5 +1604,153 @@ class ReportController extends Controller
             ]);
 
         return response()->json(['results' => $results]);
+    }
+
+    public function removeRelation(Request $request, $id, $related_id)
+    {
+        $student = Student::findOrFail(decrypt($id));
+        $relatedStudent = Student::findOrFail(decrypt($related_id));
+
+        $request->validate([
+            'new_contact_number' => 'required|string|digits_between:7,15',
+        ]);
+
+        $newNumber = preg_replace('/[^0-9]/', '', $request->new_contact_number);
+
+        // Check unique constraint for the new number
+        $exists = Student::where('phone', $newNumber)
+            ->where('country_id', $relatedStudent->country_id)
+            ->exists();
+
+        if ($exists) {
+            return back()->withErrors([
+                'new_contact_number' => 'The contact number is already registered under this country.'
+            ])->withInput();
+        }
+
+        // Update details and password
+        $country = $relatedStudent->country;
+        $countryCode = $country ? preg_replace('/[^0-9]/', '', $country->code) : '91';
+        $whatsapp_number = $relatedStudent->is_whatsapp_different
+            ? $relatedStudent->whatsapp_number
+            : ($countryCode . $newNumber);
+
+        $relatedStudent->update([
+            'contact_number' => $newNumber,
+            'phone' => $newNumber,
+            'whatsapp_number' => $whatsapp_number,
+            'password' => Hash::make($newNumber),
+        ]);
+
+        $relatedStudent->relatedStudents()->detach();
+
+        \DB::table('student_relations')
+            ->where('related_student_id', $relatedStudent->id)
+            ->delete();
+
+        return redirect()->route('admin.reports.students.show', encrypt($student->id))
+            ->with('success', 'Sibling account unlinked, contact details updated, and password reset successfully.');
+    }
+
+    public function searchStudentsForRelations(Request $request, $id)
+    {
+        $student = Student::findOrFail(decrypt($id));
+        $term = $request->input('q', '');
+
+        $relatedIds = \DB::table('student_relations')
+            ->where('student_id', $student->id)
+            ->orWhere('related_student_id', $student->id)
+            ->get()
+            ->flatMap(function ($row) {
+                return [$row->student_id, $row->related_student_id];
+            })
+            ->unique()
+            ->toArray();
+
+        $excludeIds = array_merge([$student->id], $relatedIds);
+
+        $results = Student::whereNotIn('id', $excludeIds)
+            ->where(function ($q) use ($term) {
+                $q->where('name', 'like', "%{$term}%")
+                    ->orWhere('contact_number', 'like', "%{$term}%")
+                    ->orWhere('admission_no', 'like', "%{$term}%");
+            })
+            ->limit(20)
+            ->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'text' => $s->name . ' (' . $s->admission_no . ') - ' . $s->phone,
+            ]);
+
+        return response()->json(['results' => $results]);
+    }
+
+    public function addRelation(Request $request, $id)
+    {
+        $studentA = Student::findOrFail(decrypt($id));
+        $relatedStudentId = $request->input('related_student_id');
+
+        if (!$relatedStudentId) {
+            return back()->with('error', 'Please select a student to link.');
+        }
+
+        $studentB = Student::findOrFail($relatedStudentId);
+
+        if ($studentA->id == $studentB->id) {
+            return back()->with('error', 'Cannot link a student to themselves.');
+        }
+
+        // Get A's family clique
+        $familyIdsA = \DB::table('student_relations')
+            ->where('student_id', $studentA->id)
+            ->orWhere('related_student_id', $studentA->id)
+            ->get()
+            ->flatMap(fn($row) => [$row->student_id, $row->related_student_id])
+            ->unique()
+            ->toArray();
+        $allFamilyIdsA = array_unique(array_merge($familyIdsA, [$studentA->id]));
+
+        // Get B's family clique
+        $familyIdsB = \DB::table('student_relations')
+            ->where('student_id', $studentB->id)
+            ->orWhere('related_student_id', $studentB->id)
+            ->get()
+            ->flatMap(fn($row) => [$row->student_id, $row->related_student_id])
+            ->unique()
+            ->toArray();
+        $allFamilyIdsB = array_unique(array_merge($familyIdsB, [$studentB->id]));
+
+        // Check if there are any intersecting IDs
+        if (count(array_intersect($allFamilyIdsA, $allFamilyIdsB)) > 0) {
+            return back()->with('error', 'These students are already linked.');
+        }
+
+        // Update all members of B's clique to use A's contact details
+        foreach ($allFamilyIdsB as $mId) {
+            $member = Student::find($mId);
+            if ($member) {
+                $member->update([
+                    'country_id' => $studentA->country_id,
+                    'contact_number' => $studentA->contact_number,
+                    'phone' => $studentA->phone,
+                    'whatsapp_number' => $studentA->whatsapp_number,
+                    'is_whatsapp_different' => $studentA->is_whatsapp_different,
+                ]);
+            }
+        }
+
+        // Merge cliques
+        $combinedFamilyIds = array_unique(array_merge($allFamilyIdsA, $allFamilyIdsB));
+
+        // Sync relationships bidirectionally for all members of the combined clique
+        foreach ($combinedFamilyIds as $mId) {
+            $member = Student::find($mId);
+            if ($member) {
+                $otherIds = array_diff($combinedFamilyIds, [$mId]);
+                $member->relatedStudents()->sync($otherIds);
+            }
+        }
+
+        return back()->with('success', 'Student linked as family member successfully.');
     }
 }

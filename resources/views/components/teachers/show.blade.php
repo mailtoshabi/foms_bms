@@ -21,7 +21,7 @@
                         class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                         <i class="fas fa-chevron-left"></i>
                     </a>
-                    <h5 class="mb-0">Teacher Profiles</h5>
+                    <h5 class="mb-0">Teacher Profile</h5>
                 </div>
 
                 <div class="card-body text-center">
@@ -219,7 +219,11 @@
 
                                         <td>{{ $class->course->name ?? '-' }}</td>
 
-                                        <td>{{ $class->name }}</td>
+                                        <td>
+                                            <a href="{{ $isAdmin ? route('admin.class_rooms.show', encrypt($class->id)) : route('staff.class_rooms.show', encrypt($class->id)) }}">
+                                                {{ $class->name }}
+                                            </a>
+                                        </td>
 
                                         <td>{{ ucfirst($class->classType->name ?? '-') }}</td>
 

@@ -23,18 +23,23 @@
        </div>
 
        <div class="card">
-              <div class="card-header d-flex align-items-center">
-                     <a href="javascript:window.history.back();"
-                            class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
-                            <i class="fas fa-chevron-left"></i>
+              <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                     <div class="d-flex align-items-center w-100 w-sm-auto">
+                            <a href="javascript:window.history.back();"
+                                   class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                                   <i class="fas fa-chevron-left"></i>
+                            </a>
+                            <h4 class="mb-0">
+                                   @if ($tab == 'paid')
+                                          Paid Salaries
+                                   @else
+                                          Pending Salaries
+                                   @endif
+                            </h4>
+                     </div>
+                     <a href="{{ route('admin.reports.teacher.salary.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+                            <i class="fas fa-file-excel me-1"></i> Export Excel
                      </a>
-                     <h4 class="mb-0">
-                            @if ($tab == 'paid')
-                                   Paid Salaries
-                            @else
-                                   Pending Salaries
-                            @endif
-                     </h4>
               </div>
 
               <div class="card-body table-responsive">
@@ -48,10 +53,10 @@
                                                  placeholder="Search teacher...">
                                    </div>
 
-                                   <div class="col-md-2">
+                                   <div class="col-md-1">
                                           <label class="form-label fw-bold">Status</label>
                                           <select name="status" class="form-control">
-                                                 <option value="">All Status</option>
+                                                 <option value="">All</option>
                                                  @if ($tab == 'paid')
                                                         <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>
                                                                Paid</option>
@@ -70,6 +75,14 @@
                                    </div>
 
                                    <div class="col-md-2">
+                                          <label class="form-label fw-bold">Date Type</label>
+                                          <select name="date_type" class="form-control">
+                                                 <option value="cycle_date" {{ request('date_type') == 'cycle_date' || !request('date_type') ? 'selected' : '' }}>Cycle Date</option>
+                                                 <option value="credit_date" {{ request('date_type') == 'credit_date' ? 'selected' : '' }}>Credit Date</option>
+                                          </select>
+                                   </div>
+
+                                   <div class="col-md-2">
                                           <label class="form-label fw-bold">From Date</label>
                                           <input type="date" name="from_date" value="{{ request('from_date') }}"
                                                  class="form-control">
@@ -81,19 +94,14 @@
                                                  class="form-control">
                                    </div>
 
-                                   <div class="col-md-4 d-flex align-items-end gap-2">
-                                          <button type="submit" class="btn btn-primary px-3">
+                                   <div class="col-md-2 d-flex align-items-end gap-2">
+                                          <button type="submit" class="btn btn-primary btn-sm px-2 w-100" title="Filter">
                                                  <i class="mdi mdi-filter"></i> Filter
                                           </button>
 
                                           <a href="{{ route('admin.reports.teacher.salary', ['tab' => $tab]) }}"
-                                                 class="btn btn-light px-3">
+                                                 class="btn btn-light btn-sm px-2 w-100" title="Reset">
                                                  <i class="mdi mdi-refresh"></i> Reset
-                                          </a>
-
-                                          <a href="{{ route('admin.reports.teacher.salary.export', request()->query()) }}"
-                                                 class="btn btn-success px-3">
-                                                 <i class="mdi mdi-file-excel"></i> Export
                                           </a>
                                    </div>
                             </div>
@@ -179,44 +187,50 @@
                                                         @endif
                                                  </td>
                                                  <td>
-                                                         @if($row->status == 'paid')
-                                                                <span class="badge bg-success">Paid</span>
-                                                         @elseif($row->status == 'deposit')
-                                                                <span class="badge bg-danger">Deposit</span>
-                                                         @else
-                                                                <span class="badge bg-warning text-dark">Unpaid</span>
-                                                         @endif
-                                                  </td>
-                                                  <td>
-                                                         @if($row->status == 'deposit')
-                                                                <form action="{{ route('admin.salaries.release', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to release this deposit back to salary?')">
-                                                                       @csrf
-                                                                       <button type="submit" class="btn btn-sm btn-info" title="Release Deposit">
-                                                                              <i class="fas fa-hand-holding-usd"></i>
-                                                                       </button>
-                                                                </form>
-                                                         @else
-                                                                <button class="btn btn-sm btn-primary paySalaryBtn {{ $row->status == 'paid' ? 'disabled' : '' }}"
-                                                                       data-id="{{ $row->id }}" data-amount="{{ $row->total_amount }}"
-                                                                       data-status="{{ $row->status }}"
-                                                                       data-date="{{ $row->payment_date ? \Carbon\Carbon::parse($row->payment_date)->format('Y-m-d') : '' }}"
-                                                                       data-method="{{ $row->payment_method }}"
-                                                                       data-ref="{{ $row->reference_number }}" data-notes="{{ $row->notes }}">
+                                                        @if($row->status == 'paid')
+                                                               <span class="badge bg-success">Paid</span>
+                                                        @elseif($row->status == 'deposit')
+                                                               <span class="badge bg-danger">Deposit</span>
+                                                        @else
+                                                               <span class="badge bg-warning text-dark">Unpaid</span>
+                                                        @endif
+                                                 </td>
+                                                 <td>
+                                                        @if($row->status == 'deposit')
+                                                               <form action="{{ route('admin.salaries.release', $row->id) }}" method="POST"
+                                                                      class="d-inline"
+                                                                      onsubmit="return confirm('Are you sure you want to release this deposit back to salary?')">
+                                                                      @csrf
+                                                                      <button type="submit" class="btn btn-sm btn-info"
+                                                                             title="Release Deposit">
+                                                                             <i class="fas fa-hand-holding-usd"></i>
+                                                                      </button>
+                                                               </form>
+                                                        @else
+                                                               <button class="btn btn-sm btn-primary paySalaryBtn {{ $row->status == 'paid' ? 'disabled' : '' }}"
+                                                                      data-id="{{ $row->id }}" data-amount="{{ $row->total_amount }}"
+                                                                      data-status="{{ $row->status }}"
+                                                                      data-date="{{ $row->payment_date ? \Carbon\Carbon::parse($row->payment_date)->format('Y-m-d') : '' }}"
+                                                                      data-method="{{ $row->payment_method }}"
+                                                                      data-ref="{{ $row->reference_number }}" data-notes="{{ $row->notes }}">
 
-                                                                       <i class="fas fa-money-bill"></i>
+                                                                      <i class="fas fa-money-bill"></i>
 
-                                                                </button>
-                                                         @endif
+                                                               </button>
+                                                        @endif
 
-                                                         @if($row->status == 'unpaid' && !App\Models\TeacherSalary::where('teacher_id', $row->teacher_id)->where('id', '<', $row->id)->exists())
-                                                                <form action="{{ route('admin.salaries.deposit', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to move this first month salary to deposit?')">
-                                                                       @csrf
-                                                                       <button type="submit" class="btn btn-sm btn-warning" title="Move to Deposit">
-                                                                              <i class="fas fa-university"></i>
-                                                                       </button>
-                                                                </form>
-                                                         @endif
-                                                  </td>
+                                                        @if($row->status == 'unpaid' && !App\Models\TeacherSalary::where('teacher_id', $row->teacher_id)->where('id', '<', $row->id)->exists())
+                                                               <form action="{{ route('admin.salaries.deposit', $row->id) }}" method="POST"
+                                                                      class="d-inline"
+                                                                      onsubmit="return confirm('Are you sure you want to move this first month salary to deposit?')">
+                                                                      @csrf
+                                                                      <button type="submit" class="btn btn-sm btn-warning"
+                                                                             title="Move to Deposit">
+                                                                             <i class="fas fa-university"></i>
+                                                                      </button>
+                                                               </form>
+                                                        @endif
+                                                 </td>
                                           </tr>
                                    @empty
                                           <tr>

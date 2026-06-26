@@ -179,6 +179,13 @@ class BaseClassRoomController extends BaseServiceController
             });
         }
 
+        // Filter by a specific student's enrolled classes
+        if ($request->filled('student_id')) {
+            $query->whereHas('students', function ($q) use ($request) {
+                $q->where('students.id', $request->student_id);
+            });
+        }
+
         $results = $query->where(function ($q) use ($term) {
             $q->where('name', 'like', "%{$term}%")
                 ->orWhereHas('course', fn($c) => $c->where('name', 'like', "%{$term}%"));

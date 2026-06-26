@@ -418,7 +418,7 @@ if (!function_exists('teacherRankData')) {
             $earnings = $teacherData['earnings'];
         }
 
-        $tier = getTeacherRankTier($score);
+        $tier = getTeacherRankTier($score / 4);
         $stars = $tier['stars'];
         $label = $tier['label'];
         $color = $tier['color'];

@@ -115,7 +115,11 @@
 
                                 <tr>
 
-                                    <td>{{ $teacher->name }}</td>
+                                    <td>
+                                        <a href="{{ $isAdmin ? route('admin.reports.teachers.show', encrypt($teacher->id)) : route('staff.teachers.show', encrypt($teacher->id)) }}">
+                                            {{ $teacher->name }}
+                                        </a>
+                                    </td>
                                     <td>{{ $teacher->formatted_phone }}</td>
                                     <td>
                                         ₹ {{ number_format($teacher->pivot->hourly_wage, 2) }}
@@ -209,7 +213,11 @@
 
                                 <tr>
 
-                                    <td>{{ $student->name }}</td>
+                                    <td>
+                                        <a href="{{ $isAdmin ? route('admin.reports.students.show', encrypt($student->id)) : route('staff.students.show', encrypt($student->id)) }}">
+                                            {{ $student->name }}
+                                        </a>
+                                    </td>
                                     <td>{{ $student->formatted_contact_number }}</td>
                                     <td>{{ $student->pivot->assigned_date ? \Carbon\Carbon::parse($student->pivot->assigned_date)->format('d M Y') : '-' }}
                                     </td>

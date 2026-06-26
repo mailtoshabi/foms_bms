@@ -16,6 +16,10 @@
 
             @csrf
 
+            @if(isset($relativeOfStudent))
+                <input type="hidden" name="relative_of" value="{{ encrypt($relativeOfStudent->id) }}">
+            @endif
+
             @if($isEdit)
                 @method('PUT')
             @endif
@@ -44,18 +48,27 @@
 
                             <div class="col-md-12 mb-3">
                                 <label>Country <span class="text-danger">*</span></label>
-                                <select name="country_id" class="form-control @error('country_id') is-invalid @enderror"
-                                    required>
-                                    <option value="">Select Country</option>
-                                    @foreach($countries as $country)
-                                        <option value="{{ $country->id }}" {{ old('country_id', $student->country_id ?? '') == $country->id || (!old('country_id') && !isset($student) && $country->name == 'India') ? 'selected' : '' }}>
-                                            {{ $country->name }} ({{ $country->code }})
+                                @if(isset($relativeOfStudent))
+                                    <select class="form-control" disabled>
+                                        <option value="{{ $relativeOfStudent->country_id }}">
+                                            {{ $relativeOfStudent->country->name ?? '' }} ({{ $relativeOfStudent->country->code ?? '' }})
                                         </option>
-                                    @endforeach
-                                </select>
-                                @error('country_id')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                    </select>
+                                    <input type="hidden" name="country_id" value="{{ $relativeOfStudent->country_id }}">
+                                @else
+                                    <select name="country_id" class="form-control @error('country_id') is-invalid @enderror"
+                                        required>
+                                        <option value="">Select Country</option>
+                                        @foreach($countries as $country)
+                                            <option value="{{ $country->id }}" {{ old('country_id', $student->country_id ?? '') == $country->id || (!old('country_id') && !isset($student) && $country->name == 'India') ? 'selected' : '' }}>
+                                                {{ $country->name }} ({{ $country->code }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                @endif
                             </div>
 
                             <div class="col-md-6 mb-3">
@@ -71,7 +84,8 @@
                                 <label>Contact Number</label>
                                 <input type="text" name="contact_number" id="contact_number"
                                     class="form-control @error('contact_number') is-invalid @enderror @error('phone') is-invalid @enderror"
-                                    maxlength="15" value="{{ old('contact_number', $student->contact_number ?? '') }}">
+                                    maxlength="15" value="{{ old('contact_number', isset($relativeOfStudent) ? $relativeOfStudent->contact_number : ($student->contact_number ?? '')) }}"
+                                    {{ isset($relativeOfStudent) ? 'readonly' : '' }}>
                                 @error('contact_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -119,7 +133,7 @@
                                 <label>Parent Name</label>
                                 <input type="text" name="parent_name"
                                     class="form-control @error('parent_name') is-invalid @enderror"
-                                    value="{{ old('parent_name', $student->parent_name ?? '') }}">
+                                    value="{{ old('parent_name', isset($relativeOfStudent) ? $relativeOfStudent->parent_name : ($student->parent_name ?? '')) }}">
                                 @error('parent_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -148,7 +162,7 @@
                             <div class="col-md-12 mb-3">
                                 <label>Address</label>
                                 <textarea name="address"
-                                    class="form-control @error('address') is-invalid @enderror">{{ old('address', $student->address ?? '') }}</textarea>
+                                    class="form-control @error('address') is-invalid @enderror">{{ old('address', isset($relativeOfStudent) ? $relativeOfStudent->address : ($student->address ?? '')) }}</textarea>
                                 @error('address')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -267,7 +281,7 @@
                                 <label>Phone (Login)</label>
 
                                 <input type="text" name="phone" id="phone" class="form-control" readonly
-                                    value="{{ old('phone', $student->phone ?? '') }}">
+                                    value="{{ old('phone', isset($relativeOfStudent) ? $relativeOfStudent->phone : ($student->phone ?? '')) }}">
 
                             </div>
 
@@ -339,7 +353,7 @@
 
     </script>
 
-    @if(!$isEdit)
+    @if(!$isEdit && !isset($relativeOfStudent))
         <script>
             $('#contact_number').on('keyup change', function () {
 

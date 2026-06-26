@@ -22,26 +22,56 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        $credentials = [
-            'country_id' => $request->country_id,
-            'phone' => $request->phone,
-            'password' => $request->password,
-        ];
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
 
-        if (Auth::guard('student')->attempt($credentials)) {
-            $student = Auth::guard('student')->user();
-            if ($student->is_blocked) {
-                Auth::guard('student')->logout();
-                return back()->withErrors([
-                    'phone' => 'Your account is blocked. Please contact administration.'
-                ])->onlyInput('phone', 'country_id');
+        $students = \App\Models\Student::where('country_id', $request->country_id)
+            ->where('phone', $phone)
+            ->get();
+
+        foreach ($students as $student) {
+            if (\Illuminate\Support\Facades\Hash::check($request->password, $student->password)) {
+                if ($student->is_blocked) {
+                    return back()->withErrors([
+                        'phone' => 'Your account is blocked. Please contact administration.'
+                    ])->onlyInput('phone', 'country_id');
+                }
+
+                Auth::guard('student')->login($student);
+                return redirect()->intended('/student/dashboard');
             }
-            return redirect()->intended('/student/dashboard');
         }
 
         return back()->withErrors([
             'phone' => 'Invalid country, phone, or password.'
         ])->onlyInput('phone', 'country_id');
+    }
+
+    public function switchAccount($encryptedId)
+    {
+        $currentStudent = Auth::guard('student')->user();
+        if (!$currentStudent) {
+            return redirect()->route('student.login');
+        }
+
+        try {
+            $targetStudentId = decrypt($encryptedId);
+        } catch (\Exception $e) {
+            abort(403, 'Invalid switch request.');
+        }
+
+        $isRelated = $currentStudent->relatedStudents()->where('related_student_id', $targetStudentId)->exists();
+        if (!$isRelated) {
+            abort(403, 'Unauthorized switch request.');
+        }
+
+        $targetStudent = \App\Models\Student::findOrFail($targetStudentId);
+        if ($targetStudent->is_blocked) {
+            return back()->with('error', 'Cannot switch to this account because it is blocked.');
+        }
+
+        Auth::guard('student')->login($targetStudent);
+
+        return redirect()->route('student.dashboard')->with('success', "Switched to {$targetStudent->name}'s account.");
     }
 
     public function logout()

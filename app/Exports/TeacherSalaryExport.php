@@ -32,6 +32,7 @@ class TeacherSalaryExport implements FromCollection, WithHeadings
                     DATE_FORMAT(teacher_salaries.cycle_end, '%d %b %Y')
                 ) as cycle"),
 
+                'teacher_salaries.credit_date',
                 'teacher_salaries.payment_date',
                 'teacher_salaries.payment_method',
                 'teacher_salaries.status'
@@ -43,7 +44,7 @@ class TeacherSalaryExport implements FromCollection, WithHeadings
         |--------------------------------------------------------------------------
         | Tab Logic
         |--------------------------------------------------------------------------
-        */
+        |*/
 
         if ($tab === 'paid') {
             $query->where('teacher_salaries.status', 'paid');
@@ -56,7 +57,7 @@ class TeacherSalaryExport implements FromCollection, WithHeadings
         |--------------------------------------------------------------------------
         | Filters
         |--------------------------------------------------------------------------
-        */
+        |*/
 
         if (!empty($this->filters['search'])) {
             // $query->where('teachers.name','like','%'.$this->filters['search'].'%');
@@ -71,16 +72,19 @@ class TeacherSalaryExport implements FromCollection, WithHeadings
             $query->where('teacher_salaries.status',$this->filters['status']);
         }
 
-        if (!empty($this->filters['from_date']) && !empty($this->filters['to_date'])) {
-            // $query->whereBetween('teacher_salaries.cycle_start', [
-            //     $this->filters['from_date'],
-            //     $this->filters['to_date']
-            // ]);
+        $dateType = $this->filters['date_type'] ?? 'cycle_date';
 
-            $query->where(function($q){
-                $q->whereBetween('cycle_start', [$this->filters['from_date'], $this->filters['to_date']])
-                ->orWhereBetween('cycle_end', [$this->filters['from_date'], $this->filters['to_date']]);
-            });
+        if (!empty($this->filters['from_date']) && !empty($this->filters['to_date'])) {
+            $from = $this->filters['from_date'];
+            $to = $this->filters['to_date'];
+            if ($dateType === 'credit_date') {
+                $query->whereBetween('teacher_salaries.credit_date', [$from, $to]);
+            } else {
+                $query->where(function($q) use ($from, $to) {
+                    $q->whereBetween('cycle_start', [$from, $to])
+                    ->orWhereBetween('cycle_end', [$from, $to]);
+                });
+            }
         }
 
         return $query->orderByDesc('teacher_salaries.cycle_start')->get();
@@ -94,6 +98,7 @@ class TeacherSalaryExport implements FromCollection, WithHeadings
             'Total Hours',
             'Total Salary',
             'Cycle',
+            'Credit Date',
             'Payment Date',
             'Payment Method',
             'Status'

@@ -32,6 +32,7 @@ class FeeController extends Controller
             'type' => 'required|in:admission,monthly',
             'amount' => 'required|numeric|min:0.01',
             'date' => 'required|date',
+            'status' => 'required|in:paid,unpaid',
         ]);
 
         $dueDate = Carbon::parse($validated['date'])->addDays(7)->toDateString();
@@ -48,14 +49,24 @@ class FeeController extends Controller
         }
 
         try {
-            $this->feeService->createFee([
+            $fee = $this->feeService->createFee([
                 'student_id' => $validated['student_id'],
                 'class_room_id' => $validated['class_room_id'],
                 'type' => $validated['type'],
                 'amount' => $validated['amount'],
                 'due_date' => $dueDate,
-                'status' => 'unpaid',
+                'status' => $validated['status'],
             ]);
+
+            if ($validated['status'] === 'paid') {
+                \App\Models\FeePayment::create([
+                    'fee_id' => $fee->id,
+                    'paid_amount' => $validated['amount'],
+                    'payment_method' => 'cash',
+                    'paid_date' => $validated['date'],
+                    'notes' => 'Manually marked as Paid at creation'
+                ]);
+            }
 
             return redirect()->route('admin.reports.fee')->with('success', 'Manual fee created successfully.');
         } catch (\Exception $e) {

@@ -319,11 +319,11 @@
                                                     <i class="mdi mdi-file-document-outline text-primary font-size-18"></i>
                                                     <div>
                                                         <strong
-                                                            class="text-dark d-block font-size-12">{{ Str::limit($file->name, 25) }}</strong>
-                                                        <small class="text-muted d-block font-size-10">{{ $file->size }}</small>
+                                                            class="text-dark d-block font-size-12">{{ Str::limit($file->file_name, 25) }}</strong>
+                                                        <small class="text-muted d-block font-size-10">{{ $file->file_size_formatted }}</small>
                                                     </div>
                                                 </div>
-                                                <a href="{{ route('teacher.notes.show', encrypt($file->id)) }}"
+                                                <a href="{{ route('teacher.notes.file.download', encrypt($file->id)) }}" target="_blank"
                                                     class="portal-btn btn-light py-1 px-2 font-size-11">
                                                     <i class="mdi mdi-eye"></i> View
                                                 </a>

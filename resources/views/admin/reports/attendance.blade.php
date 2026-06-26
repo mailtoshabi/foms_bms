@@ -5,7 +5,7 @@
 
         <div class="card">
 
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                         <h4 class="mb-0">
                                 <a href="javascript:window.history.back();"
                                         class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
@@ -13,6 +13,9 @@
                                 </a>
                                 Attendance Report
                         </h4>
+                        <a href="{{ route('admin.reports.attendance.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+                                <i class="fas fa-file-excel me-1"></i> Export Excel
+                        </a>
                 </div>
 
                 <div class="card-body table-responsive">
@@ -64,20 +67,15 @@
                                                         class="form-control">
                                         </div>
 
-                                        <div class="col-md-4 d-flex align-items-end gap-2">
-                                                <button type="submit" class="btn btn-primary px-3">
-                                                        <i class="mdi mdi-filter"></i> Filter
-                                                </button>
+                                        <div class="col-md-2 d-flex align-items-end gap-2">
+                                                 <button type="submit" class="btn btn-primary btn-sm px-2 w-100" title="Filter">
+                                                         <i class="mdi mdi-filter"></i> Filter
+                                                 </button>
 
-                                                <a href="{{ route('admin.reports.attendance') }}" class="btn btn-light px-3">
-                                                        <i class="mdi mdi-refresh"></i> Reset
-                                                </a>
-
-                                                <a href="{{ route('admin.reports.attendance.export', request()->query()) }}"
-                                                        class="btn btn-success px-3">
-                                                        <i class="mdi mdi-file-excel"></i> Export
-                                                </a>
-                                        </div>
+                                                 <a href="{{ route('admin.reports.attendance') }}" class="btn btn-light btn-sm px-2 w-100" title="Reset">
+                                                         <i class="mdi mdi-refresh"></i> Reset
+                                                 </a>
+                                         </div>
                                 </div>
                         </form>
 

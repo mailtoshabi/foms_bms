@@ -115,16 +115,18 @@
 
                                 <div class="d-flex gap-2 align-items-center">
 
-                                    <a href="{{ route('staff.students.show', encrypt($student->id)) }}" title="View Student Details">
+                                    <a href="{{ route('staff.students.show', encrypt($student->id)) }}"
+                                        title="View Student Details">
                                         <i class="mdi mdi-eye text-primary font-size-16"></i>
                                     </a>
                                     @if($staff->hasRoleId($enrolmentRoleId) || $staff->hasRoleId($operationRoleId))
                                         <a href="{{ route('staff.students.edit', encrypt($student->id)) }}" title="Edit Student">
                                             <i class="mdi mdi-pencil text-success font-size-16"></i>
                                         </a>
-                                        <a href="{{ route('staff.students.toggleBlock', encrypt($student->id)) }}" 
-                                           title="{{ $student->is_blocked ? 'Unblock Student' : 'Block Student' }}">
-                                            <i class="mdi {{ $student->is_blocked ? 'mdi-lock-open text-warning' : 'mdi-lock text-danger' }} font-size-16"></i>
+                                        <a href="{{ route('staff.students.toggleBlock', encrypt($student->id)) }}"
+                                            title="{{ $student->is_blocked ? 'Unblock Student' : 'Block Student' }}">
+                                            <i
+                                                class="mdi {{ $student->is_blocked ? 'mdi-lock-open text-warning' : 'mdi-lock text-danger' }} font-size-16"></i>
                                         </a>
                                     @endif
                                     @if($staff->hasRoleId($operationRoleId))

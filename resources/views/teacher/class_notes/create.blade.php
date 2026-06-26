@@ -107,6 +107,7 @@
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/compressorjs/1.2.1/compressor.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const fileContainer = document.getElementById('fileInputContainer');
@@ -135,14 +136,89 @@
                     const removeBtn = group.querySelector('.removeFileInput');
                     if (groups.length > 1) {
                         removeBtn.style.display = 'block';
-                        removeBtn.addEventListener('click', function () {
+                        // Clean up old click event listeners to avoid duplicates
+                        const newRemoveBtn = removeBtn.cloneNode(true);
+                        removeBtn.parentNode.replaceChild(newRemoveBtn, removeBtn);
+                        newRemoveBtn.addEventListener('click', function () {
                             group.remove();
+                            updateRemoveButtons();
                         });
                     } else {
                         removeBtn.style.display = 'none';
                     }
                 });
             }
+
+            // File size validation and automatic image compression
+            fileContainer.addEventListener('change', function (e) {
+                if (e.target && e.target.type === 'file') {
+                    const input = e.target;
+                    const file = input.files[0];
+                    if (!file) return;
+
+                    const maxSize = 2 * 1024 * 1024; // 2MB
+
+                    if (file.size > maxSize) {
+                        const fileExt = file.name.split('.').pop().toLowerCase();
+                        const imageExts = ['jpg', 'jpeg', 'png'];
+
+                        if (imageExts.includes(fileExt)) {
+                            if (confirm(`The image "${file.name}" is larger than 2MB (${(file.size / (1024 * 1024)).toFixed(2)}MB). Would you like to automatically compress and resize it to fit the 2MB limit?`)) {
+                                const form = input.closest('form');
+                                const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+                                if (submitBtn) {
+                                    submitBtn.disabled = true;
+                                    submitBtn.dataset.originalText = submitBtn.innerHTML;
+                                    submitBtn.innerText = 'Compressing Image...';
+                                }
+
+                                new Compressor(file, {
+                                    quality: 0.6,
+                                    maxWidth: 1600,
+                                    maxHeight: 1600,
+                                    success(result) {
+                                        const compressedFile = new File([result], file.name, {
+                                            type: result.type,
+                                            lastModified: Date.now(),
+                                        });
+
+                                        const dataTransfer = new DataTransfer();
+                                        dataTransfer.items.add(compressedFile);
+                                        input.files = dataTransfer.files;
+
+                                        if (compressedFile.size > maxSize) {
+                                            alert(`Even after compression, the image "${file.name}" is still larger than 2MB. Please choose a smaller image.`);
+                                            input.value = '';
+                                        } else {
+                                            alert(`Image successfully compressed from ${(file.size / (1024 * 1024)).toFixed(2)}MB to ${(compressedFile.size / (1024 * 1024)).toFixed(2)}MB!`);
+                                        }
+
+                                        if (submitBtn) {
+                                            submitBtn.disabled = false;
+                                            submitBtn.innerHTML = submitBtn.dataset.originalText;
+                                        }
+                                    },
+                                    error(err) {
+                                        console.error(err.message);
+                                        alert("Error compressing image. Please choose a smaller file.");
+                                        input.value = '';
+                                        if (submitBtn) {
+                                            submitBtn.disabled = false;
+                                            submitBtn.innerHTML = submitBtn.dataset.originalText;
+                                        }
+                                    },
+                                });
+                            } else {
+                                input.value = '';
+                            }
+                        } else {
+                            // Non-image files (PDF, DOCX, XLSX, etc.)
+                            alert(`The file "${file.name}" exceeds the 2MB size limit (${(file.size / (1024 * 1024)).toFixed(2)}MB). Document formats (PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX, TXT) cannot be compressed automatically in the browser. Please select a file smaller than 2MB.`);
+                            input.value = '';
+                        }
+                    }
+                }
+            });
 
             // Initial update
             updateRemoveButtons();

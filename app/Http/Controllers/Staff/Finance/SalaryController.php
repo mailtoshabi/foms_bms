@@ -28,12 +28,22 @@ class SalaryController extends Controller
             $query->where('teacher_id', $request->teacher_id);
         }
 
-        if ($request->filled('from_date')) {
-            $query->whereDate('cycle_start', '>=', $request->from_date);
-        }
+        $dateType = $request->get('date_type', 'cycle_date');
 
-        if ($request->filled('to_date')) {
-            $query->whereDate('cycle_end', '<=', $request->to_date);
+        if ($dateType === 'credit_date') {
+            if ($request->filled('from_date')) {
+                $query->whereDate('credit_date', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate('credit_date', '<=', $request->to_date);
+            }
+        } else {
+            if ($request->filled('from_date')) {
+                $query->whereDate('cycle_start', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate('cycle_end', '<=', $request->to_date);
+            }
         }
 
         $salaries = $query->latest()->paginate(utility('pagination', 50))->withQueryString();

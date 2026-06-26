@@ -21,13 +21,20 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.reports.student-advances') ? 'active' : '' }}"
+                        href="{{ route('admin.reports.student-advances') }}">
+                        Student Advances
+                    </a>
+                </li>
+
             </ul>
         </div>
     </div>
 
     <div class="card">
 
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
             <h4 class="mb-0">
                 <a href="javascript:window.history.back();"
                     class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
@@ -35,6 +42,9 @@
                 </a>
                 Student Leads Report
             </h4>
+            <a href="{{ route('admin.reports.student-leads.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+                <i class="fas fa-file-excel me-1"></i> Export Excel
+            </a>
         </div>
 
 
@@ -87,16 +97,9 @@
                     </select>
                 </div>
 
-                <div class="col-md-2">
-                    <button class="btn btn-primary">Filter</button>
-                    <a href="{{ route('admin.reports.student-leads') }}" class="btn btn-secondary">Reset</a>
-                </div>
-
-                <div class="col-md-2 text-end">
-                    <button type="submit" formaction="{{ route('admin.reports.student-leads.export') }}"
-                        class="btn btn-success">
-                        Export
-                    </button>
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary w-100">Filter</button>
+                    <a href="{{ route('admin.reports.student-leads') }}" class="btn btn-secondary w-100">Reset</a>
                 </div>
 
             </form>

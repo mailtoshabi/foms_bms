@@ -69,6 +69,16 @@ class Student extends Authenticatable
         return $this->belongsTo(Country::class);
     }
 
+    public function relatedStudents()
+    {
+        return $this->belongsToMany(
+            Student::class,
+            'student_relations',
+            'student_id',
+            'related_student_id'
+        );
+    }
+
     public function class_rooms()
     {
         return $this->belongsToMany(
