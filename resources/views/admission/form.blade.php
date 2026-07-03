@@ -319,7 +319,7 @@
                 <div class="logo-container">
                     <img src="{{ asset('images/logo.png') }}" alt="FOMS Academy Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                 </div>
-                <h1 class="admission-title">
+                <h1 class="admission-title" style="color:black">
                     @if($type == 'student')
                         Student Admission
                     @else
@@ -346,7 +346,35 @@
                         <p class="text-muted">This form link is no longer valid. Please contact the administrator at FOMS Academy for assistance.</p>
                     </div>
                 @else
-                    
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert" style="border-left: 4px solid #dc3545 !important;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-exclamation-triangle me-2" style="font-size: 1.15rem;"></i>
+                                <div>
+                                    {{ session('error') }}
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
+                    @if($errors->any())
+                        <div class="alert alert-danger alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert" style="border-left: 4px solid #dc3545 !important;">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-exclamation-circle me-2 mt-1" style="font-size: 1.15rem;"></i>
+                                <div>
+                                    <strong class="d-block mb-1">Please correct the following errors:</strong>
+                                    <ul class="mb-0 ps-3">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('admission.submit', [$type, $lead->form_token]) }}" enctype="multipart/form-data">
                         @csrf
 
@@ -547,8 +575,18 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label-premium">Passport Size Photo</label>
-                                <div class="file-upload-premium">
-                                    <i class="fas fa-image text-muted mb-2 d-block" style="font-size: 1.5rem;"></i>
+                                <div class="file-upload-premium position-relative">
+                                    <input type="hidden" name="old_photo" value="{{ old('old_photo') }}">
+                                    @if(old('old_photo'))
+                                        <div class="mb-2">
+                                            <img src="{{ asset('storage/' . old('old_photo')) }}" class="img-thumbnail" style="max-height: 80px; border-radius: 8px;">
+                                            <div class="text-success small fw-semibold mt-1">
+                                                <i class="fas fa-check-circle"></i> Photo uploaded (select new file to replace)
+                                            </div>
+                                        </div>
+                                    @else
+                                        <i class="fas fa-image text-muted mb-2 d-block" style="font-size: 1.5rem;"></i>
+                                    @endif
                                     <input type="file" class="form-control @error('photo') is-invalid @enderror" name="photo">
                                     @error('photo')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -558,8 +596,21 @@
 
                             <div class="col-md-6">
                                 <label class="form-label-premium">Government ID Proof</label>
-                                <div class="file-upload-premium">
-                                    <i class="fas fa-file text-muted mb-2 d-block" style="font-size: 1.5rem;"></i>
+                                <div class="file-upload-premium position-relative">
+                                    <input type="hidden" name="old_id_proof" value="{{ old('old_id_proof') }}">
+                                    @if(old('old_id_proof'))
+                                        <div class="mb-2">
+                                            <div class="d-inline-block bg-light p-2 rounded mb-1" style="border: 1px solid #e2e8f0;">
+                                                <i class="fas fa-file-pdf text-danger" style="font-size: 1.5rem;"></i>
+                                                <span class="small text-muted ms-1">{{ basename(old('old_id_proof')) }}</span>
+                                            </div>
+                                            <div class="text-success small fw-semibold mt-1">
+                                                <i class="fas fa-check-circle"></i> Document uploaded (select new file to replace)
+                                            </div>
+                                        </div>
+                                    @else
+                                        <i class="fas fa-file text-muted mb-2 d-block" style="font-size: 1.5rem;"></i>
+                                    @endif
                                     <input type="file" class="form-control @error('id_proof') is-invalid @enderror" name="id_proof">
                                     @error('id_proof')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -567,6 +618,21 @@
                                 </div>
                             </div>
                         </div>
+
+                        @if($type == 'teacher')
+                            <div class="mt-4">
+                                <div class="form-check">
+                                    <input class="form-check-input @error('agreed_rules') is-invalid @enderror" type="checkbox" id="agreed_rules"
+                                        name="agreed_rules" value="1" {{ old('agreed_rules') ? 'checked' : '' }} required>
+                                    <label class="form-check-label text-dark fw-semibold" for="agreed_rules" style="font-size: 0.9rem; cursor: pointer;">
+                                        I have read and agree to the <a href="{{ asset('agreement/tutor_agreement.pdf') }}" target="_blank" class="text-primary text-decoration-underline">Rules & Regulations</a> <span class="text-danger">*</span>
+                                    </label>
+                                    @error('agreed_rules')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        @endif
 
                         {{-- SUBMIT BUTTON --}}
                         <div class="mt-5 text-center">

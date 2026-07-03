@@ -73,7 +73,12 @@ class DashboardController extends Controller
         $pendingStudentLeads         = StudentLead::where('status', 'pending')->count();
         $pendingTeacherLeads         = TeacherLead::where('status', 'pending')->count();
         $unpaidFeesCount             = Fee::whereIn('status', ['unpaid', 'partial'])->count();
-        $unpaidFeesAmount            = Fee::whereIn('status', ['unpaid', 'partial'])->sum('amount');
+        $unpaidFeesQuery = Fee::whereIn('status', ['unpaid', 'partial'])->with(['payments', 'refunds'])->get();
+        $unpaidFeesAmount = $unpaidFeesQuery->sum(function ($fee) {
+            $totalPaid = $fee->payments->sum('paid_amount');
+            $totalRefunded = $fee->refunds->sum('amount');
+            return max($fee->amount - ($totalPaid - $totalRefunded), 0);
+        });
 
         $fourDaysAgo = now()->subDays(4)->endOfDay();
 
@@ -81,10 +86,12 @@ class DashboardController extends Controller
             ->whereDate('due_date', '<', $fourDaysAgo);
 
         $overdueFeesCount = (clone $overdueFeesQuery)->count();
-        $overdueFees      = (clone $overdueFeesQuery)->with('payments')->get();
+        $overdueFees      = (clone $overdueFeesQuery)->with(['payments', 'refunds'])->get();
             
         $overdueFeesAmount = $overdueFees->sum(function($fee) {
-            return $fee->amount - $fee->payments->sum('paid_amount');
+            $totalPaid = $fee->payments->sum('paid_amount');
+            $totalRefunded = $fee->refunds->sum('amount');
+            return max($fee->amount - ($totalPaid - $totalRefunded), 0);
         });
 
         $unpaidTeacherSalariesCount  = TeacherSalary::whereIn('status', ['unpaid', 'partial'])
@@ -106,18 +113,34 @@ class DashboardController extends Controller
                 ->whereYear('paid_date', $now->year)
                 ->sum('paid_amount');
 
-            $totalFees = \Illuminate\Support\Facades\DB::table('fees')
-                ->whereMonth('due_date', $now->month)
-                ->whereYear('due_date', $now->year)
+            // Subtract refunds processed in this month to show net paid
+            $refundedThisMonth = \Illuminate\Support\Facades\DB::table('fee_refunds')
+                ->whereMonth('refund_date', $now->month)
+                ->whereYear('refund_date', $now->year)
                 ->sum('amount');
 
-            $totalPaidAgainstFees = \Illuminate\Support\Facades\DB::table('fee_payments')
-                ->join('fees', 'fees.id', '=', 'fee_payments.fee_id')
-                ->whereMonth('fees.due_date', $now->month)
-                ->whereYear('fees.due_date', $now->year)
-                ->sum('fee_payments.paid_amount');
+            $paidAmount = max($paidAmount - $refundedThisMonth, 0);
 
-            $pendingAmount = max($totalFees - $totalPaidAgainstFees, 0);
+            $feesThisMonth = \Illuminate\Support\Facades\DB::table('fees')
+                ->whereMonth('created_at', $now->month)
+                ->whereYear('created_at', $now->year)
+                ->get();
+
+            $pendingAmount = 0;
+            foreach ($feesThisMonth as $fee) {
+                if ($fee->status === 'unpaid') {
+                    $pendingAmount += $fee->amount;
+                } elseif ($fee->status === 'partial') {
+                    $totalPaid = \Illuminate\Support\Facades\DB::table('fee_payments')
+                        ->where('fee_id', $fee->id)
+                        ->sum('paid_amount');
+                    $totalRefunded = \Illuminate\Support\Facades\DB::table('fee_refunds')
+                        ->where('fee_id', $fee->id)
+                        ->sum('amount');
+                    $netPaid = $totalPaid - $totalRefunded;
+                    $pendingAmount += max($fee->amount - $netPaid, 0);
+                }
+            }
         }
 
         return view('staff.dashboard.index', compact(

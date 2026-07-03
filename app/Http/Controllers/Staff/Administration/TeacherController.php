@@ -214,6 +214,14 @@ class TeacherController extends Controller
         return back()->with('success', "Teacher \"{$teacher->name}\" deleted successfully.");
     }
 
+    public function updateAgreement($id)
+    {
+        $teacher = Teacher::findOrFail(decrypt($id));
+        $teacher->update(['agreed_rules' => true]);
+
+        return back()->with('success', "Agreement status updated for teacher \"{$teacher->name}\".");
+    }
+
     public function search(Request $request)
     {
         $term = $request->input('q', '');

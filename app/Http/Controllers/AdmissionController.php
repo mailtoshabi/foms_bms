@@ -55,35 +55,45 @@ class AdmissionController extends Controller
             abort(404);
         }
 
-        $request->merge(['phone' => $request->contact_number]);
+        $oldPhoto = $request->input('old_photo');
+        $oldIdProof = $request->input('old_id_proof');
+
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $oldPhoto = $request->file('photo')->store('profiles/photos', 'public');
+        }
+
+        if ($request->hasFile('id_proof') && $request->file('id_proof')->isValid()) {
+            $oldIdProof = $request->file('id_proof')->store('profiles/id_proofs', 'public');
+        }
+
+        $request->merge([
+            'old_photo' => $oldPhoto,
+            'old_id_proof' => $oldIdProof,
+        ]);
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'contact_number' => 'required|string|digits_between:7,15',
-            'phone' => [
+            'contact_number' => [
                 'required',
+                'string',
+                'digits_between:7,15',
                 $type == 'student'
                 ? Rule::unique('students', 'phone')->where('country_id', $lead->country_id)
                 : Rule::unique('teachers', 'phone')->where('country_id', $lead->country_id)
             ],
-            'photo' => 'required|image|max:2048',
-            'id_proof' => 'required|file|max:4096',
-            'whatsapp_number' => 'nullable|required_if:is_whatsapp_different,1|string|digits_between:7,15'
+            'photo' => $oldPhoto ? 'nullable|image|max:2048' : 'required|image|max:2048',
+            'id_proof' => $oldIdProof ? 'nullable|file|max:4096' : 'required|file|max:4096',
+            'whatsapp_number' => 'nullable|required_if:is_whatsapp_different,1|string|digits_between:7,15',
+            'agreed_rules' => $type == 'teacher' ? 'required|accepted' : 'nullable'
         ], [
-            'phone.unique' => 'This contact number is already registered under this country.'
+            'contact_number.unique' => 'This contact number is already registered under this country.',
+            'agreed_rules.required' => 'You must agree to the Rules & Regulations.',
+            'agreed_rules.accepted' => 'You must agree to the Rules & Regulations.'
         ]);
 
         try {
-            $photo = null;
-            $idProof = null;
-
-            if ($request->hasFile('photo')) {
-                $photo = $request->file('photo')->store('profiles/photos', 'public');
-            }
-
-            if ($request->hasFile('id_proof')) {
-                $idProof = $request->file('id_proof')->store('profiles/id_proofs', 'public');
-            }
+            $photo = $oldPhoto;
+            $idProof = $oldIdProof;
 
             $phone = $request->contact_number;
             $whatsappUrl = '';
@@ -152,6 +162,7 @@ class AdmissionController extends Controller
                     'password' => Hash::make($phone),
                     'photo' => $photo,
                     'id_proof' => $idProof,
+                    'agreed_rules' => true,
                     'status' => 'active'
                 ]);
 

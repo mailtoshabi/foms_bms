@@ -6,6 +6,44 @@
 
 @section('title', $isEdit ? 'Edit Teacher Lead' : 'Add Teacher Lead')
 
+@section('css')
+<style>
+    .copy-tooltip {
+        visibility: hidden;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 4px 8px;
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+        font-size: 11px;
+        line-height: 1.4;
+        white-space: nowrap;
+        font-family: sans-serif;
+    }
+    .copy-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent;
+    }
+    .copy-tooltip.show {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>
+@endsection
+
 @section('content')
 
     <div class="card">
@@ -184,6 +222,7 @@
 
             <div class="card-body">
 
+                @if($lead->form_expires_at && now()->lt($lead->form_expires_at))
                 @php
                     $token = $lead->generateFormToken();
                     $link = route('admission.form', ['teacher', $token]);
@@ -200,9 +239,10 @@
 
                     <input type="text" class="form-control mb-2" value="{{ $link }}" readonly>
 
-                    <button class="btn btn-primary" onclick="navigator.clipboard.writeText('{{ $link }}')">
+                    <button type="button" class="btn btn-primary position-relative" onclick="copyLink(this, '{{ $link }}')">
 
                         <i class="mdi mdi-content-copy"></i>
+                        <span class="copy-tooltip">Copied!</span>
 
                     </button>
 
@@ -215,7 +255,7 @@
                     </a>
 
                 </div>
-
+@endif
 
                 @if($lead->form_expires_at && now()->gt($lead->form_expires_at))
 
@@ -545,6 +585,20 @@
 
 @section('script')
     <script>
+        function copyLink(btn, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const tooltip = btn.querySelector('.copy-tooltip');
+                if (tooltip) {
+                    tooltip.classList.add('show');
+                    setTimeout(() => {
+                        tooltip.classList.remove('show');
+                    }, 2000);
+                }
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
         $('.select2').select2();
 
         $('#whatsapp_different').on('change', function () {

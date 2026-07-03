@@ -67,6 +67,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/profile', [DashboardController::class, 'profile'])
             ->name('profile');
 
+        Route::resource('holidays', \App\Http\Controllers\Staff\Administration\HolidayController::class)
+            ->names('holidays');
+
+        Route::get('class-notes/file/{id}', [\App\Http\Controllers\Admin\ClassNoteController::class, 'downloadFile'])
+            ->name('class-notes.file.download');
+        Route::resource('class-notes', \App\Http\Controllers\Admin\ClassNoteController::class)
+            ->names('class-notes');
+
         Route::get('reports/fee', [ReportController::class, 'fees'])
             ->name('reports.fee');
 
@@ -728,11 +736,16 @@ Route::prefix('departments')->name('staff.')->group(function () {
                 Route::resource('teachers', TeacherController::class)
                     ->names('teachers')->except(['show']);
 
+                Route::post('teachers/{id}/agreement', [TeacherController::class, 'updateAgreement'])
+                    ->name('teachers.update-agreement');
+
                 Route::get('/deposits', [\App\Http\Controllers\Staff\Finance\DepositController::class, 'index'])
                     ->name('deposits.index');
             });
 
         Route::middleware('role:id_operation_dept')->group(function () {
+            Route::resource('holidays', \App\Http\Controllers\Staff\Administration\HolidayController::class)
+                ->names('holidays');
             Route::get('/old-data', [OldDataController::class, 'index'])->name('old_data.index');
             Route::post('/old-data/import', [OldDataController::class, 'importStartingDates'])->name('old_data.import');
             Route::post('/old-data/students-import', [OldDataController::class, 'importStudentData'])->name('old_data.students_import');

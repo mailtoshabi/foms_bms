@@ -189,6 +189,15 @@
                     </li>
                 @endif
 
+                @if($staff->hasRoleId($operationRoleId))
+                    <li class="{{ set_active(['staff.holidays.*']) }}">
+                        <a href="{{ route('staff.holidays.index') }}">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Holidays & Alerts</span>
+                        </a>
+                    </li>
+                @endif
+
                 {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['staff.messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">

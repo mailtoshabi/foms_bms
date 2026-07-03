@@ -63,7 +63,6 @@ class BlockedStudentTest extends TestCase
             'password' => 'password'
         ]);
 
-        // Should redirect back with errors
         $response->assertStatus(302);
         $response->assertSessionHasErrors('phone');
         $this->assertFalse(auth('student')->check());

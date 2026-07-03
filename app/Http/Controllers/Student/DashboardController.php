@@ -99,6 +99,26 @@ class DashboardController extends Controller
             ->get();
         $latestNotes = $allNotes->take(5);
 
+        // Fetch active/upcoming holidays for the logged-in student
+        $holidays = \App\Models\Holiday::where(function ($q) use ($student, $classRoomIds) {
+            $q->where('target_type', 'all_students')
+              ->orWhere(function ($q2) use ($student) {
+                  $q2->where('target_type', 'selected_students')
+                     ->whereHas('students', function ($q3) use ($student) {
+                         $q3->where('students.id', $student->id);
+                     });
+              })
+              ->orWhere(function ($q2) use ($classRoomIds) {
+                  $q2->where('target_type', 'classes')
+                     ->whereIn('class_target_type', ['students', 'both'])
+                     ->whereHas('classRooms', function ($q3) use ($classRoomIds) {
+                         $q3->whereIn('class_rooms.id', $classRoomIds);
+                     });
+              });
+        })->where('date', '>=', now()->toDateString())
+          ->orderBy('date', 'asc')
+          ->get();
+
         return view('student.dashboard', compact(
             'student',
             'currentClass',
@@ -113,6 +133,7 @@ class DashboardController extends Controller
             'allMessages',
             'totalAttendance',
             'presentAttendance',
+            'holidays',
         ));
     }
 

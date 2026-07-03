@@ -34,6 +34,7 @@ class Teacher extends Authenticatable
 
         'photo',
         'id_proof',
+        'agreed_rules',
 
         'status',
 

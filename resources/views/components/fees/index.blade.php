@@ -124,7 +124,7 @@
 
                         <li class="nav-item">
                             <a class="nav-link {{ $tab == 'paid' ? 'active' : '' }}" href="{{ $routeTemplatePaid }}">
-                                Full Paid
+                                Paid
                             </a>
                         </li>
 
@@ -200,13 +200,18 @@
                             <div class="col-md-2">
                                 <label class="form-label fw-bold">Payment Status</label>
                                 <select name="status" class="form-control">
-                                    <option value="">All Status</option>
-                                    <option value="unpaid" {{ request('status') == 'unpaid' ? 'selected' : '' }}>
-                                        Unpaid
-                                    </option>
-                                    <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>
-                                        Partial
-                                    </option>
+                                    @if($tab == 'paid')
+                                        <option value="paid" {{ request('status', 'paid') == 'paid' ? 'selected' : '' }}>
+                                            Paid
+                                        </option>
+                                        <option value="partial" {{ request('status') == 'partial' ? 'selected' : '' }}>
+                                            Partial
+                                        </option>
+                                    @else
+                                        <option value="unpaid" {{ request('status', 'unpaid') == 'unpaid' ? 'selected' : '' }}>
+                                            Unpaid
+                                        </option>
+                                    @endif
                                 </select>
                             </div>
 
@@ -226,12 +231,12 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'From Payment Date' : 'From Due Date' }}</label>
+                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'From Payment Date' : 'From Generated Date' }}</label>
                                 <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'To Payment Date' : 'To Due Date' }}</label>
+                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'To Payment Date' : 'To Generated Date' }}</label>
                                 <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
                             </div>
 
@@ -277,12 +282,12 @@
                         <thead>
 
                             <tr>
+                                <th>Date</th>
                                 <th>Student</th>
                                 <th>Class</th>
                                 <th>Attendance</th>
                                 <th>Type</th>
                                 <th>Amount</th>
-                                <th>Due Date</th>
                                 <th>Status</th>
                                 @if($isAction == 'true' || auth('admin')->check())
                                     <th>Actions</th>
@@ -312,6 +317,24 @@
                                 @endphp
 
                                 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">
+
+                                    <td>
+                                        <div>
+                                            {{ \Carbon\Carbon::parse($fee->created_at)->format('d M Y') }}
+                                        </div>
+                                        <div>
+                                            <span class="text-muted small fw-bold">Due:</span>
+                                            {{ \Carbon\Carbon::parse($fee->due_date)->format('d M Y') }}
+                                        </div>
+                                        @if($lastPaymentDate)
+                                            <div class="small text-muted" style="font-size: 0.75rem;" title="Last Payment Date">
+                                                Last paid: {{ \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') }}
+                                            </div>
+                                        @endif
+                                        @if($daysOverdue > 0)
+                                            <span class="badge bg-danger mt-1" style="font-size: 0.7rem;">{{ $daysOverdue }}d overdue</span>
+                                        @endif
+                                    </td>
 
                                     <td>
                                         <a href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($fee->student->id)) : route('staff.students.show', encrypt($fee->student->id)) }}">
@@ -366,17 +389,6 @@
                                             <div class="progress-bar bg-success" style="width: {{ $percentage }}%">
                                             </div>
                                         </div>
-                                    </td>
-
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($fee->due_date)->format('d M Y') }}
-                                        @if($lastPaymentDate)
-                                            <br><small class="text-muted" title="Last Payment Date">Last paid:
-                                                {{ \Carbon\Carbon::parse($lastPaymentDate)->format('d M Y') }}</small>
-                                        @endif
-                                        @if($daysOverdue > 0)
-                                            <br><small class="badge bg-danger">{{ $daysOverdue }} days overdue</small>
-                                        @endif
                                     </td>
 
                                     <td>

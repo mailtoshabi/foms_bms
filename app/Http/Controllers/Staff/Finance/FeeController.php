@@ -26,19 +26,22 @@ class FeeController extends Controller
             $query->where('type', 'admission');
         }
 
-        // Tab logic
+        // Tab & Status logic
+        $status = $request->get('status');
         if ($tab === 'paid') {
-            $query->where('status', 'paid');
-        } elseif ($tab === 'overdue') {
-            // Overdue: More than 4 days past due date AND not paid
-            $fourDaysAgo = now()->subDays(4)->endOfDay();
-            $query->where('status', '<>', 'paid')
-                ->whereDate('due_date', '<', $fourDaysAgo);
+            if ($status === 'partial') {
+                $query->where('status', 'partial');
+            } else {
+                $query->where('status', 'paid');
+            }
         } else {
-            // Unpaid: Not paid AND within 4 days of due date
+            $query->where('status', 'unpaid');
             $fourDaysAgo = now()->subDays(4)->endOfDay();
-            $query->where('status', '<>', 'paid')
-                ->whereDate('due_date', '>=', $fourDaysAgo);
+            if ($tab === 'overdue') {
+                $query->whereDate('due_date', '<', $fourDaysAgo);
+            } else {
+                $query->whereDate('due_date', '>=', $fourDaysAgo);
+            }
         }
 
         // Filters
@@ -57,10 +60,6 @@ class FeeController extends Controller
             });
         }
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
         if ($request->filled('from_date') || $request->filled('to_date')) {
             if ($tab === 'paid') {
                 $query->whereHas('payments', function ($q) use ($request) {
@@ -73,10 +72,10 @@ class FeeController extends Controller
                 });
             } else {
                 if ($request->filled('from_date')) {
-                    $query->whereDate('due_date', '>=', $request->from_date);
+                    $query->whereDate('created_at', '>=', $request->from_date);
                 }
                 if ($request->filled('to_date')) {
-                    $query->whereDate('due_date', '<=', $request->to_date);
+                    $query->whereDate('created_at', '<=', $request->to_date);
                 }
             }
         }
@@ -86,7 +85,16 @@ class FeeController extends Controller
 
         $totalAmount = 0;
         if ($isFiltered) {
-            $totalAmount = (clone $query)->sum('amount');
+            if ($request->status === 'partial') {
+                $matchingFees = (clone $query)->with(['payments', 'refunds'])->get();
+                $totalAmount = $matchingFees->sum(function ($fee) {
+                    $totalPaid = $fee->payments->sum('paid_amount');
+                    $totalRefunded = $fee->refunds->sum('amount');
+                    return max($fee->amount - ($totalPaid - $totalRefunded), 0);
+                });
+            } else {
+                $totalAmount = (clone $query)->sum('amount');
+            }
         }
 
         // Sorting

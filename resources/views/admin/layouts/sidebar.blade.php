@@ -38,7 +38,7 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.class_rooms.*']) }}">
+                <li class="{{ set_active(['admin.class_rooms.*', 'admin.class-notes.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-chalkboard"></i>
                         <span>Classes</span>
@@ -46,12 +46,20 @@
                     <ul class="sub-menu">
                         <li><a href="{{ route('admin.class_rooms.index') }}">List Classes</a></li>
                         <li><a href="{{ route('admin.class_rooms.create') }}">Add Class</a></li>
+                        <li><a href="{{ route('admin.class-notes.index') }}">Class Notes</a></li>
                         <li class="{{ set_active(['admin.reports.class-hours']) }}">
                             <a href="{{ route('admin.reports.class-hours') }}">
                                 <span>Sessions</span>
                             </a>
                         </li>
                     </ul>
+                </li>
+
+                <li class="{{ set_active(['admin.holidays.*']) }}">
+                    <a href="{{ route('admin.holidays.index') }}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Holidays & Alerts</span>
+                    </a>
                 </li>
 
                 {{-- ================= Messages ================= --}}
@@ -209,4 +217,3 @@
     </div>
 </div>
 <!-- Left Sidebar End -->
-

@@ -806,7 +806,7 @@
                         </button>
 
                         <button class="btn btn-primary" type="submit"
-                            onclick="this.disabled=true; this.innerText='Assigning...'; this.form.submit();">
+                            onclick="if(confirm('Have you checked and confirmed Fee Discount/Exemption?')) { this.disabled=true; this.innerText='Assigning...'; this.form.submit(); } else { return false; }">
 
                             Assign Class
 
@@ -903,7 +903,7 @@
                         </button>
 
                         <button class="btn btn-info" type="submit"
-                            onclick="this.disabled=true; this.innerText='Changing...'; this.form.submit();">
+                            onclick="if(confirm('Have you checked and confirmed Fee Discount/Exemption?')) { this.disabled=true; this.innerText='Changing...'; this.form.submit(); } else { return false; }">
 
                             Change Class
 
@@ -990,7 +990,7 @@
                         </button>
 
                         <button class="btn btn-success" type="submit"
-                            onclick="this.disabled=true; this.innerText='Promoting...'; this.form.submit();">
+                            onclick="if(confirm('Have you checked and confirmed Fee Discount/Exemption?')) { this.disabled=true; this.innerText='Promoting...'; this.form.submit(); } else { return false; }">
 
                             Promote Student
 

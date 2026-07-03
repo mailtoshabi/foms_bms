@@ -53,12 +53,11 @@ class DashboardController extends Controller
         $totalHours = round($totalMinutes / 60, 2);
 
         // =========================
-        // EARNINGS (THIS MONTH)
+        // YEARLY EARNINGS
         // =========================
 
-        // Latest Earnings
-        $latestEarnings = TeacherSalary::where('teacher_id', $teacher->id)
-            ->whereMonth('cycle_start', now()->month)
+        // Yearly Earnings
+        $yearlyEarnings = TeacherSalary::where('teacher_id', $teacher->id)
             ->whereYear('cycle_start', now()->year)
             ->sum('total_amount') ?? 0;
 
@@ -93,6 +92,27 @@ class DashboardController extends Controller
         $pendingSalary = TeacherSalary::where('teacher_id', $teacher->id)
             ->where('status', 'unpaid')
             ->sum('total_amount');
+
+        // Fetch active/upcoming holidays for the logged-in teacher
+        $teacherClassIds = $teacher->classRooms->pluck('id');
+        $holidays = \App\Models\Holiday::where(function ($q) use ($teacher, $teacherClassIds) {
+            $q->where('target_type', 'all_teachers')
+              ->orWhere(function ($q2) use ($teacher) {
+                  $q2->where('target_type', 'selected_teachers')
+                     ->whereHas('teachers', function ($q3) use ($teacher) {
+                         $q3->where('teachers.id', $teacher->id);
+                     });
+              })
+              ->orWhere(function ($q2) use ($teacherClassIds) {
+                  $q2->where('target_type', 'classes')
+                     ->whereIn('class_target_type', ['teachers', 'both'])
+                     ->whereHas('classRooms', function ($q3) use ($teacherClassIds) {
+                         $q3->whereIn('class_rooms.id', $teacherClassIds);
+                     });
+              });
+        })->where('date', '>=', now()->toDateString())
+          ->orderBy('date', 'asc')
+          ->get();
 
         // Earnings Graph
         $monthlyData = ClassHour::where('teacher_id', $teacher->id)
@@ -136,7 +156,7 @@ class DashboardController extends Controller
             'pendingSessions',
             'totalHours',
             'thisMonthNotesCount',
-            'latestEarnings',
+            'yearlyEarnings',
             'upcomingSalary',
             'salaries',
             'notes',
@@ -144,7 +164,8 @@ class DashboardController extends Controller
             'chartLabels',
             'classCounts',
             'earnings',
-            'rankData'
+            'rankData',
+            'holidays'
         ));
     }
 

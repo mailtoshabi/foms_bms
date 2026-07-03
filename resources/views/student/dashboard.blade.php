@@ -53,6 +53,70 @@
             </div>
         </div>
 
+        {{-- HOLIDAYS ALERT/POPUP --}}
+        @if($holidays->count() > 0)
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm" style="border-left: 4px solid #ffc107 !important; background-color: #fffdf0; border-radius: 12px;">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(255, 193, 7, 0.15);">
+                                        <i class="fas fa-calendar-alt text-warning" style="font-size: 1.2rem;"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-1" style="color: #856404;">Upcoming Holidays</h6>
+                                        <div class="text-muted small">
+                                            @foreach($holidays as $holiday)
+                                                <span class="me-3 d-inline-block">
+                                                    <i class="fas fa-bullhorn text-warning me-1"></i>
+                                                    <strong class="text-dark">{{ $holiday->title }}</strong>: 
+                                                    <span class="text-primary fw-semibold">{{ $holiday->date->format('d M Y') }}</span>
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-sm btn-outline-warning text-dark border-warning py-1 px-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#holidaysAnnouncementModal">
+                                    <i class="fas fa-eye me-1"></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holidays Announcement Modal -->
+            <div class="modal fade" id="holidaysAnnouncementModal" tabindex="-1" aria-labelledby="holidaysAnnouncementModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
+                        <div class="modal-header bg-warning text-dark border-0 py-3">
+                            <h5 class="modal-title fw-bold" id="holidaysAnnouncementModalLabel">
+                                <i class="fas fa-bullhorn me-2"></i> Holiday Announcement!
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            @foreach($holidays as $holiday)
+                                <div class="mb-4 pb-3 {{ !$loop->last ? 'border-bottom border-light' : '' }}">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <h5 class="fw-bold text-dark mb-0">{{ $holiday->title }}</h5>
+                                        <span class="badge bg-soft-info text-info font-size-12 px-2.5 py-1.5 rounded-pill" style="background-color: rgba(43, 154, 233, 0.1);">
+                                            <i class="far fa-calendar-alt me-1"></i> {{ $holiday->date->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                    <p class="text-muted mb-0" style="white-space: pre-line;">{{ $holiday->description ?: 'No additional details provided.' }}</p>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="modal-footer border-0 bg-light p-3">
+                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- QUICK NAVIGATION GRID --}}
         <div class="row g-4 mb-4">
 
@@ -749,6 +813,11 @@
                 $('#messageTeacherModal').modal('show');
             }, 500);
         });
+        // Auto open holidays announcement modal if present
+        if ($('#holidaysAnnouncementModal').length > 0) {
+            var holidayModal = new bootstrap.Modal(document.getElementById('holidaysAnnouncementModal'));
+            holidayModal.show();
+        }
     </script>
 @endsection
 

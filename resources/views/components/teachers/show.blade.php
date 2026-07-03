@@ -26,9 +26,8 @@
 
                 <div class="card-body text-center">
 
-                    @if($teacher->photo)
-                        <img src="{{ asset('storage/' . $teacher->photo) }}" class="rounded-circle mb-3" width="120">
-                    @endif
+                    <img src="@if($teacher->photo){{ asset('storage/' . $teacher->photo) }}@else https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&size=150 @endif" 
+                         class="rounded-circle mb-3 border shadow-sm" width="120" height="120" style="object-fit: cover;">
 
                     <h5>{{ $teacher->name }}</h5>
 
@@ -43,6 +42,35 @@
                     <span class="badge bg-success">
                         {{ ucfirst($teacher->status) }}
                     </span>
+
+                    <div class="mt-3 pt-3 border-top text-start">
+                        <h6 class="text-dark fw-bold mb-2">Tutor Agreement</h6>
+                        @if($teacher->agreed_rules)
+                            <div class="d-flex align-items-center text-success mb-2">
+                                <i class="fas fa-check-circle me-2" style="font-size: 1.1rem;"></i>
+                                <span class="fw-semibold">Agreed Rules & Regulations</span>
+                            </div>
+                        @else
+                            <div class="d-flex align-items-center text-danger mb-2">
+                                <i class="fas fa-times-circle me-2" style="font-size: 1.1rem;"></i>
+                                <span class="fw-semibold">Rules Not Agreed Yet</span>
+                            </div>
+                            <form action="{{ route('staff.teachers.update-agreement', encrypt($teacher->id)) }}" method="POST" class="d-inline-block w-100 mb-2">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-success w-100 py-1" onclick="return confirm('Mark this teacher as agreed to the Rules & Regulations?')">
+                                    <i class="fas fa-check me-1"></i> Mark as Agreed
+                                </button>
+                            </form>
+                        @endif
+                        <a href="{{ asset('agreement/tutor_agreement.pdf') }}" target="_blank" class="btn btn-sm btn-light border w-100 py-1">
+                            <i class="fas fa-file-pdf text-danger me-1"></i> View Tutor Agreement PDF
+                        </a>
+                        @if($teacher->id_proof)
+                            <a href="{{ asset('storage/' . $teacher->id_proof) }}" target="_blank" class="btn btn-sm btn-outline-info w-100 py-1 mt-2">
+                                <i class="fas fa-id-card me-1"></i> View ID Proof
+                            </a>
+                        @endif
+                    </div>
 
                     @php $rank = teacherRankData($teacher->id); @endphp
 
@@ -59,20 +87,26 @@
 
                     <hr>
 
-                    <p><strong>Qualification:</strong></p>
-                    <p class="text-muted">
-                        {{ $teacher->qualification ?? '-' }}
-                    </p>
+                    @if($teacher->qualification)
+                        <p><strong>Qualification:</strong></p>
+                        <p class="text-muted">
+                            {{ $teacher->qualification }}
+                        </p>
+                    @endif
 
-                    <p><strong>Experience:</strong></p>
-                    <p class="text-muted">
-                        {{ $teacher->experience ?? '-' }}
-                    </p>
+                    @if($teacher->experience !== null && $teacher->experience !== '')
+                        <p><strong>Experience:</strong></p>
+                        <p class="text-muted">
+                            {{ $teacher->experience }}
+                        </p>
+                    @endif
 
-                    <p><strong>Address:</strong></p>
-                    <p class="text-muted">
-                        {{ $teacher->address ?? '-' }}
-                    </p>
+                    @if($teacher->address)
+                        <p><strong>Address:</strong></p>
+                        <p class="text-muted">
+                            {{ $teacher->address }}
+                        </p>
+                    @endif
 
                 </div>
 

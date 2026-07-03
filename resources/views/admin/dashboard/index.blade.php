@@ -191,9 +191,11 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <span class="text-muted d-block">Unpaid Fees</span>
-                                <h4 class="mb-0">{{ $unpaidFeesCount }} <small
-                                        class="fs-6 text-danger">₹{{ number_format($unpaidFeesAmount, 2) }}</small></h4>
+                                <span class="text-muted d-block">Total Unpaid Fees</span>
+                                <h4 class="mb-0 text-danger">₹{{ number_format($unpaidFeesAmount, 2) }}
+                                    <!-- <small
+                                        class="fs-6 text-danger">₹{{ number_format($unpaidFeesAmount, 2) }}</small> -->
+                                </h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-exclamation-circle fa-2x text-danger"></i>
@@ -211,8 +213,10 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <span class="text-danger fw-bold d-block">Overdue Fees</span>
-                                <h4 class="mb-0">{{ $overdueFeesCount }} <small
-                                        class="fs-6 text-danger">₹{{ number_format($overdueFeesAmount, 2) }}</small></h4>
+                                <h4 class="mb-0 text-danger">₹{{ number_format($overdueFeesAmount, 2) }}
+                                    <!-- <small
+                                                                                            class="fs-6 text-danger">₹{{ number_format($overdueFeesAmount, 2) }}</small> -->
+                                </h4>
                             </div>
                             <div class="flex-shrink-0">
                                 <i class="fas fa-clock fa-2x text-danger"></i>
@@ -230,8 +234,9 @@
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
                                 <span class="text-muted d-block">Unpaid Teacher Salaries</span>
-                                <h4 class="mb-0">{{ $unpaidTeacherSalariesCount }} <small
-                                        class="fs-6 text-danger">₹{{ number_format(round($unpaidTeacherSalariesAmount), 0) }}</small>
+                                <h4 class="mb-0 text-danger">₹{{ number_format(round($unpaidTeacherSalariesAmount), 0) }}
+                                    <!-- <small
+                                                                                                    class="fs-6 text-danger">₹{{ number_format(round($unpaidTeacherSalariesAmount), 0) }}</small> -->
                                 </h4>
                             </div>
                             <div class="flex-shrink-0">
@@ -391,7 +396,7 @@
 
                 datasets: [{
                     data: [
-                                                                                {{ $paidAmount }},
+                                            {{ $paidAmount }},
                         {{ $pendingAmount }}
                     ],
                     borderWidth: 1
