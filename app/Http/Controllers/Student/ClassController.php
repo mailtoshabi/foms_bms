@@ -30,6 +30,8 @@ class ClassController extends Controller
                 'teachers',
                 'notes.files',
                 'notes.teacher',
+                'homeworks.files',
+                'homeworks.teacher',
                 'classHours' => function ($query) {
                     $query->latest();
                 }
@@ -77,8 +79,23 @@ class ClassController extends Controller
             return back()->with('error', 'The class is already marked as completed.');
         }
 
+        if (!\Carbon\Carbon::parse($classHour->link_updated_at)->isToday()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Link expired. Please wait for the teacher to update the link.'], 400);
+            }
+            return back()->with('error', 'Link expired. Please wait for the teacher to update the link.');
+        }
+
         $classHour->update([
             'join_student_at' => now()
+        ]);
+
+        // Log student join log
+        \App\Models\ClassHourStudentJoin::firstOrCreate([
+            'class_hour_id' => $classHour->id,
+            'student_id' => Auth::guard('student')->id()
+        ], [
+            'joined_at' => now()
         ]);
 
         if ($request->ajax() || $request->wantsJson()) {
@@ -86,5 +103,49 @@ class ClassController extends Controller
         }
 
         return redirect()->away($classHour->google_meet_link);
+    }
+
+    public function checkBuzzer()
+    {
+        if (!Auth::guard('student')->check()) {
+            return response()->json(['success' => false]);
+        }
+
+        $studentId = Auth::guard('student')->id();
+
+        // Get active buzzers for this student
+        $buzzer = \App\Models\ClassHourBuzzer::with('classHour')
+            ->where('student_id', $studentId)
+            ->where('is_active', true)
+            ->whereHas('classHour', function ($q) {
+                $q->where('status', 'pending');
+            })
+            ->first();
+
+        if ($buzzer) {
+            return response()->json([
+                'success' => true,
+                'buzzer_id' => encrypt($buzzer->id),
+                'google_meet_link' => $buzzer->classHour->google_meet_link,
+                'class_hour_id' => encrypt($buzzer->class_hour_id)
+            ]);
+        }
+
+        return response()->json(['success' => false]);
+    }
+
+    public function readBuzzer($id)
+    {
+        try {
+            $buzzerId = decrypt($id);
+            $buzzer = \App\Models\ClassHourBuzzer::where('student_id', Auth::guard('student')->id())
+                ->findOrFail($buzzerId);
+
+            $buzzer->update(['is_active' => false]);
+
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
+        }
     }
 }

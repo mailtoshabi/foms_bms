@@ -113,6 +113,16 @@ class Teacher extends Authenticatable
     return $this->hasMany(ClassNote::class);
 }
 
+    public function homeworks()
+    {
+        return $this->hasMany(Homework::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
     public function classRooms()
     {
         return $this->belongsToMany(

@@ -108,6 +108,11 @@ class Student extends Authenticatable
         return $this->hasMany(StudentAttendance::class);
     }
 
+    public function homeworkSubmissions()
+    {
+        return $this->hasMany(HomeworkSubmission::class);
+    }
+
     public function notes()
     {
         return $this->hasMany(ClassNote::class);
@@ -148,5 +153,15 @@ class Student extends Authenticatable
     public function setPhoneAttribute($value)
     {
         $this->attributes['phone'] = preg_replace('/[^0-9]/', '', $value);
+    }
+
+    public function classHourJoins()
+    {
+        return $this->hasMany(ClassHourStudentJoin::class, 'student_id');
+    }
+
+    public function buzzers()
+    {
+        return $this->hasMany(ClassHourBuzzer::class, 'student_id');
     }
 }

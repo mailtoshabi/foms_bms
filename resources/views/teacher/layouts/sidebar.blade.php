@@ -35,6 +35,18 @@
                     </ul>
                 </li>
 
+                {{-- ================= Homeworks ================= --}}
+                <li class="{{ set_active(['teacher.homeworks.*']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="fas fa-tasks"></i>
+                        <span>Homework</span>
+                    </a>
+                    <ul class="sub-menu">
+                        <li><a href="{{ route('teacher.homeworks.index') }}">My Homework</a></li>
+                        <li><a href="{{ route('teacher.homeworks.create') }}">Assign Homework</a></li>
+                    </ul>
+                </li>
+
                 {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['teacher.messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">

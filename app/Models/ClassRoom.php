@@ -46,6 +46,11 @@ class ClassRoom extends Model
         return $this->hasMany(ClassNote::class);
     }
 
+    public function homeworks()
+    {
+        return $this->hasMany(Homework::class);
+    }
+
     public function students()
     {
         return $this->belongsToMany(

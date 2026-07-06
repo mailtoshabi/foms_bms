@@ -28,6 +28,14 @@
                     </a>
                 </li>
 
+                {{-- ================= Homework ================= --}}
+                <li class="{{ set_active('student.homeworks.*') }}">
+                    <a href="{{ route('student.homeworks.index') }}">
+                        <i class="fas fa-tasks"></i>
+                        <span>Homework</span>
+                    </a>
+                </li>
+
                 {{-- ================= Messages ================= --}}
                 <li class="{{ set_active(['student.messages.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">

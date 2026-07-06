@@ -225,6 +225,11 @@
                                                     style="background-color: #f59e0b !important;">
                                                     <i class="fas fa-edit"></i> Link
                                                 </button>
+                                                <button class="portal-btn openBuzzerModal text-white"
+                                                    data-id="{{ $hour->id }}"
+                                                    style="background-color: #ec1d23 !important;">
+                                                    <i class="fas fa-bell"></i> Buzz
+                                                </button>
                                                 <button class="portal-btn btn-success openAttendanceModal text-white"
                                                     data-id="{{ $hour->id }}" style="background-color: #10b981 !important;">
                                                     <i class="fas fa-check-double"></i> Complete
@@ -347,6 +352,108 @@
         </div>
     </div>
 
+    {{-- Homework Card --}}
+    <div class="portal-card mt-4">
+        <div class="portal-card-header">
+            <h4>Homework Assignments</h4>
+            <div class="d-flex gap-2">
+                <a href="{{ route('teacher.homeworks.create', ['class_room_id' => encrypt($class->id)]) }}" class="portal-btn portal-btn-primary">
+                    <i class="fas fa-plus"></i> Assign Homework
+                </a>
+                <a href="{{ route('teacher.homeworks.index') }}" class="portal-btn btn-light">
+                    <i class="fas fa-list"></i> View All Homework
+                </a>
+            </div>
+        </div>
+        <div class="portal-card-body">
+            <div id="homeworkList" class="row">
+                @forelse($class->homeworks->take(5) as $hw)
+                    <div class="col-md-6 mb-3">
+                        <div class="p-3 border rounded h-100 d-flex flex-column justify-content-between"
+                            style="background: rgba(248, 250, 252, 0.5); border-radius: 12px !important;">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6 class="fw-bold text-dark m-0">
+                                        {{ $hw->title }}
+                                    </h6>
+                                    @if($hw->teacher_id === Auth::guard('teacher')->user()->id)
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-light p-0 border-0" type="button"
+                                                data-bs-toggle="dropdown">
+                                                <i class="mdi mdi-dots-vertical" style="font-size: 1.1rem;"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <form action="{{ route('teacher.homeworks.destroy', encrypt($hw->id)) }}" method="POST"
+                                                        onsubmit="return confirm('Are you sure you want to delete this homework? All student submissions will also be deleted.')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="dropdown-item text-danger border-0 bg-transparent">
+                                                            <i class="mdi mdi-trash-can me-1"></i> Delete Homework
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    @endif
+                                </div>
+                                <small class="text-muted d-block mt-1 mb-2">
+                                    By {{ $hw->teacher->name ?? '-' }} • {{ $hw->created_at->format('M d, Y H:i') }}
+                                </small>
+                                @if($hw->content)
+                                    <p class="text-muted small m-0 mt-2" style="line-height: 1.5;">
+                                        {{ Str::limit($hw->content, 120) }}</p>
+                                @endif
+                            </div>
+
+                            {{-- Files List --}}
+                            @if($hw->files->count() > 0)
+                                <div class="mt-3 border-top pt-2">
+                                    <small class="text-muted fw-bold d-block mb-2">
+                                        <i class="mdi mdi-attachment me-1"></i> {{ $hw->files->count() }} file(s)
+                                    </small>
+                                    <div class="list-group list-group-flush">
+                                        @foreach($hw->files as $file)
+                                            <div
+                                                class="list-group-item d-flex justify-content-between align-items-center px-0 py-2 bg-transparent border-0">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="mdi mdi-file-document-outline text-primary font-size-18"></i>
+                                                    <div>
+                                                        <strong
+                                                            class="text-dark d-block font-size-12">{{ Str::limit($file->file_name, 25) }}</strong>
+                                                        <small class="text-muted d-block font-size-10">{{ $file->file_size_formatted }}</small>
+                                                    </div>
+                                                </div>
+                                                <a href="{{ route('teacher.homeworks.file.download', encrypt($file->id)) }}" target="_blank"
+                                                    class="portal-btn btn-light py-1 px-2 font-size-11">
+                                                    <i class="mdi mdi-eye"></i> View
+                                                </a>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div class="mt-3 border-top pt-2">
+                                <a href="{{ route('teacher.homeworks.show', encrypt($hw->id)) }}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="fas fa-edit me-1"></i> View Submissions & Evaluate
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="portal-empty-state">
+                            <i class="fas fa-file-signature portal-empty-state-icon"></i>
+                            <div class="portal-empty-state-title">No Homework Assigned</div>
+                            <p class="text-muted small m-0">No homework assignments have been assigned yet.</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
     {{-- Create Session Modal --}}
     <div class="modal fade" id="startClassModal">
         <div class="modal-dialog modal-dialog-centered">
@@ -436,10 +543,135 @@
         </div>
     </div>
 
+    {{-- Buzzer Modal --}}
+    <div class="modal fade" id="buzzerModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <form id="buzzerForm">
+                    @csrf
+                    <div class="modal-header border-bottom-0 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">Buzz Students to Join Class</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <p class="text-muted small">Select the students you want to send a buzzer sound alert. Students who have not joined are ticked by default.</p>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="portal-btn btn-light py-1 px-3" id="buzzCheckAll">Select All</button>
+                            <button type="button" class="portal-btn btn-light py-1 px-3" id="buzzUncheckAll">Select None</button>
+                        </div>
+                        <div class="row" id="buzzerStudentList">
+                            {{-- Filled via JS --}}
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top-0 pt-0">
+                        <button class="portal-btn btn-light" type="button" data-bs-dismiss="modal">Cancel</button>
+                        <button class="portal-btn portal-btn-primary" type="submit" id="triggerBuzzerBtn">
+                            <i class="fas fa-bullhorn"></i> Trigger Buzzer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('script')
     <script>
+        $('.openBuzzerModal').click(function () {
+            let classHourId = $(this).data('id');
+
+            $('#buzzerForm').data('class-hour-id', classHourId);
+
+            $.get('/teacher/class-hours/' + classHourId + '/students', function (res) {
+                let html = '';
+                res.students.forEach(student => {
+                    let checked = student.has_joined ? '' : 'checked';
+                    let badge = student.has_joined ? '<span class="badge bg-success ms-2">Joined</span>' : '<span class="badge bg-warning ms-2">Absent/Not Joined</span>';
+                    
+                    html += `
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex align-items-center border rounded p-3 bg-light position-relative" style="border-radius: 10px !important;">
+                                <label class="d-flex align-items-center mb-0 w-100" style="cursor: pointer;">
+                                    <input type="checkbox"
+                                        name="buzz_students[]"
+                                        value="${student.id}"
+                                        class="form-check-input me-3 buzz-student-chk"
+                                        style="transform: scale(1.1);"
+                                        ${checked}>
+                                    <div>
+                                        <span class="text-dark fw-bold">${student.name}</span>
+                                        <div class="text-muted font-size-11">${student.admission_no} ${badge}</div>
+                                    </div>
+                                </label>
+                                <button type="button" class="btn btn-sm btn-outline-danger position-absolute end-0 me-3 directBuzzBtn" data-student-id="${student.id}" title="Buzz student instantly">
+                                    <i class="fas fa-bell"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#buzzerStudentList').html(html);
+                $('#buzzerModal').modal('show');
+            });
+        });
+
+        $('#buzzCheckAll').click(function () {
+            $('.buzz-student-chk').prop('checked', true);
+        });
+
+        $('#buzzUncheckAll').click(function () {
+            $('.buzz-student-chk').prop('checked', false);
+        });
+
+        $('#buzzerForm').on('submit', function (e) {
+            e.preventDefault();
+            let classHourId = $(this).data('class-hour-id');
+            let selectedStudents = [];
+            $('.buzz-student-chk:checked').each(function() {
+                selectedStudents.push(parseInt($(this).val()));
+            });
+
+            if (selectedStudents.length === 0) {
+                alert('Please select at least one student to buzz.');
+                return;
+            }
+
+            let btn = $('#triggerBuzzerBtn');
+            btn.prop('disabled', true).text('Buzzing...');
+
+            $.post(`/teacher/class-hours/${classHourId}/buzz`, {
+                _token: $('input[name="_token"]').val(),
+                student_ids: selectedStudents
+            }, function(res) {
+                alert('Students have been buzzed successfully!');
+                $('#buzzerModal').modal('hide');
+            }).fail(function(xhr) {
+                alert('Error sending buzz: ' + (xhr.responseJSON?.error || 'Unknown error'));
+            }).always(function() {
+                btn.prop('disabled', false).html('<i class="fas fa-bullhorn"></i> Trigger Buzzer');
+            });
+        });
+
+        $(document).on('click', '.directBuzzBtn', function() {
+            let studentId = $(this).data('student-id');
+            let classHourId = $('#buzzerForm').data('class-hour-id');
+            let btn = $(this);
+            
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+            
+            $.post(`/teacher/class-hours/${classHourId}/buzz`, {
+                _token: $('input[name="_token"]').val(),
+                student_ids: [studentId]
+            }, function(res) {
+                alert('Student buzzed successfully!');
+            }).fail(function(xhr) {
+                alert('Error sending buzz: ' + (xhr.responseJSON?.error || 'Unknown error'));
+            }).always(function() {
+                btn.prop('disabled', false).html('<i class="fas fa-bell"></i>');
+            });
+        });
+
         $('.editClassHour').click(function () {
             let id = $(this).data('id');
             let link = $(this).data('link');

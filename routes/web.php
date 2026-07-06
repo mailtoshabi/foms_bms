@@ -67,6 +67,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/profile', [DashboardController::class, 'profile'])
             ->name('profile');
 
+        Route::get('/settings/download-database', [\App\Http\Controllers\Admin\SettingsController::class, 'downloadDatabase'])
+            ->name('settings.database.download');
+
         Route::resource('holidays', \App\Http\Controllers\Staff\Administration\HolidayController::class)
             ->names('holidays');
 
@@ -74,6 +77,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->name('class-notes.file.download');
         Route::resource('class-notes', \App\Http\Controllers\Admin\ClassNoteController::class)
             ->names('class-notes');
+
+        Route::get('homeworks/file/{id}', [\App\Http\Controllers\Admin\HomeworkController::class, 'downloadFile'])
+            ->name('homeworks.file.download');
+        Route::resource('homeworks', \App\Http\Controllers\Admin\HomeworkController::class)
+            ->names('homeworks');
 
         Route::get('reports/fee', [ReportController::class, 'fees'])
             ->name('reports.fee');
@@ -838,6 +846,11 @@ Route::prefix('teacher')
             [TeacherServiceController::class, 'getClassHourStudents']
         );
 
+        Route::post(
+            '/class-hours/{id}/buzz',
+            [TeacherServiceController::class, 'buzzClassHour']
+        )->name('class-hours.buzz');
+
         // Join class (updates join_teacher_at)
         Route::get(
             '/class-hours/{id}/join',
@@ -861,6 +874,21 @@ Route::prefix('teacher')
                 Route::get('/show/{id}', 'show')->name('show');
                 Route::get('/file/{id}', 'downloadFile')->name('file.download');
                 Route::get('/class-rooms/search', 'searchClassRooms')->name('class_rooms.search');
+            });
+
+        Route::controller(\App\Http\Controllers\Teacher\HomeworkController::class)
+            ->prefix('homeworks')
+            ->name('homeworks.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/create', 'create')->name('create');
+                Route::post('/store', 'store')->name('store');
+                Route::delete('/destroy/{id}', 'destroy')->name('destroy');
+                Route::get('/show/{id}', 'show')->name('show');
+                Route::get('/file/{id}', 'downloadFile')->name('file.download');
+                Route::get('/submission-file/{id}', 'downloadSubmissionFile')->name('submission-file.download');
+                Route::get('/class-rooms/search', 'searchClassRooms')->name('class_rooms.search');
+                Route::post('/submissions/{id}/grade', 'gradeSubmission')->name('submissions.grade');
             });
 
         Route::controller(TeacherMessageController::class)
@@ -914,12 +942,26 @@ Route::prefix('student')
                 Route::get('/show/{id}', 'show')->name('show');
             });
 
+        Route::controller(\App\Http\Controllers\Student\HomeworkController::class)
+            ->prefix('homeworks')
+            ->name('homeworks.')
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/show/{id}', 'show')->name('show');
+                Route::post('/{id}/submit', 'submit')->name('submit');
+                Route::delete('/submissions/{id}', 'destroySubmission')->name('submission.destroy');
+                Route::get('/file/{id}', 'downloadFile')->name('file.download');
+                Route::get('/submission-file/{id}', 'downloadSubmissionFile')->name('submission-file.download');
+            });
+
         Route::controller(StudentClassController::class)
             ->prefix('classes')
             ->name('classes.')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/join/{id}', 'joinClass')->name('join');
+                Route::get('/check-buzzer', 'checkBuzzer')->name('check-buzzer');
+                Route::post('/buzzers/{id}/read', 'readBuzzer')->name('read-buzzer');
                 Route::get('/{id}', 'show')->name('show');
             });
 

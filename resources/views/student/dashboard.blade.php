@@ -144,11 +144,17 @@
                             @if($pendingClassHours->count() > 0)
                                 <div class="d-flex gap-2">
                                     @if($nextSession->google_meet_link)
-                                        <a href="{{ $nextSession->google_meet_link }}" target="_blank"
-                                            class="btn btn-warning text-dark rounded-pill py-2 px-3 fw-bold flex-grow-1"
-                                            onclick="fetch('{{ route('student.classes.join', encrypt($nextSession->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
-                                            <i class="fas fa-video me-1"></i> Join Meet
-                                        </a>
+                                        @if(\Carbon\Carbon::parse($nextSession->link_updated_at)->isToday())
+                                            <a href="{{ $nextSession->google_meet_link }}" target="_blank"
+                                                class="btn btn-warning text-dark rounded-pill py-2 px-3 fw-bold flex-grow-1"
+                                                onclick="fetch('{{ route('student.classes.join', encrypt($nextSession->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
+                                                <i class="fas fa-video me-1"></i> Join Meet
+                                            </a>
+                                        @else
+                                            <button class="btn btn-light rounded-pill py-2 px-3 fw-bold flex-grow-1 text-muted" disabled title="Wait for teacher to update the class link.">
+                                                <i class="fas fa-video me-1"></i> Join (Wait for Link)
+                                            </button>
+                                        @endif
                                     @endif
                                     @if($pendingClassHours->count() > 1)
                                         <button class="btn btn-outline-secondary rounded-pill py-2 px-3" data-bs-toggle="modal"
@@ -618,11 +624,17 @@
                                                     min</span></td>
                                             <td>
                                                 @if($hour->google_meet_link)
-                                                    <a href="{{ $hour->google_meet_link }}" target="_blank"
-                                                        class="btn btn-sm btn-success rounded-pill px-3"
-                                                        onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
-                                                        <i class="fas fa-video me-1"></i> Join Class
-                                                    </a>
+                                                    @if(\Carbon\Carbon::parse($hour->link_updated_at)->isToday())
+                                                        <a href="{{ $hour->google_meet_link }}" target="_blank"
+                                                            class="btn btn-sm btn-success rounded-pill px-3"
+                                                            onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
+                                                            <i class="fas fa-video me-1"></i> Join Class
+                                                        </a>
+                                                    @else
+                                                        <button class="btn btn-sm btn-light rounded-pill px-3" disabled title="Wait for teacher to update the class link.">
+                                                            <i class="fas fa-video text-muted"></i> Join (Wait for Link)
+                                                        </button>
+                                                    @endif
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif

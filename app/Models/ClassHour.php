@@ -44,4 +44,14 @@ class ClassHour extends Model
     {
         return $this->hasMany(StudentAttendance::class);
     }
+
+    public function joins()
+    {
+        return $this->hasMany(ClassHourStudentJoin::class, 'class_hour_id');
+    }
+
+    public function buzzers()
+    {
+        return $this->hasMany(ClassHourBuzzer::class, 'class_hour_id');
+    }
 }

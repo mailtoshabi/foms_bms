@@ -38,7 +38,7 @@
                     </ul>
                 </li>
 
-                <li class="{{ set_active(['admin.class_rooms.*', 'admin.class-notes.*']) }}">
+                <li class="{{ set_active(['admin.class_rooms.*', 'admin.class-notes.*', 'admin.homeworks.*']) }}">
                     <a href="javascript:void(0);" class="has-arrow">
                         <i class="fas fa-chalkboard"></i>
                         <span>Classes</span>
@@ -47,6 +47,7 @@
                         <li><a href="{{ route('admin.class_rooms.index') }}">List Classes</a></li>
                         <li><a href="{{ route('admin.class_rooms.create') }}">Add Class</a></li>
                         <li><a href="{{ route('admin.class-notes.index') }}">Class Notes</a></li>
+                        <li><a href="{{ route('admin.homeworks.index') }}">Homework</a></li>
                         <li class="{{ set_active(['admin.reports.class-hours']) }}">
                             <a href="{{ route('admin.reports.class-hours') }}">
                                 <span>Sessions</span>
@@ -207,6 +208,21 @@
                         <li class="{{ set_active(['admin.reports.staff.salary']) }}">
                             <a href="{{ route('admin.reports.staff.salary') }}">
                                 Salary
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu-title">Settings</li>
+                <li class="{{ set_active(['admin.settings.*']) }}">
+                    <a href="javascript:void(0);" class="has-arrow">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="false">
+                        <li>
+                            <a href="{{ route('admin.settings.database.download') }}">
+                                Download Database
                             </a>
                         </li>
                     </ul>

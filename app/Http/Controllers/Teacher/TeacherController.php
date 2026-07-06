@@ -50,6 +50,7 @@ class TeacherController extends Controller
             'classType',
             'students',
             'notes.files',
+            'homeworks.files',
             'classHours' => function ($query) use ($teacher) {
                 $query->where('teacher_id', $teacher->id)
                     ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
@@ -259,11 +260,49 @@ class TeacherController extends Controller
 
     public function getClassHourStudents($id)
     {
-        $classHour = ClassHour::with('classRoom.students')->findOrFail($id);
+        $classHour = ClassHour::with(['classRoom.students.classHourJoins' => function ($q) use ($id) {
+            $q->where('class_hour_id', $id);
+        }])->findOrFail($id);
+
+        $students = $classHour->classRoom->students->map(function ($student) {
+            return [
+                'id' => $student->id,
+                'name' => $student->name,
+                'admission_no' => $student->admission_no,
+                'has_joined' => $student->classHourJoins->isNotEmpty()
+            ];
+        });
 
         return response()->json([
-            'students' => $classHour->classRoom->students
+            'students' => $students
         ]);
+    }
+
+    public function buzzClassHour(Request $request, $id)
+    {
+        $classHour = ClassHour::findOrFail($id);
+
+        if ($classHour->status !== 'pending') {
+            return response()->json(['success' => false, 'error' => 'Buzzer can only be sent for pending/active sessions.'], 400);
+        }
+
+        $request->validate([
+            'student_ids' => 'required|array',
+            'student_ids.*' => 'required|integer|exists:students,id'
+        ]);
+
+        foreach ($request->student_ids as $studentId) {
+            // Create or update active buzzer alert
+            \App\Models\ClassHourBuzzer::updateOrCreate([
+                'class_hour_id' => $classHour->id,
+                'student_id' => $studentId,
+            ], [
+                'is_active' => true,
+                'updated_at' => now()
+            ]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Buzzer alerts sent successfully.']);
     }
 
     public function joinClass(Request $request, $id)

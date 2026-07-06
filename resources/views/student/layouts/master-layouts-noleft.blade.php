@@ -103,6 +103,145 @@
 
     <x-pwa-install-button />
     @include('student.layouts.vendor-scripts')
+
+    @auth('student')
+    <!-- Buzzer Alert Overlay -->
+    <div id="globalBuzzerOverlay" style="display:none; position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 16px; max-width: 450px; width: 90%; padding: 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 2px solid #ec1d23; animation: pulseBorder 2s infinite;">
+            <div style="width: 70px; height: 70px; background: rgba(236, 29, 35, 0.1); color: #ec1d23; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; font-size: 28px; animation: ringBell 0.5s infinite alternate;">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h4 style="font-weight: 800; color: #1e293b; margin-bottom: 8px;">Class Join Reminder!</h4>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">Your teacher is buzzing you to join the class session immediately.</p>
+            <div style="display: flex; gap: 12px;">
+                <button id="closeBuzzerBtn" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; color: #64748b; font-weight: 600; cursor: pointer;">Dismiss</button>
+                <a id="joinBuzzerLink" href="#" target="_blank" style="flex: 1; padding: 10px; border-radius: 8px; border: none; background: #ec1d23; color: white; text-decoration: none; font-weight: 600; cursor: pointer; text-align: center;">Join Class</a>
+            </div>
+        </div>
+    </div>
+    <style>
+        @keyframes pulseBorder {
+            0% { border-color: #ec1d23; }
+            50% { border-color: rgba(236, 29, 35, 0.3); }
+            100% { border-color: #ec1d23; }
+        }
+        @keyframes ringBell {
+            0% { transform: rotate(-15deg); }
+            100% { transform: rotate(15deg); }
+        }
+    </style>
+
+    <script>
+        let audioCtx = null;
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+        document.addEventListener('click', initAudioContext, { once: true });
+        document.addEventListener('touchstart', initAudioContext, { once: true });
+
+        function playBuzzerSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                
+                let duration = 0.4;
+                let numBeeps = 3;
+                let delay = 0.5;
+
+                for (let i = 0; i < numBeeps; i++) {
+                    let startTime = audioCtx.currentTime + (i * delay);
+                    let osc = audioCtx.createOscillator();
+                    let gain = audioCtx.createGain();
+
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(660, startTime);
+                    
+                    gain.gain.setValueAtTime(0.15, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration - 0.05);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                }
+            } catch (e) {
+                console.error("Audio Context could not play sound: ", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('globalBuzzerOverlay');
+            const closeBtn = document.getElementById('closeBuzzerBtn');
+            const joinLink = document.getElementById('joinBuzzerLink');
+            
+            let buzzerInterval = null;
+            let activeBuzzerId = null;
+
+            function checkBuzzer() {
+                fetch('/student/classes/check-buzzer')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.buzzer_id && activeBuzzerId !== data.buzzer_id) {
+                            activeBuzzerId = data.buzzer_id;
+                            
+                            // Show overlay
+                            overlay.style.display = 'flex';
+                            
+                            // Play sound & vibrate
+                            playBuzzerSound();
+                            if (navigator.vibrate) {
+                                navigator.vibrate([200, 100, 200, 100, 200]);
+                            }
+
+                            // Link action
+                            joinLink.onclick = function(e) {
+                                e.preventDefault();
+                                fetch('/student/classes/buzzers/' + data.buzzer_id + '/read', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json'
+                                    }
+                                }).then(() => {
+                                    overlay.style.display = 'none';
+                                    activeBuzzerId = null;
+                                    window.open('/student/classes/join/' + data.class_hour_id, '_blank');
+                                });
+                            };
+
+                            closeBtn.onclick = function() {
+                                fetch('/student/classes/buzzers/' + data.buzzer_id + '/read', {
+                                    method: 'POST',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json'
+                                    }
+                                }).then(() => {
+                                    overlay.style.display = 'none';
+                                    activeBuzzerId = null;
+                                });
+                            };
+                        }
+                    })
+                    .catch(err => console.error("Error checking buzzer: ", err));
+            }
+
+            // Start polling every 5 seconds
+            buzzerInterval = setInterval(checkBuzzer, 5000);
+            checkBuzzer();
+        });
+    </script>
+    @endauth
 </body>
 <script src="{{ URL::asset('/assets/js/app.min.js') }}" ></script>
 </html>

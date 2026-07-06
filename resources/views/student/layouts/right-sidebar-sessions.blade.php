@@ -22,10 +22,16 @@
                             {{ $hour->link_updated_at->format('d M Y, h:i A') }}
                         </small>
                         @if($hour->google_meet_link)
-                            <a href="{{ $hour->google_meet_link }}" target="_blank" class="btn btn-sm btn-primary w-100 mt-2"
-                                onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
-                                <i class="fas fa-video me-1"></i> Join Now
-                            </a>
+                            @if(\Carbon\Carbon::parse($hour->link_updated_at)->isToday())
+                                <a href="{{ $hour->google_meet_link }}" target="_blank" class="btn btn-sm btn-primary w-100 mt-2"
+                                    onclick="fetch('{{ route('student.classes.join', encrypt($hour->id)) }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })">
+                                    <i class="fas fa-video me-1"></i> Join Now
+                                </a>
+                            @else
+                                <button class="btn btn-sm btn-light w-100 mt-2 text-muted" disabled title="Wait for teacher to update the class link.">
+                                    <i class="fas fa-video me-1"></i> Join (Wait for Link)
+                                </button>
+                            @endif
                         @endif
                     </div>
                 @endforeach
