@@ -131,6 +131,10 @@
         }
     </style>
 
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+
     <script>
         let audioCtx = null;
         function initAudioContext() {
@@ -179,15 +183,96 @@
             }
         }
 
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "{{ config('services.firebase.api_key') }}",
+            authDomain: "{{ config('services.firebase.auth_domain') }}",
+            projectId: "{{ config('services.firebase.project_id') }}",
+            storageBucket: "{{ config('services.firebase.storage_bucket') }}",
+            messagingSenderId: "{{ config('services.firebase.messaging_sender_id') }}",
+            appId: "{{ config('services.firebase.app_id') }}"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/firebase-messaging-sw.js')
+                .then((registration) => {
+                    console.log('FCM Service Worker registered successfully: ', registration);
+                    
+                    // Request permission and fetch/save client token
+                    Notification.requestPermission().then((permission) => {
+                        if (permission === 'granted') {
+                            messaging.getToken({
+                                serviceWorkerRegistration: registration,
+                                vapidKey: "{{ config('services.firebase.vapid_key') }}"
+                            }).then((currentToken) => {
+                                if (currentToken) {
+                                    console.log('FCM Token: ', currentToken);
+                                    // Save token to server
+                                    fetch('{{ route("student.classes.update-fcm-token") }}', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                        },
+                                        body: JSON.stringify({ fcm_token: currentToken })
+                                    });
+                                }
+                            }).catch((err) => {
+                                console.error('Error fetching token: ', err);
+                            });
+                        }
+                    });
+                }).catch((err) => {
+                    console.error('FCM Service Worker registration failed: ', err);
+                });
+        }
+
+        // Listen for foreground notifications
+        messaging.onMessage((payload) => {
+            console.log('FCM foreground message received: ', payload);
+            
+            const overlay = document.getElementById('globalBuzzerOverlay');
+            const closeBtn = document.getElementById('closeBuzzerBtn');
+            const joinLink = document.getElementById('joinBuzzerLink');
+
+            if (payload.data && payload.data.class_hour_id) {
+                overlay.style.display = 'flex';
+                
+                playBuzzerSound();
+                if (navigator.vibrate) {
+                    navigator.vibrate([200, 100, 200, 100, 200]);
+                }
+
+                joinLink.onclick = function(e) {
+                    e.preventDefault();
+                    overlay.style.display = 'none';
+                    window.open('/student/classes/join/' + payload.data.class_hour_id, '_blank');
+                };
+
+                closeBtn.onclick = function() {
+                    overlay.style.display = 'none';
+                };
+            }
+        });
+
+        // Database polling fallback (runs in foreground as fail-safe)
         document.addEventListener('DOMContentLoaded', function() {
             const overlay = document.getElementById('globalBuzzerOverlay');
             const closeBtn = document.getElementById('closeBuzzerBtn');
             const joinLink = document.getElementById('joinBuzzerLink');
             
-            let buzzerInterval = null;
             let activeBuzzerId = null;
 
             function checkBuzzer() {
+                // If overlay is already active/visible, skip checking
+                if (overlay.style.display === 'flex') {
+                    return;
+                }
+
                 fetch('/student/classes/check-buzzer')
                     .then(res => res.json())
                     .then(data => {
@@ -233,11 +318,11 @@
                             };
                         }
                     })
-                    .catch(err => console.error("Error checking buzzer: ", err));
+                    .catch(err => console.error("Error checking buzzer fallback: ", err));
             }
 
-            // Start polling every 5 seconds
-            buzzerInterval = setInterval(checkBuzzer, 5000);
+            // Poll every 5 seconds
+            setInterval(checkBuzzer, 5000);
             checkBuzzer();
         });
     </script>

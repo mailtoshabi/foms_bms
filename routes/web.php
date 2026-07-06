@@ -960,6 +960,7 @@ Route::prefix('student')
             ->group(function () {
                 Route::get('/', 'index')->name('index');
                 Route::get('/join/{id}', 'joinClass')->name('join');
+                Route::post('/update-fcm-token', 'updateFcmToken')->name('update-fcm-token');
                 Route::get('/check-buzzer', 'checkBuzzer')->name('check-buzzer');
                 Route::post('/buzzers/{id}/read', 'readBuzzer')->name('read-buzzer');
                 Route::get('/{id}', 'show')->name('show');

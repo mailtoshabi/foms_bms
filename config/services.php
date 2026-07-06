@@ -35,4 +35,15 @@ return [
         ],
     ],
 
+    'firebase' => [
+        'api_key' => env('MIX_FIREBASE_API_KEY'),
+        'auth_domain' => env('MIX_FIREBASE_AUTH_DOMAIN'),
+        'project_id' => env('MIX_FIREBASE_PROJECT_ID'),
+        'storage_bucket' => env('MIX_FIREBASE_STORAGE_BUCKET'),
+        'messaging_sender_id' => env('MIX_FIREBASE_MESSAGING_SENDER_ID'),
+        'app_id' => env('MIX_FIREBASE_APP_ID'),
+        'vapid_key' => env('MIX_FIREBASE_VAPID_KEY'),
+        'service_account_path' => env('FIREBASE_SERVICE_ACCOUNT_PATH', 'storage/app/firebase-service-account.json'),
+    ],
+
 ];

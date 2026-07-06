@@ -36,7 +36,7 @@ class LoginController extends Controller
                     ])->onlyInput('phone', 'country_id');
                 }
 
-                Auth::guard('student')->login($student);
+                Auth::guard('student')->login($student, true);
                 return redirect()->intended('/student/dashboard');
             }
         }
@@ -69,7 +69,7 @@ class LoginController extends Controller
             return back()->with('error', 'Cannot switch to this account because it is blocked.');
         }
 
-        Auth::guard('student')->login($targetStudent);
+        Auth::guard('student')->login($targetStudent, true);
 
         return redirect()->route('student.dashboard')->with('success', "Switched to {$targetStudent->name}'s account.");
     }

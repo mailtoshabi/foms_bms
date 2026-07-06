@@ -105,6 +105,26 @@ class ClassController extends Controller
         return redirect()->away($classHour->google_meet_link);
     }
 
+    public function updateFcmToken(Request $request)
+    {
+        $request->validate([
+            'fcm_token' => 'required|string'
+        ]);
+
+        try {
+            $student = Auth::guard('student')->user();
+            if ($student) {
+                $student->update([
+                    'fcm_token' => $request->fcm_token
+                ]);
+                return response()->json(['success' => true]);
+            }
+            return response()->json(['success' => false, 'error' => 'Unauthenticated'], 401);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+        }
+    }
+
     public function checkBuzzer()
     {
         if (!Auth::guard('student')->check()) {

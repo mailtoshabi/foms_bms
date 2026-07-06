@@ -280,7 +280,7 @@ class TeacherController extends Controller
 
     public function buzzClassHour(Request $request, $id)
     {
-        $classHour = ClassHour::findOrFail($id);
+        $classHour = ClassHour::with('classRoom')->findOrFail($id);
 
         if ($classHour->status !== 'pending') {
             return response()->json(['success' => false, 'error' => 'Buzzer can only be sent for pending/active sessions.'], 400);
@@ -291,15 +291,33 @@ class TeacherController extends Controller
             'student_ids.*' => 'required|integer|exists:students,id'
         ]);
 
-        foreach ($request->student_ids as $studentId) {
+        $firebaseService = new \App\Services\FirebaseService();
+        $className = $classHour->classRoom->name ?? 'Class Session';
+
+        $students = \App\Models\Student::whereIn('id', $request->student_ids)->get();
+
+        foreach ($students as $student) {
             // Create or update active buzzer alert
             \App\Models\ClassHourBuzzer::updateOrCreate([
                 'class_hour_id' => $classHour->id,
-                'student_id' => $studentId,
+                'student_id' => $student->id,
             ], [
                 'is_active' => true,
                 'updated_at' => now()
             ]);
+
+            // Dispatch Firebase Push alert if token exists
+            if ($student->fcm_token) {
+                $firebaseService->sendNotification(
+                    $student->fcm_token,
+                    "Class Join Reminder: {$className}",
+                    "Your teacher is buzzing you to join the class session immediately.",
+                    [
+                        'class_hour_id' => encrypt($classHour->id),
+                        'google_meet_link' => $classHour->google_meet_link
+                    ]
+                );
+            }
         }
 
         return response()->json(['success' => true, 'message' => 'Buzzer alerts sent successfully.']);
