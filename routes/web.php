@@ -216,6 +216,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/fees/{id}/refunds', [ReportController::class, 'getRefunds'])
             ->name('fees.refunds');
 
+        Route::get('/fees/{id}/payments', [ReportController::class, 'getPayments'])
+            ->name('fees.payments');
+
         Route::get('reports/class-hours', [ReportController::class, 'classHours'])
             ->name('reports.class-hours');
 

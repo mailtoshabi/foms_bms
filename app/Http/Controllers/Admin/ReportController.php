@@ -1598,6 +1598,14 @@ class ReportController extends Controller
         ]);
     }
 
+    public function getPayments($id)
+    {
+        $fee = Fee::with('payments')->findOrFail($id);
+        return response()->json([
+            'payments' => $fee->payments
+        ]);
+    }
+
     public function assignClass(Request $request)
     {
         $request->validate([

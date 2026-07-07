@@ -446,7 +446,7 @@
                                                 @endif
 
                                                 <button class="btn btn-sm btn-info studentFeeViewPaymentsBtn"
-                                                    data-url="{{ route('staff.fees.payments', $fee->id) }}">
+                                                    data-url="{{ auth('admin')->check() ? route('admin.fees.payments', $fee->id) : route('staff.fees.payments', $fee->id) }}">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
 

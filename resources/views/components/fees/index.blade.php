@@ -406,7 +406,7 @@
                                             <a href="javascript:void(0)" class="badge bg-secondary viewRefundsBtn mt-1" 
                                                data-url="{{ auth('admin')->check() ? route('admin.fees.refunds', $fee->id) : route('staff.fees.refunds', $fee->id) }}"
                                                title="View refund history">
-                                                <i class="fas fa-undo-alt me-1"></i> Refunded
+                                               <i class="fas fa-undo-alt me-1"></i> Refunded
                                             </a>
                                         @endif
                                     </td>
@@ -422,25 +422,20 @@
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 @endif
+                                            @endif
 
-                                                <button class="btn btn-sm btn-info viewPaymentsBtn"
-                                                    data-url="{{ route('staff.fees.payments', $fee->id) }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
+                                            <button class="btn btn-sm btn-info viewPaymentsBtn"
+                                                data-url="{{ auth('admin')->check() ? route('admin.fees.payments', $fee->id) : route('staff.fees.payments', $fee->id) }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
 
+                                            @if($isAction == 'true')
                                                 @if($tab === 'paid')
                                                     <a href="{{ route('staff.fees.invoice.download', $fee->id) }}"
                                                         class="btn btn-sm btn-danger" title="Download Invoice PDF" target="_blank">
                                                         <i class="mdi mdi-file-pdf-box"></i>
                                                     </a>
                                                 @endif
-
-                                                <!-- @if($tab !== 'paid')
-                                                    <button class="btn btn-sm btn-warning sendNotificationBtn" data-id="{{ $fee->id }}"
-                                                        title="Send notification">
-                                                        <i class="fas fa-bell"></i>
-                                                    </button>
-                                                @endif -->
                                             @endif
 
                                             @if(auth('admin')->check() && $netPaid > 0 && $lastPaymentDate && !\Carbon\Carbon::parse($lastPaymentDate)->addMonths(2)->isPast())
