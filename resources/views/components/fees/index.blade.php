@@ -563,6 +563,8 @@
 
         </div>
 
+    @endif
+
         {{-- Payment History Modal --}}
         <div class="modal fade" id="paymentsModal">
 
@@ -608,8 +610,6 @@
             </div>
 
         </div>
-
-    @endif
 
     @if(auth('admin')->check())
         {{-- Refund Fee Modal --}}
@@ -764,76 +764,7 @@
 
         </script>
 
-        <script>
 
-            $('.viewPaymentsBtn').click(function () {
-
-                let url = $(this).data('url');
-
-                $('#paymentsTableBody').html(`
-                                                        <tr>
-                                                            <td colspan="4" class="text-center">Loading...</td>
-                                                        </tr>
-                                                    `);
-
-                $('#totalPaid').text('0.00');
-
-                $.get(url, function (res) {
-
-                    let rows = '';
-                    let total = 0;
-
-                    if (res.payments.length === 0) {
-
-                        rows = `
-                                                                <tr>
-                                                                    <td colspan="4" class="text-center text-muted">
-                                                                        No payments found
-                                                                    </td>
-                                                                </tr>
-                                                            `;
-
-                    } else {
-
-                        res.payments.forEach(p => {
-
-                            let amount = parseFloat(p.paid_amount);
-                            total += amount;
-
-                            rows += `
-                                                                    <tr>
-                                                                        <td>${formatDate(p.paid_date)}</td>
-                                                                        <td>₹ ${amount.toFixed(2)}</td>
-                                                                        <td>${formatMethod(p.payment_method)}</td>
-                                                                        <td>${p.notes ?? '-'}</td>
-                                                                    </tr>
-                                                                `;
-
-                        });
-
-                    }
-
-                    $('#paymentsTableBody').html(rows);
-                    $('#totalPaid').text(total.toFixed(2));
-
-                    $('#paymentsModal').modal('show');
-
-                });
-
-            });
-
-            function formatDate(dateStr) {
-                let d = new Date(dateStr);
-                return d.toLocaleDateString('en-IN', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric'
-                });
-            }
-
-            function formatMethod(method) {
-                return method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-            }
 
             // Delete Fee Handler (Admin only)
             $(document).on('click', '.deleteFeeBtnAdmin', function (e) {
@@ -952,6 +883,51 @@
     @endif
 
     <script>
+        $(document).on('click', '.viewPaymentsBtn', function () {
+            let url = $(this).data('url');
+
+            $('#paymentsTableBody').html(`
+                <tr>
+                    <td colspan="4" class="text-center">Loading...</td>
+                </tr>
+            `);
+
+            $('#totalPaid').text('0.00');
+
+            $.get(url, function (res) {
+                let rows = '';
+                let total = 0;
+
+                if (!res.payments || res.payments.length === 0) {
+                    rows = `
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">
+                                No payments found
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    res.payments.forEach(p => {
+                        let amount = parseFloat(p.paid_amount);
+                        total += amount;
+
+                        rows += `
+                            <tr>
+                                <td>${formatDate(p.paid_date)}</td>
+                                <td>₹ ${amount.toFixed(2)}</td>
+                                <td>${formatMethod(p.payment_method)}</td>
+                                <td>${p.notes ?? '-'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                $('#paymentsTableBody').html(rows);
+                $('#totalPaid').text(total.toFixed(2));
+                $('#paymentsModal').modal('show');
+            });
+        });
+
         $(document).on('click', '.viewRefundsBtn', function () {
             let url = $(this).data('url');
 

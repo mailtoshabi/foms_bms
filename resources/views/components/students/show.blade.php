@@ -1113,6 +1113,7 @@
                 </div>
             </div>
         </div>
+    @endif
 
         {{-- Student Fee Payment History Modal --}}
         <div class="modal fade" id="studentFeePaymentsModal">
@@ -1143,7 +1144,6 @@
                 </div>
             </div>
         </div>
-    @endif
 
     {{-- Fee exemption Modal --}}
 
@@ -1445,30 +1445,6 @@
                      $('#studentFeePaymentModal').modal('show');
                  });
 
-                $('.studentFeeViewPaymentsBtn').click(function () {
-                    let url = $(this).data('url');
-                    $('#studentFeePaymentsTableBody').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
-                    $('#studentFeeTotalPaid').text('0.00');
-                    $.get(url, function (res) {
-                        let rows = '';
-                        let total = 0;
-                        if (res.payments.length === 0) {
-                            rows = '<tr><td colspan="4" class="text-center text-muted">No payments found</td></tr>';
-                        } else {
-                            res.payments.forEach(p => {
-                                let amt = parseFloat(p.paid_amount);
-                                total += amt;
-                                let d = new Date(p.paid_date);
-                                let dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-                                let method = p.payment_method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-                                rows += '<tr><td>' + dateStr + '</td><td>₹ ' + amt.toFixed(2) + '</td><td>' + method + '</td><td>' + (p.notes ?? '-') + '</td></tr>';
-                            });
-                        }
-                        $('#studentFeePaymentsTableBody').html(rows);
-                        $('#studentFeeTotalPaid').text(total.toFixed(2));
-                        $('#studentFeePaymentsModal').modal('show');
-                    });
-                });
 
                 $('.studentFeeSendNotificationBtn').click(function (e) {
                     e.preventDefault();
@@ -1503,6 +1479,31 @@
             @endif
 
             @if(auth('staff')->check() || auth('admin')->check())
+                $(document).on('click', '.studentFeeViewPaymentsBtn', function () {
+                    let url = $(this).data('url');
+                    $('#studentFeePaymentsTableBody').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+                    $('#studentFeeTotalPaid').text('0.00');
+                    $.get(url, function (res) {
+                        let rows = '';
+                        let total = 0;
+                        if (res.payments.length === 0) {
+                            rows = '<tr><td colspan="4" class="text-center text-muted">No payments found</td></tr>';
+                        } else {
+                            res.payments.forEach(p => {
+                                let amt = parseFloat(p.paid_amount);
+                                total += amt;
+                                let d = new Date(p.paid_date);
+                                let dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+                                let method = p.payment_method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                rows += '<tr><td>' + dateStr + '</td><td>₹ ' + amt.toFixed(2) + '</td><td>' + method + '</td><td>' + (p.notes ?? '-') + '</td></tr>';
+                            });
+                        }
+                        $('#studentFeePaymentsTableBody').html(rows);
+                        $('#studentFeeTotalPaid').text(total.toFixed(2));
+                        $('#studentFeePaymentsModal').modal('show');
+                    });
+                });
+
                 $(document).on('show.bs.modal', '#linkExistingFamilyModal', function() {
                     var $el = $('#related_student_id');
                     if ($el.hasClass('select2-hidden-accessible')) { $el.select2('destroy'); }
