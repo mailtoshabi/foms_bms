@@ -145,7 +145,7 @@ class HomeworkController extends Controller
     {
         $file = HomeworkSubmissionFile::with('submission.homework')->findOrFail(decrypt($id));
         
-        if ($file->submission->homework->teacher_id !== auth('teacher')->id()) {
+        if ((int) $file->submission->homework->teacher_id !== (int) auth('teacher')->id()) {
             abort(403, 'Unauthorized access to this file.');
         }
 
@@ -192,7 +192,7 @@ class HomeworkController extends Controller
     {
         $submission = HomeworkSubmission::with('homework')->findOrFail(decrypt($request->submission_id));
 
-        if ($submission->homework->teacher_id !== auth('teacher')->id()) {
+        if ((int) $submission->homework->teacher_id !== (int) auth('teacher')->id()) {
             abort(403, 'Unauthorized action.');
         }
 

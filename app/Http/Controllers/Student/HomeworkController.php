@@ -161,7 +161,7 @@ class HomeworkController extends Controller
     {
         $file = HomeworkSubmissionFile::with('submission')->findOrFail(decrypt($id));
         
-        if ($file->submission->student_id !== auth('student')->id()) {
+        if ((int) $file->submission->student_id !== (int) auth('student')->id()) {
             abort(403, 'Unauthorized access to this file.');
         }
 
