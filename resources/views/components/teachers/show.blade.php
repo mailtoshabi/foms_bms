@@ -270,7 +270,7 @@
 
                                                     <br>
 
-                                                    {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
+                                                    {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}
 
                                                 </small>
 

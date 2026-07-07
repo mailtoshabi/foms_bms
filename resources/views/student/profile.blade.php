@@ -103,7 +103,7 @@
                                             <td>
                                                 {{ implode(', ', $class->selected_days ?? []) }}
                                                 @if($class->time_slot)
-                                                    <br><small>{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') }}</small>
+                                                    <br><small>{{ \Carbon\Carbon::parse($class->time_slot)->format('h:i A') }}</small>
                                                 @endif
                                             </td>
                                         </tr>

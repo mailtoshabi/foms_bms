@@ -70,7 +70,7 @@
             <div class="portal-info-card-content">
                 <span class="portal-info-card-label">Time Slot</span>
                 <span
-                    class="portal-info-card-value">{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</span>
+                    class="portal-info-card-value">{{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}</span>
             </div>
         </div>
 

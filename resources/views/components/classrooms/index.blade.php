@@ -146,7 +146,7 @@ Add Class
 <small>
 <br>
 @if (!empty($class->time_slot))
-    {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') }}
+    {{ \Carbon\Carbon::parse($class->time_slot)->format('h:i A') }}
 @endif
 </small>
 

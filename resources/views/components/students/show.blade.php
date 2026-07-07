@@ -236,7 +236,7 @@
                                             @endif
                                         </td>
 
-                                        <td>{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
+                                        <td>{{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}
                                         </td>
 
                                         <td>{{ $class->pivot->assigned_date ? \Carbon\Carbon::parse($class->pivot->assigned_date)->format('d M Y') : '-' }}

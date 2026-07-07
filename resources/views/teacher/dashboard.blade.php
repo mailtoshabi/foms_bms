@@ -416,7 +416,7 @@
                                                             {{ implode(', ', $class->selected_days ?? []) }}
                                                         </div>
                                                         <small class="text-muted"><i class="far fa-clock me-1"></i>
-                                                            {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</small>
+                                                            {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}</small>
                                                     @else
                                                         <span class="text-muted">-</span>
                                                     @endif

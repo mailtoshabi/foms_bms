@@ -547,8 +547,8 @@
                                             <td>
                                                 <div class="fw-semibold text-dark">{{ implode(', ', $class->selected_days ?? []) }}
                                                 </div>
-                                                <small class="text-muted"><i class="far fa-clock me-1"></i>
-                                                    {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</small>
+                                                 <small class="text-muted"><i class="far fa-clock me-1"></i>
+                                                     {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}</small>
                                             </td>
                                             <td>
                                                 <a href="{{ route('student.classes.show', encrypt($class->id)) }}"

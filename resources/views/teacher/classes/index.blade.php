@@ -62,7 +62,7 @@
                                     <span class="fw-semibold text-muted">{{ implode(', ', $class->selected_days ?? []) }}</span>
                                     <small class="text-primary fw-bold mt-1">
                                         <i class="far fa-clock me-1"></i>
-                                        {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
+                                        {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}
                                     </small>
                                 </div>
                             </td>

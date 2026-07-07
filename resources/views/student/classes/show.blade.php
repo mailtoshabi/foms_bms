@@ -38,7 +38,7 @@
                         <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
                     @endif
                     <p><strong>Time:</strong>
-                        {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}</p>
+                        {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}</p>
                     <p><strong>Duration:</strong> {{ $class->slot_duration }} minutes</p>
                     <p><strong>Monthly Sessions:</strong> {{ $class->classes_per_week * 4 }}</p>
                 </div>

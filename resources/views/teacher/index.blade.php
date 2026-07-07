@@ -44,7 +44,7 @@
 
                                 <br>
 
-                                {{ $class->time_slot }}
+                                {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}
 
                             </td>
 
