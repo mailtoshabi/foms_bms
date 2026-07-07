@@ -429,7 +429,7 @@
 
                 <div class="modal-footer">
                     <button class="btn btn-primary" type="submit"
-                        onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save</button>
+                        onclick="if(confirm('Have you checked and confirmed Fee Discount/Exemption?')) { this.disabled=true; this.innerText='Saving...'; this.form.submit(); } else { return false; }">Save</button>
                 </div>
 
             </form>

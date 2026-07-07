@@ -231,20 +231,31 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'From Payment Date' : 'From Generated Date' }}</label>
+                                <label class="form-label fw-bold">Date Type</label>
+                                <select name="date_type" id="date_type_select" class="form-control">
+                                    <option value="created_at" {{ request('date_type', ($tab === 'paid' ? 'payment_date' : 'created_at')) == 'created_at' ? 'selected' : '' }}>Generated Date</option>
+                                    <option value="due_date" {{ request('date_type') == 'due_date' ? 'selected' : '' }}>Due Date</option>
+                                    @if($tab === 'paid')
+                                        <option value="payment_date" {{ request('date_type', 'payment_date') == 'payment_date' ? 'selected' : '' }}>Payment Date</option>
+                                    @endif
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold" id="from_date_label">From Date</label>
                                 <input type="date" name="from_date" value="{{ request('from_date') }}" class="form-control">
                             </div>
 
                             <div class="col-md-3">
-                                <label class="form-label fw-bold">{{ $tab === 'paid' ? 'To Payment Date' : 'To Generated Date' }}</label>
+                                <label class="form-label fw-bold" id="to_date_label">To Date</label>
                                 <input type="date" name="to_date" value="{{ request('to_date') }}" class="form-control">
                             </div>
 
-                            <div class="col-md-6 d-flex align-items-end justify-content-end gap-2">
-                                <button type="submit" class="btn btn-primary px-4">
+                            <div class="col-md-3 d-flex align-items-end justify-content-end gap-2">
+                                <button type="submit" class="btn btn-primary w-100">
                                     <i class="mdi mdi-filter"></i> Filter
                                 </button>
-                                <a href="{{ $filterRoute }}" class="btn btn-light px-4">
+                                <a href="{{ $filterRoute }}" class="btn btn-light w-100">
                                     <i class="mdi mdi-refresh"></i> Reset
                                 </a>
                             </div>
@@ -765,7 +776,7 @@
         </script>
 
 
-
+        <script>
             // Delete Fee Handler (Admin only)
             $(document).on('click', '.deleteFeeBtnAdmin', function (e) {
                 e.preventDefault();
@@ -990,6 +1001,16 @@
                 return method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
             }
         }
+
+        $(document).ready(function() {
+            function updateDateLabels() {
+                let selectedText = $('#date_type_select option:selected').text();
+                $('#from_date_label').text('From ' + selectedText);
+                $('#to_date_label').text('To ' + selectedText);
+            }
+            $('#date_type_select').change(updateDateLabels);
+            updateDateLabels();
+        });
     </script>
 
 @endsection

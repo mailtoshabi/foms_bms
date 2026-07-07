@@ -85,7 +85,12 @@ class ReportController extends Controller
         }
 
         if ($request->filled('from_date') || $request->filled('to_date')) {
-            if ($tab === 'paid') {
+            $dateType = $request->get('date_type');
+            if (empty($dateType)) {
+                $dateType = ($tab === 'paid') ? 'payment_date' : 'created_at';
+            }
+
+            if ($dateType === 'payment_date') {
                 $query->whereHas('payments', function ($q) use ($request) {
                     if ($request->filled('from_date')) {
                         $q->whereDate('paid_date', '>=', $request->from_date);
@@ -94,6 +99,13 @@ class ReportController extends Controller
                         $q->whereDate('paid_date', '<=', $request->to_date);
                     }
                 });
+            } elseif ($dateType === 'due_date') {
+                if ($request->filled('from_date')) {
+                    $query->whereDate('due_date', '>=', $request->from_date);
+                }
+                if ($request->filled('to_date')) {
+                    $query->whereDate('due_date', '<=', $request->to_date);
+                }
             } else {
                 if ($request->filled('from_date')) {
                     $query->whereDate('created_at', '>=', $request->from_date);
@@ -105,7 +117,7 @@ class ReportController extends Controller
         }
 
         // Check if any filter is applied
-        $isFiltered = $request->anyFilled(['search', 'class_room_id', 'type', 'status', 'from_date', 'to_date']);
+        $isFiltered = $request->anyFilled(['search', 'class_room_id', 'type', 'status', 'from_date', 'to_date', 'date_type']);
 
         $totalAmount = 0;
         if ($isFiltered) {
