@@ -145,9 +145,9 @@ Add Class
 {{ implode(', ', $class->selected_days ?? []) }}
 <small>
 <br>
-
-{{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') ?? '' }}
-
+@if (!empty($class->time_slot))
+    {{ \Carbon\Carbon::createFromFormat('H:i', $class->time_slot)->format('h:i A') }}
+@endif
 </small>
 
 @endif

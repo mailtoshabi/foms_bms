@@ -100,7 +100,7 @@
                     <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
                         <div class="modal-header bg-warning text-dark border-0 py-3">
                             <h5 class="modal-title fw-bold" id="holidaysAnnouncementModalLabel">
-                                <i class="fas fa-bullhorn me-2"></i> Holiday Announcement!
+                                <i class="fas fa-bullhorn me-2"></i> Announcement!
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
@@ -809,12 +809,20 @@
                         }
                     }
                 });
-                // Auto open holidays announcement modal if present
-                if ($('#holidaysAnnouncementModal').length > 0) {
-                    var holidayModal = new bootstrap.Modal(document.getElementById('holidaysAnnouncementModal'));
-                    holidayModal.show();
-                }
-            });
+            }
+        });
+
+        // Auto open holidays/announcement modal on page load if present
+        $(document).ready(function () {
+            if ($('#holidaysAnnouncementModal').length > 0) {
+                $('#holidaysAnnouncementModal').modal('show');
+            }
+        });
+
+
+
+
+
     </script>
 @endsection
 
