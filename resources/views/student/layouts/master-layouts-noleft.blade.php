@@ -136,7 +136,20 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
 
     <script>
+        // ── Audio Setup ──────────────────────────────────────────────────────────
         let audioCtx = null;
+
+        // Preload the WAV buzzer for use as an Audio element (works in background tabs)
+        let buzzerAudio = null;
+        function getBuzzerAudio() {
+            if (!buzzerAudio) {
+                buzzerAudio = new Audio('/sounds/buzzer.wav');
+                buzzerAudio.preload = 'auto';
+            }
+            return buzzerAudio;
+        }
+
+        // Unlock AudioContext on first user interaction (required by browsers)
         function initAudioContext() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -144,11 +157,43 @@
             if (audioCtx.state === 'suspended') {
                 audioCtx.resume();
             }
+            // Also "unlock" the Audio element so it can autoplay later
+            const a = getBuzzerAudio();
+            a.volume = 0;
+            a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = 1; }).catch(() => {});
         }
         document.addEventListener('click', initAudioContext, { once: true });
         document.addEventListener('touchstart', initAudioContext, { once: true });
 
+        /**
+         * Play the buzzer sound.
+         * First tries the Audio element (WAV file – more reliable across tabs/background).
+         * Falls back to Web Audio API synthesis if Audio element is blocked.
+         */
         function playBuzzerSound() {
+            // --- Primary: Audio element (WAV file) ---
+            try {
+                const audio = getBuzzerAudio();
+                audio.currentTime = 0;
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        // Autoplay blocked – fall back to Web Audio synthesis
+                        playBuzzerSynthesis();
+                    });
+                }
+            } catch(e) {
+                playBuzzerSynthesis();
+            }
+
+            // Vibrate
+            if (navigator.vibrate) {
+                navigator.vibrate([300, 100, 300, 100, 300]);
+            }
+        }
+
+        /** Web Audio API synthesis fallback (for foreground / unlocked context) */
+        function playBuzzerSynthesis() {
             try {
                 if (!audioCtx) {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -156,34 +201,48 @@
                 if (audioCtx.state === 'suspended') {
                     audioCtx.resume();
                 }
-                
                 let duration = 0.4;
                 let numBeeps = 3;
                 let delay = 0.5;
-
                 for (let i = 0; i < numBeeps; i++) {
                     let startTime = audioCtx.currentTime + (i * delay);
                     let osc = audioCtx.createOscillator();
                     let gain = audioCtx.createGain();
-
                     osc.type = 'sawtooth';
                     osc.frequency.setValueAtTime(660, startTime);
-                    
                     gain.gain.setValueAtTime(0.15, startTime);
                     gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration - 0.05);
-
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-
                     osc.start(startTime);
                     osc.stop(startTime + duration);
                 }
             } catch (e) {
-                console.error("Audio Context could not play sound: ", e);
+                console.error('Web Audio synthesis failed: ', e);
             }
         }
 
-        // Initialize Firebase
+        // ── Show Buzzer Overlay ───────────────────────────────────────────────────
+        function showBuzzerOverlay(classHourId, joinUrl) {
+            const overlay  = document.getElementById('globalBuzzerOverlay');
+            const closeBtn = document.getElementById('closeBuzzerBtn');
+            const joinLink = document.getElementById('joinBuzzerLink');
+            if (!overlay) return;
+
+            overlay.style.display = 'flex';
+            playBuzzerSound();
+
+            joinLink.onclick = function(e) {
+                e.preventDefault();
+                overlay.style.display = 'none';
+                window.open(joinUrl || '/student/dashboard', '_blank');
+            };
+            closeBtn.onclick = function() {
+                overlay.style.display = 'none';
+            };
+        }
+
+        // ── Initialize Firebase ───────────────────────────────────────────────────
         const firebaseConfig = {
             apiKey: "{{ config('services.firebase.api_key') }}",
             authDomain: "{{ config('services.firebase.auth_domain') }}",
@@ -196,13 +255,13 @@
         firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
 
-        // Register Service Worker
+        // ── Register Service Worker ───────────────────────────────────────────────
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/firebase-messaging-sw.js')
                 .then((registration) => {
-                    console.log('FCM Service Worker registered successfully: ', registration);
-                    
-                    // Request permission and fetch/save client token
+                    console.log('FCM Service Worker registered: ', registration);
+
+                    // Request permission and save FCM token
                     Notification.requestPermission().then((permission) => {
                         if (permission === 'granted') {
                             messaging.getToken({
@@ -211,7 +270,6 @@
                             }).then((currentToken) => {
                                 if (currentToken) {
                                     console.log('FCM Token: ', currentToken);
-                                    // Save token to server
                                     fetch('{{ route("student.classes.update-fcm-token") }}', {
                                         method: 'POST',
                                         headers: {
@@ -221,74 +279,71 @@
                                         body: JSON.stringify({ fcm_token: currentToken })
                                     });
                                 }
-                            }).catch((err) => {
-                                console.error('Error fetching token: ', err);
-                            });
+                            }).catch((err) => console.error('Error fetching FCM token: ', err));
                         }
                     });
-                }).catch((err) => {
-                    console.error('FCM Service Worker registration failed: ', err);
-                });
-        }
+                }).catch((err) => console.error('FCM SW registration failed: ', err));
 
-        // Listen for foreground notifications
-        messaging.onMessage((payload) => {
-            console.log('FCM foreground message received: ', payload);
-            
-            const overlay = document.getElementById('globalBuzzerOverlay');
-            const closeBtn = document.getElementById('closeBuzzerBtn');
-            const joinLink = document.getElementById('joinBuzzerLink');
+            // ── Listen for messages FROM the Service Worker ───────────────────────
+            // This fires when the SW calls client.postMessage() for background messages.
+            // This covers the case where the tab is open but the screen/phone is backgrounded.
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (!event.data) return;
 
-            if (payload.data && payload.data.class_hour_id) {
-                overlay.style.display = 'flex';
-                
-                playBuzzerSound();
-                if (navigator.vibrate) {
-                    navigator.vibrate([200, 100, 200, 100, 200]);
+                if (event.data.type === 'FCM_BUZZER') {
+                    const data = event.data.data || {};
+                    const classHourId = data.class_hour_id || null;
+                    const joinUrl = classHourId
+                        ? '/student/classes/join/' + classHourId
+                        : '/student/dashboard';
+                    console.log('[SW postMessage] FCM_BUZZER received, showing overlay');
+                    showBuzzerOverlay(classHourId, joinUrl);
                 }
 
-                joinLink.onclick = function(e) {
-                    e.preventDefault();
-                    overlay.style.display = 'none';
-                    window.open('/student/classes/join/' + payload.data.class_hour_id, '_blank');
-                };
+                if (event.data.type === 'FCM_BUZZER_CLICK') {
+                    const data = event.data.data || {};
+                    const classHourId = data.class_hour_id || null;
+                    const joinUrl = data.url || (classHourId
+                        ? '/student/classes/join/' + classHourId
+                        : '/student/dashboard');
+                    showBuzzerOverlay(classHourId, joinUrl);
+                }
+            });
+        }
 
-                closeBtn.onclick = function() {
-                    overlay.style.display = 'none';
-                };
+        // ── Foreground FCM message ────────────────────────────────────────────────
+        // Fires when the app tab is active (visible in foreground)
+        messaging.onMessage((payload) => {
+            console.log('FCM foreground message: ', payload);
+            if (payload.data && payload.data.class_hour_id) {
+                const classHourId = payload.data.class_hour_id;
+                showBuzzerOverlay(classHourId, '/student/classes/join/' + classHourId);
             }
         });
 
-        // Database polling fallback (runs in foreground as fail-safe)
+        // ── Database Polling Fallback ─────────────────────────────────────────────
+        // Safety net: catches buzzers even if FCM delivery fails
         document.addEventListener('DOMContentLoaded', function() {
-            const overlay = document.getElementById('globalBuzzerOverlay');
+            const overlay  = document.getElementById('globalBuzzerOverlay');
             const closeBtn = document.getElementById('closeBuzzerBtn');
             const joinLink = document.getElementById('joinBuzzerLink');
-            
             let activeBuzzerId = null;
 
             function checkBuzzer() {
-                // If overlay is already active/visible, skip checking
-                if (overlay.style.display === 'flex') {
-                    return;
-                }
+                if (overlay && overlay.style.display === 'flex') return;
 
                 fetch('/student/classes/check-buzzer')
                     .then(res => res.json())
                     .then(data => {
                         if (data.success && data.buzzer_id && activeBuzzerId !== data.buzzer_id) {
                             activeBuzzerId = data.buzzer_id;
-                            
-                            // Show overlay
-                            overlay.style.display = 'flex';
-                            
-                            // Play sound & vibrate
-                            playBuzzerSound();
-                            if (navigator.vibrate) {
-                                navigator.vibrate([200, 100, 200, 100, 200]);
-                            }
 
-                            // Link action
+                            showBuzzerOverlay(
+                                data.class_hour_id,
+                                '/student/classes/join/' + data.class_hour_id
+                            );
+
+                            // Override join/close to also mark buzzer as read
                             joinLink.onclick = function(e) {
                                 e.preventDefault();
                                 fetch('/student/classes/buzzers/' + data.buzzer_id + '/read', {
@@ -303,7 +358,6 @@
                                     window.open('/student/classes/join/' + data.class_hour_id, '_blank');
                                 });
                             };
-
                             closeBtn.onclick = function() {
                                 fetch('/student/classes/buzzers/' + data.buzzer_id + '/read', {
                                     method: 'POST',
@@ -318,10 +372,9 @@
                             };
                         }
                     })
-                    .catch(err => console.error("Error checking buzzer fallback: ", err));
+                    .catch(err => console.error('Buzzer poll error: ', err));
             }
 
-            // Poll every 5 seconds
             setInterval(checkBuzzer, 5000);
             checkBuzzer();
         });

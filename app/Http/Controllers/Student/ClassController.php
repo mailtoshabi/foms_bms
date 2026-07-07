@@ -168,4 +168,31 @@ class ClassController extends Controller
             return response()->json(['success' => false, 'error' => $e->getMessage()], 400);
         }
     }
+
+    /**
+     * Full-screen buzzer alert page.
+     *
+     * Opened by the service worker when a push notification is tapped.
+     * Because the page is opened via user interaction (tap), the browser
+     * allows autoplay of audio immediately on load — solving the screen-off
+     * sound problem for PWA.
+     */
+    public function buzzerAlert(Request $request)
+    {
+        $classHourId  = $request->query('class_hour_id');
+        $googleMeetLink = null;
+
+        if ($classHourId) {
+            try {
+                $classHour = \App\Models\ClassHour::find(decrypt($classHourId));
+                if ($classHour) {
+                    $googleMeetLink = $classHour->google_meet_link;
+                }
+            } catch (\Exception $e) {
+                // Invalid encrypted ID — just show the alert without a join link
+            }
+        }
+
+        return view('student.buzzer-alert', compact('classHourId', 'googleMeetLink'));
+    }
 }

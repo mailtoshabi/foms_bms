@@ -57,27 +57,31 @@
         @if($holidays->count() > 0)
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm" style="border-left: 4px solid #ffc107 !important; background-color: #fffdf0; border-radius: 12px;">
+                    <div class="card border-0 shadow-sm"
+                        style="border-left: 4px solid #ffc107 !important; background-color: #fffdf0; border-radius: 12px;">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(255, 193, 7, 0.15);">
+                                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px; background-color: rgba(255, 193, 7, 0.15);">
                                         <i class="fas fa-calendar-alt text-warning" style="font-size: 1.2rem;"></i>
                                     </div>
                                     <div>
-                                        <h6 class="fw-bold mb-1" style="color: #856404;">Upcoming Holidays</h6>
+                                        <h6 class="fw-bold mb-1" style="color: #856404;">Upcoming Alerts</h6>
                                         <div class="text-muted small">
                                             @foreach($holidays as $holiday)
                                                 <span class="me-3 d-inline-block">
                                                     <i class="fas fa-bullhorn text-warning me-1"></i>
-                                                    <strong class="text-dark">{{ $holiday->title }}</strong>: 
-                                                    <span class="text-primary fw-semibold">{{ $holiday->date->format('d M Y') }}</span>
+                                                    <strong class="text-dark">{{ $holiday->title }}</strong>:
+                                                    <span
+                                                        class="text-primary fw-semibold">{{ $holiday->date->format('d M Y') }}</span>
                                                 </span>
                                             @endforeach
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-warning text-dark border-warning py-1 px-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#holidaysAnnouncementModal">
+                                <button class="btn btn-sm btn-outline-warning text-dark border-warning py-1 px-3 rounded-pill"
+                                    data-bs-toggle="modal" data-bs-target="#holidaysAnnouncementModal">
                                     <i class="fas fa-eye me-1"></i> View Details
                                 </button>
                             </div>
@@ -87,7 +91,8 @@
             </div>
 
             <!-- Holidays Announcement Modal -->
-            <div class="modal fade" id="holidaysAnnouncementModal" tabindex="-1" aria-labelledby="holidaysAnnouncementModalLabel" aria-hidden="true">
+            <div class="modal fade" id="holidaysAnnouncementModal" tabindex="-1"
+                aria-labelledby="holidaysAnnouncementModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
                         <div class="modal-header bg-warning text-dark border-0 py-3">
@@ -101,16 +106,19 @@
                                 <div class="mb-4 pb-3 {{ !$loop->last ? 'border-bottom border-light' : '' }}">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h5 class="fw-bold text-dark mb-0">{{ $holiday->title }}</h5>
-                                        <span class="badge bg-soft-info text-info font-size-12 px-2.5 py-1.5 rounded-pill" style="background-color: rgba(43, 154, 233, 0.1);">
+                                        <span class="badge bg-soft-info text-info font-size-12 px-2.5 py-1.5 rounded-pill"
+                                            style="background-color: rgba(43, 154, 233, 0.1);">
                                             <i class="far fa-calendar-alt me-1"></i> {{ $holiday->date->format('d M Y') }}
                                         </span>
                                     </div>
-                                    <p class="text-muted mb-0" style="white-space: pre-line;">{{ $holiday->description ?: 'No additional details provided.' }}</p>
+                                    <p class="text-muted mb-0" style="white-space: pre-line;">
+                                        {{ $holiday->description ?: 'No additional details provided.' }}</p>
                                 </div>
                             @endforeach
                         </div>
                         <div class="modal-footer border-0 bg-light p-3">
-                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary rounded-pill px-4"
+                                data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -151,7 +159,8 @@
                                                 <i class="fas fa-video me-1"></i> Join Meet
                                             </a>
                                         @else
-                                            <button class="btn btn-light rounded-pill py-2 px-3 fw-bold flex-grow-1 text-muted" disabled title="Wait for teacher to update the class link.">
+                                            <button class="btn btn-light rounded-pill py-2 px-3 fw-bold flex-grow-1 text-muted" disabled
+                                                title="Wait for teacher to update the class link.">
                                                 <i class="fas fa-video me-1"></i> Join (Wait for Link)
                                             </button>
                                         @endif
@@ -377,8 +386,10 @@
                                             class="fas fa-check-circle me-1"></i> Fully Paid</span>
                                 @endif
                                 @if(isset($student->wallet_balance) && $student->wallet_balance > 0)
-                                    <span class="badge badge-premium badge-premium-success px-3 py-2 fw-bold" style="background-color: rgba(16, 185, 129, 0.15) !important; color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important;"><i
-                                            class="fas fa-plus-circle me-1"></i> Advance Wallet: ₹{{ number_format($student->wallet_balance, 2) }}</span>
+                                    <span class="badge badge-premium badge-premium-success px-3 py-2 fw-bold"
+                                        style="background-color: rgba(16, 185, 129, 0.15) !important; color: #10b981 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important;"><i
+                                            class="fas fa-plus-circle me-1"></i> Advance Wallet:
+                                        ₹{{ number_format($student->wallet_balance, 2) }}</span>
                                 @endif
                             </div>
                         </div>
@@ -631,7 +642,8 @@
                                                             <i class="fas fa-video me-1"></i> Join Class
                                                         </a>
                                                     @else
-                                                        <button class="btn btn-sm btn-light rounded-pill px-3" disabled title="Wait for teacher to update the class link.">
+                                                        <button class="btn btn-sm btn-light rounded-pill px-3" disabled
+                                                            title="Wait for teacher to update the class link.">
                                                             <i class="fas fa-video text-muted"></i> Join (Wait for Link)
                                                         </button>
                                                     @endif

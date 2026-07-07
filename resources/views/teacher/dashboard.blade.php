@@ -40,7 +40,9 @@
                                     class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-2 mb-2 small fw-bold ms-md-2 badge-interactive"
                                     style="backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.25) !important;"
                                     data-bs-toggle="modal" data-bs-target="#scoreDetailsModal">
-                                    <i class="fas fa-trophy me-1 text-warning"></i> Level: <strong>{{ $rankData['label'] }}</strong> (Score: <strong>{{ $rankData['score'] }}</strong>)
+                                    <i class="fas fa-trophy me-1 text-warning"></i> Level:
+                                    <strong>{{ $rankData['label'] }}</strong> (Score:
+                                    <strong>{{ $rankData['score'] }}</strong>)
                                     <i class="fas fa-info-circle ms-1 text-info" style="font-size: 0.9em;"></i>
                                 </span>
                                 <h2 class="mb-1 text-white fw-bold">Welcome back, {{ $teacher->name }}!</h2>
@@ -58,27 +60,31 @@
         @if($holidays->count() > 0)
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm" style="border-left: 4px solid #ffc107 !important; background-color: #fffdf0; border-radius: 12px;">
+                    <div class="card border-0 shadow-sm"
+                        style="border-left: 4px solid #ffc107 !important; background-color: #fffdf0; border-radius: 12px;">
                         <div class="card-body p-3">
                             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(255, 193, 7, 0.15);">
+                                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px; background-color: rgba(255, 193, 7, 0.15);">
                                         <i class="fas fa-calendar-alt text-warning" style="font-size: 1.2rem;"></i>
                                     </div>
                                     <div>
-                                        <h6 class="fw-bold mb-1" style="color: #856404;">Upcoming Holidays</h6>
+                                        <h6 class="fw-bold mb-1" style="color: #856404;">Upcoming Alerts</h6>
                                         <div class="text-muted small">
                                             @foreach($holidays as $holiday)
                                                 <span class="me-3 d-inline-block">
                                                     <i class="fas fa-bullhorn text-warning me-1"></i>
-                                                    <strong class="text-dark">{{ $holiday->title }}</strong>: 
-                                                    <span class="text-primary fw-semibold">{{ $holiday->date->format('d M Y') }}</span>
+                                                    <strong class="text-dark">{{ $holiday->title }}</strong>:
+                                                    <span
+                                                        class="text-primary fw-semibold">{{ $holiday->date->format('d M Y') }}</span>
                                                 </span>
                                             @endforeach
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn btn-sm btn-outline-warning text-dark border-warning py-1 px-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#holidaysAnnouncementModal">
+                                <button class="btn btn-sm btn-outline-warning text-dark border-warning py-1 px-3 rounded-pill"
+                                    data-bs-toggle="modal" data-bs-target="#holidaysAnnouncementModal">
                                     <i class="fas fa-eye me-1"></i> View Details
                                 </button>
                             </div>
@@ -88,7 +94,8 @@
             </div>
 
             <!-- Holidays Announcement Modal -->
-            <div class="modal fade" id="holidaysAnnouncementModal" tabindex="-1" aria-labelledby="holidaysAnnouncementModalLabel" aria-hidden="true">
+            <div class="modal fade" id="holidaysAnnouncementModal" tabindex="-1"
+                aria-labelledby="holidaysAnnouncementModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
                         <div class="modal-header bg-warning text-dark border-0 py-3">
@@ -102,16 +109,20 @@
                                 <div class="mb-4 pb-3 {{ !$loop->last ? 'border-bottom border-light' : '' }}">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <h5 class="fw-bold text-dark mb-0">{{ $holiday->title }}</h5>
-                                        <span class="badge bg-soft-info text-info font-size-12 px-2.5 py-1.5 rounded-pill" style="background-color: rgba(43, 154, 233, 0.1);">
+                                        <span class="badge bg-soft-info text-info font-size-12 px-2.5 py-1.5 rounded-pill"
+                                            style="background-color: rgba(43, 154, 233, 0.1);">
                                             <i class="far fa-calendar-alt me-1"></i> {{ $holiday->date->format('d M Y') }}
                                         </span>
                                     </div>
-                                    <p class="text-muted mb-0" style="white-space: pre-line;">{{ $holiday->description ?: 'No additional details provided.' }}</p>
+                                    <p class="text-muted mb-0" style="white-space: pre-line;">
+                                        {{ $holiday->description ?: 'No additional details provided.' }}
+                                    </p>
                                 </div>
                             @endforeach
                         </div>
                         <div class="modal-footer border-0 bg-light p-3">
-                            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary rounded-pill px-4"
+                                data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -447,45 +458,57 @@
         </div>
 
         {{-- Score Details Modal --}}
-        <div class="modal fade" id="scoreDetailsModal" tabindex="-1" aria-labelledby="scoreDetailsModalLabel" aria-hidden="true">
+        <div class="modal fade" id="scoreDetailsModal" tabindex="-1" aria-labelledby="scoreDetailsModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-                    <div class="modal-header border-bottom-0 text-white p-4" style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
+                    <div class="modal-header border-bottom-0 text-white p-4"
+                        style="background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-white bg-opacity-10 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <div class="bg-white bg-opacity-10 rounded-circle p-2 d-flex align-items-center justify-content-center"
+                                style="width: 45px; height: 45px;">
                                 <i class="fas fa-chart-line text-info fs-4"></i>
                             </div>
                             <div>
-                                <h5 class="modal-title fw-bold m-0" id="scoreDetailsModalLabel">Performance Insights & Rating</h5>
-                                <small class="text-white text-opacity-70">Understand your teaching metrics & level metrics</small>
+                                <h5 class="modal-title fw-bold m-0" id="scoreDetailsModalLabel">Performance Insights &
+                                    Rating</h5>
+                                <small class="text-white text-opacity-70">Understand your teaching metrics & level
+                                    metrics</small>
                             </div>
                         </div>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4 bg-light">
                         <!-- Top stats grid -->
                         <div class="row g-3 mb-4">
                             <!-- Hero Card: Level & Stars -->
                             <div class="col-md-5">
-                                <div class="card border-0 h-100 shadow-sm" style="border-radius: 16px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white;">
+                                <div class="card border-0 h-100 shadow-sm"
+                                    style="border-radius: 16px; background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); color: white;">
                                     <div class="card-body p-4 d-flex flex-column justify-content-between text-center">
                                         <div>
-                                            <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-3 py-1.5 mb-3 small fw-bold text-uppercase tracking-wider" style="font-size: 0.7rem;">
+                                            <span
+                                                class="badge bg-white bg-opacity-10 text-white rounded-pill px-3 py-1.5 mb-3 small fw-bold text-uppercase tracking-wider"
+                                                style="font-size: 0.7rem;">
                                                 Current Status
                                             </span>
                                             <h3 class="fw-bold mb-1">{{ $rankData['label'] }} Tier</h3>
                                             <div class="mb-3">
                                                 @for($s = 1; $s <= 5; $s++)
-                                                    <i class="fas fa-star" style="font-size: 1.4rem; color: {{ $s <= $rankData['stars'] ? '#fbbf24' : 'rgba(255, 255, 255, 0.2)' }};"></i>
+                                                    <i class="fas fa-star"
+                                                        style="font-size: 1.4rem; color: {{ $s <= $rankData['stars'] ? '#fbbf24' : 'rgba(255, 255, 255, 0.2)' }};"></i>
                                                 @endfor
                                             </div>
                                         </div>
                                         <div class="my-3">
-                                            <div class="display-4 fw-extrabold text-warning mb-0">{{ $rankData['score'] }}</div>
+                                            <div class="display-4 fw-extrabold text-warning mb-0">{{ $rankData['score'] }}
+                                            </div>
                                             <small class="text-white text-opacity-65">Performance Score</small>
                                         </div>
                                         <div class="mt-2 bg-white bg-opacity-10 rounded-3 py-2 px-3">
-                                            <span class="small"><i class="fas fa-trophy text-warning me-1"></i> Ranked <strong>#{{ $rankData['rank'] }}</strong> among all teachers</span>
+                                            <span class="small"><i class="fas fa-trophy text-warning me-1"></i> Ranked
+                                                <strong>#{{ $rankData['rank'] }}</strong> among all teachers</span>
                                         </div>
                                     </div>
                                 </div>
@@ -496,26 +519,39 @@
                                 <div class="card border-0 h-100 shadow-sm" style="border-radius: 16px;">
                                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                                         <div>
-                                            <h6 class="fw-bold text-dark mb-2"><i class="fas fa-rocket text-primary me-2"></i>How to Level Up & Improve?</h6>
+                                            <h6 class="fw-bold text-dark mb-2"><i
+                                                    class="fas fa-rocket text-primary me-2"></i>How to Level Up & Improve?
+                                            </h6>
                                             <p class="text-muted small mb-3" style="line-height: 1.5;">
-                                                Your tier is calculated using a weighted index of your teaching activity, student retention, class notes delivery, and performance. Follow these recommendations to boost your score:
+                                                Your tier is calculated using a weighted index of your teaching activity,
+                                                student retention, class notes delivery, and performance. Follow these
+                                                recommendations to boost your score:
                                             </p>
                                             <ul class="list-unstyled mb-0 text-muted small">
                                                 <li class="mb-2 d-flex align-items-start">
                                                     <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                                                    <span><strong>Engage More Students (40% Weight):</strong> The number of active students you manage is the most significant factor. Retaining and attracting students to classes boosts your rating fastest.</span>
+                                                    <span><strong>Engage More Students (40% Weight):</strong> The number of
+                                                        active students you manage is the most significant factor. Retaining
+                                                        and attracting students to classes boosts your rating
+                                                        fastest.</span>
                                                 </li>
                                                 <li class="mb-2 d-flex align-items-start">
                                                     <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                                                    <span><strong>Maintain High Attendance (10% Weight):</strong> Encourage regularity among your students. Active student presence ensures a solid score contribution.</span>
+                                                    <span><strong>Maintain High Attendance (10% Weight):</strong> Encourage
+                                                        regularity among your students. Active student presence ensures a
+                                                        solid score contribution.</span>
                                                 </li>
                                                 <li class="mb-2 d-flex align-items-start">
                                                     <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                                                    <span><strong>Log Complete Sessions & Hours (25% combined):</strong> Complete all scheduled classroom slots. Both active class count (15%) and total teaching hours (10%) count directly.</span>
+                                                    <span><strong>Log Complete Sessions & Hours (25% combined):</strong>
+                                                        Complete all scheduled classroom slots. Both active class count
+                                                        (15%) and total teaching hours (10%) count directly.</span>
                                                 </li>
                                                 <li class="mb-0 d-flex align-items-start">
                                                     <i class="fas fa-check-circle text-success me-2 mt-1"></i>
-                                                    <span><strong>Upload Class Notes (10% Weight):</strong> Share notes, slides, or homework resources after class. Uploading resources keeps students active and increases score.</span>
+                                                    <span><strong>Upload Class Notes (10% Weight):</strong> Share notes,
+                                                        slides, or homework resources after class. Uploading resources keeps
+                                                        students active and increases score.</span>
                                                 </li>
                                             </ul>
                                         </div>
@@ -527,7 +563,8 @@
                         <!-- Detailed Breakdown -->
                         <div class="card border-0 shadow-sm mb-0" style="border-radius: 16px;">
                             <div class="card-header bg-white border-light py-3 px-4">
-                                <h6 class="fw-bold text-dark m-0"><i class="fas fa-list-ol text-primary me-2"></i>Detailed Performance Metrics Breakdown</h6>
+                                <h6 class="fw-bold text-dark m-0"><i class="fas fa-list-ol text-primary me-2"></i>Detailed
+                                    Performance Metrics Breakdown</h6>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -544,98 +581,118 @@
                                             <tr>
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="icon-wrap icon-wrap-primary rounded-circle" style="width: 35px; height: 35px; min-width: 35px;">
+                                                        <div class="icon-wrap icon-wrap-primary rounded-circle"
+                                                            style="width: 35px; height: 35px; min-width: 35px;">
                                                             <i class="fas fa-users" style="font-size: 0.9rem;"></i>
                                                         </div>
                                                         <div>
                                                             <strong class="text-dark d-block">Active Students</strong>
-                                                            <span class="text-muted small" style="font-size: 0.75rem;">Unique active student count</span>
+                                                            <span class="text-muted small"
+                                                                style="font-size: 0.75rem;">Unique active student
+                                                                count</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center fw-bold">{{ $rankData['studentsCount'] }}</td>
                                                 <td class="text-center text-muted">40%</td>
-                                                <td class="text-end fw-bold text-primary pe-4">+{{ round($rankData['studentsCount'] * 0.40 / 4, 2) }}</td>
+                                                <td class="text-end fw-bold text-primary pe-4">
+                                                    +{{ round($rankData['studentsCount'] * 0.40 / 4, 2) }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="icon-wrap icon-wrap-success rounded-circle" style="width: 35px; height: 35px; min-width: 35px;">
+                                                        <div class="icon-wrap icon-wrap-success rounded-circle"
+                                                            style="width: 35px; height: 35px; min-width: 35px;">
                                                             <i class="fas fa-laptop-house" style="font-size: 0.9rem;"></i>
                                                         </div>
                                                         <div>
                                                             <strong class="text-dark d-block">Active Classes</strong>
-                                                            <span class="text-muted small" style="font-size: 0.75rem;">Sessions completed</span>
+                                                            <span class="text-muted small"
+                                                                style="font-size: 0.75rem;">Sessions completed</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center fw-bold">{{ $rankData['totalClasses'] }}</td>
                                                 <td class="text-center text-muted">15%</td>
-                                                <td class="text-end fw-bold text-success pe-4">+{{ round($rankData['totalClasses'] * 0.15 / 4, 2) }}</td>
+                                                <td class="text-end fw-bold text-success pe-4">
+                                                    +{{ round($rankData['totalClasses'] * 0.15 / 4, 2) }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="icon-wrap icon-wrap-info rounded-circle" style="width: 35px; height: 35px; min-width: 35px;">
+                                                        <div class="icon-wrap icon-wrap-info rounded-circle"
+                                                            style="width: 35px; height: 35px; min-width: 35px;">
                                                             <i class="fas fa-clock" style="font-size: 0.9rem;"></i>
                                                         </div>
                                                         <div>
                                                             <strong class="text-dark d-block">Total Hours</strong>
-                                                            <span class="text-muted small" style="font-size: 0.75rem;">Total hours conducted</span>
+                                                            <span class="text-muted small" style="font-size: 0.75rem;">Total
+                                                                hours conducted</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center fw-bold">{{ $rankData['totalHours'] }} hrs</td>
                                                 <td class="text-center text-muted">10%</td>
-                                                <td class="text-end fw-bold text-info pe-4">+{{ round($rankData['totalHours'] * 0.10 / 4, 2) }}</td>
+                                                <td class="text-end fw-bold text-info pe-4">
+                                                    +{{ round($rankData['totalHours'] * 0.10 / 4, 2) }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="icon-wrap icon-wrap-warning rounded-circle" style="width: 35px; height: 35px; min-width: 35px;">
+                                                        <div class="icon-wrap icon-wrap-warning rounded-circle"
+                                                            style="width: 35px; height: 35px; min-width: 35px;">
                                                             <i class="fas fa-user-check" style="font-size: 0.9rem;"></i>
                                                         </div>
                                                         <div>
                                                             <strong class="text-dark d-block">Attendance Rate</strong>
-                                                            <span class="text-muted small" style="font-size: 0.75rem;">Avg student attendance %</span>
+                                                            <span class="text-muted small" style="font-size: 0.75rem;">Avg
+                                                                student attendance %</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center fw-bold">{{ $rankData['attendancePercent'] }}%</td>
                                                 <td class="text-center text-muted">10%</td>
-                                                <td class="text-end fw-bold text-warning pe-4">+{{ round($rankData['attendancePercent'] * 0.10 / 4, 2) }}</td>
+                                                <td class="text-end fw-bold text-warning pe-4">
+                                                    +{{ round($rankData['attendancePercent'] * 0.10 / 4, 2) }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="icon-wrap icon-wrap-danger rounded-circle" style="width: 35px; height: 35px; min-width: 35px;">
+                                                        <div class="icon-wrap icon-wrap-danger rounded-circle"
+                                                            style="width: 35px; height: 35px; min-width: 35px;">
                                                             <i class="fas fa-file-signature" style="font-size: 0.9rem;"></i>
                                                         </div>
                                                         <div>
                                                             <strong class="text-dark d-block">Class Notes Uploaded</strong>
-                                                            <span class="text-muted small" style="font-size: 0.75rem;">Total uploaded class resources</span>
+                                                            <span class="text-muted small" style="font-size: 0.75rem;">Total
+                                                                uploaded class resources</span>
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td class="text-center fw-bold">{{ $rankData['totalNotes'] }}</td>
                                                 <td class="text-center text-muted">10%</td>
-                                                <td class="text-end fw-bold text-danger pe-4">+{{ round($rankData['totalNotes'] * 0.10 / 4, 2) }}</td>
+                                                <td class="text-end fw-bold text-danger pe-4">
+                                                    +{{ round($rankData['totalNotes'] * 0.10 / 4, 2) }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="ps-4">
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <div class="icon-wrap rounded-circle" style="width: 35px; height: 35px; min-width: 35px; background: rgba(16, 185, 129, 0.08); color: #10b981;">
+                                                        <div class="icon-wrap rounded-circle"
+                                                            style="width: 35px; height: 35px; min-width: 35px; background: rgba(16, 185, 129, 0.08); color: #10b981;">
                                                             <i class="fas fa-wallet" style="font-size: 0.9rem;"></i>
                                                         </div>
                                                         <div>
                                                             <strong class="text-dark d-block">Earnings Factor</strong>
-                                                            <span class="text-muted small" style="font-size: 0.75rem;">Earnings (scaled) index</span>
+                                                            <span class="text-muted small"
+                                                                style="font-size: 0.75rem;">Earnings (scaled) index</span>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td class="text-center fw-bold">₹{{ number_format($rankData['earnings'], 2) }}</td>
+                                                <td class="text-center fw-bold">
+                                                    ₹{{ number_format($rankData['earnings'], 2) }}</td>
                                                 <td class="text-center text-muted">15%</td>
-                                                <td class="text-end fw-bold text-success pe-4">+{{ round(($rankData['earnings'] / 100) * 0.15 / 4, 2) }}</td>
+                                                <td class="text-end fw-bold text-success pe-4">
+                                                    +{{ round(($rankData['earnings'] / 100) * 0.15 / 4, 2) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -644,7 +701,8 @@
                         </div>
                     </div>
                     <div class="modal-footer border-top-0 bg-light p-3 d-flex justify-content-end">
-                        <button type="button" class="btn btn-secondary rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary rounded-pill px-4 py-2 fw-semibold"
+                            data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -751,12 +809,12 @@
                         }
                     }
                 });
-            // Auto open holidays announcement modal if present
-            if ($('#holidaysAnnouncementModal').length > 0) {
-                var holidayModal = new bootstrap.Modal(document.getElementById('holidaysAnnouncementModal'));
-                holidayModal.show();
-            }
-        });
+                // Auto open holidays announcement modal if present
+                if ($('#holidaysAnnouncementModal').length > 0) {
+                    var holidayModal = new bootstrap.Modal(document.getElementById('holidaysAnnouncementModal'));
+                    holidayModal.show();
+                }
+            });
     </script>
 @endsection
 
@@ -983,6 +1041,7 @@
             cursor: pointer;
             transition: var(--transition-smooth);
         }
+
         .badge-interactive:hover {
             background-color: rgba(255, 255, 255, 0.35) !important;
             transform: translateY(-1px);

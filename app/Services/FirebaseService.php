@@ -70,6 +70,11 @@ class FirebaseService
 
     /**
      * Send Web Push notification via FCM v1 API.
+     *
+     * Uses a DATA-ONLY message (no top-level 'notification' field) so that FCM
+     * always routes the message through the service worker's onBackgroundMessage()
+     * handler – even when the screen is off.  The service worker then calls
+     * self.registration.showNotification() with full control over sound/vibration.
      */
     public function sendNotification($token, $title, $body, $data = [])
     {
@@ -80,7 +85,7 @@ class FirebaseService
 
         $configPath = config('services.firebase.service_account_path', 'storage/app/firebase-service-account.json');
         $absolutePath = base_path($configPath);
-        
+
         if (!file_exists($absolutePath)) {
             return false;
         }
@@ -90,35 +95,43 @@ class FirebaseService
 
         $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
 
-        // Webpush options so clicking background notification opens/routes to the join URL
-        $clickAction = isset($data['class_hour_id']) 
-            ? url("/student/classes/join/" . $data['class_hour_id']) 
+        $clickAction = isset($data['class_hour_id'])
+            ? url("/student/classes/join/" . $data['class_hour_id'])
             : url("/student/dashboard");
 
         $payload = [
             'message' => [
                 'token' => $token,
-                'notification' => [
+
+                // ── DATA-ONLY — no top-level 'notification' key ──────────────────
+                // With no 'notification' field, FCM never auto-displays a notification.
+                // The service worker's onBackgroundMessage() always fires, giving us
+                // full control to show a notification with the sound/vibration we want.
+                // Title & body are embedded in 'data' so the SW can read them.
+                'data' => array_map('strval', array_merge([
                     'title' => $title,
-                    'body' => $body
-                ],
-                'data' => array_map('strval', $data), // FCM v1 data keys/values must be strings
+                    'body'  => $body,
+                    'type'  => 'buzzer',
+                ], $data)),
+
+                // ── WEBPUSH headers ──────────────────────────────────────────────
+                // Urgency:high  → FCM delivers immediately, bypassing battery-saver queuing.
+                // TTL:60        → If device is unreachable, retry for 60 seconds only.
                 'webpush' => [
-                    'fcm_options' => [
-                        'link' => $clickAction
+                    'headers' => [
+                        'Urgency' => 'high',
+                        'TTL'     => '60',
                     ],
-                    'notification' => [
-                        'icon' => asset('/assets/images/logo.png'),
-                        'badge' => asset('/assets/images/logo.png'),
-                        'vibrate' => [200, 100, 200, 100, 200]
-                    ]
-                ]
+                    'fcm_options' => [
+                        'link' => $clickAction,
+                    ],
+                ],
             ]
         ];
 
         $response = Http::withHeaders([
             'Authorization' => "Bearer {$accessToken}",
-            'Content-Type' => 'application/json'
+            'Content-Type'  => 'application/json',
         ])->post($url, $payload);
 
         if ($response->failed()) {
