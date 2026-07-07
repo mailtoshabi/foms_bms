@@ -15,8 +15,8 @@
                 <div class="col-lg-12">
                     <div class="text-center mb-5 pt-5">
                         <h1 class="error-title mt-5"><span>403!</span></h1>
-                        <h4 class="text-uppercase mt-5">Sorry, page not found</h4>
-                        <p class="font-size-15 mx-auto text-muted w-50 mt-4">{{ $exception->getMessage() ?: 'It will be as simple as Occidental in fact, it will Occidental to an English person' }}</p>
+                        <h4 class="text-uppercase mt-5">Sorry, Permission Denied</h4>
+                        <p class="font-size-15 mx-auto text-muted w-50 mt-4">{{ $exception->getMessage() ?: 'Unauthorized access.' }}</p>
                         <div class="mt-5 text-center">
                             <a class="btn btn-primary waves-effect waves-light" href="{{ url('/') }}">Back to Dashboard</a>
                         </div>

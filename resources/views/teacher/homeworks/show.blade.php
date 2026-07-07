@@ -158,8 +158,9 @@
                     <h5 class="modal-title" id="evaluateModalLabel">Evaluate Homework Submission</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="evaluationForm" method="POST" action="">
+                <form id="evaluationForm" method="POST" action="{{ route('teacher.homeworks.submissions.grade') }}">
                     @csrf
+                    <input type="hidden" name="submission_id" id="modalSubmissionId">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Student Name</label>
@@ -225,9 +226,8 @@
                 $('#modalMarkObtained').val(obtained);
                 $('#modalComments').val(comments);
 
-                // Set Action URL
-                var baseGradeUrl = "{{ route('teacher.homeworks.submissions.grade', ':id') }}";
-                $('#evaluationForm').attr('action', baseGradeUrl.replace(':id', id));
+                // Set Submission ID
+                $('#modalSubmissionId').val(id);
 
                 // Populate attachments
                 var filesList = $('#modalFilesList');

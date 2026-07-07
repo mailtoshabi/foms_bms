@@ -188,9 +188,9 @@ class HomeworkController extends Controller
         return back()->with('success', 'Homework deleted successfully.');
     }
 
-    public function gradeSubmission(Request $request, $id)
+    public function gradeSubmission(Request $request)
     {
-        $submission = HomeworkSubmission::with('homework')->findOrFail(decrypt($id));
+        $submission = HomeworkSubmission::with('homework')->findOrFail(decrypt($request->submission_id));
 
         if ($submission->homework->teacher_id !== auth('teacher')->id()) {
             abort(403, 'Unauthorized action.');

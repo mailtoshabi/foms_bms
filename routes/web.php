@@ -888,7 +888,7 @@ Route::prefix('teacher')
                 Route::get('/file/{id}', 'downloadFile')->name('file.download');
                 Route::get('/submission-file/{id}', 'downloadSubmissionFile')->name('submission-file.download');
                 Route::get('/class-rooms/search', 'searchClassRooms')->name('class_rooms.search');
-                Route::post('/submissions/{id}/grade', 'gradeSubmission')->name('submissions.grade');
+                Route::post('/submissions/grade', 'gradeSubmission')->name('submissions.grade');
             });
 
         Route::controller(TeacherMessageController::class)
