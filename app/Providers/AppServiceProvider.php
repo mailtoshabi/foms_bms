@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\View;
 use App\Models\ClassHour;
 use App\Models\Teacher;
 use App\Models\ClassRoom;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +34,32 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Global rate limiter (100 requests per minute)
+        RateLimiter::for('global', function (Request $request) {
+            return app()->runningUnitTests() ? null : Limit::perMinute(100)->by($request->ip());
+        });
+
+        // Login rate limiter: limit to 5 login attempts per minute per IP + username/phone combo
+        RateLimiter::for('login', function (Request $request) {
+            if (app()->runningUnitTests()) {
+                return null;
+            }
+            $phone = $request->input('phone') ?? '';
+            $country = $request->input('country_id') ?? '';
+            $key = 'login|' . $country . '|' . $phone . '|' . $request->ip();
+            return Limit::perMinute(5)->by($key)->response(function (Request $request, array $headers) {
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => 'Too many login attempts. Please try again in ' . $headers['Retry-After'] . ' seconds.'], 429);
+                }
+                return back()->with('error', 'Too many login attempts. Please try again in ' . $headers['Retry-After'] . ' seconds.')->withInput($request->except('password'));
+            });
+        });
+
+        // Admission rate limiter: limit to 10 form submissions per hour per IP
+        RateLimiter::for('admission', function (Request $request) {
+            return app()->runningUnitTests() ? null : Limit::perHour(10)->by($request->ip());
+        });
 
         // Student right-sidebar: pass upcoming class hours
         View::composer(['student.layouts.right-sidebar-messages', 'student.layouts.right-sidebar-sessions', 'student.layouts.topbar', 'student.layouts.horizontal'], function ($view) {

@@ -375,7 +375,8 @@
                     .catch(err => console.error('Buzzer poll error: ', err));
             }
 
-            setInterval(checkBuzzer, 5000);
+            const pollInterval = {{ (int)utility('buzzer_interval', 20000) }};
+            setInterval(checkBuzzer, pollInterval);
             checkBuzzer();
         });
     </script>

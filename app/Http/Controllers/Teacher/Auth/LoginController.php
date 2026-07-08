@@ -10,6 +10,9 @@ class LoginController extends Controller
 {
     public function showLoginForm()
     {
+        if (Auth::guard('teacher')->check()) {
+            return redirect()->route('teacher.dashboard');
+        }
         $countries = \App\Models\Country::orderBy('name', 'asc')->get();
         return view('teacher.auth.login', compact('countries'));
     }

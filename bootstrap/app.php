@@ -19,21 +19,32 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\LastLoginTracker::class,
+            'throttle:global',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->respond(function ($response, $exception, $request) {
+            if ($response->getStatusCode() === 429) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'message' => 'Too many requests. Please try again later.'
+                    ], 429);
+                }
+                return back()->with('error', 'Too many requests. Please wait a moment before trying again.');
+            }
+
             if ($response->getStatusCode() === 419) {
                 $path = request()->path();
+                $referer = request()->headers->get('referer');
                 $loginRoute = 'admin.login'; // Default
     
-                if (str_starts_with($path, 'admin')) {
+                if (str_starts_with($path, 'admin') || ($referer && str_contains($referer, '/admin'))) {
                     $loginRoute = 'admin.login';
-                } elseif (str_starts_with($path, 'departments')) {
+                } elseif (str_starts_with($path, 'departments') || str_starts_with($path, 'staff') || ($referer && (str_contains($referer, '/departments') || str_contains($referer, '/staff')))) {
                     $loginRoute = 'staff.login';
-                } elseif (str_starts_with($path, 'teacher')) {
+                } elseif (str_starts_with($path, 'teacher') || ($referer && str_contains($referer, '/teacher'))) {
                     $loginRoute = 'teacher.login';
-                } elseif (str_starts_with($path, 'student')) {
+                } elseif (str_starts_with($path, 'student') || ($referer && str_contains($referer, '/student'))) {
                     $loginRoute = 'student.login';
                 }
 

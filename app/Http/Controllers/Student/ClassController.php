@@ -132,23 +132,32 @@ class ClassController extends Controller
         }
 
         $studentId = Auth::guard('student')->id();
+        $intervalMs = (int)utility('buzzer_interval', 20000);
+        $cacheSeconds = max(5, $intervalMs / 1000);
 
-        // Get active buzzers for this student
-        $buzzer = \App\Models\ClassHourBuzzer::with('classHour')
-            ->where('student_id', $studentId)
-            ->where('is_active', true)
-            ->whereHas('classHour', function ($q) {
-                $q->where('status', 'pending');
-            })
-            ->first();
+        // Cache the active buzzer check to prevent hammering the database
+        $buzzerData = cache()->remember("student_{$studentId}_active_buzzer", $cacheSeconds, function () use ($studentId) {
+            $buzzer = \App\Models\ClassHourBuzzer::with('classHour')
+                ->where('student_id', $studentId)
+                ->where('is_active', true)
+                ->whereHas('classHour', function ($q) {
+                    $q->where('status', 'pending');
+                })
+                ->first();
 
-        if ($buzzer) {
-            return response()->json([
-                'success' => true,
-                'buzzer_id' => encrypt($buzzer->id),
-                'google_meet_link' => $buzzer->classHour->google_meet_link,
-                'class_hour_id' => encrypt($buzzer->class_hour_id)
-            ]);
+            if ($buzzer) {
+                return [
+                    'buzzer_id' => encrypt($buzzer->id),
+                    'google_meet_link' => $buzzer->classHour->google_meet_link,
+                    'class_hour_id' => encrypt($buzzer->class_hour_id)
+                ];
+            }
+
+            return null;
+        });
+
+        if ($buzzerData) {
+            return response()->json(array_merge(['success' => true], $buzzerData));
         }
 
         return response()->json(['success' => false]);

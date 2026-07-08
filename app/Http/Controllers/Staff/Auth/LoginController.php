@@ -69,9 +69,6 @@ class LoginController extends Controller
     {
         Auth::guard('staff')->logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
         return redirect()->route('staff.login');
     }
 }

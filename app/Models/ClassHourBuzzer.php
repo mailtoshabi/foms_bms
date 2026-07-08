@@ -18,6 +18,17 @@ class ClassHourBuzzer extends Model
         'is_active' => 'boolean',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($buzzer) {
+            cache()->forget("student_{$buzzer->student_id}_active_buzzer");
+        });
+
+        static::deleted(function ($buzzer) {
+            cache()->forget("student_{$buzzer->student_id}_active_buzzer");
+        });
+    }
+
     public function classHour()
     {
         return $this->belongsTo(ClassHour::class);

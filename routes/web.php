@@ -45,7 +45,8 @@ Route::get('/admission/{type}/{token}', [AdmissionController::class, 'showForm']
     ->name('admission.form');
 
 Route::post('/admission/{type}/{token}', [AdmissionController::class, 'submitForm'])
-    ->name('admission.submit');
+    ->name('admission.submit')
+    ->middleware('throttle:admission');
 
 Route::prefix('admin')->name('admin.')->group(function () {
 
@@ -55,7 +56,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     // Login
     Route::get('/login', [AdminLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit');
+    Route::post('/login', [AdminLoginController::class, 'login'])->name('login.submit')->middleware('throttle:login');
 
     // Logout
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
@@ -411,7 +412,8 @@ Route::prefix('departments')->name('staff.')->group(function () {
         ->name('login');
 
     Route::post('login', [StaffLoginController::class, 'login'])
-        ->name('login.submit');
+        ->name('login.submit')
+        ->middleware('throttle:login');
 
     Route::post('logout', [StaffLoginController::class, 'logout'])
         ->name('logout');
@@ -802,7 +804,7 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
 
     // Login
     Route::get('/login', [TeacherLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [TeacherLoginController::class, 'login'])->name('login.submit');
+    Route::post('/login', [TeacherLoginController::class, 'login'])->name('login.submit')->middleware('throttle:login');
 });
 
 
@@ -920,7 +922,7 @@ Route::prefix('student')->name('student.')->group(function () {
 
     // Login
     Route::get('/login', [StudentLoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [StudentLoginController::class, 'login'])->name('login.submit');
+    Route::post('/login', [StudentLoginController::class, 'login'])->name('login.submit')->middleware('throttle:login');
 });
 
 Route::prefix('student')

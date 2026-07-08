@@ -14,8 +14,6 @@ class CheckStudentBlocked
             $student = Auth::guard('student')->user();
             if ($student->is_blocked) {
                 Auth::guard('student')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
                 return redirect()->route('student.login')->withErrors([
                     'phone' => 'Your account is blocked. Please contact administration.'
                 ]);
