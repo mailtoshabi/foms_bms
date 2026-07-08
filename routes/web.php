@@ -985,3 +985,27 @@ Route::prefix('student')
 
     });
 
+// Fallback routes for PWA Service Workers if the webserver routes them to the front controller
+Route::get('/sw.js', function () {
+    $path = public_path('sw.js');
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path, [
+        'Content-Type' => 'application/javascript',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+    ]);
+});
+
+Route::get('/firebase-messaging-sw.js', function () {
+    $path = public_path('firebase-messaging-sw.js');
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path, [
+        'Content-Type' => 'application/javascript',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+    ]);
+});
+
+
