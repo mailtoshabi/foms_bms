@@ -280,6 +280,10 @@ class TeacherController extends Controller
 
     public function buzzClassHour(Request $request, $id)
     {
+        if (utility('buzzer_status', 'on') !== 'on') {
+            return response()->json(['success' => false, 'error' => 'Buzzer is currently disabled.'], 403);
+        }
+
         $classHour = ClassHour::with('classRoom')->findOrFail($id);
 
         if ($classHour->status !== 'pending') {

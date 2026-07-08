@@ -225,11 +225,13 @@
                                                     style="background-color: #f59e0b !important;">
                                                     <i class="fas fa-edit"></i> Link
                                                 </button>
+                                                @if(utility('buzzer_status', 'on') === 'on')
                                                 <button class="portal-btn openBuzzerModal text-white"
                                                     data-id="{{ $hour->id }}"
                                                     style="background-color: #ec1d23 !important;">
                                                     <i class="fas fa-bell"></i> Buzz
                                                 </button>
+                                                @endif
                                                 <button class="portal-btn btn-success openAttendanceModal text-white"
                                                     data-id="{{ $hour->id }}" style="background-color: #10b981 !important;">
                                                     <i class="fas fa-check-double"></i> Complete
@@ -543,6 +545,7 @@
         </div>
     </div>
 
+    @if(utility('buzzer_status', 'on') === 'on')
     {{-- Buzzer Modal --}}
     <div class="modal fade" id="buzzerModal">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -573,6 +576,7 @@
             </div>
         </div>
     </div>
+    @endif
 
 @endsection
 

@@ -105,6 +105,7 @@
     @include('student.layouts.vendor-scripts')
 
     @auth('student')
+    @if(utility('buzzer_status', 'on') === 'on')
     <!-- Buzzer Alert Overlay -->
     <div id="globalBuzzerOverlay" style="display:none; position: fixed; z-index: 10000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 16px; max-width: 450px; width: 90%; padding: 24px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); border: 2px solid #ec1d23; animation: pulseBorder 2s infinite;">
@@ -380,6 +381,7 @@
             checkBuzzer();
         });
     </script>
+    @endif
     @endauth
 </body>
 <script src="{{ URL::asset('/assets/js/app.min.js') }}" ></script>

@@ -127,6 +127,10 @@ class ClassController extends Controller
 
     public function checkBuzzer()
     {
+        if (utility('buzzer_status', 'on') !== 'on') {
+            return response()->json(['success' => false, 'error' => 'Buzzer is disabled.'], 403);
+        }
+
         if (!Auth::guard('student')->check()) {
             return response()->json(['success' => false]);
         }
