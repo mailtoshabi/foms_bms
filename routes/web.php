@@ -1008,4 +1008,38 @@ Route::get('/firebase-messaging-sw.js', function () {
     ]);
 });
 
+Route::get('/{manifest}.json', function ($manifest) {
+    $allowed = [
+        'manifest',
+        'manifest-admin',
+        'manifest-home',
+        'manifest-staff',
+        'manifest-student',
+        'manifest-teacher'
+    ];
+    if (in_array($manifest, $allowed)) {
+        $path = public_path($manifest . '.json');
+        if (file_exists($path)) {
+            return response()->file($path, [
+                'Content-Type' => 'application/json',
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            ]);
+        }
+    }
+    abort(404);
+})->where('manifest', 'manifest(-[a-z]+)?');
+
+Route::get('/offline.html', function () {
+    $path = public_path('offline.html');
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path, [
+        'Content-Type' => 'text/html',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+    ]);
+});
+
+
+
 

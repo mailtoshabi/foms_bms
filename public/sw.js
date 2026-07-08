@@ -95,7 +95,7 @@ self.addEventListener('install', (event) => {
             // doesn't break the whole install.
             return Promise.allSettled(
                 PRECACHE_URLS.map(url =>
-                    cache.add(url).catch(() => console.warn('[SW] Pre-cache skipped:', url))
+                    cache.add(url).catch((err) => console.warn('[SW] Pre-cache skipped:', url, err))
                 )
             );
         })
