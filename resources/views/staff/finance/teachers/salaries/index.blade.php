@@ -147,8 +147,20 @@
 
                                     <tr>
 
-                                        <td><a
-                                                href="{{ route('staff.teachers.show', encrypt($salary->teacher->id)) }}">{{ $salary->teacher->name ?? '-' }}</a>
+                                        <td>
+                                            <a href="{{ route('staff.teachers.show', encrypt($salary->teacher->id)) }}">{{ $salary->teacher->name ?? '-' }}</a>
+                                            <div class="mt-1 small">
+                                                @if(!empty($salary->teacher->whatsapp_number))
+                                                    <a href="https://wa.me/{{ $salary->teacher->whatsapp_number }}" target="_blank" class="text-success me-2 text-decoration-none">
+                                                        <i class="mdi mdi-whatsapp"></i> +{{ $salary->teacher->whatsapp_number }}
+                                                    </a>
+                                                @endif
+                                                @if(!empty($salary->teacher->upi_number))
+                                                    <span class="text-muted d-block d-sm-inline-block mt-1 mt-sm-0">
+                                                        <i class="mdi mdi-cash text-primary"></i> Gpay: {{ $salary->teacher->upi_number }}
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </td>
 
                                         <td>

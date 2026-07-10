@@ -23,7 +23,8 @@
        </div>
 
        <div class="card">
-              <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+              <div
+                     class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
                      <div class="d-flex align-items-center w-100 w-sm-auto">
                             <a href="javascript:window.history.back();"
                                    class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
@@ -37,7 +38,8 @@
                                    @endif
                             </h4>
                      </div>
-                     <a href="{{ route('admin.reports.teacher.salary.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+                     <a href="{{ route('admin.reports.teacher.salary.export', request()->query()) }}"
+                            class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
                             <i class="fas fa-file-excel me-1"></i> Export Excel
                      </a>
               </div>
@@ -153,6 +155,18 @@
                                                  <td>
                                                         <a
                                                                href="{{ route('admin.reports.teachers.show', encrypt($row->teacher_id)) }}">{{ $row->name ?? '-' }}</a>
+                                                        <div class="mt-1 small">
+                                                               @if(!empty($row->whatsapp_number))
+                                                                      <a href="https://wa.me/{{ $row->whatsapp_number }}" target="_blank" class="text-success me-2 text-decoration-none">
+                                                                             <i class="mdi mdi-whatsapp"></i> +{{ $row->whatsapp_number }}
+                                                                      </a>
+                                                               @endif
+                                                               @if(!empty($row->upi_number))
+                                                                      <span class="text-muted d-block d-sm-inline-block mt-1 mt-sm-0">
+                                                                             <i class="mdi mdi-cash text-primary"></i> Gpay: {{ $row->upi_number }}
+                                                                      </span>
+                                                               @endif
+                                                        </div>
                                                  </td>
 
                                                  <td>

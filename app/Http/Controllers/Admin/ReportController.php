@@ -473,6 +473,8 @@ class ReportController extends Controller
                 'teachers.id as teacher_id',
                 'teachers.name',
                 'teachers.phone',
+                'teachers.whatsapp_number',
+                'teachers.upi_number',
                 'teacher_salaries.id',
                 'teacher_salaries.total_hours',
                 'teacher_salaries.total_amount',
