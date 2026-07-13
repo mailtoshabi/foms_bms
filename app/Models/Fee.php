@@ -85,8 +85,11 @@ class Fee extends Model
         return $this->belongsTo(ClassRoom::class)->withTrashed();
     }
 
-    public function getPaidAmountAttribute()
+    public function getPaidAmountAttribute($value)
     {
+        if ($value !== null) {
+            return $value;
+        }
         return $this->payments()->sum('paid_amount');
     }
 

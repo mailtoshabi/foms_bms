@@ -31,6 +31,10 @@
             ->where('class_hours.status', 'completed')
             ->orderBy('class_hours.completed_at', 'asc')
             ->get()
+            ->map(function ($item) {
+                $item->completed_at_parsed = \Carbon\Carbon::parse($item->completed_at);
+                return $item;
+            })
             ->groupBy(function ($item) {
                 return $item->student_id . '-' . $item->class_room_id;
             });
@@ -65,7 +69,7 @@
                 $prevFeeCreatedAt = $previousFee ? \Carbon\Carbon::parse($previousFee->created_at) : null;
 
                 foreach ($studentClassAttendances as $att) {
-                    $completedAt = \Carbon\Carbon::parse($att->completed_at);
+                    $completedAt = $att->completed_at_parsed;
 
                     if ($prevFeeCreatedAt) {
                         // Classes completed after the previous fee up to the current fee
@@ -324,7 +328,7 @@
                                         ? $dueDate->startOfDay()->diffInDays(now()->startOfDay())
                                         : 0;
 
-                                    $lastPaymentDate = $fee->payments()->max('paid_date');
+                                    $lastPaymentDate = $fee->last_payment_date;
                                 @endphp
 
                                 <tr class="{{ $fee->rowStyle['class'] }}" style="{{ $fee->rowStyle['style'] }}">

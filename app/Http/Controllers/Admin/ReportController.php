@@ -47,8 +47,9 @@ class ReportController extends Controller
 
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student', 'classRoom', 'refunds']);
-        // ->withSum('payments as paid_amount', 'paid_amount');
+        $query = Fee::with(['student', 'classRoom', 'refunds'])
+            ->withSum('payments as paid_amount', 'paid_amount')
+            ->withMax('payments as last_payment_date', 'paid_date');
 
         // Tab & Status logic
         $status = $request->get('status');

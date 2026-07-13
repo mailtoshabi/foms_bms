@@ -18,7 +18,9 @@ class FeeController extends Controller
         $tab = $request->get('tab', 'unpaid'); // default
 
         $query = Fee::with(['student', 'classRoom', 'refunds'])
-            ->whereHas('student');
+            ->whereHas('student')
+            ->withSum('payments as paid_amount', 'paid_amount')
+            ->withMax('payments as last_payment_date', 'paid_date');
 
         // Enrolment dept sees admission fees only
         $staff = auth('staff')->user();
