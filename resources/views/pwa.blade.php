@@ -81,7 +81,7 @@
         e.preventDefault();          // Stop default mini-info bar
         deferredPrompt = e;
 
-        if (installBanner && !isStandalone) {
+        if (installBanner && !isStandalone && !sessionStorage.getItem('pwa_android_dismissed')) {
             installBanner.classList.remove('d-none');
         }
     });
@@ -97,6 +97,7 @@
                 if (installBanner) installBanner.classList.add('d-none');
                 if (choiceResult.outcome === 'accepted') {
                     console.log('[PWA] User accepted the install prompt');
+                    sessionStorage.setItem('pwa_android_dismissed', '1');
                 }
             });
         });
@@ -105,6 +106,7 @@
     if (dismissBtn) {
         dismissBtn.addEventListener('click', function () {
             if (installBanner) installBanner.classList.add('d-none');
+            sessionStorage.setItem('pwa_android_dismissed', '1');
         });
     }
 
@@ -112,6 +114,7 @@
     window.addEventListener('appinstalled', function () {
         deferredPrompt = null;
         if (installBanner) installBanner.classList.add('d-none');
+        sessionStorage.setItem('pwa_android_dismissed', '1');
         console.log('[PWA] App installed successfully');
     });
 

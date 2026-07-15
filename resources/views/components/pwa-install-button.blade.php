@@ -1,7 +1,3 @@
-@if (
-    request()->routeIs('student.login', 'teacher.login', 'admin.login', 'staff.login') ||
-    request()->is('student', 'student/login', 'teacher', 'teacher/login', 'admin', 'admin/login', 'departments', 'departments/login')
-)
 {{--
 PWA Install Banner Component
 Included at the bottom of all master layouts.
@@ -39,7 +35,7 @@ Visibility is controlled by pwa.js at runtime.
             </button>
         </div>
 
-    </div>
+     </div>
 </div>
 
 {{-- ── iOS "Add to Home Screen" instructions banner ────────────────────── --}}
@@ -119,4 +115,3 @@ Visibility is controlled by pwa.js at runtime.
         filter: brightness(1.1);
     }
 </style>
-@endif

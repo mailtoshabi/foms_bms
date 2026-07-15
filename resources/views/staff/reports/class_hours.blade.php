@@ -102,33 +102,39 @@
                         @forelse($data as $row)
                             <tr>
                                 <td>
-                                    <small>Created:</small><br>
-                                    {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
-
-                                    <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->created_at)->format('h:i A') }}</small><br>
-                                    <small>Updated:</small><br>
-                                    {{ \Carbon\Carbon::parse($row->link_updated_at)->format('d M Y') }}
-
-                                    <small
-                                        class="text-muted">{{ \Carbon\Carbon::parse($row->link_updated_at)->format('h:i A') }}</small>
-                                </td>
-                                <td>
-                                    @if($row->join_teacher_at)
-                                        <small>Teacher Joined:</small><br>
-                                        {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
-
-                                        <small
-                                            class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small><br>
-                                        <small>Student Joined:</small><br>
-                                        {{ \Carbon\Carbon::parse($row->join_student_at)->format('d M Y') }}
-
-                                        <small
-                                            class="text-muted">{{ \Carbon\Carbon::parse($row->join_student_at)->format('h:i A') }}</small>
-                                    @else
-                                        <small>Not Joined Yet</small>
-                                    @endif
-                                </td>
+                                     <small>Created:</small><br>
+                                     @if($row->created_at)
+                                         {{ \Carbon\Carbon::parse($row->created_at)->format('d M Y') }}
+                                         <small class="text-muted">{{ \Carbon\Carbon::parse($row->created_at)->format('h:i A') }}</small>
+                                     @else
+                                         <small class="text-muted">N/A</small>
+                                     @endif
+                                     <br>
+                                     <small>Updated:</small><br>
+                                     @if($row->link_updated_at)
+                                         {{ \Carbon\Carbon::parse($row->link_updated_at)->format('d M Y') }}
+                                         <small class="text-muted">{{ \Carbon\Carbon::parse($row->link_updated_at)->format('h:i A') }}</small>
+                                     @else
+                                         <small class="text-muted">N/A</small>
+                                     @endif
+                                 </td>
+                                 <td>
+                                     <small>Teacher Joined:</small><br>
+                                     @if($row->join_teacher_at)
+                                         {{ \Carbon\Carbon::parse($row->join_teacher_at)->format('d M Y') }}
+                                         <small class="text-muted">{{ \Carbon\Carbon::parse($row->join_teacher_at)->format('h:i A') }}</small>
+                                     @else
+                                         <small class="text-muted">Not Joined</small>
+                                     @endif
+                                     <br>
+                                     <small>Student Joined:</small><br>
+                                     @if($row->join_student_at)
+                                         {{ \Carbon\Carbon::parse($row->join_student_at)->format('d M Y') }}
+                                         <small class="text-muted">{{ \Carbon\Carbon::parse($row->join_student_at)->format('h:i A') }}</small>
+                                     @else
+                                         <small class="text-muted">Not Joined</small>
+                                     @endif
+                                 </td>
                                 <td>
                                     <strong><a href="{{ route('staff.class_rooms.show', encrypt($row->classRoom->id)) }}">{{ $row->classRoom->name ?? 'N/A' }}</a></strong>
                                     <br>
