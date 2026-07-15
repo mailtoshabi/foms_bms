@@ -313,8 +313,7 @@
                     <h3>Students</h3>
                     <p>Classes &amp; Notes</p>
                 </a>
-                <button class="card-install-btn" id="install-student" type="button"
-                    onclick="this.disabled=true; this.innerText='Installing...';">
+                <button class="card-install-btn" id="install-student" type="button">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v13M8 11l4 4 4-4" />
@@ -341,8 +340,7 @@
                     <h3>Teachers</h3>
                     <p>Classes &amp; Students</p>
                 </a>
-                <button class="card-install-btn" id="install-teacher" type="button"
-                    onclick="this.disabled=true; this.innerText='Installing...';">
+                <button class="card-install-btn" id="install-teacher" type="button">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 2v13M8 11l4 4 4-4" />
@@ -378,6 +376,9 @@
         var installBtns = document.querySelectorAll('.card-install-btn');
         var deferredPrompt = null;
 
+        var isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent) && !window.MSStream;
+        var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
         // ── Service Worker Registration ──────────────────────────────────────────
         if ('serviceWorker' in navigator) {
             @if(config('app.env') === 'local')
@@ -398,9 +399,16 @@
                         console.error('[PWA] SW registration failed:', err);
                     });
             @endif
-    }
+        }
 
         if (isStandalone) return;
+
+        // Show install button by default on non-iOS mobile devices
+        if (isMobile && !isIOS) {
+            installBtns.forEach(function (btn) {
+                btn.style.display = 'inline-flex';
+            });
+        }
 
         // ── Android / Chrome ─────────────────────────────────────────────────────
         window.addEventListener('beforeinstallprompt', function (e) {
@@ -413,12 +421,30 @@
 
         installBtns.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                if (!deferredPrompt) return;
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function () {
-                    deferredPrompt = null;
-                    installBtns.forEach(function (b) { b.style.display = 'none'; });
-                });
+                if (deferredPrompt) {
+                    btn.disabled = true;
+                    btn.innerText = 'Installing...';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function (choiceResult) {
+                        deferredPrompt = null;
+                        if (choiceResult.outcome === 'accepted') {
+                            installBtns.forEach(function (b) { b.style.display = 'none'; });
+                        } else {
+                            // Reset state if declined
+                            btn.disabled = false;
+                            btn.innerHTML = `
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v13M8 11l4 4 4-4" />
+                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+                                </svg>
+                                Install App
+                            `;
+                        }
+                    });
+                } else {
+                    alert("To install FOMS BMS on your device:\n\n1. Tap your browser's menu button (usually three dots ⋮ at the top or bottom right).\n2. Select 'Add to Home screen' or 'Install App'.");
+                }
             });
         });
 
@@ -428,7 +454,6 @@
         });
 
         // ── iOS Safari ───────────────────────────────────────────────────────────
-        var isIOS = /ipad|iphone|ipod/i.test(navigator.userAgent) && !window.MSStream;
         if (isIOS && !sessionStorage.getItem('pwa_home_ios_dismissed')) {
             document.querySelectorAll('.ios-hint').forEach(function (el) {
                 el.style.display = 'block';
