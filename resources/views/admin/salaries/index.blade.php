@@ -131,7 +131,15 @@
 
                                     <tr>
 
-                                        <td>{{ $salary->teacher->name ?? '-' }}</td>
+                                        <td>
+                                            @if($salary->teacher)
+                                                <a href="{{ route('admin.reports.teachers.show', $salary->teacher->id) }}" class="fw-semibold">
+                                                    {{ $salary->teacher->name }}
+                                                </a>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
 
                                         <td>
                                             {{ \Carbon\Carbon::parse($salary->cycle_start)->format('d M Y') }}

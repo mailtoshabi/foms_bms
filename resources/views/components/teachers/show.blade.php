@@ -87,6 +87,25 @@
 
                     <hr>
 
+                    @if($teacher->salary_cycle_day)
+                        @php
+                            $salaryDate = \Carbon\Carbon::create(
+                                now()->year,
+                                now()->month,
+                                min($teacher->salary_cycle_day, now()->daysInMonth)
+                            );
+                            $creditDate = $salaryDate->copy()->addDays(10);
+                        @endphp
+                        <p><strong>Salary Date:</strong></p>
+                        <p class="text-muted">
+                            {{ $salaryDate->format('d M Y') }}
+                        </p>
+                        <p><strong>Credit Date:</strong></p>
+                        <p class="text-muted">
+                            {{ $creditDate->format('d M Y') }}
+                        </p>
+                    @endif
+
                     @if($teacher->qualification)
                         <p><strong>Qualification:</strong></p>
                         <p class="text-muted">

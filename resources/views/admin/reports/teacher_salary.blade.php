@@ -155,7 +155,7 @@
                                                  <td>
                                                         <a
                                                                href="{{ route('admin.reports.teachers.show', encrypt($row->teacher_id)) }}">{{ $row->name ?? '-' }}</a>
-                                                        <div class="mt-1 small">
+                                                        <div class="mt-1 ">
                                                                @if(!empty($row->whatsapp_number))
                                                                       <a href="https://wa.me/{{ $row->whatsapp_number }}" target="_blank" class="text-success me-2 text-decoration-none">
                                                                              <i class="mdi mdi-whatsapp"></i> +{{ $row->whatsapp_number }}
