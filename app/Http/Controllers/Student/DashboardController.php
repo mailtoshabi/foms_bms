@@ -60,6 +60,7 @@ class DashboardController extends Controller
         $feeDetails = $student->fees()
             ->with(['classRoom', 'payments'])
             ->latest()
+            ->limit(5)
             ->get();
 
         // Get all teachers from student's class rooms
