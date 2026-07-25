@@ -26,8 +26,8 @@
 
                 <div class="card-body text-center">
 
-                    <img src="@if($teacher->photo){{ asset('storage/' . $teacher->photo) }}@else https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&size=150 @endif" 
-                         class="rounded-circle mb-3 border shadow-sm" width="120" height="120" style="object-fit: cover;">
+                    <img src="@if($teacher->photo){{ asset('storage/' . $teacher->photo) }}@else https://ui-avatars.com/api/?name={{ urlencode($teacher->name) }}&size=150 @endif"
+                        class="rounded-circle mb-3 border shadow-sm" width="120" height="120" style="object-fit: cover;">
 
                     <h5>{{ $teacher->name }}</h5>
 
@@ -55,18 +55,22 @@
                                 <i class="fas fa-times-circle me-2" style="font-size: 1.1rem;"></i>
                                 <span class="fw-semibold">Rules Not Agreed Yet</span>
                             </div>
-                            <form action="{{ route('staff.teachers.update-agreement', encrypt($teacher->id)) }}" method="POST" class="d-inline-block w-100 mb-2">
+                            <form action="{{ route('staff.teachers.update-agreement', encrypt($teacher->id)) }}" method="POST"
+                                class="d-inline-block w-100 mb-2">
                                 @csrf
-                                <button type="submit" class="btn btn-sm btn-outline-success w-100 py-1" onclick="return confirm('Mark this teacher as agreed to the Rules & Regulations?')">
+                                <button type="submit" class="btn btn-sm btn-outline-success w-100 py-1"
+                                    onclick="return confirm('Mark this teacher as agreed to the Rules & Regulations?')">
                                     <i class="fas fa-check me-1"></i> Mark as Agreed
                                 </button>
                             </form>
                         @endif
-                        <a href="{{ asset('agreement/tutor_agreement.pdf') }}" target="_blank" class="btn btn-sm btn-light border w-100 py-1">
+                        <a href="{{ asset('agreement/tutor_agreement.pdf') }}" target="_blank"
+                            class="btn btn-sm btn-light border w-100 py-1">
                             <i class="fas fa-file-pdf text-danger me-1"></i> View Tutor Agreement PDF
                         </a>
                         @if($teacher->id_proof)
-                            <a href="{{ asset('storage/' . $teacher->id_proof) }}" target="_blank" class="btn btn-sm btn-outline-info w-100 py-1 mt-2">
+                            <a href="{{ asset('storage/' . $teacher->id_proof) }}" target="_blank"
+                                class="btn btn-sm btn-outline-info w-100 py-1 mt-2">
                                 <i class="fas fa-id-card me-1"></i> View ID Proof
                             </a>
                         @endif
@@ -199,6 +203,27 @@
                                                     <i class="fas fa-money-bill-wave text-success"></i>
 
                                                 </button>
+
+                                                <button
+                                                    class="btn btn-sm btn-info viewSalaryBtn"
+                                                    style="transition: opacity 0.15s ease-in-out;"
+                                                    onmouseover="this.style.opacity='0.7';"
+                                                    onmouseout="this.style.opacity='1';"
+                                                    title="View Details"
+                                                    data-cycle_start="{{ optional($salary->cycle_start)->format('d M Y') ?? '-' }}"
+                                                    data-cycle_end="{{ optional($salary->cycle_end)->format('d M Y') ?? '-' }}"
+                                                    data-total_hours="{{ $salary->total_hours ?? '-' }}"
+                                                    data-total_amount="₹ {{ number_format($salary->total_amount, 2) }}"
+                                                    data-method="{{ ucfirst($salary->payment_method ?? '-') }}"
+                                                    data-date="{{ optional($salary->payment_date)->format('d M Y') ?? '-' }}"
+                                                    data-reference_number="{{ $salary->reference_number ?? '-' }}"
+                                                    data-notes="{{ $salary->notes ?? '-' }}"
+                                                    data-status="{{ ucfirst($salary->status) }}"
+                                                    data-credit_date="{{ optional($salary->credit_date)->format('d M Y') ?? '-' }}">
+
+                                                    <i class="fas fa-eye text-white"></i>
+
+                                                </button>
                                             @endif
                                         </td>
 
@@ -273,7 +298,8 @@
                                         <td>{{ $class->course->name ?? '-' }}</td>
 
                                         <td>
-                                            <a href="{{ $isAdmin ? route('admin.class_rooms.show', encrypt($class->id)) : route('staff.class_rooms.show', encrypt($class->id)) }}">
+                                            <a
+                                                href="{{ $isAdmin ? route('admin.class_rooms.show', encrypt($class->id)) : route('staff.class_rooms.show', encrypt($class->id)) }}">
                                                 {{ $class->name }}
                                             </a>
                                         </td>
@@ -596,6 +622,69 @@
 
     </div>
 
+
+    {{-- View Salary Details Modal --}}
+
+    <div class="modal fade" id="viewSalaryModal" tabindex="-1" aria-labelledby="viewSalaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewSalaryModalLabel">Salary Payment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered mb-0">
+                        <tbody>
+                            <tr>
+                                <th class="w-50">Cycle Start</th>
+                                <td id="val_cycle_start"></td>
+                            </tr>
+                            <tr>
+                                <th>Cycle End</th>
+                                <td id="val_cycle_end"></td>
+                            </tr>
+                            <tr>
+                                <th>Total Hours</th>
+                                <td id="val_total_hours"></td>
+                            </tr>
+                            <tr>
+                                <th>Total Amount</th>
+                                <td id="val_total_amount" class="fw-bold"></td>
+                            </tr>
+                            <tr>
+                                <th>Due/Credit Date</th>
+                                <td id="val_credit_date"></td>
+                            </tr>
+                            <tr>
+                                <th>Payment Date</th>
+                                <td id="val_payment_date"></td>
+                            </tr>
+                            <tr>
+                                <th>Payment Method</th>
+                                <td id="val_payment_method"></td>
+                            </tr>
+                            <tr>
+                                <th>Reference Number</th>
+                                <td id="val_reference_number"></td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td id="val_status"></td>
+                            </tr>
+                            <tr>
+                                <th>Notes</th>
+                                <td id="val_notes"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Teacher attendance modal --}}
 
     <div class="modal fade" id="attendanceModal">
@@ -747,6 +836,48 @@
 
             $('#salaryModal').modal('show');
 
+        });
+
+        $(document).on('click', '.viewSalaryBtn', function () {
+            let cycleStart = $(this).data('cycle_start') || '-';
+            let cycleEnd = $(this).data('cycle_end') || '-';
+            let totalHours = $(this).data('total_hours') || '-';
+            let totalAmount = $(this).data('total_amount') || '-';
+            let creditDate = $(this).data('credit_date') || '-';
+            let date = $(this).data('date') || '-';
+            let method = $(this).data('method') || '-';
+            let refNum = $(this).data('reference_number') || '-';
+            let status = $(this).data('status') || '';
+            let notes = $(this).data('notes') || '-';
+
+            $('#val_cycle_start').text(cycleStart);
+            $('#val_cycle_end').text(cycleEnd);
+            $('#val_total_hours').text(totalHours);
+            $('#val_total_amount').text(totalAmount);
+            $('#val_credit_date').text(creditDate);
+            $('#val_payment_date').text(date);
+            $('#val_payment_method').text(method);
+            $('#val_reference_number').text(refNum);
+            
+            // Apply badge color to status
+            let badgeClass = 'badge bg-secondary';
+            let statusLower = status.toString().toLowerCase();
+            if (statusLower === 'paid') {
+                badgeClass = 'badge bg-success';
+            } else if (statusLower === 'unpaid') {
+                badgeClass = 'badge bg-danger';
+            } else if (statusLower === 'pending') {
+                badgeClass = 'badge bg-warning text-dark';
+            }
+            if (status) {
+                $('#val_status').html('<span class="' + badgeClass + '">' + status + '</span>');
+            } else {
+                $('#val_status').text('-');
+            }
+            
+            $('#val_notes').text(notes);
+
+            $('#viewSalaryModal').modal('show');
         });
 
     </script>
