@@ -19,7 +19,7 @@ class BaseClassRoomController extends BaseServiceController
 
     public function index(Request $request)
     {
-        $query = ClassRoom::with(['course', 'classType'])
+        $query = ClassRoom::with(['course', 'classType', 'students'])
             ->orderBy('is_completed', 'asc')
             ->orderBy('created_at', 'desc');
 
@@ -51,6 +51,31 @@ class BaseClassRoomController extends BaseServiceController
 
         $class_rooms = $query->paginate(utility('pagination', 50))->withQueryString();
 
+        // Precompute attendance stats to prevent N+1 queries in Blade loop
+        $classRoomIds = $class_rooms->pluck('id')->toArray();
+        $completedHours = \App\Models\ClassHour::whereIn('class_room_id', $classRoomIds)
+            ->where('status', 'completed')
+            ->select('id', 'class_room_id')
+            ->get()
+            ->groupBy('class_room_id');
+
+        $classRoomStats = [];
+        if (!empty($classRoomIds)) {
+            $allCompletedHourIds = $completedHours->flatten()->pluck('id')->toArray();
+            if (!empty($allCompletedHourIds)) {
+                $attendanceData = \Illuminate\Support\Facades\DB::table('student_attendance')
+                    ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
+                    ->select('class_hours.class_room_id', 'student_attendance.student_id', \Illuminate\Support\Facades\DB::raw('SUM(student_attendance.is_present) as present'))
+                    ->whereIn('student_attendance.class_hour_id', $allCompletedHourIds)
+                    ->groupBy('class_hours.class_room_id', 'student_attendance.student_id')
+                    ->get();
+                
+                foreach ($attendanceData as $row) {
+                    $classRoomStats[$row->class_room_id][$row->student_id] = (int)$row->present;
+                }
+            }
+        }
+
         $courses = Course::all();
         $types = ClassType::all();
 
@@ -61,7 +86,7 @@ class BaseClassRoomController extends BaseServiceController
 
         return view(
             $this->viewPrefix . '.index',
-            compact('class_rooms', 'courses', 'types', 'classRoomSearchUrl', 'selectedClassName')
+            compact('class_rooms', 'courses', 'types', 'classRoomSearchUrl', 'selectedClassName', 'completedHours', 'classRoomStats')
         );
     }
 

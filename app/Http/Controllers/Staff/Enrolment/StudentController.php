@@ -42,7 +42,7 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
-        $students = Student::query()->with('lead');
+        $students = Student::query()->with(['lead', 'country']);
 
         if ($request->filled('status')) {
             $students->where('status', $request->status);
@@ -387,6 +387,8 @@ class StudentController extends Controller
     public function show($id)
     {
         $student = Student::with([
+            'country',
+            'relatedStudents.country',
             'class_rooms.course',
             'class_rooms.classType',
             'fees',

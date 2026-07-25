@@ -236,15 +236,15 @@ action="{{ $deleteRoute(encrypt($class->id)) }}">
             </div>
             <div class="modal-body text-start">
                 @php
-                    $completedClassHours = \App\Models\ClassHour::where('class_room_id', $class->id)->where('status', 'completed')->pluck('id');
-                    $totalClasses = $completedClassHours->count() ?: 1;
+                    $completedClassHoursList = isset($completedHours) && isset($completedHours[$class->id]) 
+                        ? $completedHours[$class->id]->pluck('id') 
+                        : \App\Models\ClassHour::where('class_room_id', $class->id)->where('status', 'completed')->pluck('id');
                     
-                    $attendanceStats = \Illuminate\Support\Facades\DB::table('student_attendance')
-                            ->select('student_id', \Illuminate\Support\Facades\DB::raw('SUM(is_present) as present'))
-                            ->whereIn('class_hour_id', $completedClassHours)
-                            ->groupBy('student_id')
-                            ->get()
-                            ->keyBy('student_id');
+                    $totalClasses = $completedClassHoursList->count() ?: 1;
+                    
+                    $statsMap = isset($classRoomStats) && isset($classRoomStats[$class->id])
+                        ? $classRoomStats[$class->id]
+                        : null;
                 @endphp
                 <div class="table-responsive">
                     <table class="table table-bordered  align-middle table-nowrap mb-0">
@@ -257,8 +257,15 @@ action="{{ $deleteRoute(encrypt($class->id)) }}">
                         <tbody>
                             @foreach($class->students as $student)
                                 @php
-                                    $stat = $attendanceStats->get($student->id);
-                                    $present = $stat ? $stat->present : 0;
+                                    if ($statsMap !== null) {
+                                        $present = isset($statsMap[$student->id]) ? $statsMap[$student->id] : 0;
+                                    } else {
+                                        $stat = \Illuminate\Support\Facades\DB::table('student_attendance')
+                                            ->whereIn('class_hour_id', $completedClassHoursList)
+                                            ->where('student_id', $student->id)
+                                            ->sum('is_present');
+                                        $present = $stat ?: 0;
+                                    }
                                     $percentage = round(($present / $totalClasses) * 100);
                                 @endphp
                                 <tr>

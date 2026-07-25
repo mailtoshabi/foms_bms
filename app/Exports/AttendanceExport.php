@@ -53,7 +53,7 @@ class AttendanceExport implements FromCollection, WithHeadings
         }
 
         if (!empty($this->filters['from_date'])) {
-            $query->whereDate('class_hours. link_updated_at', '>=', $this->filters['from_date']);
+            $query->whereDate('class_hours.link_updated_at', '>=', $this->filters['from_date']);
         }
 
         if (!empty($this->filters['to_date'])) {

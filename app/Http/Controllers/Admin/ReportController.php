@@ -47,7 +47,7 @@ class ReportController extends Controller
 
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student', 'classRoom', 'refunds'])
+        $query = Fee::with(['student.country', 'classRoom.classType', 'refunds'])
             ->withSum('payments as paid_amount', 'paid_amount')
             ->withMax('payments as last_payment_date', 'paid_date');
 
@@ -567,7 +567,7 @@ class ReportController extends Controller
 
     public function studentLeadReport(Request $request)
     {
-        $query = StudentLead::query()->with('notes.staff');
+        $query = StudentLead::query()->with(['notes.staff', 'country', 'source']);
 
         // Date range filter (same as salary)
         if ($request->filled('from_date') && $request->filled('to_date')) {
@@ -674,7 +674,7 @@ class ReportController extends Controller
             $query->where('is_blocked', $request->is_blocked);
         }
 
-        $students = $query->latest('id')->paginate(utility('pagination', 20))->withQueryString();
+        $students = $query->with(['country', 'lead'])->latest('id')->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalStudents = $query->count();
@@ -735,7 +735,7 @@ class ReportController extends Controller
 
     public function studentAdvances(Request $request)
     {
-        $query = Student::query();
+        $query = Student::query()->with('country');
 
         // Name / Phone / Admission No filter
         if ($request->filled('name')) {
@@ -1087,10 +1087,13 @@ class ReportController extends Controller
     public function showStudent($id)
     {
         $student = Student::with([
+            'country',
+            'relatedStudents.country',
             'class_rooms.course',
             'class_rooms.classType',
             'fees',
-            'attendances'
+            'attendances',
+            'walletTransactions.fee'
         ])->findOrFail(decrypt($id));
 
         $teachers = Teacher::whereHas('classRooms', function ($q) use ($student) {
@@ -1124,7 +1127,7 @@ class ReportController extends Controller
 
     public function teacherLeadReport(Request $request)
     {
-        $query = TeacherLead::with(['source', 'notes.staff']);
+        $query = TeacherLead::with(['source', 'notes.staff', 'country']);
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [
                 $request->from_date . ' 00:00:00',
@@ -1224,7 +1227,7 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $teachers = $query->latest('id')->paginate(utility('pagination', 20))->withQueryString();
+        $teachers = $query->with(['country', 'lead'])->latest('id')->paginate(utility('pagination', 20))->withQueryString();
 
         // Summary
         $totalTeachers = $query->count();
@@ -1278,7 +1281,12 @@ class ReportController extends Controller
 
     public function showTeacher($id)
     {
-        $teacher = Teacher::with('classRooms.course')->findOrFail(decrypt($id));
+        $teacher = Teacher::with([
+            'country',
+            'classRooms.course',
+            'classRooms.classType',
+            'salaries'
+        ])->findOrFail(decrypt($id));
 
         $notes = ClassNote::whereIn(
             'class_room_id',

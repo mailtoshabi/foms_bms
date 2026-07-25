@@ -189,6 +189,7 @@ class TeacherController extends Controller
     public function show($id)
     {
         $teacher = Teacher::with([
+            'country',
             'classRooms.course',
             'classRooms.classType',
             'salaries'

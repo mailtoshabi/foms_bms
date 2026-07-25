@@ -18,7 +18,7 @@ class TeacherLeadController extends Controller
 
     public function index(Request $request)
     {
-        $leads = TeacherLead::query()->with(['country', 'notes.staff']);
+        $leads = TeacherLead::query()->with(['country', 'notes.staff', 'source']);
 
         // Search by name or contact
         if ($request->filled('search')) {

@@ -17,7 +17,7 @@ class FeeController extends Controller
     {
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student', 'classRoom', 'refunds'])
+        $query = Fee::with(['student.country', 'classRoom.classType', 'refunds'])
             ->whereHas('student')
             ->withSum('payments as paid_amount', 'paid_amount')
             ->withMax('payments as last_payment_date', 'paid_date');

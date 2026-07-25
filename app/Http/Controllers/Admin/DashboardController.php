@@ -153,9 +153,9 @@ class DashboardController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $feesThisMonth = DB::table('fees')
-            ->whereMonth('created_at', $now->month)
+        $feesThisMonth = Fee::whereMonth('created_at', $now->month)
             ->whereYear('created_at', $now->year)
+            ->with(['payments', 'refunds'])
             ->get();
 
         $pendingAmount = 0;
@@ -163,12 +163,8 @@ class DashboardController extends Controller
             if ($fee->status === 'unpaid') {
                 $pendingAmount += $fee->amount;
             } elseif ($fee->status === 'partial') {
-                $totalPaid = DB::table('fee_payments')
-                    ->where('fee_id', $fee->id)
-                    ->sum('paid_amount');
-                $totalRefunded = DB::table('fee_refunds')
-                    ->where('fee_id', $fee->id)
-                    ->sum('amount');
+                $totalPaid = $fee->payments->sum('paid_amount');
+                $totalRefunded = $fee->refunds->sum('amount');
                 $netPaid = $totalPaid - $totalRefunded;
                 $pendingAmount += max($fee->amount - $netPaid, 0);
             }

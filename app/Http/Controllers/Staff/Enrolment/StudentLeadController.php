@@ -22,7 +22,7 @@ class StudentLeadController extends Controller
     */
     public function index(Request $request)
     {
-        $leads = StudentLead::with(['source', 'notes.staff']);
+        $leads = StudentLead::with(['source', 'notes.staff', 'country']);
 
         // Search by name or contact
         if ($request->filled('search')) {
