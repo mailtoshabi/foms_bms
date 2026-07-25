@@ -272,7 +272,7 @@ action="{{ $deleteRoute(encrypt($class->id)) }}">
                                     <td>{{ $student->name }}</td>
                                     <td>
                                         <span class="badge {{ $percentage >= 75 ? 'bg-success' : ($percentage >= 50 ? 'bg-warning' : 'bg-danger') }}">
-                                            {{ $present }}/{{ $completedClassHours->count() ?: 1 }} ({{ $percentage }}%)
+                                            {{ $present }}/{{ $completedClassHoursList->count() }} ({{ $percentage }}%)
                                         </span>
                                     </td>
                                 </tr>

@@ -29,6 +29,7 @@ Route::get('/all_cache', function () {
     Artisan::call('route:clear');
     Artisan::call('view:clear');
     Artisan::call('config:cache');
+    Artisan::call('view:cache');
 
     try {
         Artisan::call('storage:link');
