@@ -14,7 +14,8 @@ class SalaryController extends Controller
     {
         $tab = $request->get('tab', 'unpaid');
 
-        $query = TeacherSalary::with('teacher');
+        $query = TeacherSalary::select('id', 'teacher_id', 'cycle_start', 'cycle_end', 'total_hours', 'total_amount', 'status', 'payment_date', 'payment_method', 'reference_number', 'notes')
+            ->with(['teacher' => fn($q) => $q->select('id', 'name', 'whatsapp_number', 'upi_number')]);
 
         // 🔥 Tab Logic
         if ($tab === 'paid') {
@@ -48,17 +49,17 @@ class SalaryController extends Controller
 
         $salaries = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
-        // return $salaries;
-
-        $teachers = Teacher::pluck('name', 'id');
+        $teachers = \Illuminate\Support\Facades\Cache::remember('salary_teachers', 3600, function () {
+            return Teacher::orderBy('name')->pluck('name', 'id');
+        });
 
         $counts = TeacherSalary::selectRaw("
-        SUM(status = 'unpaid' OR status = 'deposit') as unpaid,
-        SUM(status = 'paid') as paid
-    ")->first();
+            SUM(status = 'unpaid' OR status = 'deposit') as unpaid,
+            SUM(status = 'paid') as paid
+        ")->first();
 
-        $unpaidCount = $counts->unpaid;
-        $paidCount = $counts->paid;
+        $unpaidCount = $counts->unpaid ?? 0;
+        $paidCount = $counts->paid ?? 0;
 
         return view(
             'staff.finance.teachers.salaries.index',

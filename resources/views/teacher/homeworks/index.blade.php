@@ -35,9 +35,9 @@
                             <td class="fw-bold text-dark">{{ $hw->title }}</td>
                             <td>{{ $hw->classRoom?->name ?? 'N/A' }}</td>
                             <td>
-                                @if($hw->files->count() > 0)
+                                @if($hw->files_count > 0)
                                     <span class="portal-badge portal-badge-info">
-                                        <i class="fas fa-paperclip me-1"></i> {{ $hw->files->count() }} file(s)
+                                        <i class="fas fa-paperclip me-1"></i> {{ $hw->files_count }} file(s)
                                     </span>
                                 @else
                                     <span class="text-muted small">-</span>
@@ -45,7 +45,7 @@
                             </td>
                             <td>
                                 <span class="portal-badge portal-badge-primary">
-                                    {{ $hw->submissions->count() }} submission(s)
+                                    {{ $hw->submissions_count }} submission(s)
                                 </span>
                             </td>
                             <td>

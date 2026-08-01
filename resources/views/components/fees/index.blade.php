@@ -1,10 +1,19 @@
 @section('title', 'Fees')
 
 @php
+    // Skip calculations if attendance data has been pre-loaded by the controller
+    $needsAttendanceCalc = false;
+    foreach ($fees as $fee) {
+        if ($fee->type === 'monthly' && !isset($fee->has_attendance)) {
+            $needsAttendanceCalc = true;
+            break;
+        }
+    }
+
     $studentIds = $fees->pluck('student_id')->unique()->filter();
     $classRoomIds = $fees->pluck('class_room_id')->unique()->filter();
 
-    if ($studentIds->isNotEmpty() && $classRoomIds->isNotEmpty()) {
+    if ($needsAttendanceCalc && $studentIds->isNotEmpty() && $classRoomIds->isNotEmpty()) {
         // Fetch all monthly fees for these students and classrooms to locate previous fees in memory
         $allMonthlyFees = DB::table('fees')
             ->whereIn('student_id', $studentIds)
@@ -320,7 +329,7 @@
 
                                 @php
                                     $paid = $fee->paid_amount ?? 0;
-                                    $totalRefunded = $fee->refunds->sum('amount');
+                                    $totalRefunded = $fee->total_refunded ?? (isset($fee->refunds) ? $fee->refunds->sum('amount') : 0);
                                     $netPaid = $paid - $totalRefunded;
                                     $remaining = $fee->amount - $netPaid;
 

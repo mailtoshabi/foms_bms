@@ -86,10 +86,10 @@
                                 <td>{{ $hw->classRoom?->name ?? 'N/A' }}</td>
                                 <td>{{ $hw->teacher?->name ?? 'N/A' }}</td>
                                 <td>
-                                    @if($hw->files->count() > 0)
+                                    @if($hw->files_count > 0)
                                         <span class="badge bg-soft-info text-info fs-7">
                                             <i class="fas fa-paperclip me-1"></i>
-                                            {{ $hw->files->count() }} file(s)
+                                            {{ $hw->files_count }} file(s)
                                         </span>
                                     @else
                                         <span class="text-muted small">-</span>
@@ -97,7 +97,7 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-soft-primary text-primary fs-7">
-                                        {{ $hw->submissions->count() }} submission(s)
+                                        {{ $hw->submissions_count }} submission(s)
                                     </span>
                                 </td>
                                 <td>

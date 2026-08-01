@@ -16,9 +16,13 @@ class ClassNoteController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
-        $classRoomIds = $student->class_rooms->pluck('id');
+        $classRoomIds = $student->class_rooms()->pluck('class_rooms.id');
 
-        $notes = ClassNote::with(['classRoom', 'teacher'])
+        $notes = ClassNote::select('id', 'class_room_id', 'teacher_id', 'title', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name')
+            ])
             ->whereIn('class_room_id', $classRoomIds)
             ->latest()
             ->paginate(utility('pagination', 50));
@@ -30,9 +34,14 @@ class ClassNoteController extends Controller
     public function show($id)
     {
         $student = Auth::guard('student')->user();
-        $classRoomIds = $student->class_rooms->pluck('id');
+        $classRoomIds = $student->class_rooms()->pluck('class_rooms.id');
 
-        $note = ClassNote::with(['classRoom', 'teacher'])
+        $note = ClassNote::select('id', 'class_room_id', 'teacher_id', 'title', 'content', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name'),
+                'files' => fn($q) => $q->select('id', 'class_note_id', 'file_name', 'file_path')
+            ])
             ->whereIn('class_room_id', $classRoomIds)
             ->findOrFail(decrypt($id));
 

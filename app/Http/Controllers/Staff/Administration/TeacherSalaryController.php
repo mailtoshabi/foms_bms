@@ -37,7 +37,7 @@ class TeacherSalaryController extends Controller
         $cycleStart = $cycleEnd->copy()->subMonth()->addDay();
 
         // Get class hours in cycle
-        $classHours = ClassHour::with('classRoom')
+        $classHours = ClassHour::select('id', 'class_room_id', 'duration')
             ->where('teacher_id', $teacher->id)
             ->where('status', 'completed')
             ->where('has_salary_calculated', false)
@@ -47,29 +47,21 @@ class TeacherSalaryController extends Controller
             ])
             ->get();
 
-
-
-        // return  $cycleEnd->endOfDay();
-
         if ($classHours->isEmpty()) {
             return;
         }
+
+        // Get wages in a single query map of class_room_id => hourly_wage
+        $wages = DB::table('teacher_class_room')
+            ->where('teacher_id', $teacher->id)
+            ->pluck('hourly_wage', 'class_room_id');
 
         $totalAmount = 0;
         $totalHours = 0;
 
         foreach ($classHours as $hour) {
-
-            // Get wage from pivot
-            $pivot = $hour->classRoom->teachers()
-                ->where('teacher_id', $teacher->id)
-                ->first()
-                ->pivot;
-
-            $wage = $pivot->hourly_wage ?? 0;
-
+            $wage = $wages[$hour->class_room_id] ?? 0;
             $duration = $hour->duration ?? 0; // minutes
-
             $hours = $duration / 60;
 
             $totalHours += $hours;

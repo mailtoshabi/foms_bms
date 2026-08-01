@@ -14,7 +14,12 @@ class HomeworkController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Homework::with(['classRoom', 'teacher', 'files']);
+        $query = Homework::select('id', 'title', 'class_room_id', 'teacher_id', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name')
+            ])
+            ->withCount(['files', 'submissions']);
 
         if ($request->filled('title')) {
             $query->where('title', 'like', '%' . $request->title . '%');
@@ -30,15 +35,28 @@ class HomeworkController extends Controller
 
         $homeworks = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
-        $classRooms = ClassRoom::active()->orderBy('name')->get();
-        $teachers = Teacher::active()->orderBy('name')->get();
+        $classRooms = \Illuminate\Support\Facades\Cache::remember('homework_classrooms', 3600, function () {
+            return ClassRoom::active()->orderBy('name')->select('id', 'name')->get();
+        });
+
+        $teachers = \Illuminate\Support\Facades\Cache::remember('homework_teachers', 3600, function () {
+            return Teacher::active()->orderBy('name')->select('id', 'name')->get();
+        });
 
         return view('admin.homeworks.index', compact('homeworks', 'classRooms', 'teachers'));
     }
 
     public function show($id)
     {
-        $homework = Homework::with(['classRoom', 'teacher', 'files', 'submissions.student'])
+        $homework = Homework::select('id', 'title', 'content', 'class_room_id', 'teacher_id', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name'),
+                'files' => fn($q) => $q->select('id', 'homework_id', 'file_name', 'file_path', 'file_size'),
+                'submissions' => fn($q) => $q->select('id', 'homework_id', 'student_id', 'created_at', 'graded_at', 'mark_obtained', 'total_mark', 'graded_by'),
+                'submissions.student' => fn($q) => $q->select('id', 'name'),
+                'submissions.grader' => fn($q) => $q->select('id', 'name')
+            ])
             ->findOrFail(decrypt($id));
 
         return view('admin.homeworks.show', compact('homework'));

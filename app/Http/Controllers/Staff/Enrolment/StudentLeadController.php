@@ -22,7 +22,12 @@ class StudentLeadController extends Controller
     */
     public function index(Request $request)
     {
-        $leads = StudentLead::with(['source', 'notes.staff', 'country']);
+        $leads = StudentLead::select('id', 'name', 'contact_number', 'whatsapp_number', 'email', 'status', 'source_id', 'country_id', 'created_at')
+            ->with([
+                'source' => fn($q) => $q->select('id', 'name'),
+                'notes.staff' => fn($q) => $q->select('id', 'name'),
+                'country' => fn($q) => $q->select('id', 'name', 'code')
+            ]);
 
         // Search by name or contact
         if ($request->filled('search')) {
@@ -52,7 +57,9 @@ class StudentLeadController extends Controller
         $leads = $leads->latest()->paginate(utility('pagination', 50))->withQueryString();
 
         // Needed for filter dropdown
-        $sources = Source::where('is_active', true)->get();
+        $sources = \Illuminate\Support\Facades\Cache::remember('active_sources', 3600, function () {
+            return Source::where('is_active', true)->select('id', 'name')->get();
+        });
 
         return view('staff.student_leads.index', compact('leads', 'sources'));
     }
@@ -61,11 +68,16 @@ class StudentLeadController extends Controller
     |--------------------------------------------------------------------------
     | Create
     |--------------------------------------------------------------------------
+    |
     */
     public function create()
     {
-        $sources = Source::where('is_active', true)->get();
-        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        $sources = \Illuminate\Support\Facades\Cache::remember('active_sources', 3600, function () {
+            return Source::where('is_active', true)->select('id', 'name')->get();
+        });
+        $countries = \Illuminate\Support\Facades\Cache::remember('active_countries', 86400, function () {
+            return \App\Models\Country::orderBy('name', 'asc')->select('id', 'name', 'code')->get();
+        });
 
         return view('staff.student_leads.create', compact('sources', 'countries'));
     }
@@ -123,8 +135,12 @@ class StudentLeadController extends Controller
     public function edit($id)
     {
         $lead = StudentLead::with('notes.staff')->findOrFail(decrypt($id));
-        $sources = Source::where('is_active', true)->get();
-        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        $sources = \Illuminate\Support\Facades\Cache::remember('active_sources', 3600, function () {
+            return Source::where('is_active', true)->select('id', 'name')->get();
+        });
+        $countries = \Illuminate\Support\Facades\Cache::remember('active_countries', 86400, function () {
+            return \App\Models\Country::orderBy('name', 'asc')->select('id', 'name', 'code')->get();
+        });
 
         return view('staff.student_leads.create', compact('lead', 'sources', 'countries'));
     }

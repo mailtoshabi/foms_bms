@@ -17,7 +17,11 @@ class TeacherController extends Controller
 
     public function index(Request $request)
     {
-        $teachers = Teacher::query()->with(['lead', 'country']);
+        $teachers = Teacher::select('id', 'name', 'contact_number', 'whatsapp_number', 'upi_number', 'status', 'is_blocked', 'teacher_lead_id', 'country_id', 'photo', 'id_proof')
+            ->with([
+                'lead' => fn($q) => $q->select('id', 'name'),
+                'country' => fn($q) => $q->select('id', 'name', 'code')
+            ]);
 
         if ($request->filled('search')) {
             $teachers->where(function ($q) use ($request) {
@@ -34,7 +38,9 @@ class TeacherController extends Controller
 
     public function create()
     {
-        $countries = Country::orderBy('name', 'asc')->get();
+        $countries = \Illuminate\Support\Facades\Cache::remember('active_countries', 86400, function () {
+            return Country::orderBy('name', 'asc')->select('id', 'name', 'code')->get();
+        });
         return view('staff.teachers.create', compact('countries'));
     }
 
@@ -112,7 +118,9 @@ class TeacherController extends Controller
     public function edit($id)
     {
         $teacher = Teacher::findOrFail(decrypt($id));
-        $countries = Country::orderBy('name', 'asc')->get();
+        $countries = \Illuminate\Support\Facades\Cache::remember('active_countries', 86400, function () {
+            return Country::orderBy('name', 'asc')->select('id', 'name', 'code')->get();
+        });
 
         return view('staff.teachers.create', compact('teacher', 'countries'));
     }
@@ -188,16 +196,23 @@ class TeacherController extends Controller
 
     public function show($id)
     {
-        $teacher = Teacher::with([
-            'country',
-            'classRooms.course',
-            'classRooms.classType',
-            'salaries'
-        ])->findOrFail(decrypt($id));
+        $teacher = Teacher::select('id', 'name', 'dob', 'email', 'contact_number', 'whatsapp_number', 'upi_number', 'address', 'qualification', 'experience', 'status', 'is_blocked', 'agreed_rules', 'country_id', 'photo', 'id_proof', 'salary_amount')
+            ->with([
+                'country' => fn($q) => $q->select('id', 'name', 'code'),
+                'classRooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
+                    ->with([
+                        'course' => fn($qc) => $qc->select('id', 'name'),
+                        'classType' => fn($qt) => $qt->select('id', 'name')
+                    ]),
+                'salaries' => fn($q) => $q->select('id', 'teacher_id', 'cycle_start', 'cycle_end', 'total_amount', 'status', 'payment_date')
+            ])->findOrFail(decrypt($id));
 
         $assignedClasses = $teacher->classRooms->pluck('id')->toArray();
 
-        $notes = ClassNote::where('teacher_id', $teacher->id)->latest()->get();
+        $notes = ClassNote::where('teacher_id', $teacher->id)
+            ->select('id', 'teacher_id', 'class_room_id', 'title', 'created_at')
+            ->latest()
+            ->get();
 
         return view('staff.teachers.show', [
             'teacher' => $teacher,
@@ -228,6 +243,7 @@ class TeacherController extends Controller
         $term = $request->input('q', '');
         $results = Teacher::where('name', 'like', "%{$term}%")
             ->orWhere('contact_number', 'like', "%{$term}%")
+            ->select('id', 'name')
             ->limit(30)
             ->get()
             ->map(fn($t) => [

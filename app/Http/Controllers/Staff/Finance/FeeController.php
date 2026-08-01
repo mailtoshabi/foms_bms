@@ -17,9 +17,10 @@ class FeeController extends Controller
     {
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student.country', 'classRoom.classType', 'refunds'])
+        $query = Fee::with(['student', 'classRoom.classType'])
             ->whereHas('student')
             ->withSum('payments as paid_amount', 'paid_amount')
+            ->withSum('refunds as total_refunded', 'amount')
             ->withMax('payments as last_payment_date', 'paid_date');
 
         // Enrolment dept sees admission fees only
@@ -100,12 +101,12 @@ class FeeController extends Controller
         $totalAmount = 0;
         if ($isFiltered) {
             if ($request->status === 'partial') {
-                $matchingFees = (clone $query)->with(['payments', 'refunds'])->get();
-                $totalAmount = $matchingFees->sum(function ($fee) {
-                    $totalPaid = $fee->payments->sum('paid_amount');
-                    $totalRefunded = $fee->refunds->sum('amount');
-                    return max($fee->amount - ($totalPaid - $totalRefunded), 0);
-                });
+                $totalAmount = (clone $query)
+                    ->selectRaw('SUM(GREATEST(amount - (
+                        (SELECT COALESCE(SUM(paid_amount), 0) FROM fee_payments WHERE fee_payments.fee_id = fees.id) - 
+                        (SELECT COALESCE(SUM(amount), 0) FROM fee_refunds WHERE fee_refunds.fee_id = fees.id)
+                    ), 0)) as total_remaining')
+                    ->value('total_remaining') ?? 0;
             } else {
                 $totalAmount = (clone $query)->sum('amount');
             }
@@ -124,9 +125,97 @@ class FeeController extends Controller
 
         $fees = $query->paginate(utility('pagination', 50))->withQueryString();
 
+        // Pre-calculate attendance for monthly fees in the paginated set
+        $studentIds = $fees->pluck('student_id')->unique()->filter();
+        $classRoomIds = $fees->pluck('class_room_id')->unique()->filter();
+
+        if ($studentIds->isNotEmpty() && $classRoomIds->isNotEmpty()) {
+            $allMonthlyFees = DB::table('fees')
+                ->whereIn('student_id', $studentIds)
+                ->whereIn('class_room_id', $classRoomIds)
+                ->where('type', 'monthly')
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->groupBy(function ($item) {
+                    return $item->student_id . '-' . $item->class_room_id;
+                });
+
+            $allAttendances = DB::table('student_attendance')
+                ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
+                ->select(
+                    'student_attendance.student_id',
+                    'class_hours.class_room_id',
+                    'class_hours.completed_at',
+                    'student_attendance.is_present'
+                )
+                ->whereIn('student_attendance.student_id', $studentIds)
+                ->whereIn('class_hours.class_room_id', $classRoomIds)
+                ->where('class_hours.status', 'completed')
+                ->orderBy('class_hours.completed_at', 'asc')
+                ->get()
+                ->map(function ($item) {
+                    $item->completed_at_parsed = \Carbon\Carbon::parse($item->completed_at);
+                    return $item;
+                })
+                ->groupBy(function ($item) {
+                    return $item->student_id . '-' . $item->class_room_id;
+                });
+
+            foreach ($fees as $fee) {
+                if ($fee->type !== 'monthly') {
+                    continue;
+                }
+
+                $key = $fee->student_id . '-' . $fee->class_room_id;
+
+                $previousFee = null;
+                $studentClassFees = isset($allMonthlyFees[$key]) ? $allMonthlyFees[$key] : null;
+                if ($studentClassFees) {
+                    $index = $studentClassFees->search(function ($item) use ($fee) {
+                        return (int) $item->id === (int) $fee->id;
+                    });
+                    if ($index !== false && $index > 0) {
+                        $previousFee = $studentClassFees->get($index - 1);
+                    }
+                }
+
+                $total = 0;
+                $present = 0;
+
+                $studentClassAttendances = isset($allAttendances[$key]) ? $allAttendances[$key] : null;
+                if ($studentClassAttendances) {
+                    $feeCreatedAt = \Carbon\Carbon::parse($fee->created_at);
+                    $prevFeeCreatedAt = $previousFee ? \Carbon\Carbon::parse($previousFee->created_at) : null;
+
+                    foreach ($studentClassAttendances as $att) {
+                        $completedAt = $att->completed_at_parsed;
+
+                        if ($prevFeeCreatedAt) {
+                            $inInterval = $completedAt->gt($prevFeeCreatedAt) && $completedAt->lte($feeCreatedAt);
+                        } else {
+                            $inInterval = $completedAt->lte($feeCreatedAt);
+                        }
+
+                        if ($inInterval) {
+                            $total++;
+                            if ($att->is_present) {
+                                $present++;
+                            }
+                        }
+                    }
+                }
+
+                $fee->attendance_total = $total;
+                $fee->attendance_present = $present;
+                $fee->attendance_percent = $total > 0 ? round(($present / $total) * 100) : 0;
+                $fee->has_attendance = $total > 0;
+            }
+        }
+
         $classRoomSearchUrl = route('staff.class_rooms.search');
         $selectedClassName = $request->filled('class_room_id')
-            ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+            ? optional(\App\Models\ClassRoom::select('name')->find($request->class_room_id))->name
             : null;
 
         return view('staff.finance.fees.index', compact('fees', 'classRoomSearchUrl', 'selectedClassName', 'tab', 'totalAmount', 'isFiltered'));
@@ -333,12 +422,18 @@ class FeeController extends Controller
         try {
             $successCount = 0;
             $failureCount = 0;
-            $notifications = [];
 
-            foreach ($validated['fee_ids'] as $feeId) {
+            // Load all fees and their students at once
+            $fees = Fee::with('student')->whereIn('id', $validated['fee_ids'])->get();
+
+            // Fetch already sent notifications for today at once
+            $existingNotifications = FeeNotification::whereIn('fee_id', $validated['fee_ids'])
+                ->whereDate('created_at', now()->toDateString())
+                ->pluck('fee_id')
+                ->toArray();
+
+            foreach ($fees as $fee) {
                 try {
-                    $fee = Fee::with('student')->findOrFail($feeId);
-
                     // Calculate days overdue
                     $dueDate = \Carbon\Carbon::parse($fee->due_date);
                     $daysOverdue = $dueDate->isPast() && $fee->status != 'paid' ? now()->diffInDays($dueDate) : 0;
@@ -356,14 +451,9 @@ class FeeController extends Controller
                         $message = "Dear {$studentName}, Your fee of ₹{$amount} is due on {$dueDateStr}. Please make payment.";
                     }
 
-                    // Check if notification was already sent today
-                    $existingNotification = FeeNotification::where('fee_id', $feeId)
-                        ->whereDate('created_at', now()->toDateString())
-                        ->first();
-
-                    if (!$existingNotification) {
+                    if (!in_array($fee->id, $existingNotifications)) {
                         FeeNotification::create([
-                            'fee_id' => $feeId,
+                            'fee_id' => $fee->id,
                             'type' => $notificationType,
                             'recipient_phone' => $contactNumber,
                             'message' => $message,
@@ -420,9 +510,10 @@ class FeeController extends Controller
                 if ($student->is_wallet_autopay_enabled) {
                     $student->refresh();
 
-                    // Fetch unpaid or partial fees sorted by due date ascending
+                    // Fetch unpaid or partial fees sorted by due date ascending with eager loaded payments sum
                     $fees = Fee::where('student_id', $student->id)
                         ->whereIn('status', ['unpaid', 'partial'])
+                        ->withSum('payments as paid_amount', 'paid_amount')
                         ->orderBy('due_date', 'asc')
                         ->orderBy('id', 'asc')
                         ->get();
@@ -432,7 +523,7 @@ class FeeController extends Controller
                             break;
                         }
 
-                        $totalPaid = FeePayment::where('fee_id', $fee->id)->sum('paid_amount');
+                        $totalPaid = $fee->paid_amount ?? 0;
                         $remaining = $fee->amount - $totalPaid;
 
                         if ($remaining <= 0) {

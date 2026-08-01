@@ -42,7 +42,11 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
-        $students = Student::query()->with(['lead', 'country']);
+        $students = Student::select('id', 'name', 'admission_no', 'contact_number', 'email', 'status', 'is_blocked', 'student_lead_id', 'country_id', 'photo')
+            ->with([
+                'lead' => fn($q) => $q->select('id', 'name'),
+                'country' => fn($q) => $q->select('id', 'name', 'code')
+            ]);
 
         if ($request->filled('status')) {
             $students->where('status', $request->status);
@@ -69,7 +73,9 @@ class StudentController extends Controller
     public function create(Request $request)
     {
         $this->checkManagementRole();
-        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        $countries = \Illuminate\Support\Facades\Cache::remember('active_countries', 86400, function () {
+            return \App\Models\Country::orderBy('name', 'asc')->select('id', 'name', 'code')->get();
+        });
         
         $relativeOfStudent = null;
         if ($request->filled('relative_of')) {
@@ -243,7 +249,9 @@ class StudentController extends Controller
     {
         $this->checkManagementRole();
         $student = Student::findOrFail(decrypt($id));
-        $countries = \App\Models\Country::orderBy('name', 'asc')->get();
+        $countries = \Illuminate\Support\Facades\Cache::remember('active_countries', 86400, function () {
+            return \App\Models\Country::orderBy('name', 'asc')->select('id', 'name', 'code')->get();
+        });
 
         return view('staff.students.create', compact('student', 'countries'));
     }
@@ -386,30 +394,34 @@ class StudentController extends Controller
 
     public function show($id)
     {
-        $student = Student::with([
-            'country',
-            'relatedStudents.country',
-            'class_rooms.course',
-            'class_rooms.classType',
-            'fees',
-            'attendances',
-            'walletTransactions.fee'
-        ])->findOrFail(decrypt($id));
+        $student = Student::select('id', 'name', 'admission_no', 'dob', 'email', 'contact_number', 'whatsapp_number', 'parent_name', 'address', 'phone', 'photo', 'id_proof', 'classes_per_week', 'selected_days', 'time_slot', 'starting_date', 'status', 'is_blocked', 'is_admission_fee_exempted', 'is_monthly_fee_exempted', 'admission_fee_discount', 'monthly_fee_discount', 'is_wallet_autopay_enabled', 'wallet_balance', 'country_id')
+            ->with([
+                'country' => fn($q) => $q->select('id', 'name', 'code'),
+                'relatedStudents' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no', 'students.is_blocked', 'students.country_id', 'students.contact_number')->with(['country' => fn($qc) => $qc->select('id', 'name', 'code')]),
+                'class_rooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
+                    ->with([
+                        'course' => fn($qc) => $qc->select('id', 'name'),
+                        'classType' => fn($qt) => $qt->select('id', 'name')
+                    ]),
+                'fees' => fn($q) => $q->select('id', 'student_id', 'class_room_id', 'type', 'amount', 'due_date', 'status', 'payment_date'),
+                'attendances' => fn($q) => $q->select('student_attendance.id', 'student_attendance.student_id', 'student_attendance.class_hour_id', 'student_attendance.is_present'),
+                'walletTransactions.fee' => fn($q) => $q->select('id', 'amount', 'type', 'status')
+            ])->findOrFail(decrypt($id));
 
         $teachers = Teacher::whereHas('classRooms', function ($q) use ($student) {
             $q->whereIn('class_rooms.id', $student->class_rooms->pluck('id'));
-        })->get();
+        })->select('id', 'name', 'whatsapp_number', 'upi_number')->get();
 
         $attendance = [
-            'total' => $student->attendances()->count(),
-            'present' => $student->attendances()->where('is_present', 1)->count(),
-            'absent' => $student->attendances()->where('is_present', 0)->count(),
+            'total' => $student->attendances->count(),
+            'present' => $student->attendances->where('is_present', 1)->count(),
+            'absent' => $student->attendances->where('is_present', 0)->count(),
         ];
 
         $notes = ClassNote::whereIn(
             'class_room_id',
             $student->class_rooms->pluck('id')
-        )->latest()->get();
+        )->select('id', 'class_room_id', 'teacher_id', 'title', 'created_at')->latest()->get();
 
         return view('staff.students.show', compact(
             'student',
@@ -706,6 +718,7 @@ class StudentController extends Controller
                 ->orWhere('contact_number', 'like', "%{$term}%")
                 ->orWhere('admission_no', 'like', "%{$term}%");
         })
+            ->select('id', 'name', 'contact_number', 'admission_no')
             ->limit(20)
             ->get();
 

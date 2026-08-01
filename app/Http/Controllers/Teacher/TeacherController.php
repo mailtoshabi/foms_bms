@@ -27,7 +27,11 @@ class TeacherController extends Controller
         $teacher = Auth::guard('teacher')->user();
 
         $classes = $teacher->classRooms()
-            ->with(['course', 'classType'])
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id', 'class_rooms.slot_duration', 'class_rooms.classes_per_week', 'class_rooms.is_completed')
+            ->with([
+                'course' => fn($q) => $q->select('id', 'name'),
+                'classType' => fn($q) => $q->select('id', 'name')
+            ])
             ->latest()
             ->paginate(utility('pagination', 50));
 
@@ -45,19 +49,22 @@ class TeacherController extends Controller
     {
         $teacher = Auth::guard('teacher')->user();
 
-        $class = $teacher->classRooms()->with([
-            'course',
-            'classType',
-            'students',
-            'notes.files',
-            'homeworks.files',
-            'classHours' => function ($query) use ($teacher) {
-                $query->where('teacher_id', $teacher->id)
-                    ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
-                    ->latest()
-                    ->limit(15);
-            }
-        ])->findOrFail(decrypt($id));
+        $class = $teacher->classRooms()
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id', 'class_rooms.slot_duration', 'class_rooms.classes_per_week', 'class_rooms.is_completed', 'class_rooms.starting_date', 'class_rooms.monthly_fee')
+            ->with([
+                'course' => fn($q) => $q->select('id', 'name'),
+                'classType' => fn($q) => $q->select('id', 'name'),
+                'students' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no'),
+                'notes.files' => fn($q) => $q->select('id', 'class_note_id', 'file_path', 'file_name'),
+                'homeworks.files' => fn($q) => $q->select('id', 'homework_id', 'file_path', 'file_name'),
+                'classHours' => function ($query) use ($teacher) {
+                    $query->select('id', 'class_room_id', 'teacher_id', 'duration', 'google_meet_link', 'status', 'link_updated_at', 'join_teacher_at', 'join_student_at', 'completed_at')
+                        ->where('teacher_id', $teacher->id)
+                        ->orderByRaw("CASE WHEN status = 'pending' THEN 0 ELSE 1 END")
+                        ->latest()
+                        ->limit(15);
+                }
+            ])->findOrFail(decrypt($id));
 
         // =========================
         // Attendance Calculation (Current Cycle Only)
@@ -367,7 +374,11 @@ class TeacherController extends Controller
     {
         $teacher = Auth::guard('teacher')->user();
 
-        $query = ClassHour::with('classRoom.course')
+        $query = ClassHour::select('id', 'class_room_id', 'teacher_id', 'duration', 'google_meet_link', 'status', 'link_updated_at', 'has_salary_calculated', 'has_fee_calculated')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name', 'course_id')
+                    ->with(['course' => fn($c) => $c->select('id', 'name')])
+            ])
             ->where('teacher_id', $teacher->id);
 
         if ($request->filled('filter')) {
@@ -394,7 +405,10 @@ class TeacherController extends Controller
 
         $sessions = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
-        $classRooms = $teacher->classRooms()->with('course')->get();
+        $classRooms = $teacher->classRooms()
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id')
+            ->with(['course' => fn($q) => $q->select('id', 'name')])
+            ->get();
 
         return view('teacher.classes.sessions', compact('sessions', 'classRooms'));
     }

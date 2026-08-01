@@ -21,9 +21,9 @@ class HolidayController extends Controller
 
     public function create()
     {
-        $teachers = Teacher::where('status', 'active')->orderBy('name', 'asc')->get();
-        $students = Student::where('status', 'active')->orderBy('name', 'asc')->get();
-        $classes = ClassRoom::active()->orderBy('name', 'asc')->get();
+        $teachers = Teacher::where('status', 'active')->orderBy('name', 'asc')->select('id', 'name')->get();
+        $students = Student::where('status', 'active')->orderBy('name', 'asc')->select('id', 'name', 'admission_no')->get();
+        $classes = ClassRoom::active()->orderBy('name', 'asc')->select('id', 'name')->get();
         $routePrefix = Auth::guard('admin')->check() ? 'admin' : 'staff';
 
         return view('staff.holidays.create', compact('teachers', 'students', 'classes', 'routePrefix'));

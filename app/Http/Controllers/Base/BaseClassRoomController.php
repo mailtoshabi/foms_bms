@@ -19,7 +19,12 @@ class BaseClassRoomController extends BaseServiceController
 
     public function index(Request $request)
     {
-        $query = ClassRoom::with(['course', 'classType', 'students'])
+        $query = ClassRoom::select('id', 'name', 'course_id', 'class_type_id', 'classes_per_week', 'selected_days', 'time_slot', 'slot_duration', 'is_completed', 'created_at')
+            ->with([
+                'course' => fn($q) => $q->select('id', 'name'),
+                'classType' => fn($q) => $q->select('id', 'name'),
+                'students' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no')
+            ])
             ->orderBy('is_completed', 'asc')
             ->orderBy('created_at', 'desc');
 
@@ -76,12 +81,16 @@ class BaseClassRoomController extends BaseServiceController
             }
         }
 
-        $courses = Course::all();
-        $types = ClassType::all();
+        $courses = \Illuminate\Support\Facades\Cache::remember('active_courses_list', 3600, function () {
+            return Course::select('id', 'name')->get();
+        });
+        $types = \Illuminate\Support\Facades\Cache::remember('active_class_types', 3600, function () {
+            return ClassType::select('id', 'name')->get();
+        });
 
         $classRoomSearchUrl = route($this->routePrefix . '.search');
         $selectedClassName = $request->filled('class_room_id')
-            ? optional(ClassRoom::find($request->class_room_id))->name
+            ? optional(ClassRoom::select('id', 'name')->find($request->class_room_id))->name
             : null;
 
         return view(
@@ -93,8 +102,12 @@ class BaseClassRoomController extends BaseServiceController
 
     public function create()
     {
-        $courses = Course::all();
-        $types = ClassType::all();
+        $courses = \Illuminate\Support\Facades\Cache::remember('active_courses_list', 3600, function () {
+            return Course::select('id', 'name')->get();
+        });
+        $types = \Illuminate\Support\Facades\Cache::remember('active_class_types', 3600, function () {
+            return ClassType::select('id', 'name')->get();
+        });
 
         return view($this->viewPrefix . '.create', compact('courses', 'types'));
     }
@@ -138,8 +151,12 @@ class BaseClassRoomController extends BaseServiceController
     {
         $class = ClassRoom::findOrFail(decrypt($id));
 
-        $courses = Course::all();
-        $types = ClassType::all();
+        $courses = \Illuminate\Support\Facades\Cache::remember('active_courses_list', 3600, function () {
+            return Course::select('id', 'name')->get();
+        });
+        $types = \Illuminate\Support\Facades\Cache::remember('active_class_types', 3600, function () {
+            return ClassType::select('id', 'name')->get();
+        });
 
         return view(
             $this->viewPrefix . '.create',
@@ -227,14 +244,15 @@ class BaseClassRoomController extends BaseServiceController
 
     public function show($id)
     {
-        $class = ClassRoom::with([
-            'course',
-            'classType',
-            'teachers',
-            'students'
-        ])->findOrFail(decrypt($id));
+        $class = ClassRoom::select('id', 'name', 'course_id', 'class_type_id', 'classes_per_week', 'selected_days', 'time_slot', 'slot_duration', 'admission_fee', 'monthly_fee', 'is_completed', 'starting_date')
+            ->with([
+                'course' => fn($q) => $q->select('id', 'name'),
+                'classType' => fn($q) => $q->select('id', 'name'),
+                'teachers' => fn($q) => $q->select('teachers.id', 'teachers.name', 'teachers.contact_number')->withPivot('hourly_wage'),
+                'students' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no', 'students.status', 'students.is_blocked')
+            ])->findOrFail(decrypt($id));
 
-        $teachers = Teacher::all();
+        $teachers = Teacher::select('id', 'name')->get();
 
         return view($this->viewPrefix . '.show', compact(
             'class',

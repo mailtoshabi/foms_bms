@@ -9,7 +9,8 @@ class ExpenseService
 {
     public function getExpenses($request = null)
     {
-        $query = Expense::with('category');
+        $query = Expense::select('id', 'category_id', 'amount', 'expense_date', 'remarks')
+            ->with(['category' => fn($q) => $q->select('id', 'name')]);
 
         if ($request) {
             // Filter by category
@@ -66,7 +67,9 @@ class ExpenseService
 
     public function getCategories()
     {
-        return ExpenseCategory::orderBy('name', 'asc')->pluck('name', 'id');
+        return \Illuminate\Support\Facades\Cache::remember('expense_categories', 3600, function () {
+            return ExpenseCategory::orderBy('name', 'asc')->pluck('name', 'id');
+        });
     }
 
     public function getTotalExpenses($query = null)

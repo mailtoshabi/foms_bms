@@ -228,7 +228,7 @@
                                 @empty
 
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted">
+                                        <td colspan="7" class="text-center text-muted">
                                             {{ $tab == 'paid' ? 'No paid salaries found' : 'No unpaid salaries found' }}
                                         </td>
                                     </tr>

@@ -391,7 +391,7 @@
                     </tr>
                     <tr>
                         @php
-                            $lastPaymentDate = $fee->payments()->max('paid_date');
+                            $lastPaymentDate = $fee->payments->max('paid_date');
                         @endphp
                         @if($lastPaymentDate)
                             <td>Receipted On</td>

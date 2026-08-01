@@ -77,7 +77,8 @@ class FeeController extends Controller
     public function searchStudents(Request $request)
     {
         $term = $request->input('q', '');
-        $results = Student::where('name', 'like', "%{$term}%")
+        $results = Student::select(['id', 'name', 'admission_no'])
+            ->where('name', 'like', "%{$term}%")
             ->orWhere('contact_number', 'like', "%{$term}%")
             ->orWhere('admission_no', 'like', "%{$term}%")
             ->limit(30)

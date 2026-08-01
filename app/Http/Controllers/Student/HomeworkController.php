@@ -16,15 +16,20 @@ class HomeworkController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
-        $classRoomIds = $student->class_rooms->pluck('id');
+        $classRoomIds = $student->class_rooms()->pluck('class_rooms.id');
 
-        $homeworks = Homework::with(['classRoom', 'teacher'])
+        $homeworks = Homework::select('id', 'title', 'class_room_id', 'teacher_id', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name')
+            ])
             ->whereIn('class_room_id', $classRoomIds)
             ->latest()
             ->paginate(utility('pagination', 50));
 
         // Get submissions indexed by homework ID
-        $submissions = HomeworkSubmission::where('student_id', $student->id)
+        $submissions = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'graded_at', 'mark_obtained', 'total_mark')
+            ->where('student_id', $student->id)
             ->whereIn('homework_id', $homeworks->pluck('id'))
             ->get()
             ->keyBy('homework_id');
@@ -35,13 +40,22 @@ class HomeworkController extends Controller
     public function show($id)
     {
         $student = Auth::guard('student')->user();
-        $classRoomIds = $student->class_rooms->pluck('id');
+        $classRoomIds = $student->class_rooms()->pluck('class_rooms.id');
 
-        $homework = Homework::with(['classRoom', 'teacher', 'files'])
+        $homework = Homework::select('id', 'title', 'content', 'class_room_id', 'teacher_id', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name'),
+                'files' => fn($q) => $q->select('id', 'homework_id', 'file_name', 'file_path', 'file_size')
+            ])
             ->whereIn('class_room_id', $classRoomIds)
             ->findOrFail(decrypt($id));
 
-        $submission = HomeworkSubmission::with('files')
+        $submission = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'submitted_text', 'graded_at', 'mark_obtained', 'total_mark', 'teacher_comments', 'graded_by')
+            ->with([
+                'files' => fn($q) => $q->select('id', 'homework_submission_id', 'file_name', 'file_path', 'file_size'),
+                'grader' => fn($q) => $q->select('id', 'name')
+            ])
             ->where('homework_id', $homework->id)
             ->where('student_id', $student->id)
             ->first();
@@ -52,7 +66,7 @@ class HomeworkController extends Controller
     public function submit(Request $request, $id)
     {
         $student = Auth::guard('student')->user();
-        $classRoomIds = $student->class_rooms->pluck('id');
+        $classRoomIds = $student->class_rooms()->pluck('class_rooms.id');
 
         $homework = Homework::whereIn('class_room_id', $classRoomIds)
             ->findOrFail(decrypt($id));
@@ -139,7 +153,7 @@ class HomeworkController extends Controller
     {
         $file = HomeworkFile::findOrFail(decrypt($id));
         $student = Auth::guard('student')->user();
-        $classRoomIds = $student->class_rooms->pluck('id');
+        $classRoomIds = $student->class_rooms()->pluck('class_rooms.id');
 
         $homework = Homework::whereIn('class_room_id', $classRoomIds)->find($file->homework_id);
         if (!$homework) {

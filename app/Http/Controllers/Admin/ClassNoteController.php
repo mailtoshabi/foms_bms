@@ -14,7 +14,12 @@ class ClassNoteController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ClassNote::with(['classRoom', 'teacher', 'files']);
+        $query = ClassNote::select('id', 'class_room_id', 'teacher_id', 'title', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name'),
+                'files' => fn($q) => $q->select('id', 'class_note_id', 'file_name', 'file_path')
+            ]);
 
         // Filters
         if ($request->filled('title')) {
@@ -31,15 +36,24 @@ class ClassNoteController extends Controller
 
         $notes = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
-        $classRooms = ClassRoom::active()->orderBy('name')->get();
-        $teachers = Teacher::active()->orderBy('name')->get();
+        $classRooms = \Illuminate\Support\Facades\Cache::remember('active_classrooms', 3600, function () {
+            return ClassRoom::active()->orderBy('name')->select('id', 'name')->get();
+        });
+        $teachers = \Illuminate\Support\Facades\Cache::remember('active_teachers', 3600, function () {
+            return Teacher::active()->orderBy('name')->select('id', 'name')->get();
+        });
 
         return view('admin.class_notes.index', compact('notes', 'classRooms', 'teachers'));
     }
 
     public function show($id)
     {
-        $note = ClassNote::with(['classRoom', 'teacher', 'files'])
+        $note = ClassNote::select('id', 'class_room_id', 'teacher_id', 'title', 'content', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name'),
+                'files' => fn($q) => $q->select('id', 'class_note_id', 'file_name', 'file_path')
+            ])
             ->findOrFail(decrypt($id));
 
         return view('admin.class_notes.show', compact('note'));

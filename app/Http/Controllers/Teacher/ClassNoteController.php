@@ -17,7 +17,11 @@ class ClassNoteController extends Controller
     public function index()
     {
         $notes = auth('teacher')->user()->notes()
-            ->with(['classRoom', 'teacher'])
+            ->select('id', 'class_room_id', 'teacher_id', 'title', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name')
+            ])
             ->latest()
             ->paginate(utility('pagination', 50));
 
@@ -36,7 +40,8 @@ class ClassNoteController extends Controller
         $teacher = Auth::guard('teacher')->user();
 
         $results = $teacher->classRooms()
-            ->with('course')
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id')
+            ->with(['course' => fn($q) => $q->select('id', 'name')])
             ->where('class_rooms.name', 'like', "%{$term}%")
             ->limit(30)
             ->get()
@@ -103,7 +108,12 @@ class ClassNoteController extends Controller
     public function show($id)
     {
         $note = auth('teacher')->user()->notes()
-            ->with(['classRoom', 'teacher'])
+            ->select('id', 'class_room_id', 'teacher_id', 'title', 'content', 'created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name'),
+                'files' => fn($q) => $q->select('id', 'class_note_id', 'file_name', 'file_path')
+            ])
             ->findOrFail(decrypt($id));
 
         return view('teacher.class_notes.show', compact('note'));

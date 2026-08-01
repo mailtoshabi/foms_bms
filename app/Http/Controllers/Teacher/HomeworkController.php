@@ -18,7 +18,12 @@ class HomeworkController extends Controller
     public function index()
     {
         $homeworks = auth('teacher')->user()->homeworks()
-            ->with(['classRoom', 'teacher'])
+            ->select('homeworks.id', 'homeworks.title', 'homeworks.class_room_id', 'homeworks.teacher_id', 'homeworks.created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'teacher' => fn($q) => $q->select('id', 'name')
+            ])
+            ->withCount(['files', 'submissions'])
             ->latest()
             ->paginate(utility('pagination', 50));
 
@@ -45,7 +50,8 @@ class HomeworkController extends Controller
         $teacher = Auth::guard('teacher')->user();
 
         $results = $teacher->classRooms()
-            ->with('course')
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id')
+            ->with(['course' => fn($q) => $q->select('id', 'name')])
             ->where('class_rooms.name', 'like', "%{$term}%")
             ->limit(30)
             ->get()
@@ -109,11 +115,20 @@ class HomeworkController extends Controller
     public function show($id)
     {
         $homework = auth('teacher')->user()->homeworks()
-            ->with(['classRoom.students', 'files'])
+            ->select('homeworks.id', 'homeworks.title', 'homeworks.content', 'homeworks.class_room_id', 'homeworks.teacher_id', 'homeworks.created_at')
+            ->with([
+                'classRoom' => fn($q) => $q->select('id', 'name'),
+                'classRoom.students' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no'),
+                'files' => fn($q) => $q->select('id', 'homework_id', 'file_name', 'file_path', 'file_size'),
+                'teacher' => fn($q) => $q->select('id', 'name')
+            ])
             ->findOrFail(decrypt($id));
 
         // Get submissions indexed by student ID for easier lookup
-        $submissions = HomeworkSubmission::with(['files', 'student'])
+        $submissions = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'submitted_text', 'graded_at', 'mark_obtained', 'total_mark', 'teacher_comments')
+            ->with([
+                'files' => fn($q) => $q->select('id', 'homework_submission_id', 'file_name', 'file_path', 'file_size')
+            ])
             ->where('homework_id', $homework->id)
             ->get()
             ->keyBy('student_id');

@@ -44,11 +44,11 @@ class ReportController extends Controller
 
     public function fees(Request $request)
     {
-
         $tab = $request->get('tab', 'unpaid'); // default
 
-        $query = Fee::with(['student.country', 'classRoom.classType', 'refunds'])
+        $query = Fee::with(['student', 'classRoom.classType'])
             ->withSum('payments as paid_amount', 'paid_amount')
+            ->withSum('refunds as total_refunded', 'amount')
             ->withMax('payments as last_payment_date', 'paid_date');
 
         // Tab & Status logic
@@ -123,12 +123,12 @@ class ReportController extends Controller
         $totalAmount = 0;
         if ($isFiltered) {
             if ($request->status === 'partial') {
-                $matchingFees = (clone $query)->with(['payments', 'refunds'])->get();
-                $totalAmount = $matchingFees->sum(function ($fee) {
-                    $totalPaid = $fee->payments->sum('paid_amount');
-                    $totalRefunded = $fee->refunds->sum('amount');
-                    return max($fee->amount - ($totalPaid - $totalRefunded), 0);
-                });
+                $totalAmount = (clone $query)
+                    ->selectRaw('SUM(GREATEST(amount - (
+                        (SELECT COALESCE(SUM(paid_amount), 0) FROM fee_payments WHERE fee_payments.fee_id = fees.id) - 
+                        (SELECT COALESCE(SUM(amount), 0) FROM fee_refunds WHERE fee_refunds.fee_id = fees.id)
+                    ), 0)) as total_remaining')
+                    ->value('total_remaining') ?? 0;
             } else {
                 $totalAmount = (clone $query)->sum('amount');
             }
@@ -147,9 +147,97 @@ class ReportController extends Controller
 
         $fees = $query->paginate(utility('pagination', 50))->withQueryString();
 
+        // Pre-calculate attendance for monthly fees in the paginated set
+        $studentIds = $fees->pluck('student_id')->unique()->filter();
+        $classRoomIds = $fees->pluck('class_room_id')->unique()->filter();
+
+        if ($studentIds->isNotEmpty() && $classRoomIds->isNotEmpty()) {
+            $allMonthlyFees = DB::table('fees')
+                ->whereIn('student_id', $studentIds)
+                ->whereIn('class_room_id', $classRoomIds)
+                ->where('type', 'monthly')
+                ->orderBy('created_at', 'asc')
+                ->orderBy('id', 'asc')
+                ->get()
+                ->groupBy(function ($item) {
+                    return $item->student_id . '-' . $item->class_room_id;
+                });
+
+            $allAttendances = DB::table('student_attendance')
+                ->join('class_hours', 'student_attendance.class_hour_id', '=', 'class_hours.id')
+                ->select(
+                    'student_attendance.student_id',
+                    'class_hours.class_room_id',
+                    'class_hours.completed_at',
+                    'student_attendance.is_present'
+                )
+                ->whereIn('student_attendance.student_id', $studentIds)
+                ->whereIn('class_hours.class_room_id', $classRoomIds)
+                ->where('class_hours.status', 'completed')
+                ->orderBy('class_hours.completed_at', 'asc')
+                ->get()
+                ->map(function ($item) {
+                    $item->completed_at_parsed = \Carbon\Carbon::parse($item->completed_at);
+                    return $item;
+                })
+                ->groupBy(function ($item) {
+                    return $item->student_id . '-' . $item->class_room_id;
+                });
+
+            foreach ($fees as $fee) {
+                if ($fee->type !== 'monthly') {
+                    continue;
+                }
+
+                $key = $fee->student_id . '-' . $fee->class_room_id;
+
+                $previousFee = null;
+                $studentClassFees = isset($allMonthlyFees[$key]) ? $allMonthlyFees[$key] : null;
+                if ($studentClassFees) {
+                    $index = $studentClassFees->search(function ($item) use ($fee) {
+                        return (int) $item->id === (int) $fee->id;
+                    });
+                    if ($index !== false && $index > 0) {
+                        $previousFee = $studentClassFees->get($index - 1);
+                    }
+                }
+
+                $total = 0;
+                $present = 0;
+
+                $studentClassAttendances = isset($allAttendances[$key]) ? $allAttendances[$key] : null;
+                if ($studentClassAttendances) {
+                    $feeCreatedAt = \Carbon\Carbon::parse($fee->created_at);
+                    $prevFeeCreatedAt = $previousFee ? \Carbon\Carbon::parse($previousFee->created_at) : null;
+
+                    foreach ($studentClassAttendances as $att) {
+                        $completedAt = $att->completed_at_parsed;
+
+                        if ($prevFeeCreatedAt) {
+                            $inInterval = $completedAt->gt($prevFeeCreatedAt) && $completedAt->lte($feeCreatedAt);
+                        } else {
+                            $inInterval = $completedAt->lte($feeCreatedAt);
+                        }
+
+                        if ($inInterval) {
+                            $total++;
+                            if ($att->is_present) {
+                                $present++;
+                            }
+                        }
+                    }
+                }
+
+                $fee->attendance_total = $total;
+                $fee->attendance_present = $present;
+                $fee->attendance_percent = $total > 0 ? round(($present / $total) * 100) : 0;
+                $fee->has_attendance = $total > 0;
+            }
+        }
+
         $classRoomSearchUrl = route('admin.class_rooms.search');
         $selectedClassName = $request->filled('class_room_id')
-            ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+            ? optional(\App\Models\ClassRoom::select('name')->find($request->class_room_id))->name
             : null;
 
         return view('admin.reports.fees', compact('fees', 'classRoomSearchUrl', 'selectedClassName', 'tab', 'totalAmount', 'isFiltered'));
@@ -268,7 +356,7 @@ class ReportController extends Controller
         $categories = \App\Models\CourseCategory::orderBy('name', 'asc')->pluck('name', 'id');
 
         $selectedClassName = $request->filled('class_room_id')
-            ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+            ? optional(\App\Models\ClassRoom::select('name')->find($request->class_room_id))->name
             : null;
 
         return view('admin.reports.fee_collection', compact('data', 'categories', 'selectedClassName', 'totalGross', 'totalRefunded', 'totalNet', 'isFiltered'));
@@ -436,17 +524,23 @@ class ReportController extends Controller
         $summary = null;
 
         if ($hasFilters) {
+            $counts = (clone $query)
+                ->selectRaw('COUNT(*) as total')
+                ->selectRaw('SUM(CASE WHEN student_attendance.is_present = 1 THEN 1 ELSE 0 END) as present')
+                ->selectRaw('SUM(CASE WHEN student_attendance.is_present = 0 THEN 1 ELSE 0 END) as absent')
+                ->first();
+
             $summary = [
-                'total' => (clone $query)->count(),
-                'present' => (clone $query)->where('student_attendance.is_present', 1)->count(),
-                'absent' => (clone $query)->where('student_attendance.is_present', 0)->count(),
+                'total' => $counts->total ?? 0,
+                'present' => $counts->present ?? 0,
+                'absent' => $counts->absent ?? 0,
             ];
         }
 
         $data = $query->latest('class_hours.link_updated_at')->paginate(utility('pagination', 50))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
-            ? optional(ClassRoom::find($request->class_room_id))->name
+            ? optional(ClassRoom::select('name')->find($request->class_room_id))->name
             : null;
 
         $classRoomSearchUrl = route('admin.class_rooms.search');
@@ -567,7 +661,7 @@ class ReportController extends Controller
 
     public function studentLeadReport(Request $request)
     {
-        $query = StudentLead::query()->with(['notes.staff', 'country', 'source']);
+        $query = StudentLead::query();
 
         // Date range filter (same as salary)
         if ($request->filled('from_date') && $request->filled('to_date')) {
@@ -591,12 +685,18 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $leads = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
+        // Optimize counts to run in one light query
+        $counts = $query->clone()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN status = "converted" THEN 1 ELSE 0 END) as converted')
+            ->selectRaw('SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending')
+            ->first();
 
-        // Summary (like salary totals)
-        $totalLeads = $query->count();
-        $convertedLeads = $query->clone()->where('status', 'converted')->count();
-        $pendingLeads = $query->clone()->where('status', 'pending')->count();
+        $totalLeads = $counts->total ?? 0;
+        $convertedLeads = $counts->converted ?? 0;
+        $pendingLeads = $counts->pending ?? 0;
+
+        $leads = $query->with(['notes.staff', 'country', 'source'])->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         return view('admin.reports.student_leads', compact(
             'leads',
@@ -674,14 +774,18 @@ class ReportController extends Controller
             $query->where('is_blocked', $request->is_blocked);
         }
 
-        $students = $query->with(['country', 'lead'])->latest('id')->paginate(utility('pagination', 20))->withQueryString();
+        // Optimize counts to run in one light query
+        $counts = $query->clone()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active')
+            ->selectRaw('SUM(CASE WHEN status IN ("passout", "dropout") THEN 1 ELSE 0 END) as inactive')
+            ->first();
 
-        // Summary
-        $totalStudents = $query->count();
-        $activeStudents = $query->clone()->where('status', 'active')->count();
-        $inactiveStudents = $query->clone()->where(function ($q) {
-            $q->where('status', 'passout')->orWhere('status', 'dropout');
-        })->count();
+        $totalStudents = $counts->total ?? 0;
+        $activeStudents = $counts->active ?? 0;
+        $inactiveStudents = $counts->inactive ?? 0;
+
+        $students = $query->with(['country', 'lead'])->latest('id')->paginate(utility('pagination', 20))->withQueryString();
 
         return view('admin.reports.students', compact(
             'students',
@@ -735,7 +839,7 @@ class ReportController extends Controller
 
     public function studentAdvances(Request $request)
     {
-        $query = Student::query()->with('country');
+        $query = Student::query();
 
         // Name / Phone / Admission No filter
         if ($request->filled('name')) {
@@ -769,16 +873,21 @@ class ReportController extends Controller
             $query->where('wallet_balance', '<=', 0);
         }
 
-        // Calculate totals based on filtered query
-        $filteredAdvanceAmount = (clone $query)->sum('wallet_balance');
-        $filteredStudentsCount = (clone $query)->count();
+        // Combine filtered stats in a single query
+        $filteredStats = $query->clone()
+            ->selectRaw('SUM(wallet_balance) as total_balance, COUNT(*) as total_count')
+            ->first();
+        $filteredAdvanceAmount = $filteredStats->total_balance ?? 0;
+        $filteredStudentsCount = $filteredStats->total_count ?? 0;
 
-        // Overall stats
-        $totalSystemAdvance = Student::sum('wallet_balance');
-        $studentsWithAdvanceCount = Student::where('wallet_balance', '>', 0)->count();
+        // Combine overall stats in a single query
+        $overallStats = Student::selectRaw('SUM(wallet_balance) as total_balance, SUM(CASE WHEN wallet_balance > 0 THEN 1 ELSE 0 END) as total_count')
+            ->first();
+        $totalSystemAdvance = $overallStats->total_balance ?? 0;
+        $studentsWithAdvanceCount = $overallStats->total_count ?? 0;
 
         // Paginate results
-        $students = $query->orderByDesc('wallet_balance')
+        $students = $query->with('country')->orderByDesc('wallet_balance')
             ->paginate(utility('pagination', 20))
             ->withQueryString();
 
@@ -811,13 +920,18 @@ class ReportController extends Controller
             });
         }
 
-        $staffs = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
+        // Combine counts in a single query
+        $counts = $query->clone()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN salary_amount IS NOT NULL AND salary_amount > 0 THEN 1 ELSE 0 END) as with_salary')
+            ->selectRaw('SUM(CASE WHEN salary_amount IS NULL OR salary_amount = 0 THEN 1 ELSE 0 END) as without_salary')
+            ->first();
 
-        $totalStaffs = (clone $query)->count();
-        $withSalary = (clone $query)->whereNotNull('salary_amount')->count();
-        $withoutSalary = (clone $query)->where(function ($q) {
-            $q->whereNull('salary_amount')->orWhere('salary_amount', 0);
-        })->count();
+        $totalStaffs = $counts->total ?? 0;
+        $withSalary = $counts->with_salary ?? 0;
+        $withoutSalary = $counts->without_salary ?? 0;
+
+        $staffs = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         return view('admin.reports.staffs', compact(
             'staffs',
@@ -1100,10 +1214,11 @@ class ReportController extends Controller
             $q->whereIn('class_rooms.id', $student->class_rooms->pluck('id'));
         })->get();
 
+        // Optimized: Use collection count instead of executing 3 DB queries
         $attendance = [
-            'total' => $student->attendances()->count(),
-            'present' => $student->attendances()->where('is_present', 1)->count(),
-            'absent' => $student->attendances()->where('is_present', 0)->count(),
+            'total' => $student->attendances->count(),
+            'present' => $student->attendances->where('is_present', 1)->count(),
+            'absent' => $student->attendances->where('is_present', 0)->count(),
         ];
 
         $notes = ClassNote::whereIn(
@@ -1138,7 +1253,7 @@ class ReportController extends Controller
 
     public function teacherLeadReport(Request $request)
     {
-        $query = TeacherLead::with(['source', 'notes.staff', 'country']);
+        $query = TeacherLead::query();
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('created_at', [
                 $request->from_date . ' 00:00:00',
@@ -1160,12 +1275,18 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $leads = $query->latest()->paginate(utility('pagination', 20))->withQueryString();
+        // Optimize counts to run in one light query
+        $counts = $query->clone()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN status = "converted" THEN 1 ELSE 0 END) as converted')
+            ->selectRaw('SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending')
+            ->first();
 
-        // Summary
-        $totalLeads = $query->count();
-        $convertedLeads = $query->clone()->where('status', 'converted')->count();
-        $pendingLeads = $query->clone()->where('status', 'pending')->count();
+        $totalLeads = $counts->total ?? 0;
+        $convertedLeads = $counts->converted ?? 0;
+        $pendingLeads = $counts->pending ?? 0;
+
+        $leads = $query->with(['source', 'notes.staff', 'country'])->latest()->paginate(utility('pagination', 20))->withQueryString();
 
         return view('admin.reports.teacher_leads', compact(
             'leads',
@@ -1238,12 +1359,18 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $teachers = $query->with(['country', 'lead'])->latest('id')->paginate(utility('pagination', 20))->withQueryString();
+        // Optimize counts to run in one light query
+        $counts = $query->clone()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw('SUM(CASE WHEN status = "active" THEN 1 ELSE 0 END) as active')
+            ->selectRaw('SUM(CASE WHEN status != "active" THEN 1 ELSE 0 END) as inactive')
+            ->first();
 
-        // Summary
-        $totalTeachers = $query->count();
-        $activeTeachers = $query->clone()->where('status', 'active')->count();
-        $inactiveTeachers = $query->clone()->where('status', '!=', 'active')->count();
+        $totalTeachers = $counts->total ?? 0;
+        $activeTeachers = $counts->active ?? 0;
+        $inactiveTeachers = $counts->inactive ?? 0;
+
+        $teachers = $query->with(['country', 'lead'])->latest('id')->paginate(utility('pagination', 20))->withQueryString();
 
         return view('admin.reports.teachers', compact(
             'teachers',
@@ -1405,8 +1532,12 @@ class ReportController extends Controller
             $query->whereDate('link_updated_at', '<=', $request->to_date);
         }
 
-        $totalClassHours = $query->count();
-        $totalDurationMins = (int) $query->sum('duration');
+        // Optimize counts and sums to run in a single query
+        $stats = $query->clone()
+            ->selectRaw('COUNT(*) as total_count, SUM(duration) as total_duration')
+            ->first();
+        $totalClassHours = $stats->total_count ?? 0;
+        $totalDurationMins = (int) ($stats->total_duration ?? 0);
 
         $totalDurationHours = floor($totalDurationMins / 60);
         $remainingMins = $totalDurationMins % 60;
@@ -1415,11 +1546,11 @@ class ReportController extends Controller
         $data = $query->latest('link_updated_at')->paginate(utility('pagination', 20))->withQueryString();
 
         $selectedClassName = $request->filled('class_room_id')
-            ? optional(\App\Models\ClassRoom::find($request->class_room_id))->name
+            ? optional(\App\Models\ClassRoom::select('name')->find($request->class_room_id))->name
             : null;
 
         $selectedTeacherName = $request->filled('teacher_id')
-            ? optional(\App\Models\Teacher::find($request->teacher_id))->name
+            ? optional(\App\Models\Teacher::select('name')->find($request->teacher_id))->name
             : null;
 
         return view('admin.reports.class_hours', compact(
@@ -1469,9 +1600,10 @@ class ReportController extends Controller
                 if ($student->is_wallet_autopay_enabled) {
                     $student->refresh();
 
-                    // Fetch unpaid or partial fees sorted by due date ascending
+                    // Fetch unpaid or partial fees sorted by due date ascending with eager loaded payments sum
                     $fees = Fee::where('student_id', $student->id)
                         ->whereIn('status', ['unpaid', 'partial'])
+                        ->withSum('payments as paid_amount', 'paid_amount')
                         ->orderBy('due_date', 'asc')
                         ->orderBy('id', 'asc')
                         ->get();
@@ -1481,7 +1613,7 @@ class ReportController extends Controller
                             break;
                         }
 
-                        $totalPaid = \App\Models\FeePayment::where('fee_id', $fee->id)->sum('paid_amount');
+                        $totalPaid = $fee->paid_amount ?? 0;
                         $remaining = $fee->amount - $totalPaid;
 
                         if ($remaining <= 0) {
@@ -1575,20 +1707,21 @@ class ReportController extends Controller
 
         try {
             DB::transaction(function () use ($validated) {
-                $fee = Fee::findOrFail($validated['fee_id']);
+                // Optimized: Eager load payments sum, refunds sum and last payment date in a single query
+                $fee = Fee::withSum('payments as paid_amount_sum', 'paid_amount')
+                    ->withSum('refunds as refunds_amount_sum', 'amount')
+                    ->withMax('payments as last_payment_date', 'paid_date')
+                    ->findOrFail($validated['fee_id']);
 
-                // Calculate total paid so far
-                $totalPaid = $fee->payments()->sum('paid_amount');
-                // Calculate total refunded so far
-                $totalRefunded = \App\Models\FeeRefund::where('fee_id', $fee->id)->sum('amount');
-
+                $totalPaid = $fee->paid_amount_sum ?? 0;
+                $totalRefunded = $fee->refunds_amount_sum ?? 0;
                 $maxRefundable = $totalPaid - $totalRefunded;
 
                 if ($validated['amount'] > $maxRefundable) {
                     throw new \Exception('Refund amount of ₹' . number_format($validated['amount'], 2) . ' exceeds the max refundable amount of ₹' . number_format($maxRefundable, 2));
                 }
 
-                $lastPaymentDate = $fee->payments()->max('paid_date');
+                $lastPaymentDate = $fee->last_payment_date;
                 if (!$lastPaymentDate) {
                     throw new \Exception('Cannot refund a fee with no recorded payments.');
                 }
@@ -1651,7 +1784,7 @@ class ReportController extends Controller
         $class = ClassRoom::with('classType', 'students')->findOrFail($request->class_room_id);
 
         if ($class->classType?->name === 'individual') {
-            if ($class->students()->count() > 0) {
+            if ($class->students->count() > 0) {
                 return back()->with('error', 'Only one student allowed for individual class.');
             }
         }

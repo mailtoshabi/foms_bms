@@ -16,7 +16,8 @@ class StaffController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Staff::with('roles');
+        $query = Staff::select('id', 'name', 'phone', 'email', 'is_blocked', 'photo', 'created_at')
+            ->with(['roles' => fn($q) => $q->select('roles.id', 'roles.name')]);
 
         if ($request->filled('name')) {
             $query->where('name', 'like', '%' . $request->name . '%');
@@ -42,14 +43,18 @@ class StaffController extends Controller
 
         $staffs = $query->latest()->paginate(utility('pagination', 50))->withQueryString();
 
-        $roles = Role::all();
+        $roles = \Illuminate\Support\Facades\Cache::remember('staff_roles', 3600, function () {
+            return Role::select('id', 'name')->get();
+        });
 
         return view('admin.staffs.index', compact('staffs', 'roles'));
     }
 
     public function create()
     {
-        $roles = Role::all();
+        $roles = \Illuminate\Support\Facades\Cache::remember('staff_roles', 3600, function () {
+            return Role::select('id', 'name')->get();
+        });
         return view('admin.staffs.create', compact('roles'));
     }
 
@@ -124,7 +129,9 @@ class StaffController extends Controller
     public function edit($id)
     {
         $staff = Staff::with('roles')->findOrFail(decrypt($id));
-        $roles = Role::all();
+        $roles = \Illuminate\Support\Facades\Cache::remember('staff_roles', 3600, function () {
+            return Role::select('id', 'name')->get();
+        });
         return view('admin.staffs.create', compact('staff', 'roles'));
     }
 
@@ -214,7 +221,12 @@ class StaffController extends Controller
 
     public function show($id)
     {
-        $staff = Staff::with(['roles', 'salaries'])->findOrFail(decrypt($id));
+        $staff = Staff::select('id', 'name', 'phone', 'email', 'is_blocked', 'address', 'gpay_number', 'photo', 'id_proof', 'salary_amount')
+            ->with([
+                'roles' => fn($q) => $q->select('roles.id', 'roles.name'),
+                'salaries' => fn($q) => $q->select('id', 'staff_id', 'salary_month', 'salary_amount', 'status', 'paid_date', 'remarks')
+            ])
+            ->findOrFail(decrypt($id));
         return view('admin.staffs.show', compact('staff'));
     }
 

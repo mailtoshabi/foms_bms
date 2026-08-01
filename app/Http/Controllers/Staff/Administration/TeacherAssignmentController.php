@@ -17,8 +17,8 @@ class TeacherAssignmentController extends Controller
             'hourly_wage' => 'nullable|numeric|min:0'
         ]);
 
-        $teacher = Teacher::findOrFail($request->teacher_id);
-        $classRoom = ClassRoom::findOrFail($request->class_room_id);
+        $teacher = Teacher::select('id', 'name')->findOrFail($request->teacher_id);
+        $classRoom = ClassRoom::select('id', 'is_completed')->findOrFail($request->class_room_id);
 
         if ($classRoom->is_completed) {
             return back()->with('error', 'Cannot assign teacher. The class is already marked as completed.');
@@ -43,8 +43,8 @@ class TeacherAssignmentController extends Controller
 
     public function destroy(Request $request, $teacherId, $classRoomId)
     {
-        $teacher = Teacher::findOrFail($teacherId);
-        $classRoom = ClassRoom::findOrFail($classRoomId);
+        $teacher = Teacher::select('id', 'name')->findOrFail($teacherId);
+        $classRoom = ClassRoom::select('id', 'is_completed')->findOrFail($classRoomId);
 
         if ($classRoom->is_completed) {
             return back()->with('error', 'Cannot remove teacher. The class is already marked as completed.');
@@ -77,8 +77,8 @@ class TeacherAssignmentController extends Controller
             'hourly_wage' => 'required|numeric|min:0'
         ]);
 
-        $teacher = Teacher::findOrFail($request->teacher_id);
-        $classRoom = ClassRoom::findOrFail($request->class_room_id);
+        $teacher = Teacher::select('id', 'name')->findOrFail($request->teacher_id);
+        $classRoom = ClassRoom::select('id', 'is_completed')->findOrFail($request->class_room_id);
 
         if ($classRoom->is_completed) {
             return back()->with('error', 'Cannot update wage. The class is already marked as completed.');

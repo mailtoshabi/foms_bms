@@ -53,14 +53,14 @@ class StaffMessageController extends BaseServiceController
             $authUser = auth('admin')->user();
 
             // Admin can send to all staff
-            $users = Staff::orderBy('name', 'asc')->get();
+            $users = Staff::orderBy('name', 'asc')->select('id', 'name')->get();
 
         } elseif (auth('staff')->check()) {
 
             $authUser = auth('staff')->user();
 
             // Staff can send to all admins
-            $users = Admin::orderBy('name', 'asc')->get();
+            $users = Admin::orderBy('name', 'asc')->select('id', 'name')->get();
 
         } else {
             abort(403, 'Unauthorized access');

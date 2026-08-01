@@ -14,7 +14,13 @@ class ClassController extends Controller
     public function index()
     {
         $student = Auth::guard('student')->user();
-        $classes = $student->class_rooms()->with(['course', 'classType', 'teachers'])->get();
+        $classes = $student->class_rooms()
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
+            ->with([
+                'course' => fn($q) => $q->select('id', 'name'),
+                'classType' => fn($q) => $q->select('id', 'name'),
+                'teachers' => fn($q) => $q->select('teachers.id', 'teachers.name')
+            ])->get();
 
         return view('student.classes.index', compact('classes'));
     }
@@ -24,16 +30,17 @@ class ClassController extends Controller
         $student = Auth::guard('student')->user();
 
         $class = $student->class_rooms()
+            ->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
             ->with([
-                'course',
-                'classType',
-                'teachers',
-                'notes.files',
-                'notes.teacher',
-                'homeworks.files',
-                'homeworks.teacher',
+                'course' => fn($q) => $q->select('id', 'name'),
+                'classType' => fn($q) => $q->select('id', 'name'),
+                'teachers' => fn($q) => $q->select('teachers.id', 'teachers.name'),
+                'notes.files' => fn($q) => $q->select('id', 'class_note_id', 'file_path', 'file_name'),
+                'notes.teacher' => fn($q) => $q->select('id', 'name'),
+                'homeworks.files' => fn($q) => $q->select('id', 'homework_id', 'file_path', 'file_name'),
+                'homeworks.teacher' => fn($q) => $q->select('id', 'name'),
                 'classHours' => function ($query) {
-                    $query->latest();
+                    $query->select('id', 'class_room_id', 'duration', 'google_meet_link', 'status', 'link_updated_at', 'join_teacher_at', 'join_student_at', 'completed_at')->latest();
                 }
             ])
             ->findOrFail(decrypt($id));
