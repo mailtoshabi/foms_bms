@@ -52,7 +52,7 @@
             $studentClassFees = isset($allMonthlyFees[$key]) ? $allMonthlyFees[$key] : null;
             if ($studentClassFees) {
                 $index = $studentClassFees->search(function ($item) use ($fee) {
-                    return (int)$item->id === (int)$fee->id;
+                    return (int) $item->id === (int) $fee->id;
                 });
                 if ($index !== false && $index > 0) {
                     $previousFee = $studentClassFees->get($index - 1);
@@ -138,7 +138,8 @@
             </div>
             <div class="card">
 
-                <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+                <div
+                    class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
 
                     <h4 class="mb-0">
                         <a href="javascript:window.history.back();"
@@ -155,7 +156,8 @@
                     </h4>
 
                     @if($isExport == 'true')
-                        <a href="{{ route('admin.reports.fee.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+                        <a href="{{ route('admin.reports.fee.export', request()->query()) }}"
+                            class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
                             <i class="fas fa-file-excel me-1"></i> Export Excel
                         </a>
                     @endif
@@ -238,7 +240,8 @@
                                 <label class="form-label fw-bold">Date Type</label>
                                 <select name="date_type" id="date_type_select" class="form-control">
                                     <option value="created_at" {{ request('date_type', ($tab === 'paid' ? 'payment_date' : 'created_at')) == 'created_at' ? 'selected' : '' }}>Generated Date</option>
-                                    <option value="due_date" {{ request('date_type') == 'due_date' ? 'selected' : '' }}>Due Date</option>
+                                    <option value="due_date" {{ request('date_type') == 'due_date' ? 'selected' : '' }}>Due
+                                        Date</option>
                                     @if($tab === 'paid')
                                         <option value="payment_date" {{ request('date_type', 'payment_date') == 'payment_date' ? 'selected' : '' }}>Payment Date</option>
                                     @endif
@@ -297,7 +300,7 @@
                         <thead>
 
                             <tr>
-                                <th>Date</th>
+                                <th>Dates</th>
                                 <th>Student</th>
                                 <th>Class</th>
                                 <th>Attendance</th>
@@ -347,31 +350,36 @@
                                             </div>
                                         @endif
                                         @if($daysOverdue > 0)
-                                            <span class="badge bg-danger mt-1" style="font-size: 0.7rem;">{{ $daysOverdue }}d overdue</span>
+                                            <span class="badge bg-danger mt-1" style="font-size: 0.7rem;">{{ $daysOverdue }}d
+                                                overdue</span>
                                         @endif
                                     </td>
 
                                     <td>
-                                        <a href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($fee->student->id)) : route('staff.students.show', encrypt($fee->student->id)) }}">
+                                        <a
+                                            href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($fee->student->id)) : route('staff.students.show', encrypt($fee->student->id)) }}">
                                             {{ $fee->student->name ?? 'N/A' }}
                                         </a>
                                     </td>
 
                                     <td>
-                                        <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">
+                                        <a
+                                            href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">
                                             {{ $fee->classRoom->name ?? 'N/A' }}
                                             <br><small>Type: {{ ucfirst($fee->classRoom->classType->name ?? 'N/A') }}</small>
                                         </a>
                                     </td>
 
                                     <td>
-                                    @if($fee->type == 'monthly' && isset($fee->has_attendance) && $fee->has_attendance)
-                                        <span class="badge {{ $fee->attendance_percent >= 85 ? 'bg-success' : ($fee->attendance_percent >= 75 ? 'bg-warning text-dark' : 'bg-danger') }}">
-                                            {{ $fee->attendance_present }}/{{ $fee->attendance_total }} ({{ $fee->attendance_percent }}%)
-                                        </span>
-                                    @else
-                                        <span class="text-muted small">N/A</span>
-                                    @endif
+                                        @if($fee->type == 'monthly' && isset($fee->has_attendance) && $fee->has_attendance)
+                                            <span
+                                                class="badge {{ $fee->attendance_percent >= 85 ? 'bg-success' : ($fee->attendance_percent >= 75 ? 'bg-warning text-dark' : 'bg-danger') }}">
+                                                {{ $fee->attendance_present }}/{{ $fee->attendance_total }}
+                                                ({{ $fee->attendance_percent }}%)
+                                            </span>
+                                        @else
+                                            <span class="text-muted small">N/A</span>
+                                        @endif
                                     </td>
 
                                     <td>
@@ -400,7 +408,8 @@
                                             $percentage = $fee->amount > 0 ? (max(0, $netPaid) / $fee->amount) * 100 : 0;
                                         @endphp
 
-                                        <div class="progress mt-1" style="height:6px;" title="{{ round($percentage) }}% net paid">
+                                        <div class="progress mt-1" style="height:6px;"
+                                            title="{{ round($percentage) }}% net paid">
                                             <div class="progress-bar bg-success" style="width: {{ $percentage }}%">
                                             </div>
                                         </div>
@@ -418,10 +427,10 @@
                                             class="badge {{ $badgeClasses[$fee->status] ?? 'bg-danger' }}">{{ ucfirst($fee->status) }}</span>
                                         @if($totalRefunded > 0)
                                             <br>
-                                            <a href="javascript:void(0)" class="badge bg-secondary viewRefundsBtn mt-1" 
-                                               data-url="{{ auth('admin')->check() ? route('admin.fees.refunds', $fee->id) : route('staff.fees.refunds', $fee->id) }}"
-                                               title="View refund history">
-                                               <i class="fas fa-undo-alt me-1"></i> Refunded
+                                            <a href="javascript:void(0)" class="badge bg-secondary viewRefundsBtn mt-1"
+                                                data-url="{{ auth('admin')->check() ? route('admin.fees.refunds', $fee->id) : route('staff.fees.refunds', $fee->id) }}"
+                                                title="View refund history">
+                                                <i class="fas fa-undo-alt me-1"></i> Refunded
                                             </a>
                                         @endif
                                     </td>
@@ -432,14 +441,13 @@
                                                 @if($tab !== 'paid')
                                                     <button class="btn btn-sm btn-success markPaidBtn" data-id="{{ $fee->id }}"
                                                         data-amount="{{ $fee->amount }}" data-remaining="{{ $remaining }}"
-                                                        data-wallet="{{ $fee->student->wallet_balance ?? 0 }}"
-                                                        {{ $remaining <= 0 ? 'disabled' : '' }}>
+                                                        data-wallet="{{ $fee->student->wallet_balance ?? 0 }}" {{ $remaining <= 0 ? 'disabled' : '' }}>
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 @endif
                                             @endif
 
-                                            <button class="btn btn-sm btn-info viewPaymentsBtn"
+                                            <button class="btn btn-sm btn-primary viewPaymentsBtn"
                                                 data-url="{{ auth('admin')->check() ? route('admin.fees.payments', $fee->id) : route('staff.fees.payments', $fee->id) }}">
                                                 <i class="fas fa-eye"></i>
                                             </button>
@@ -454,12 +462,9 @@
                                             @endif
 
                                             @if(auth('admin')->check() && $netPaid > 0 && $lastPaymentDate && !\Carbon\Carbon::parse($lastPaymentDate)->addMonths(2)->isPast())
-                                                <button class="btn btn-sm btn-warning refundFeeBtn" 
-                                                    data-id="{{ $fee->id }}"
-                                                    data-student="{{ $fee->student->name ?? 'N/A' }}"
-                                                    data-amount="{{ $fee->amount }}"
-                                                    data-netpaid="{{ $netPaid }}"
-                                                    title="Refund Fee">
+                                                <button class="btn btn-sm btn-warning refundFeeBtn" data-id="{{ $fee->id }}"
+                                                    data-student="{{ $fee->student->name ?? 'N/A' }}" data-amount="{{ $fee->amount }}"
+                                                    data-netpaid="{{ $netPaid }}" title="Refund Fee">
                                                     <i class="fas fa-undo"></i>
                                                 </button>
                                             @endif
@@ -467,8 +472,7 @@
                                             @if(auth('admin')->check() && $fee->status === 'unpaid')
                                                 <button class="btn btn-sm btn-danger deleteFeeBtnAdmin" data-id="{{ $fee->id }}"
                                                     data-student="{{ $fee->student->name ?? 'N/A' }}"
-                                                    data-amount="{{ number_format($fee->amount, 2) }}"
-                                                    title="Delete fee">
+                                                    data-amount="{{ number_format($fee->amount, 2) }}" title="Delete fee">
                                                     <i class="mdi mdi-trash-can"></i>
                                                 </button>
                                                 <form id="delete_fee_admin_{{ $fee->id }}" method="POST"
@@ -580,51 +584,51 @@
 
     @endif
 
-        {{-- Payment History Modal --}}
-        <div class="modal fade" id="paymentsModal">
+    {{-- Payment History Modal --}}
+    <div class="modal fade" id="paymentsModal">
 
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
 
-                    <div class="modal-header">
-                        <h5>Payment History</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
+                <div class="modal-header">
+                    <h5>Payment History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
-                    <div class="modal-body">
-                        <p><strong>Total Paid:</strong> ₹ <span id="totalPaid"></span></p>
+                <div class="modal-body">
+                    <p><strong>Total Paid:</strong> ₹ <span id="totalPaid"></span></p>
 
-                        <div class="table-responsive">
-                            <table class="table table-bordered  align-middle table-nowrap mb-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered  align-middle table-nowrap mb-0">
 
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Amount</th>
-                                        <th>Method</th>
-                                        <th>Notes</th>
-                                    </tr>
-                                </thead>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
 
-                                <tbody id="paymentsTableBody">
+                            <tbody id="paymentsTableBody">
 
-                                    <tr>
-                                        <td colspan="4" class="text-center text-muted">
-                                            Loading...
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        Loading...
+                                    </td>
+                                </tr>
 
-                                </tbody>
+                            </tbody>
 
-                            </table>
-                        </div>
-
+                        </table>
                     </div>
 
                 </div>
-            </div>
 
+            </div>
         </div>
+
+    </div>
 
     @if(auth('admin')->check())
         {{-- Refund Fee Modal --}}
@@ -643,7 +647,9 @@
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Student Name</label>
-                                <input type="text" id="refund_student_name" class="form-control-plaintext border-bottom p-0 fw-bold text-dark" readonly style="font-size: 1.1rem;">
+                                <input type="text" id="refund_student_name"
+                                    class="form-control-plaintext border-bottom p-0 fw-bold text-dark" readonly
+                                    style="font-size: 1.1rem;">
                             </div>
 
                             <div class="mb-3">
@@ -666,7 +672,8 @@
                                 <label class="form-label fw-bold">Refund Amount</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" step="0.01" min="0.01" name="amount" id="refund_amount" class="form-control" required>
+                                    <input type="number" step="0.01" min="0.01" name="amount" id="refund_amount"
+                                        class="form-control" required>
                                 </div>
                             </div>
 
@@ -902,10 +909,10 @@
             let url = $(this).data('url');
 
             $('#paymentsTableBody').html(`
-                <tr>
-                    <td colspan="4" class="text-center">Loading...</td>
-                </tr>
-            `);
+                    <tr>
+                        <td colspan="4" class="text-center">Loading...</td>
+                    </tr>
+                `);
 
             $('#totalPaid').text('0.00');
 
@@ -915,25 +922,25 @@
 
                 if (!res.payments || res.payments.length === 0) {
                     rows = `
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                No payments found
-                            </td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    No payments found
+                                </td>
+                            </tr>
+                        `;
                 } else {
                     res.payments.forEach(p => {
                         let amount = parseFloat(p.paid_amount);
                         total += amount;
 
                         rows += `
-                            <tr>
-                                <td>${formatDate(p.paid_date)}</td>
-                                <td>₹ ${amount.toFixed(2)}</td>
-                                <td>${formatMethod(p.payment_method)}</td>
-                                <td>${p.notes ?? '-'}</td>
-                            </tr>
-                        `;
+                                <tr>
+                                    <td>${formatDate(p.paid_date)}</td>
+                                    <td>₹ ${amount.toFixed(2)}</td>
+                                    <td>${formatMethod(p.payment_method)}</td>
+                                    <td>${p.notes ?? '-'}</td>
+                                </tr>
+                            `;
                     });
                 }
 
@@ -947,10 +954,10 @@
             let url = $(this).data('url');
 
             $('#refundsTableBody').html(`
-                <tr>
-                    <td colspan="4" class="text-center">Loading...</td>
-                </tr>
-            `);
+                    <tr>
+                        <td colspan="4" class="text-center">Loading...</td>
+                    </tr>
+                `);
             $('#totalRefundedAmount').text('0.00');
 
             $.get(url, function (res) {
@@ -959,25 +966,25 @@
 
                 if (!res.refunds || res.refunds.length === 0) {
                     rows = `
-                        <tr>
-                            <td colspan="4" class="text-center text-muted">
-                                No refunds found
-                            </td>
-                        </tr>
-                    `;
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    No refunds found
+                                </td>
+                            </tr>
+                        `;
                 } else {
                     res.refunds.forEach(r => {
                         let amount = parseFloat(r.amount);
                         total += amount;
 
                         rows += `
-                            <tr>
-                                <td>${formatDate(r.refund_date)}</td>
-                                <td>₹ ${amount.toFixed(2)}</td>
-                                <td>${formatMethod(r.payment_method)}</td>
-                                <td>${r.notes ?? '-'}</td>
-                            </tr>
-                        `;
+                                <tr>
+                                    <td>${formatDate(r.refund_date)}</td>
+                                    <td>₹ ${amount.toFixed(2)}</td>
+                                    <td>${formatMethod(r.payment_method)}</td>
+                                    <td>${r.notes ?? '-'}</td>
+                                </tr>
+                            `;
                     });
                 }
 
@@ -989,7 +996,7 @@
 
         // Date helper if not defined in this scope
         if (typeof formatDate !== 'function') {
-            window.formatDate = function(dateStr) {
+            window.formatDate = function (dateStr) {
                 let d = new Date(dateStr);
                 return d.toLocaleDateString('en-IN', {
                     day: '2-digit',
@@ -1001,12 +1008,12 @@
 
         // Method helper if not defined in this scope
         if (typeof formatMethod !== 'function') {
-            window.formatMethod = function(method) {
+            window.formatMethod = function (method) {
                 return method.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
             }
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             function updateDateLabels() {
                 let selectedText = $('#date_type_select option:selected').text();
                 $('#from_date_label').text('From ' + selectedText);

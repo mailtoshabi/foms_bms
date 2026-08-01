@@ -225,6 +225,11 @@
                                 Download Database
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.settings.change-password') }}">
+                                Change Password
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

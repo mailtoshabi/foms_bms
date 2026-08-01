@@ -275,7 +275,8 @@ class BaseClassRoomController extends BaseServiceController
     {
         $validated = $request->validate([
             'class_room_id' => 'required',
-            'teacher_id' => 'required'
+            'teacher_id' => 'required',
+            'reason' => 'nullable|string|max:1000'
         ]);
 
         $classId = decrypt($validated['class_room_id']);
@@ -286,7 +287,7 @@ class BaseClassRoomController extends BaseServiceController
             return back()->with('error', 'Cannot remove teacher. The class is already marked as completed.');
         }
 
-        $this->classService->removeTeacher($classId, $teacherId);
+        $this->classService->removeTeacher($classId, $teacherId, $request->reason);
 
         return back()->with('success', 'Teacher removed from class');
     }
@@ -351,7 +352,8 @@ class BaseClassRoomController extends BaseServiceController
     {
         $validated = $request->validate([
             'class_room_id' => 'required',
-            'student_id' => 'required'
+            'student_id' => 'required',
+            'reason' => 'nullable|string|max:1000'
         ]);
 
         $classId = decrypt($validated['class_room_id']);
@@ -362,7 +364,7 @@ class BaseClassRoomController extends BaseServiceController
             return back()->with('error', 'Cannot remove student. The class is already marked as completed.');
         }
 
-        $this->classService->removeStudent($classId, $studentId);
+        $this->classService->removeStudent($classId, $studentId, $request->reason);
 
         return back()->with('success', 'Student removed from class');
     }

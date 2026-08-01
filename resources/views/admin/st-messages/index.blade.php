@@ -126,7 +126,7 @@
                                     <td>{{ $msg->created_at->format('d M Y, h:i A') }}</td>
                                     <td>
                                         <a href="{{ route('admin.st-messages.show', encrypt($msg->id)) }}"
-                                            class="btn btn-sm btn-info" title="View Thread">
+                                            class="btn btn-sm btn-primary" title="View Thread">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>

@@ -103,7 +103,7 @@
                                 <th>Phone</th>
                                 <th>Wage/Hour</th>
                                 @if(!$class->is_completed)
-                                    @if($isAdmin || $isOperation || $isAdministrator)
+                                    @if($isAdmin) <!-- || $isOperation || $isAdministrator -->
                                     <th>Remove From Class</th> @endif
                                 @endif
                             </tr>
@@ -126,13 +126,14 @@
                                         ₹ {{ number_format($teacher->pivot->hourly_wage, 2) }}
                                     </td>
                                     @if(!$class->is_completed)
-                                        @if($isAdmin || $isOperation || $isAdministrator)
+                                        @if($isAdmin) <!--  || $isOperation || $isAdministrator -->
                                             <td>
-
-                                                <form method="POST" action="{{ route('staff.class_rooms.remove.teacher') }}"
-                                                    onsubmit="return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.')">
+                                                <form method="POST"
+                                                    action="{{ $isAdmin ? route('admin.class_rooms.remove.teacher') : route('staff.class_rooms.remove.teacher') }}"
+                                                    onsubmit="let reason = prompt('Please enter the reason for removing this teacher:'); if (reason === null) return false; if (reason.trim() === '') { alert('Reason is required.'); return false; } this.querySelector('.removal-reason').value = reason; return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.');">
 
                                                     @csrf
+                                                    <input type="hidden" name="reason" class="removal-reason">
 
                                                     <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
                                                     <input type="hidden" name="teacher_id" value="{{ encrypt($teacher->id) }}">
@@ -201,7 +202,7 @@
                                 <th>Name</th>
                                 <th>Contact</th>
                                 <th>Assigned Date</th>
-                                @if($isAdmin || $isOperation || $isAdministrator)
+                                @if($isAdmin) <!-- || $isOperation || $isAdministrator -->
                                     @if(!$class->is_completed)
                                     <th>Remove from Class</th> @endif
                                 @endif
@@ -224,14 +225,17 @@
                                     <td>{{ $student->pivot->assigned_date ? \Carbon\Carbon::parse($student->pivot->assigned_date)->format('d M Y') : '-' }}
                                     </td>
 
-                                    @if($isAdmin || $isOperation || $isAdministrator)
+                                    @if($isAdmin)
+                                        <!-- || $isOperation || $isAdministrator -->
                                         @if(!$class->is_completed)
                                             <td>
 
-                                                <form method="POST" action="{{ route('staff.class_rooms.remove.student') }}"
-                                                    onsubmit="return confirm('Are you sure you want to remove this student?\n\nThis will:\n1. Delete all UNPAID fees for this student in this class.\n2. Delete PENDING class sessions (if individual class or last student).')">
+                                                <form method="POST"
+                                                    action="{{ $isAdmin ? route('admin.class_rooms.remove.student') : route('staff.class_rooms.remove.student') }}"
+                                                    onsubmit="let reason = prompt('Please enter the reason for removing this student:'); if (reason === null) return false; if (reason.trim() === '') { alert('Reason is required.'); return false; } this.querySelector('.removal-reason').value = reason; return confirm('Are you sure you want to remove this student?\n\nThis will:\n1. Delete all UNPAID fees for this student in this class.\n2. Delete PENDING class sessions (if individual class or last student).');">
 
                                                     @csrf
+                                                    <input type="hidden" name="reason" class="removal-reason">
 
                                                     <input type="hidden" name="class_room_id" value="{{ encrypt($class->id) }}">
                                                     <input type="hidden" name="student_id" value="{{ encrypt($student->id) }}">
@@ -453,10 +457,10 @@
 
                 selectedStudents.forEach((name, id) => {
                     badgesHtml += `
-                                                                                                                                        <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
-                                                                                                                                            ${name}
-                                                                                                                                            <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
-                                                                                                                                        </span>`;
+                                                                                                                                                                                        <span class="badge bg-primary d-flex align-items-center gap-2 p-2">
+                                                                                                                                                                                            ${name}
+                                                                                                                                                                                            <i class="fas fa-times cursor-pointer remove-selected" data-id="${id}" style="cursor:pointer"></i>
+                                                                                                                                                                                        </span>`;
                     inputsHtml += `<input type="hidden" name="student_ids[]" value="${id}">`;
                 });
 
@@ -476,7 +480,7 @@
                     }
                 @endif
 
-                                                                                                                                if ($(this).is(':checked')) {
+                                                                                                                                                                                if ($(this).is(':checked')) {
                     selectedStudents.set(id, name);
                 } else {
                     selectedStudents.delete(id);
@@ -500,10 +504,10 @@
                 if (q.length < 2) {
                     if (q.length === 0) {
                         $('#studentList').html(`
-                                                                                                                                            <div class="col-12 text-center py-4 text-muted">
-                                                                                                                                                <i class="fas fa-search fa-2x mb-2"></i>
-                                                                                                                                                <p>Start typing to find students to add...</p>
-                                                                                                                                            </div>`);
+                                                                                                                                                                                            <div class="col-12 text-center py-4 text-muted">
+                                                                                                                                                                                                <i class="fas fa-search fa-2x mb-2"></i>
+                                                                                                                                                                                                <p>Start typing to find students to add...</p>
+                                                                                                                                                                                            </div>`);
                     }
                     return;
                 }
@@ -512,7 +516,7 @@
                     $('#studentList').html('<div class="col-12 text-center py-4"><div class="spinner-border text-primary" role="status"></div></div>');
 
                     $.ajax({
-                        url: "{{ route('staff.students.search') }}",
+                        url: "{{ $isAdmin ? route('admin.students.search') : route('staff.students.search') }}",
                         method: 'GET',
                         data: {
                             q: q,
@@ -527,13 +531,13 @@
                                 response.results.forEach(student => {
                                     let isChecked = selectedStudents.has(student.id.toString()) ? 'checked' : '';
                                     html += `
-                                                                                                                                                        <div class="col-md-6 mb-2">
-                                                                                                                                                            <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
-                                                                                                                                                                <input type="checkbox" value="${student.id}" data-name="${student.name}" 
-                                                                                                                                                                    class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
-                                                                                                                                                                <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
-                                                                                                                                                            </label>
-                                                                                                                                                        </div>`;
+                                                                                                                                                                                                        <div class="col-md-6 mb-2">
+                                                                                                                                                                                                            <label class="d-flex align-items-center border p-2 rounded w-100 h-100" style="cursor: pointer;">
+                                                                                                                                                                                                                <input type="checkbox" value="${student.id}" data-name="${student.name}" 
+                                                                                                                                                                                                                    class="form-check-input me-2 ajax-student-checkbox" ${isChecked}>
+                                                                                                                                                                                                                <span>${student.name} <br><small class="text-muted">${student.admission_no || ''}</small></span>
+                                                                                                                                                                                                            </label>
+                                                                                                                                                                                                        </div>`;
                                 });
                             }
                             $('#studentList').html(html);

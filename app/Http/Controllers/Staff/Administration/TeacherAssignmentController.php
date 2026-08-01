@@ -41,7 +41,7 @@ class TeacherAssignmentController extends Controller
         return back()->with('success', 'Class assigned successfully');
     }
 
-    public function destroy($teacherId, $classRoomId)
+    public function destroy(Request $request, $teacherId, $classRoomId)
     {
         $teacher = Teacher::findOrFail($teacherId);
         $classRoom = ClassRoom::findOrFail($classRoomId);
@@ -61,7 +61,7 @@ class TeacherAssignmentController extends Controller
         //     );
         // }
 
-        $teacher->classRooms()->detach($classRoomId);
+        app(\App\Services\ClassService::class)->removeTeacher($classRoomId, $teacherId, $request->reason);
 
         return back()->with(
             'success',

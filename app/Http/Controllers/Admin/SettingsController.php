@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
 class SettingsController extends Controller
 {
     /**
@@ -130,5 +133,30 @@ class SettingsController extends Controller
 
         // Download and delete temporary file after sending
         return response()->download($tempPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    public function showChangePasswordForm()
+    {
+        return view('admin.settings.change-password');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        $admin = auth('admin')->user();
+
+        if (!Hash::check($request->old_password, $admin->password)) {
+            return back()->withErrors(['old_password' => 'Old password does not match our records.']);
+        }
+
+        $admin->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+
+        return back()->with('success', 'Password changed successfully.');
     }
 }

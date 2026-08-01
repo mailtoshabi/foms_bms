@@ -354,7 +354,7 @@
                                         @if($teacher)
                                             <div class="d-flex gap-2">
                                                 <button
-                                                    class="btn btn-info text-white rounded-pill py-2 px-3 fw-semibold flex-grow-1"
+                                                    class="btn btn-primary text-white rounded-pill py-2 px-3 fw-semibold flex-grow-1"
                                                     data-bs-toggle="modal" data-bs-target="#messageTeacherModal"
                                                     data-teacher-id="{{ $teacher->id }}"
                                                     data-teacher-name="{{ $teacher->name }}">
@@ -899,7 +899,7 @@
                                                         <td>{{ $note->created_at->format('d M Y') }}</td>
                                                         <td>
                                                             <a href="{{ route('student.notes.show', encrypt($note->id)) }}"
-                                                                class="btn btn-sm btn-info text-white rounded-pill px-3">
+                                                                class="btn btn-sm btn-primary text-white rounded-pill px-3">
                                                                 <i class="fas fa-eye me-1"></i> View Note
                                                             </a>
                                                         </td>

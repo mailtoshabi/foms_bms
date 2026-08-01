@@ -34,7 +34,8 @@
 
     <div class="card">
 
-        <div class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
+        <div
+            class="card-header d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2">
             <h4 class="mb-0">
                 <a href="javascript:window.history.back();"
                     class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
@@ -42,7 +43,8 @@
                 </a>
                 Teachers Report
             </h4>
-            <a href="{{ route('admin.reports.teachers.export', request()->query()) }}" class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
+            <a href="{{ route('admin.reports.teachers.export', request()->query()) }}"
+                class="btn btn-success w-75 mx-auto me-sm-0 ms-sm-auto w-sm-auto mt-2 mt-sm-0 text-center">
                 <i class="fas fa-file-excel me-1"></i> Export Excel
             </a>
         </div>
@@ -126,9 +128,12 @@
                             <td>{{ $teacher->qualification ?? 'N/A' }}</td>
                             <td>
                                 <span class="badge bg-{{ $teacher->status == 'active' ? 'success' : 'danger' }}">
-                                    {{ ucfirst($teacher->status) }}
-                                </span>
-                                <span class="badge bg-{{ $rank['color'] }}  px-3 ">{{ $rank['label'] }}</span><br>
+                                     {{ ucfirst($teacher->status) }}
+                                 </span>
+                                 @if($teacher->is_blocked)
+                                     <span class="badge bg-danger">Blocked</span>
+                                 @endif
+                                 <span class="badge bg-{{ $rank['color'] }}  px-3 ">{{ $rank['label'] }}</span><br>
                                 @for($s = 1; $s <= 5; $s++)
                                     <span
                                         style="font-size:1rem; color: {{ $s <= $rank['stars'] ? '#f1c40f' : '#ccc' }}">&#9733;</span>
@@ -137,10 +142,19 @@
                             </td>
                             <td>{{ $teacher->created_at->format('d M Y') }}</td>
                             <td>
-                                <a href="{{ route('admin.reports.teachers.show', encrypt($teacher->id)) }}"
-                                    class="btn btn-sm btn-info">
-                                    View
-                                </a>
+                                <div class="d-flex gap-1">
+                                    <a href="{{ route('admin.reports.teachers.show', encrypt($teacher->id)) }}"
+                                        class="btn btn-sm btn-primary" data-bs-toggle="tooltip" title="View Teacher">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.reports.teachers.toggleBlock', encrypt($teacher->id)) }}"
+                                        onclick="return confirm('Are you sure you want to {{ $teacher->is_blocked ? 'unblock' : 'block' }} this teacher?');"
+                                        class="btn btn-sm {{ $teacher->is_blocked ? 'btn-success' : 'btn-danger' }}"
+                                        data-bs-toggle="tooltip"
+                                        title="{{ $teacher->is_blocked ? 'Unblock Teacher' : 'Block Teacher' }}">
+                                        <i class="fas {{ $teacher->is_blocked ? 'fa-unlock' : 'fa-ban' }}"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
 

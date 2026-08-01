@@ -51,7 +51,7 @@
                                             </td>
                                             <td>
                                                 {{-- <a href="{{ route('student.classes.show', encrypt($class->id)) }}"
-                                                    class="btn btn-sm btn-info">View</a> --}}
+                                                    class="btn btn-sm btn-primary">View</a> --}}
                                                 <a href="{{ route('student.classes.show', encrypt($class->id)) }}"
                                                     class="btn btn-sm btn-primary mt-2">
                                                     <i class="fas fa-sign-in-alt"></i> Enter

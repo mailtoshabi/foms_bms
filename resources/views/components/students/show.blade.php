@@ -57,22 +57,23 @@
                     @if($showButtons == 'true' && auth('admin')->check())
                         <div class="mt-4 p-3 bg-light rounded text-start shadow-sm border border-2 border-soft-primary">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-uppercase text-muted font-size-11 fw-bold tracking-wider">Wallet Balance</span>
+                                <span class="text-uppercase text-muted font-size-11 fw-bold tracking-wider">Wallet
+                                    Balance</span>
                                 <span class="badge bg-info font-size-10">Advance</span>
                             </div>
                             <h3 class="mb-3 text-primary">₹ {{ number_format($student->wallet_balance ?? 0, 2) }}</h3>
 
                             <!-- Autopay Toggle Form -->
-                            <form method="POST" action="{{ route('admin.students.wallet.toggle-autopay', encrypt($student->id)) }}" class="mb-3">
+                            <form method="POST"
+                                action="{{ route('admin.students.wallet.toggle-autopay', encrypt($student->id)) }}"
+                                class="mb-3">
                                 @csrf
                                 <div class="form-check form-switch d-flex align-items-center justify-content-between p-0">
                                     <label class="form-check-label text-muted font-size-12 cursor-pointer" for="autopaySwitch">
                                         <i class="fas fa-magic text-primary me-1"></i> Fee Autopay from Balance
                                     </label>
-                                    <input class="form-check-input ms-0 cursor-pointer" type="checkbox" id="autopaySwitch" 
-                                           style="width: 2.2em; height: 1.1em;"
-                                           {{ $student->is_wallet_autopay_enabled ? 'checked' : '' }} 
-                                           onchange="this.form.submit()">
+                                    <input class="form-check-input ms-0 cursor-pointer" type="checkbox" id="autopaySwitch"
+                                        style="width: 2.2em; height: 1.1em;" {{ $student->is_wallet_autopay_enabled ? 'checked' : '' }} onchange="this.form.submit()">
                                 </div>
                             </form>
 
@@ -82,6 +83,7 @@
                                         flex-direction: column !important;
                                         align-items: center !important;
                                     }
+
                                     .wallet-action-buttons button {
                                         width: 150px !important;
                                         flex-grow: 0 !important;
@@ -89,11 +91,13 @@
                                 }
                             </style>
                             <div class="d-flex gap-2 wallet-action-buttons">
-                                <button class="btn btn-sm btn-primary flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletDepositModal">
+                                <button class="btn btn-sm btn-primary flex-grow-1 font-size-11" data-bs-toggle="modal"
+                                    data-bs-target="#walletDepositModal">
                                     <i class="fas fa-plus-circle me-1"></i> Record Advance
                                 </button>
                                 @if(($student->wallet_balance ?? 0) > 0)
-                                    <button class="btn btn-sm btn-outline-danger flex-grow-1 font-size-11" data-bs-toggle="modal" data-bs-target="#walletRefundModal">
+                                    <button class="btn btn-sm btn-outline-danger flex-grow-1 font-size-11" data-bs-toggle="modal"
+                                        data-bs-target="#walletRefundModal">
                                         <i class="fas fa-arrow-alt-circle-down me-1"></i> Refund
                                     </button>
                                 @endif
@@ -122,24 +126,26 @@
                     <hr>
 
                     <div class="d-flex flex-column gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-info w-100" data-bs-toggle="modal" data-bs-target="#familyMembersModal">
+                        <button type="button" class="btn btn-sm btn-outline-info w-100" data-bs-toggle="modal"
+                            data-bs-target="#familyMembersModal">
                             <i class="fas fa-users me-1"></i> View Family Members ({{ $student->relatedStudents->count() }})
                         </button>
 
                         @if(auth('staff')->check())
-                            <a href="{{ route('staff.students.create', ['relative_of' => encrypt($student->id)]) }}" 
-                               class="btn btn-sm btn-outline-primary w-100">
+                            <a href="{{ route('staff.students.create', ['relative_of' => encrypt($student->id)]) }}"
+                                class="btn btn-sm btn-outline-primary w-100">
                                 <i class="fas fa-user-plus me-1"></i> Add Family Member
                             </a>
                         @elseif(auth('admin')->check())
-                            <a href="{{ route('admin.students.create', ['relative_of' => encrypt($student->id)]) }}" 
-                               class="btn btn-sm btn-outline-primary w-100">
+                            <a href="{{ route('admin.students.create', ['relative_of' => encrypt($student->id)]) }}"
+                                class="btn btn-sm btn-outline-primary w-100">
                                 <i class="fas fa-user-plus me-1"></i> Add Family Member
                             </a>
                         @endif
 
                         @if(auth('staff')->check() || auth('admin')->check())
-                            <button type="button" class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#linkExistingFamilyModal">
+                            <button type="button" class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal"
+                                data-bs-target="#linkExistingFamilyModal">
                                 <i class="fas fa-link me-1"></i> Link Existing Student
                             </button>
                         @endif
@@ -166,19 +172,22 @@
                     @php $routePrefix = auth('admin')->check() ? 'admin' : 'staff'; @endphp
                     @if($showButtons == 'true' && (auth('staff')->check() || auth('admin')->check()))
                         <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
-                            <button class="btn btn-sm btn-primary w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#assignClassModal">
+                            <button class="btn btn-sm btn-primary w-100 w-sm-auto" data-bs-toggle="modal"
+                                data-bs-target="#assignClassModal">
 
                                 <i class="fas fa-plus"></i> Assign Class
 
                             </button>
 
-                            <button class="btn btn-sm btn-info w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#changeClassModal">
+                            <button class="btn btn-sm btn-primary w-100 w-sm-auto" data-bs-toggle="modal"
+                                data-bs-target="#changeClassModal">
 
                                 <i class="fas fa-exchange-alt"></i> Change Class
 
                             </button>
 
-                            <button class="btn btn-sm btn-success w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#promoteClassModal">
+                            <button class="btn btn-sm btn-success w-100 w-sm-auto" data-bs-toggle="modal"
+                                data-bs-target="#promoteClassModal">
 
                                 <i class="fas fa-arrow-up"></i> Promote Class
 
@@ -213,7 +222,8 @@
                                         <td>{{ $class->course->name ?? '-' }}</td>
 
                                         <td>
-                                            <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($class->id)) : route('staff.class_rooms.show', encrypt($class->id)) }}">
+                                            <a
+                                                href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($class->id)) : route('staff.class_rooms.show', encrypt($class->id)) }}">
                                                 {{ $class->name }}
                                             </a>
                                             @if($class->is_completed)
@@ -257,6 +267,16 @@
 
         </div>
 
+        {{-- =========================
+        REMOVED CLASSES HISTORY
+        ========================= --}}
+        @php
+            $studentRemovalLogs = \App\Models\StudentRemovalLog::with(['classroom.course', 'classroom.classType'])
+                ->where('student_id', $student->id)
+                ->latest()
+                ->get();
+        @endphp
+
 
         {{-- =========================
         TEACHER DETAILS
@@ -289,7 +309,8 @@
                                     <tr>
 
                                         <td>
-                                            <a href="{{ auth('admin')->check() ? route('admin.reports.teachers.show', encrypt($teacher->id)) : route('staff.teachers.show', encrypt($teacher->id)) }}">
+                                            <a
+                                                href="{{ auth('admin')->check() ? route('admin.reports.teachers.show', encrypt($teacher->id)) : route('staff.teachers.show', encrypt($teacher->id)) }}">
                                                 {{ $teacher->name }}
                                             </a>
                                         </td>
@@ -394,7 +415,9 @@
 
                                         <td>{{ $fee->created_at->format('d M Y') }}</td>
                                         <td>
-                                            <a href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">{{ $fee->classRoom->name ?? '-' }}</a></td>
+                                            <a
+                                                href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($fee->classRoom->id)) : route('staff.class_rooms.show', encrypt($fee->classRoom->id)) }}">{{ $fee->classRoom->name ?? '-' }}</a>
+                                        </td>
                                         <td>{{ ucfirst($fee->type) . ' Fee' }}</td>
 
                                         <td>
@@ -440,12 +463,13 @@
                                                 @if($fee->status !== 'paid')
                                                     <button class="btn btn-sm btn-success studentFeeMarkPaidBtn"
                                                         data-id="{{ $fee->id }}" data-amount="{{ $fee->amount }}"
-                                                        data-remaining="{{ $feeRemaining }}" data-wallet="{{ $student->wallet_balance ?? 0 }}" {{ $feeRemaining <= 0 ? 'disabled' : '' }}>
+                                                        data-remaining="{{ $feeRemaining }}"
+                                                        data-wallet="{{ $student->wallet_balance ?? 0 }}" {{ $feeRemaining <= 0 ? 'disabled' : '' }}>
                                                         <i class="fas fa-check"></i>
                                                     </button>
                                                 @endif
 
-                                                <button class="btn btn-sm btn-info studentFeeViewPaymentsBtn"
+                                                <button class="btn btn-sm btn-primary studentFeeViewPaymentsBtn"
                                                     data-url="{{ auth('admin')->check() ? route('admin.fees.payments', $fee->id) : route('staff.fees.payments', $fee->id) }}">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
@@ -525,7 +549,8 @@
                                             @endif
                                         </td>
                                         <td class="{{ $tx->amount > 0 ? 'text-success' : 'text-danger' }}">
-                                            <strong>{{ $tx->amount > 0 ? '+' : '' }} ₹ {{ number_format($tx->amount, 2) }}</strong>
+                                            <strong>{{ $tx->amount > 0 ? '+' : '' }} ₹
+                                                {{ number_format($tx->amount, 2) }}</strong>
                                         </td>
                                         <td>
                                             {{ $tx->payment_method ? ucfirst(str_replace('_', ' ', $tx->payment_method)) : '-' }}
@@ -591,6 +616,93 @@
                         <p class="text-muted">No notes available.</p>
 
                     @endforelse
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- =========================
+        Removed Classes History
+        ========================= --}}
+
+        <div class="col-md-12">
+
+            <div class="card">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Removed Classes History</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle table-nowrap mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Class</th>
+                                    <th>Type</th>
+                                    <th>Removed Date & Time</th>
+                                    <th>Removed By</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @forelse($studentRemovalLogs as $log)
+
+                                    <tr>
+
+                                        <td>{{ $log->classroom->course->name ?? '-' }}</td>
+
+                                        <td>
+                                            @if($log->classroom)
+                                                @if($log->classroom->trashed())
+                                                    {{ $log->classroom->name }} <span class="badge bg-danger">Deleted Class</span>
+                                                @else
+                                                    <a
+                                                        href="{{ auth('admin')->check() ? route('admin.class_rooms.show', encrypt($log->classroom->id)) : route('staff.class_rooms.show', encrypt($log->classroom->id)) }}">
+                                                        {{ $log->classroom->name }}
+                                                    </a>
+                                                @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+
+                                        <td>{{ ucfirst($log->classroom->classType->name ?? '-') }}</td>
+
+                                        <td>
+                                            <span class="fw-bold">{{ $log->date ? $log->date->format('d M Y') : '-' }}</span>
+                                            <br>
+                                            <small
+                                                class="text-muted">{{ $log->date ? $log->date->format('h:i A') : '-' }}</small>
+                                        </td>
+
+                                        <td>{{ $log->remover_name }}</td>
+
+                                        <td>{{ $log->reason ?? '-' }}</td>
+
+                                    </tr>
+
+                                @empty
+
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            No removed classes recorded
+                                        </td>
+                                    </tr>
+
+                                @endforelse
+
+                            </tbody>
+
+                        </table>
+                    </div>
 
                 </div>
 
@@ -736,16 +848,18 @@
                                 <strong>Account Status:</strong>
                                 @if($student->is_blocked)
                                     <span class="badge bg-danger ms-2">Blocked</span>
-                                    <p class="text-muted mt-2 mb-0 font-size-13">This student is currently blocked. They are unable to log in, and fee generation is suspended.</p>
+                                    <p class="text-muted mt-2 mb-0 font-size-13">This student is currently blocked. They are unable
+                                        to log in, and fee generation is suspended.</p>
                                 @else
                                     <span class="badge bg-success ms-2">Unblocked / Active</span>
-                                    <p class="text-muted mt-2 mb-0 font-size-13">This student has active access. They can log in and fees will generate normally.</p>
+                                    <p class="text-muted mt-2 mb-0 font-size-13">This student has active access. They can log in and
+                                        fees will generate normally.</p>
                                 @endif
                             </div>
                             <div>
-                                <a href="{{ route('admin.reports.students.toggleBlock', encrypt($student->id)) }}" 
-                                   class="btn {{ $student->is_blocked ? 'btn-success' : 'btn-danger' }}"
-                                   onclick="return confirm('Are you sure you want to {{ $student->is_blocked ? 'unblock' : 'block' }} this student?')">
+                                <a href="{{ route('admin.reports.students.toggleBlock', encrypt($student->id)) }}"
+                                    class="btn {{ $student->is_blocked ? 'btn-success' : 'btn-danger' }}"
+                                    onclick="return confirm('Are you sure you want to {{ $student->is_blocked ? 'unblock' : 'block' }} this student?')">
                                     <i class="fas {{ $student->is_blocked ? 'fa-unlock' : 'fa-ban' }} me-1"></i>
                                     {{ $student->is_blocked ? 'Unblock Student' : 'Block Student' }}
                                 </a>
@@ -902,7 +1016,7 @@
 
                         </button>
 
-                        <button class="btn btn-info" type="submit"
+                        <button class="btn btn-primary" type="submit"
                             onclick="if(confirm('Have you checked and confirmed Fee Discount/Exemption?')) { this.disabled=true; this.innerText='Changing...'; this.form.submit(); } else { return false; }">
 
                             Change Class
@@ -1115,35 +1229,35 @@
         </div>
     @endif
 
-        {{-- Student Fee Payment History Modal --}}
-        <div class="modal fade" id="studentFeePaymentsModal">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5>Payment History</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p><strong>Total Paid:</strong> ₹ <span id="studentFeeTotalPaid"></span></p>
-                        <table class="table table-bordered  align-middle table-nowrap mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Amount</th>
-                                    <th>Method</th>
-                                    <th>Notes</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentFeePaymentsTableBody">
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">Loading...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+    {{-- Student Fee Payment History Modal --}}
+    <div class="modal fade" id="studentFeePaymentsModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Payment History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Total Paid:</strong> ₹ <span id="studentFeeTotalPaid"></span></p>
+                    <table class="table table-bordered  align-middle table-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentFeePaymentsTableBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+    </div>
 
     {{-- Fee exemption Modal --}}
 
@@ -1239,7 +1353,8 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Notes</label>
-                                <textarea name="notes" class="form-control" placeholder="e.g. Advance payment for upcoming fees"></textarea>
+                                <textarea name="notes" class="form-control"
+                                    placeholder="e.g. Advance payment for upcoming fees"></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1267,11 +1382,13 @@
                         </div>
                         <div class="modal-body">
                             <div class="alert alert-info">
-                                <i class="fas fa-info-circle me-1"></i> Available balance for refund: <strong>₹ {{ number_format($student->wallet_balance ?? 0, 2) }}</strong>
+                                <i class="fas fa-info-circle me-1"></i> Available balance for refund: <strong>₹
+                                    {{ number_format($student->wallet_balance ?? 0, 2) }}</strong>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Amount (₹)</label>
-                                <input type="number" step="0.01" name="amount" class="form-control" required min="1" max="{{ $student->wallet_balance ?? 0 }}">
+                                <input type="number" step="0.01" name="amount" class="form-control" required min="1"
+                                    max="{{ $student->wallet_balance ?? 0 }}">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Refund Method</label>
@@ -1284,7 +1401,8 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Notes</label>
-                                <textarea name="notes" class="form-control" placeholder="e.g. Refund of remaining advance balance"></textarea>
+                                <textarea name="notes" class="form-control"
+                                    placeholder="e.g. Refund of remaining advance balance"></textarea>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1301,7 +1419,8 @@
     @endif
 
     {{-- Family Members Modal --}}
-    <div class="modal fade" id="familyMembersModal" tabindex="-1" aria-labelledby="familyMembersModalLabel" aria-hidden="true">
+    <div class="modal fade" id="familyMembersModal" tabindex="-1" aria-labelledby="familyMembersModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1312,27 +1431,28 @@
                     @if($student->relatedStudents->count() > 0)
                         <div class="list-group list-group-flush">
                             @foreach($student->relatedStudents as $relatedStudent)
-                                <div class="list-group-item d-flex align-items-center justify-content-between p-3 border-0 border-bottom">
+                                <div
+                                    class="list-group-item d-flex align-items-center justify-content-between p-3 border-0 border-bottom">
                                     <div class="d-flex align-items-center gap-3">
                                         <img class="rounded-circle" width="40" height="40"
-                                             src="@if (($relatedStudent->photo == '') || (empty($relatedStudent->photo))) https://ui-avatars.com/api/?name={{ urlencode($relatedStudent->name) }}&size=200 @else {{ URL::asset('storage/' . $relatedStudent->photo) }} @endif"
-                                             alt="Avatar">
+                                            src="@if (($relatedStudent->photo == '') || (empty($relatedStudent->photo))) https://ui-avatars.com/api/?name={{ urlencode($relatedStudent->name) }}&size=200 @else {{ URL::asset('storage/' . $relatedStudent->photo) }} @endif"
+                                            alt="Avatar">
                                         <div>
                                             <h6 class="mb-0 fw-bold">
-                                                <a href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($relatedStudent->id)) : route('staff.students.show', encrypt($relatedStudent->id)) }}">
+                                                <a
+                                                    href="{{ auth('admin')->check() ? route('admin.reports.students.show', encrypt($relatedStudent->id)) : route('staff.students.show', encrypt($relatedStudent->id)) }}">
                                                     {{ $relatedStudent->name }}
                                                 </a>
                                             </h6>
                                             <small class="text-muted">{{ $relatedStudent->admission_no }}</small>
                                         </div>
                                     </div>
-                                    
+
                                     {{-- Unlink button triggers modal --}}
                                     <button type="button" class="btn btn-sm btn-outline-danger unlink-sibling-btn"
-                                            data-id="{{ encrypt($relatedStudent->id) }}"
-                                            data-name="{{ $relatedStudent->name }}"
-                                            data-action="{{ route($routePrefix . '.students.relations.destroy', ['id' => encrypt($student->id), 'related_id' => encrypt($relatedStudent->id)]) }}"
-                                            title="Unlink Sibling">
+                                        data-id="{{ encrypt($relatedStudent->id) }}" data-name="{{ $relatedStudent->name }}"
+                                        data-action="{{ route($routePrefix . '.students.relations.destroy', ['id' => encrypt($student->id), 'related_id' => encrypt($relatedStudent->id)]) }}"
+                                        title="Unlink Sibling">
                                         <i class="fas fa-unlink"></i>
                                     </button>
                                 </div>
@@ -1354,24 +1474,29 @@
 
     {{-- Link Existing Family Modal --}}
     @if(auth('staff')->check() || auth('admin')->check())
-        <div class="modal fade" id="linkExistingFamilyModal" tabindex="-1" aria-labelledby="linkExistingFamilyModalLabel" aria-hidden="true">
+        <div class="modal fade" id="linkExistingFamilyModal" tabindex="-1" aria-labelledby="linkExistingFamilyModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <form method="POST" action="{{ route($routePrefix . '.students.relations.store', encrypt($student->id)) }}">
                         @csrf
                         <div class="modal-header">
-                            <h5 class="modal-title" id="linkExistingFamilyModalLabel">Link Existing Student as Family Member</h5>
+                            <h5 class="modal-title" id="linkExistingFamilyModalLabel">Link Existing Student as Family Member
+                            </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Select Student to Link</label>
-                                <select name="related_student_id" id="related_student_id" class="form-control select2-relations-ajax" required>
+                                <select name="related_student_id" id="related_student_id"
+                                    class="form-control select2-relations-ajax" required>
                                     <option value="">Search student by name, admission no, or phone...</option>
                                 </select>
                                 <small class="text-muted d-block mt-2">
-                                    <i class="fas fa-info-circle text-primary me-1"></i> 
-                                    <strong>Important:</strong> The linked student's contact number, WhatsApp number, country, and login phone will be automatically updated to match <strong>{{ $student->name }}</strong>'s contact details.
+                                    <i class="fas fa-info-circle text-primary me-1"></i>
+                                    <strong>Important:</strong> The linked student's contact number, WhatsApp number, country,
+                                    and login phone will be automatically updated to match
+                                    <strong>{{ $student->name }}</strong>'s contact details.
                                 </small>
                             </div>
                         </div>
@@ -1388,7 +1513,8 @@
         </div>
 
         {{-- Unlink Sibling Modal --}}
-        <div class="modal fade" id="unlinkSiblingModal" tabindex="-1" aria-labelledby="unlinkSiblingModalLabel" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal fade" id="unlinkSiblingModal" tabindex="-1" aria-labelledby="unlinkSiblingModalLabel"
+            aria-hidden="true" style="z-index: 1060;">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <form method="POST" id="unlinkSiblingForm" action="">
@@ -1400,12 +1526,16 @@
                         </div>
                         <div class="modal-body">
                             <p>You are unlinking <strong id="unlinkSiblingName"></strong> from the family group.</p>
-                            <p class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i> Since they will no longer share the family's phone number, you must assign a new unique contact number for this student.</p>
-                            
+                            <p class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i> Since they will no longer
+                                share the family's phone number, you must assign a new unique contact number for this student.
+                            </p>
+
                             <div class="mb-3">
                                 <label for="new_contact_number" class="form-label fw-bold">New Contact Number</label>
-                                <input type="text" name="new_contact_number" id="new_contact_number" class="form-control" required placeholder="e.g. 9876543210" maxlength="15">
-                                <small class="text-muted">The student's password will also be automatically reset to this new number for login.</small>
+                                <input type="text" name="new_contact_number" id="new_contact_number" class="form-control"
+                                    required placeholder="e.g. 9876543210" maxlength="15">
+                                <small class="text-muted">The student's password will also be automatically reset to this new
+                                    number for login.</small>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -1424,26 +1554,26 @@
     @section('script')
         <script>
             @if($showButtons == 'true' && auth('staff')->check())
-                 $('.studentFeeMarkPaidBtn').click(function () {
-                     let feeId = $(this).data('id');
-                     let amount = $(this).data('amount');
-                     let remaining = $(this).data('remaining');
-                     let walletBalance = parseFloat($(this).data('wallet') || 0);
+                $('.studentFeeMarkPaidBtn').click(function () {
+                    let feeId = $(this).data('id');
+                    let amount = $(this).data('amount');
+                    let remaining = $(this).data('remaining');
+                    let walletBalance = parseFloat($(this).data('wallet') || 0);
 
-                     $('#studentFeeId').val(feeId);
-                     $('#studentFeeTotalFee').val(amount);
-                     $('#studentFeeBalanceToPay').val(remaining);
+                    $('#studentFeeId').val(feeId);
+                    $('#studentFeeTotalFee').val(amount);
+                    $('#studentFeeBalanceToPay').val(remaining);
 
-                     let select = $('#studentFeePaymentModal select[name="payment_method"]');
-                     select.find('option[value="wallet"]').remove();
-                     if (walletBalance > 0) {
-                         select.append(`<option value="wallet">Wallet Balance (Available: ₹${walletBalance.toFixed(2)})</option>`);
-                     }
+                    let select = $('#studentFeePaymentModal select[name="payment_method"]');
+                    select.find('option[value="wallet"]').remove();
+                    if (walletBalance > 0) {
+                        select.append(`<option value="wallet">Wallet Balance (Available: ₹${walletBalance.toFixed(2)})</option>`);
+                    }
 
-                     $('#studentFeePaymentModal input[name="paid_amount"]').val(remaining).attr('max', remaining);
+                    $('#studentFeePaymentModal input[name="paid_amount"]').val(remaining).attr('max', remaining);
 
-                     $('#studentFeePaymentModal').modal('show');
-                 });
+                    $('#studentFeePaymentModal').modal('show');
+                });
 
 
                 $('.studentFeeSendNotificationBtn').click(function (e) {
@@ -1504,37 +1634,37 @@
                     });
                 });
 
-                $(document).on('show.bs.modal', '#linkExistingFamilyModal', function() {
+                $(document).on('show.bs.modal', '#linkExistingFamilyModal', function () {
                     var $el = $('#related_student_id');
                     if ($el.hasClass('select2-hidden-accessible')) { $el.select2('destroy'); }
                     $el.select2({
-                        placeholder: 'Search student...', 
-                        allowClear: true, 
+                        placeholder: 'Search student...',
+                        allowClear: true,
                         width: '100%',
                         dropdownParent: $('#linkExistingFamilyModal'),
                         minimumInputLength: 1,
-                        ajax: { 
-                            url: '{{ route($routePrefix . ".students.search-relations", encrypt($student->id)) }}', 
-                            dataType: 'json', 
+                        ajax: {
+                            url: '{{ route($routePrefix . ".students.search-relations", encrypt($student->id)) }}',
+                            dataType: 'json',
                             delay: 250,
-                            data: function(p) { return { q: p.term || '' }; },
-                            processResults: function(d) { return { results: d.results }; },
+                            data: function (p) { return { q: p.term || '' }; },
+                            processResults: function (d) { return { results: d.results }; },
                             cache: true
                         }
                     });
                 });
 
-                $(document).on('click', '.unlink-sibling-btn', function() {
+                $(document).on('click', '.unlink-sibling-btn', function () {
                     var actionUrl = $(this).data('action');
                     var siblingName = $(this).data('name');
-                    
+
                     $('#unlinkSiblingForm').attr('action', actionUrl);
                     $('#unlinkSiblingName').text(siblingName);
                     $('#new_contact_number').val('');
-                    
+
                     $('#familyMembersModal').modal('hide');
-                    
-                    setTimeout(function() {
+
+                    setTimeout(function () {
                         $('#unlinkSiblingModal').modal('show');
                     }, 300);
                 });

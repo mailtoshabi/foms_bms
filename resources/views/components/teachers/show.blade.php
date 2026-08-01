@@ -204,11 +204,9 @@
 
                                                 </button>
 
-                                                <button
-                                                    class="btn btn-sm btn-info viewSalaryBtn"
+                                                <button class="btn btn-sm btn-primary viewSalaryBtn"
                                                     style="transition: opacity 0.15s ease-in-out;"
-                                                    onmouseover="this.style.opacity='0.7';"
-                                                    onmouseout="this.style.opacity='1';"
+                                                    onmouseover="this.style.opacity='0.7';" onmouseout="this.style.opacity='1';"
                                                     title="View Details"
                                                     data-cycle_start="{{ optional($salary->cycle_start)->format('d M Y') ?? '-' }}"
                                                     data-cycle_end="{{ optional($salary->cycle_end)->format('d M Y') ?? '-' }}"
@@ -283,7 +281,7 @@
                                     <th>Type</th>
                                     <th>Days</th>
                                     <th>Hourly Wage</th>
-                                    @if($isAdmin || $isOperation || $isAdministrator)
+                                    @if($isAdmin) <!--  || $isOperation || $isAdministrator -->
                                         <th width="100">Action</th>
                                     @endif
                                 </tr>
@@ -324,7 +322,8 @@
 
                                         <td>
 
-                                            <form method="POST" action="{{ route('staff.teachers.update.wage') }}"
+                                            <form method="POST"
+                                                action="{{ $isAdmin ? route('admin.teachers.update.wage') : route('staff.teachers.update.wage') }}"
                                                 class="d-flex">
 
                                                 @csrf
@@ -346,15 +345,16 @@
                                             </form>
 
                                         </td>
-                                        @if($isAdmin || $isOperation || $isAdministrator)
+                                        @if($isAdmin) <!-- || $isOperation || $isAdministrator -->
                                             <td>
 
                                                 <form method="POST"
-                                                    action="{{ route('staff.teachers.classrooms.destroy', [$teacher->id, $class->id]) }}"
-                                                    onsubmit="return confirm('Remove Teacher From the class?')">
+                                                    action="{{ $isAdmin ? route('admin.teachers.classrooms.destroy', [$teacher->id, $class->id]) : route('staff.teachers.classrooms.destroy', [$teacher->id, $class->id]) }}"
+                                                    onsubmit="let reason = prompt('Please enter the reason for removing this teacher:'); if (reason === null) return false; if (reason.trim() === '') { alert('Reason is required.'); return false; } this.querySelector('.removal-reason').value = reason; return confirm('Are you sure you want to remove this teacher?\n\nWarning:\nPENDING class sessions assigned to this teacher in this classroom will be DELETED.');">
 
                                                     @csrf
                                                     @method('DELETE')
+                                                    <input type="hidden" name="reason" class="removal-reason">
 
                                                     <button class="btn btn-sm btn-danger">
                                                         <i class="fas fa-times"></i>
@@ -371,6 +371,97 @@
                                     <tr>
                                         <td colspan="5" class="text-center text-muted">
                                             No classes assigned
+                                        </td>
+                                    </tr>
+
+                                @endforelse
+
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- =========================
+        REMOVED CLASSES HISTORY
+        ========================= --}}
+        @php
+            $removalLogs = \App\Models\TeacherRemovalLog::with(['classroom.course', 'classroom.classType'])
+                ->where('teacher_id', $teacher->id)
+                ->latest()
+                ->get();
+        @endphp
+
+        <div class="col-md-12 mt-4">
+
+            <div class="card">
+
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Removed Classes History</h5>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle table-nowrap mb-0">
+
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Class</th>
+                                    <th>Type</th>
+                                    <th>Removed Date & Time</th>
+                                    <th>Removed By</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @forelse($removalLogs as $log)
+
+                                    <tr>
+
+                                        <td>{{ $log->classroom->course->name ?? '-' }}</td>
+
+                                        <td>
+                                            @if($log->classroom)
+                                                @if($log->classroom->trashed())
+                                                    {{ $log->classroom->name }} <span class="badge bg-danger">Deleted Class</span>
+                                                @else
+                                                    <a href="{{ $isAdmin ? route('admin.class_rooms.show', encrypt($log->classroom->id)) : route('staff.class_rooms.show', encrypt($log->classroom->id)) }}">
+                                                        {{ $log->classroom->name }}
+                                                    </a>
+                                                @endif
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
+
+                                        <td>{{ ucfirst($log->classroom->classType->name ?? '-') }}</td>
+
+                                        <td>
+                                            <span class="fw-bold">{{ $log->date ? $log->date->format('d M Y') : '-' }}</span>
+                                            <br>
+                                            <small class="text-muted">{{ $log->date ? $log->date->format('h:i A') : '-' }}</small>
+                                        </td>
+
+                                        <td>{{ $log->remover_name }}</td>
+                                        
+                                        <td>{{ $log->reason ?? '-' }}</td>
+
+                                    </tr>
+
+                                @empty
+
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            No removed classes recorded
                                         </td>
                                     </tr>
 
@@ -465,7 +556,8 @@
         <div class="modal-dialog">
             <div class="modal-content">
 
-                <form method="POST" action="{{ route('staff.teachers.assign.classrooms') }}">
+                <form method="POST"
+                    action="{{ $isAdmin ? route('admin.teachers.assign.classrooms') : route('staff.teachers.assign.classrooms') }}">
 
                     @csrf
 
@@ -484,7 +576,8 @@
                             <label class="form-label">Class Room</label>
 
                             <select name="class_room_id" class="form-control select2-class-ajax"
-                                data-ajax-url="{{ route('staff.students.active-classes.search') }}" required>
+                                data-ajax-url="{{ $isAdmin ? route('admin.students.active-classes.search') : route('staff.students.active-classes.search') }}"
+                                required>
 
                                 <option value="">Search active class...</option>
 
@@ -824,7 +917,8 @@
             let date = $(this).data('date');
             let notes = $(this).data('notes');
 
-            $('#salaryForm').attr('action', '/departments/teachers/salaries/' + id);
+            let actionUrl = "{{ $isAdmin ? route('admin.teacher-salaries.update', ':id') : route('staff.teacher-salaries.update', ':id') }}";
+            $('#salaryForm').attr('action', actionUrl.replace(':id', id));
 
             $('input[name=total_amount]').val(total_amount);
             $('input[name=status]').val('paid');
@@ -858,7 +952,7 @@
             $('#val_payment_date').text(date);
             $('#val_payment_method').text(method);
             $('#val_reference_number').text(refNum);
-            
+
             // Apply badge color to status
             let badgeClass = 'badge bg-secondary';
             let statusLower = status.toString().toLowerCase();
@@ -874,7 +968,7 @@
             } else {
                 $('#val_status').text('-');
             }
-            
+
             $('#val_notes').text(notes);
 
             $('#viewSalaryModal').modal('show');

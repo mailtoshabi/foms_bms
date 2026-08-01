@@ -40,7 +40,8 @@ class Teacher extends Authenticatable
 
         'salary_cycle_day',
         'salary_amount',
-        'is_whatsapp_different'
+        'is_whatsapp_different',
+        'is_blocked'
     ];
 
     protected $hidden = [
@@ -52,6 +53,7 @@ class Teacher extends Authenticatable
         'dob' => 'date',
         'last_login_at' => 'datetime',
         'salary_cycle_day' => 'integer',
+        'is_blocked' => 'boolean',
     ];
 
     public function salaries()

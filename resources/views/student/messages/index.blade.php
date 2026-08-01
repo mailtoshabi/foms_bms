@@ -6,7 +6,9 @@
 
     <div class="portal-page-header">
         <div class="d-flex align-items-center">
-            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle" title="Go Back" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle"
+                title="Go Back"
+                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <h4 class="m-0 fw-bold text-dark">Inbox</h4>
@@ -75,7 +77,7 @@
                                     <td>{{ $msg->created_at->format('d M Y, h:i A') }}</td>
                                     <td>
                                         <a href="{{ route('student.messages.show', encrypt($msg->id)) }}"
-                                            class="btn btn-sm btn-info">
+                                            class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>

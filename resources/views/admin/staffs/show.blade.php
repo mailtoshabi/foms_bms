@@ -38,7 +38,8 @@
             <div class="card">
 
                 <div class="card-header d-flex align-items-center">
-                    <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
+                    <a href="javascript:window.history.back();"
+                        class="btn btn-sm btn-light border-0 shadow-sm me-2 rounded-circle" title="Go Back">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                     <h5 class="mb-0">Staff Profile</h5>
@@ -133,7 +134,8 @@
                 <div class="card-body">
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle table-nowrap mb-0" style="border-color: #e9ecef;">
+                        <table class="table table-bordered table-hover align-middle table-nowrap mb-0"
+                            style="border-color: #e9ecef;">
 
                             <thead class="table-light">
                                 <tr>
@@ -150,55 +152,55 @@
 
                                 @forelse($staff->salaries as $salary)
 
-                                                            <tr>
+                                                        <tr>
 
-                                                                <td>{{ $salary->salary_month_formatted }}</td>
+                                                            <td>{{ $salary->salary_month_formatted }}</td>
 
-                                                                <td>₹ {{ number_format($salary->salary_amount, 2) }}</td>
+                                                            <td>₹ {{ number_format($salary->salary_amount, 2) }}</td>
 
-                                                                <td>₹ {{ number_format($salary->paid_amount, 2) }}</td>
+                                                            <td>₹ {{ number_format($salary->paid_amount, 2) }}</td>
 
-                                                                <td>
-                                                                    <span class="badge
-                                    @if($salary->status == 'paid') bg-success
-                                    @elseif($salary->status == 'partial') bg-warning
-                                    @else bg-danger @endif">
-                                                                        {{ ucfirst(str_replace('_', ' ', $salary->status)) }}
-                                                                    </span>
-                                                                </td>
+                                                            <td>
+                                                                <span class="badge
+                                                                @if($salary->status == 'paid') bg-success
+                                                                @elseif($salary->status == 'partial') bg-warning
+                                                                @else bg-danger @endif">
+                                                                    {{ ucfirst(str_replace('_', ' ', $salary->status)) }}
+                                                                </span>
+                                                            </td>
 
-                                                                <td>{{ optional($salary->paid_date)->format('d M Y') ?? '-' }}</td>
+                                                            <td>{{ optional($salary->paid_date)->format('d M Y') ?? '-' }}</td>
 
-                                                                <td>
+                                                            <td>
 
 
-                                                                    <button class="btn btn-sm viewPaymentHistory" title="View Payment History"
-                                                                        data-id="{{ $salary->id }}"
-                                                                        data-salary_month="{{ $salary->salary_month_formatted }}"
-                                                                        data-salary_amount="{{ $salary->salary_amount }}"
+                                                                <button class="btn btn-sm viewPaymentHistory" title="View Payment History"
+                                                                    data-id="{{ $salary->id }}"
+                                                                    data-salary_month="{{ $salary->salary_month_formatted }}"
+                                                                    data-salary_amount="{{ $salary->salary_amount }}"
+                                                                    data-paid_amount="{{ $salary->paid_amount }}"
+                                                                    data-payments="{{ json_encode($salary->payments->map(function ($p) {
+                                    return ['id' => $p->id, 'amount' => $p->paid_amount, 'method' => $p->payment_method, 'date' => optional($p->paid_date)->format('d M Y'), 'date_raw' => optional($p->paid_date)->format('Y-m-d'), 'notes' => $p->notes]; })->values()->all()) }}">
+
+                                                                    <i class="fas fa-history text-info"></i>
+
+                                                                </button>
+
+                                                                @if($salary->paid_amount < $salary->salary_amount)
+                                                                    <button class="btn btn-sm payBalance" title="Pay Balance"
+                                                                        data-id="{{ $salary->id }}" data-salary_amount="{{ $salary->salary_amount }}"
                                                                         data-paid_amount="{{ $salary->paid_amount }}"
-                                                                        data-payments="{{ json_encode($salary->payments->map(function ($p) {
-                                        return ['id' => $p->id, 'amount' => $p->paid_amount, 'method' => $p->payment_method, 'date' => optional($p->paid_date)->format('d M Y'), 'date_raw' => optional($p->paid_date)->format('Y-m-d'), 'notes' => $p->notes]; })->values()->all()) }}">
+                                                                        data-salary_month="{{ $salary->salary_month_formatted }}"
+                                                                        data-balance="{{ $salary->salary_amount - $salary->paid_amount }}">
 
-                                                                        <i class="fas fa-history text-info"></i>
+                                                                        <i class="fas fa-money-bill text-success"></i>
 
                                                                     </button>
+                                                                @endif
 
-                                                                    @if($salary->paid_amount < $salary->salary_amount)
-                                                                        <button class="btn btn-sm payBalance" title="Pay Balance"
-                                                                            data-id="{{ $salary->id }}" data-salary_amount="{{ $salary->salary_amount }}"
-                                                                            data-paid_amount="{{ $salary->paid_amount }}"
-                                                                            data-salary_month="{{ $salary->salary_month_formatted }}"
-                                                                            data-balance="{{ $salary->salary_amount - $salary->paid_amount }}">
+                                                            </td>
 
-                                                                            <i class="fas fa-money-bill text-success"></i>
-
-                                                                        </button>
-                                                                    @endif
-
-                                                                </td>
-
-                                                            </tr>
+                                                        </tr>
 
                                 @empty
 
@@ -236,7 +238,7 @@
 
                     <div class="card-body">
 
-                        <a href="{{ asset('storage/' . $staff->id_proof) }}" target="_blank" class="btn btn-sm btn-info">
+                        <a href="{{ asset('storage/' . $staff->id_proof) }}" target="_blank" class="btn btn-sm btn-primary">
                             <i class="fas fa-file"></i> View ID Proof
                         </a>
 
@@ -288,8 +290,8 @@
 
                             <label class="form-label">Salary Amount (₹)</label>
 
-                            <input type="number" step="0.01" name="salary_amount" id="salaryAmountField" class="form-control"
-                                value="{{ $staff->salary_amount ?? 0 }}" required>
+                            <input type="number" step="0.01" name="salary_amount" id="salaryAmountField"
+                                class="form-control" value="{{ $staff->salary_amount ?? 0 }}" required>
 
                         </div>
 
@@ -585,7 +587,8 @@
                         <input type="hidden" name="payment_id" id="editPaymentId" value="">
                         <div class="mb-3">
                             <label class="form-label">Payment Amount (₹)</label>
-                            <input type="number" step="0.01" name="paid_amount" id="editPaymentAmount" class="form-control" required>
+                            <input type="number" step="0.01" name="paid_amount" id="editPaymentAmount" class="form-control"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Payment Method</label>
@@ -608,7 +611,9 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button class="btn btn-primary" type="submit" onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save Changes</button>
+                        <button class="btn btn-primary" type="submit"
+                            onclick="this.disabled=true; this.innerText='Saving...'; this.form.submit();">Save
+                            Changes</button>
                     </div>
                 </form>
             </div>
@@ -755,7 +760,7 @@
                     html += '<td><span class="badge bg-secondary">' + (payment.method ? payment.method.charAt(0).toUpperCase() + payment.method.slice(1).replace('_', ' ') : 'N/A') + '</span></td>';
                     html += '<td>' + (payment.date || '-') + '</td>';
                     html += '<td>' + (payment.notes || '-') + '</td>';
-                    html += '<td><button class="btn btn-sm text-primary editSinglePaymentBtn" data-id="'+payment.id+'" data-amount="'+payment.amount+'" data-method="'+(payment.method||'')+'" data-date="'+(payment.date_raw||payment.date)+'" data-notes="'+(payment.notes||'')+'"><i class="fas fa-pencil-alt"></i></button></td>';
+                    html += '<td><button class="btn btn-sm text-primary editSinglePaymentBtn" data-id="' + payment.id + '" data-amount="' + payment.amount + '" data-method="' + (payment.method || '') + '" data-date="' + (payment.date_raw || payment.date) + '" data-notes="' + (payment.notes || '') + '"><i class="fas fa-pencil-alt"></i></button></td>';
                     html += '</tr>';
                 });
                 $('#paymentHistoryTable').html(html);
@@ -764,7 +769,7 @@
             $('#paymentHistoryModal').modal('show');
         });
 
-        $(document).on('click', '.editSinglePaymentBtn', function() {
+        $(document).on('click', '.editSinglePaymentBtn', function () {
             $('#paymentHistoryModal').modal('hide');
             $('#editPaymentId').val($(this).data('id'));
             $('#editPaymentAmount').val($(this).data('amount'));

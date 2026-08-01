@@ -76,9 +76,9 @@ class ClassService
         });
     }
 
-    public function removeTeacher(int $classId, int $teacherId)
+    public function removeTeacher(int $classId, int $teacherId, string $reason = null)
     {
-        return DB::transaction(function () use ($classId, $teacherId) {
+        return DB::transaction(function () use ($classId, $teacherId, $reason) {
 
             // 1. Delete pending class hours for this teacher in this classroom
             ClassHour::where('teacher_id', $teacherId)
@@ -89,6 +89,16 @@ class ClassService
             // 2. Detach teacher from classroom
             $class = ClassRoom::findOrFail($classId);
             $class->teachers()->detach($teacherId);
+
+            // 3. Record removal in the logs table
+            \App\Models\TeacherRemovalLog::create([
+                'teacher_id' => $teacherId,
+                'class_id' => $classId,
+                'date' => now(),
+                'removed_by' => auth('admin')->id() ?? auth('staff')->id(),
+                'auth_type' => auth('admin')->check() ? 'admin' : (auth('staff')->check() ? 'staff' : null),
+                'reason' => $reason,
+            ]);
 
         });
     }
@@ -195,13 +205,16 @@ class ClassService
         });
     }
 
-    public function removeStudent(int $classId, int $studentId)
+    public function removeStudent(int $classId, int $studentId, string $reason = null)
     {
-        return DB::transaction(function () use ($classId, $studentId) {
+        return DB::transaction(function () use ($classId, $studentId, $reason) {
 
             $class = ClassRoom::with('classType', 'students')->findOrFail($classId);
 
             // 1. Delete related unpaid fees for this student in this classroom
+            $pendingClassHours = ClassHour::where('class_room_id', $classId)
+                ->where('status', 'pending');
+
             Fee::where('student_id', $studentId)
                 ->where('class_room_id', $classId)
                 ->where('status', 'unpaid')
@@ -213,9 +226,6 @@ class ClassService
             // 3. Handle pending class hours based on classroom type and remaining students
             $type = strtolower($class->classType->name ?? '');
             $remainingStudentsCount = $class->students()->count();
-
-            $pendingClassHours = ClassHour::where('class_room_id', $classId)
-                ->where('status', 'pending');
 
             if ($type === 'individual' || ($type === 'group' && $remainingStudentsCount === 0)) {
 
@@ -232,6 +242,16 @@ class ClassService
                         ->delete();
                 }
             }
+
+            // 4. Record student removal in the logs table
+            \App\Models\StudentRemovalLog::create([
+                'student_id' => $studentId,
+                'class_id' => $classId,
+                'date' => now(),
+                'removed_by' => auth('admin')->id() ?? auth('staff')->id(),
+                'auth_type' => auth('admin')->check() ? 'admin' : (auth('staff')->check() ? 'staff' : null),
+                'reason' => $reason,
+            ]);
 
             return true;
         });

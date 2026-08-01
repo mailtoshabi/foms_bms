@@ -260,9 +260,11 @@ class TeacherController extends Controller
 
     public function getClassHourStudents($id)
     {
-        $classHour = ClassHour::with(['classRoom.students.classHourJoins' => function ($q) use ($id) {
-            $q->where('class_hour_id', $id);
-        }])->findOrFail($id);
+        $classHour = ClassHour::with([
+            'classRoom.students.classHourJoins' => function ($q) use ($id) {
+                $q->where('class_hour_id', $id);
+            }
+        ])->findOrFail($id);
 
         $students = $classHour->classRoom->students->map(function ($student) {
             return [

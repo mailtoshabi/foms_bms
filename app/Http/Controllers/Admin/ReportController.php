@@ -1125,6 +1125,17 @@ class ReportController extends Controller
         return back()->with('success', "Student \"{$student->name}\" {$statusStr} successfully.");
     }
 
+    public function toggleBlockTeacher($id)
+    {
+        $teacher = \App\Models\Teacher::findOrFail(decrypt($id));
+        $teacher->update([
+            'is_blocked' => !$teacher->is_blocked
+        ]);
+
+        $statusStr = $teacher->is_blocked ? 'blocked' : 'unblocked';
+        return back()->with('success', "Teacher \"{$teacher->name}\" {$statusStr} successfully.");
+    }
+
     public function teacherLeadReport(Request $request)
     {
         $query = TeacherLead::with(['source', 'notes.staff', 'country']);

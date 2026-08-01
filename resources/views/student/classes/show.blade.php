@@ -6,17 +6,21 @@
 
     <div class="portal-page-header">
         <div class="d-flex align-items-center">
-            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle" title="Go Back" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+            <a href="javascript:window.history.back();" class="btn btn-sm btn-light border-0 shadow-sm me-3 rounded-circle"
+                title="Go Back"
+                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
                 <i class="fas fa-chevron-left"></i>
             </a>
             <h4 class="m-0 fw-bold text-dark">
                 {{ $class->name }}
                 @if ($class->is_completed)
-                    <span class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-1 font-size-12 ms-2">
+                    <span
+                        class="badge bg-soft-success text-success border border-success rounded-pill px-3 py-1 font-size-12 ms-2">
                         <i class="fas fa-check-circle me-1"></i> Completed
                     </span>
                 @else
-                    <span class="badge bg-soft-primary text-primary border border-primary rounded-pill px-3 py-1 font-size-12 ms-2">
+                    <span
+                        class="badge bg-soft-primary text-primary border border-primary rounded-pill px-3 py-1 font-size-12 ms-2">
                         <i class="fas fa-play-circle me-1"></i> Active
                     </span>
                 @endif
@@ -53,7 +57,8 @@
                         <div class="card-body text-center d-flex flex-column justify-content-between p-0">
                             <div>
                                 <h6 class="text-muted fw-bold mb-2">My Attendance</h6>
-                                <h3 class="{{ $myPercentage >= 75 ? 'text-success' : ($myPercentage >= 50 ? 'text-warning' : 'text-danger') }} mb-1 fw-bold">
+                                <h3
+                                    class="{{ $myPercentage >= 75 ? 'text-success' : ($myPercentage >= 50 ? 'text-warning' : 'text-danger') }} mb-1 fw-bold">
                                     {{ $myPercentage }}%
                                 </h3>
                                 <p class="text-muted mb-2 small">{{ $myPresent }} / {{ $totalClasses }} classes</p>
@@ -69,11 +74,13 @@
                 {{-- Card 2: Sessions --}}
                 <div class="col-md-3 mb-3">
                     <a href="#sessions-section" class="text-decoration-none">
-                        <div class="card h-100 border text-center p-3" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border-radius: 12px;"
-                             onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'"
-                             onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                        <div class="card h-100 border text-center p-3"
+                            style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border-radius: 12px;"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'"
+                            onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
                             <div class="card-body d-flex flex-column align-items-center justify-content-center p-0">
-                                <div class="rounded-circle mb-3 d-inline-flex justify-content-center align-items-center" style="width: 50px; height: 50px; background-color: rgba(13, 110, 253, 0.1); color: #0d6efd;">
+                                <div class="rounded-circle mb-3 d-inline-flex justify-content-center align-items-center"
+                                    style="width: 50px; height: 50px; background-color: rgba(13, 110, 253, 0.1); color: #0d6efd;">
                                     <i class="fas fa-video fs-5"></i>
                                 </div>
                                 <h6 class="fw-bold text-dark mb-1">My Sessions</h6>
@@ -86,11 +93,13 @@
                 {{-- Card 3: Notes --}}
                 <div class="col-md-3 mb-3">
                     <a href="#notes-section" class="text-decoration-none">
-                        <div class="card h-100 border text-center p-3" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border-radius: 12px;"
-                             onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'"
-                             onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                        <div class="card h-100 border text-center p-3"
+                            style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border-radius: 12px;"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'"
+                            onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
                             <div class="card-body d-flex flex-column align-items-center justify-content-center p-0">
-                                <div class="rounded-circle mb-3 d-inline-flex justify-content-center align-items-center" style="width: 50px; height: 50px; background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0;">
+                                <div class="rounded-circle mb-3 d-inline-flex justify-content-center align-items-center"
+                                    style="width: 50px; height: 50px; background-color: rgba(13, 202, 240, 0.1); color: #0dcaf0;">
                                     <i class="fas fa-sticky-note fs-5"></i>
                                 </div>
                                 <h6 class="fw-bold text-dark mb-1">Class Notes</h6>
@@ -103,11 +112,13 @@
                 {{-- Card 4: Homeworks --}}
                 <div class="col-md-3 mb-3">
                     <a href="#homework-section" class="text-decoration-none">
-                        <div class="card h-100 border text-center p-3" style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border-radius: 12px;"
-                             onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'"
-                             onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
+                        <div class="card h-100 border text-center p-3"
+                            style="transition: transform 0.2s, box-shadow 0.2s; cursor: pointer; border-radius: 12px;"
+                            onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 4px 15px rgba(0,0,0,0.1)'"
+                            onmouseout="this.style.transform='none'; this.style.boxShadow='none'">
                             <div class="card-body d-flex flex-column align-items-center justify-content-center p-0">
-                                <div class="rounded-circle mb-3 d-inline-flex justify-content-center align-items-center" style="width: 50px; height: 50px; background-color: rgba(25, 135, 84, 0.1); color: #198754;">
+                                <div class="rounded-circle mb-3 d-inline-flex justify-content-center align-items-center"
+                                    style="width: 50px; height: 50px; background-color: rgba(25, 135, 84, 0.1); color: #198754;">
                                     <i class="fas fa-tasks fs-5"></i>
                                 </div>
                                 <h6 class="fw-bold text-dark mb-1">Homework</h6>
@@ -144,7 +155,8 @@
                                                 <i class="fas fa-video"></i> Join
                                             </a>
                                         @else
-                                            <button class="btn btn-sm btn-light text-nowrap" disabled title="Wait for teacher to update the class link.">
+                                            <button class="btn btn-sm btn-light text-nowrap" disabled
+                                                title="Wait for teacher to update the class link.">
                                                 <i class="fas fa-video text-muted"></i> Join (Wait for Link)
                                             </button>
                                         @endif
@@ -193,7 +205,7 @@
                                     <p class="text-muted mt-2 mb-0">{{ Str::limit($note->content, 150) }}</p>
                                 @endif
                             </div>
-                            <a href="{{ route('student.notes.show', encrypt($note->id)) }}" class="btn btn-sm btn-info">
+                            <a href="{{ route('student.notes.show', encrypt($note->id)) }}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </div>
@@ -245,7 +257,7 @@
                                     <p class="text-muted mt-2 mb-0">{{ Str::limit($hw->content, 150) }}</p>
                                 @endif
                             </div>
-                            <a href="{{ route('student.homeworks.show', encrypt($hw->id)) }}" class="btn btn-sm btn-info">
+                            <a href="{{ route('student.homeworks.show', encrypt($hw->id)) }}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-eye"></i> View/Submit
                             </a>
                         </div>

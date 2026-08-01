@@ -32,6 +32,13 @@ class LoginController extends Controller
         ];
     
         if (Auth::guard('teacher')->attempt($credentials)) {
+            $teacher = Auth::guard('teacher')->user();
+            if ($teacher->is_blocked) {
+                Auth::guard('teacher')->logout();
+                return back()->withErrors([
+                    'phone' => 'Your account is blocked. Please contact administration.'
+                ])->onlyInput('phone', 'country_id');
+            }
             return redirect()->intended('/teacher/dashboard');
         }
     

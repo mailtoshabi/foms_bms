@@ -72,6 +72,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings/download-database', [\App\Http\Controllers\Admin\SettingsController::class, 'downloadDatabase'])
             ->name('settings.database.download');
 
+        Route::get('/settings/change-password', [\App\Http\Controllers\Admin\SettingsController::class, 'showChangePasswordForm'])
+            ->name('settings.change-password');
+        Route::put('/settings/change-password', [\App\Http\Controllers\Admin\SettingsController::class, 'changePassword'])
+            ->name('settings.update.password');
+
         Route::resource('holidays', \App\Http\Controllers\Staff\Administration\HolidayController::class)
             ->names('holidays');
 
@@ -179,8 +184,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('reports/students/{id}', [ReportController::class, 'showStudent'])
             ->name('reports.students.show');
 
+        Route::get('reports/students-search', [\App\Http\Controllers\Staff\Enrolment\StudentController::class, 'searchStudents'])
+            ->name('students.search');
+
         Route::get('reports/students/{id}/toggle-block', [ReportController::class, 'toggleBlockStudent'])
             ->name('reports.students.toggleBlock');
+
+        Route::get('reports/teachers/{id}/toggle-block', [ReportController::class, 'toggleBlockTeacher'])
+            ->name('reports.teachers.toggleBlock');
 
         Route::delete('reports/students/{id}/relations/{related_id}', [ReportController::class, 'removeRelation'])
             ->name('students.relations.destroy');
@@ -380,6 +391,26 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/store', 'store')->name('store');
                 Route::get('/students/search', 'searchStudents')->name('students.search');
             });
+
+        Route::post(
+            '/teachers/assign-classrooms',
+            [\App\Http\Controllers\Staff\Administration\TeacherAssignmentController::class, 'assign']
+        )->name('teachers.assign.classrooms');
+
+        Route::put(
+            '/teachers/update-wage',
+            [\App\Http\Controllers\Staff\Administration\TeacherAssignmentController::class, 'updateWage']
+        )->name('teachers.update.wage');
+
+        Route::put(
+            '/teachers/salaries/{salary}',
+            [\App\Http\Controllers\Staff\Administration\TeacherSalaryController::class, 'update']
+        )->name('teacher-salaries.update');
+
+        Route::delete(
+            '/teachers/{teacher}/classrooms/{class_room}',
+            [\App\Http\Controllers\Staff\Administration\TeacherAssignmentController::class, 'destroy']
+        )->name('teachers.classrooms.destroy');
 
     });
 
@@ -810,7 +841,10 @@ Route::prefix('teacher')->name('teacher.')->group(function () {
 
 
 Route::prefix('teacher')
-    ->middleware('auth:teacher')
+    ->middleware([
+        'auth:teacher',
+        \App\Http\Middleware\CheckTeacherBlocked::class
+    ])
     ->name('teacher.')
     ->group(function () {
         Route::post('/logout', [TeacherLoginController::class, 'logout'])->name('logout');

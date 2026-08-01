@@ -210,12 +210,27 @@
                                                         @endif
                                                  </td>
                                                  <td>
+                                                        <button class="btn btn-sm btn-primary viewSalaryBtn mb-1"
+                                                                data-cycle_start="{{ $row->cycle_start ? \Carbon\Carbon::parse($row->cycle_start)->format('d M Y') : '-' }}"
+                                                                data-cycle_end="{{ $row->cycle_end ? \Carbon\Carbon::parse($row->cycle_end)->format('d M Y') : '-' }}"
+                                                                data-total_hours="{{ $row->total_hours }}"
+                                                                data-total_amount="₹ {{ number_format($row->total_amount, 2) }}"
+                                                                data-credit_date="{{ $row->credit_date ? \Carbon\Carbon::parse($row->credit_date)->format('d M Y') : '-' }}"
+                                                                data-date="{{ $row->payment_date ? \Carbon\Carbon::parse($row->payment_date)->format('d M Y') : '-' }}"
+                                                                data-method="{{ $row->payment_method ? ucfirst(str_replace('_', ' ', $row->payment_method)) : '-' }}"
+                                                                data-reference_number="{{ $row->reference_number ?? '-' }}"
+                                                                data-status="{{ ucfirst($row->status) }}"
+                                                                data-notes="{{ $row->notes ?? '-' }}"
+                                                                title="View Details">
+                                                                <i class="fas fa-eye"></i>
+                                                        </button>
+
                                                         @if($row->status == 'deposit')
                                                                <form action="{{ route('admin.salaries.release', $row->id) }}" method="POST"
                                                                       class="d-inline"
                                                                       onsubmit="return confirm('Are you sure you want to release this deposit back to salary?')">
                                                                       @csrf
-                                                                      <button type="submit" class="btn btn-sm btn-info"
+                                                                      <button type="submit" class="btn btn-sm btn-primary"
                                                                              title="Release Deposit">
                                                                              <i class="fas fa-hand-holding-usd"></i>
                                                                       </button>
@@ -323,7 +338,68 @@
 
        </div>
 
-       {{-- Payment Modal End --}}
+        {{-- Payment Modal End --}}
+
+        {{-- View Salary Details Modal --}}
+        <div class="modal fade" id="viewSalaryModal" tabindex="-1" aria-labelledby="viewSalaryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewSalaryModalLabel">Salary Payment Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="w-50">Cycle Start</th>
+                                    <td id="val_cycle_start"></td>
+                                </tr>
+                                <tr>
+                                    <th>Cycle End</th>
+                                    <td id="val_cycle_end"></td>
+                                </tr>
+                                <tr>
+                                    <th>Total Hours</th>
+                                    <td id="val_total_hours"></td>
+                                </tr>
+                                <tr>
+                                    <th>Total Amount</th>
+                                    <td id="val_total_amount" class="fw-bold"></td>
+                                </tr>
+                                <tr>
+                                    <th>Due/Credit Date</th>
+                                    <td id="val_credit_date"></td>
+                                </tr>
+                                <tr>
+                                    <th>Payment Date</th>
+                                    <td id="val_payment_date"></td>
+                                </tr>
+                                <tr>
+                                    <th>Payment Method</th>
+                                    <td id="val_payment_method"></td>
+                                </tr>
+                                <tr>
+                                    <th>Reference Number</th>
+                                    <td id="val_reference_number"></td>
+                                </tr>
+                                <tr>
+                                    <th>Status</th>
+                                    <td id="val_status"></td>
+                                </tr>
+                                <tr>
+                                    <th>Notes</th>
+                                    <td id="val_notes"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 @endsection
 
@@ -344,6 +420,50 @@
 
                      $('#salaryPaymentModal').modal('show');
 
+              });
+
+              $(document).on('click', '.viewSalaryBtn', function () {
+                     let cycleStart = $(this).data('cycle_start') || '-';
+                     let cycleEnd = $(this).data('cycle_end') || '-';
+                     let totalHours = $(this).data('total_hours') || '-';
+                     let totalAmount = $(this).data('total_amount') || '-';
+                     let creditDate = $(this).data('credit_date') || '-';
+                     let date = $(this).data('date') || '-';
+                     let method = $(this).data('method') || '-';
+                     let refNum = $(this).data('reference_number') || '-';
+                     let status = $(this).data('status') || '';
+                     let notes = $(this).data('notes') || '-';
+
+                     $('#val_cycle_start').text(cycleStart);
+                     $('#val_cycle_end').text(cycleEnd);
+                     $('#val_total_hours').text(totalHours);
+                     $('#val_total_amount').text(totalAmount);
+                     $('#val_credit_date').text(creditDate);
+                     $('#val_payment_date').text(date);
+                     $('#val_payment_method').text(method);
+                     $('#val_reference_number').text(refNum);
+
+                     // Apply badge color to status
+                     let badgeClass = 'badge bg-secondary';
+                     let statusLower = status.toString().toLowerCase();
+                     if (statusLower === 'paid') {
+                         badgeClass = 'badge bg-success';
+                     } else if (statusLower === 'unpaid') {
+                         badgeClass = 'badge bg-danger';
+                     } else if (statusLower === 'pending') {
+                         badgeClass = 'badge bg-warning text-dark';
+                     } else if (statusLower === 'deposit') {
+                         badgeClass = 'badge bg-primary';
+                     }
+                     if (status) {
+                         $('#val_status').html('<span class="' + badgeClass + '">' + status + '</span>');
+                     } else {
+                         $('#val_status').text('-');
+                     }
+
+                     $('#val_notes').text(notes);
+
+                     $('#viewSalaryModal').modal('show');
               });
 
        </script>
