@@ -196,7 +196,7 @@ class TeacherController extends Controller
 
     public function show($id)
     {
-        $teacher = Teacher::select('id', 'name', 'dob', 'email', 'contact_number', 'whatsapp_number', 'upi_number', 'address', 'qualification', 'experience', 'status', 'is_blocked', 'agreed_rules', 'country_id', 'photo', 'id_proof', 'salary_amount')
+        $teacher = Teacher::select('id', 'name', 'dob', 'email', 'contact_number', 'whatsapp_number', 'upi_number', 'address', 'qualification', 'experience', 'status', 'is_blocked', 'agreed_rules', 'country_id', 'photo', 'id_proof')
             ->with([
                 'country' => fn($q) => $q->select('id', 'name', 'code'),
                 'classRooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
