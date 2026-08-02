@@ -146,7 +146,7 @@
                     <tbody>
                         @forelse($class->classHours as $hour)
                             <tr>
-                                <td>{{ $hour->created_at->format('d M Y h:i A') }}</td>
+                                <td>{{ $hour->created_at?->format('d M Y h:i A') ?? 'N/A' }}</td>
                                 <td>
                                     @if($hour->status == 'pending' && $hour->google_meet_link)
                                         @if(\Carbon\Carbon::parse($hour->link_updated_at)->isToday())
@@ -199,7 +199,7 @@
                                 </h6>
                                 <small class="text-muted">
                                     By {{ $note->teacher->name ?? 'Unknown' }} &bull;
-                                    {{ $note->created_at->format('M d, Y H:i') }}
+                                    {{ $note->created_at?->format('M d, Y H:i') ?? 'N/A' }}
                                 </small>
                                 @if($note->content)
                                     <p class="text-muted mt-2 mb-0">{{ Str::limit($note->content, 150) }}</p>
@@ -251,7 +251,7 @@
                                 </h6>
                                 <small class="text-muted">
                                     By {{ $hw->teacher->name ?? 'Unknown' }} &bull;
-                                    {{ $hw->created_at->format('M d, Y H:i') }}
+                                    {{ $hw->created_at?->format('M d, Y H:i') ?? 'N/A' }}
                                 </small>
                                 @if($hw->content)
                                     <p class="text-muted mt-2 mb-0">{{ Str::limit($hw->content, 150) }}</p>

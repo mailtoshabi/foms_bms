@@ -403,7 +403,7 @@ class StudentController extends Controller
                         'course' => fn($qc) => $qc->select('id', 'name'),
                         'classType' => fn($qt) => $qt->select('id', 'name')
                     ]),
-                'fees' => fn($q) => $q->select('id', 'student_id', 'class_room_id', 'type', 'amount', 'due_date', 'status', 'payment_date'),
+                'fees' => fn($q) => $q->select('id', 'student_id', 'class_room_id', 'type', 'amount', 'due_date', 'status', 'created_at'),
                 'attendances' => fn($q) => $q->select('student_attendance.id', 'student_attendance.student_id', 'student_attendance.class_hour_id', 'student_attendance.is_present'),
                 'walletTransactions.fee' => fn($q) => $q->select('id', 'amount', 'type', 'status')
             ])->findOrFail(decrypt($id));
