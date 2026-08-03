@@ -248,8 +248,9 @@ class BaseClassRoomController extends BaseServiceController
             ->with([
                 'course' => fn($q) => $q->select('id', 'name'),
                 'classType' => fn($q) => $q->select('id', 'name'),
-                'teachers' => fn($q) => $q->select('teachers.id', 'teachers.name', 'teachers.contact_number')->withPivot('hourly_wage'),
-                'students' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no', 'students.status', 'students.is_blocked')
+                'teachers' => fn($q) => $q->select('teachers.id', 'teachers.name', 'teachers.phone', 'teachers.contact_number')->withPivot('hourly_wage'),
+                'students' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no', 'students.status', 'students.is_blocked', 'students.contact_number', 'students.country_id')
+                    ->with(['country' => fn($qc) => $qc->select('id', 'code')])
             ])->findOrFail(decrypt($id));
 
         $teachers = Teacher::select('id', 'name')->get();

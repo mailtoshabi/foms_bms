@@ -17,7 +17,7 @@ class TeacherController extends Controller
 
     public function index(Request $request)
     {
-        $teachers = Teacher::select('id', 'name', 'contact_number', 'whatsapp_number', 'upi_number', 'status', 'is_blocked', 'teacher_lead_id', 'country_id', 'photo', 'id_proof')
+        $teachers = Teacher::select('id', 'name', 'contact_number', 'whatsapp_number', 'upi_number', 'status', 'is_blocked', 'teacher_lead_id', 'country_id', 'photo', 'id_proof', 'email', 'salary_cycle_day')
             ->with([
                 'lead' => fn($q) => $q->select('id', 'name'),
                 'country' => fn($q) => $q->select('id', 'name', 'code')
@@ -196,15 +196,15 @@ class TeacherController extends Controller
 
     public function show($id)
     {
-        $teacher = Teacher::select('id', 'name', 'dob', 'email', 'contact_number', 'whatsapp_number', 'upi_number', 'address', 'qualification', 'experience', 'status', 'is_blocked', 'agreed_rules', 'country_id', 'photo', 'id_proof')
+        $teacher = Teacher::select('id', 'name', 'phone', 'dob', 'email', 'contact_number', 'whatsapp_number', 'upi_number', 'address', 'qualification', 'experience', 'status', 'is_blocked', 'agreed_rules', 'country_id', 'photo', 'id_proof')
             ->with([
                 'country' => fn($q) => $q->select('id', 'name', 'code'),
-                'classRooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
+                'classRooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id', 'class_rooms.selected_days', 'class_rooms.time_slot')
                     ->with([
                         'course' => fn($qc) => $qc->select('id', 'name'),
                         'classType' => fn($qt) => $qt->select('id', 'name')
                     ]),
-                'salaries' => fn($q) => $q->select('id', 'teacher_id', 'cycle_start', 'cycle_end', 'total_amount', 'status', 'payment_date')
+                'salaries' => fn($q) => $q->select('id', 'teacher_id', 'cycle_start', 'cycle_end', 'total_amount', 'status', 'payment_date', 'credit_date', 'payment_method', 'notes')
             ])->findOrFail(decrypt($id));
 
         $assignedClasses = $teacher->classRooms->pluck('id')->toArray();

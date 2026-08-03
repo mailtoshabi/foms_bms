@@ -14,7 +14,7 @@ class SalaryController extends Controller
     {
         $tab = $request->get('tab', 'unpaid');
 
-        $query = TeacherSalary::select('id', 'teacher_id', 'cycle_start', 'cycle_end', 'total_hours', 'total_amount', 'status', 'payment_date', 'payment_method', 'reference_number', 'notes')
+        $query = TeacherSalary::select('id', 'teacher_id', 'cycle_start', 'cycle_end', 'total_hours', 'total_amount', 'status', 'payment_date', 'payment_method', 'reference_number', 'notes', 'credit_date')
             ->with(['teacher' => fn($q) => $q->select('id', 'name', 'whatsapp_number', 'upi_number')]);
 
         // 🔥 Tab Logic

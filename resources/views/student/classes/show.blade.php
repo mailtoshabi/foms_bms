@@ -42,7 +42,8 @@
                         <p><strong>Days:</strong> {{ implode(', ', $class->selected_days ?? []) }}</p>
                     @endif
                     <p><strong>Time:</strong>
-                        {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}</p>
+                        {{ $class->time_slot ? \Carbon\Carbon::parse($class->time_slot)->format('h:i A') : '' }}
+                    </p>
                     <p><strong>Duration:</strong> {{ $class->slot_duration }} minutes</p>
                     <p><strong>Monthly Sessions:</strong> {{ $class->classes_per_week * 4 }}</p>
                 </div>
@@ -83,7 +84,7 @@
                                     style="width: 50px; height: 50px; background-color: rgba(13, 110, 253, 0.1); color: #0d6efd;">
                                     <i class="fas fa-video fs-5"></i>
                                 </div>
-                                <h6 class="fw-bold text-dark mb-1">My Sessions</h6>
+                                <h6 class="fw-bold text-dark mb-1">Sessions</h6>
                                 <p class="text-muted small mb-0">{{ $class->classHours->count() }} Session(s)</p>
                             </div>
                         </div>
@@ -146,7 +147,14 @@
                     <tbody>
                         @forelse($class->classHours as $hour)
                             <tr>
-                                <td>{{ $hour->created_at?->format('d M Y h:i A') ?? 'N/A' }}</td>
+                                <td>
+                                    {{ $hour->created_at?->format('d M Y') ?? 'N/A' }}
+                                    @if($hour->join_student_at)
+                                        <br>
+                                        <small class="text-muted"><i class="far fa-clock me-1"></i>Joined:
+                                            {{ $hour->join_student_at->format('d M Y h:i A') }}</small>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($hour->status == 'pending' && $hour->google_meet_link)
                                         @if(\Carbon\Carbon::parse($hour->link_updated_at)->isToday())

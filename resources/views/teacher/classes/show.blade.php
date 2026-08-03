@@ -182,10 +182,10 @@
                                         </div>
                                     </td>
                                     <td>
-                                        @if($hour->joined_at)
+                                        @if($hour->join_teacher_at)
                                             <div class="d-flex flex-column">
                                                 <span class="text-dark fw-semibold mb-1">Joined:
-                                                    {{ \Carbon\Carbon::parse($hour->joined_at)->format('h:i A') }}</span>
+                                                    {{ \Carbon\Carbon::parse($hour->join_teacher_at)->format('h:i A') }}</span>
                                                 @if($hour->completed_at)
                                                     <small class="text-success"><i class="fas fa-check-circle me-1"></i>Completed:
                                                         {{ \Carbon\Carbon::parse($hour->completed_at)->format('h:i A') }}</small>

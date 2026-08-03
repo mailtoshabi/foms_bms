@@ -40,7 +40,7 @@ class ClassController extends Controller
                 'homeworks.files' => fn($q) => $q->select('id', 'homework_id', 'file_path', 'file_name'),
                 'homeworks.teacher' => fn($q) => $q->select('id', 'name'),
                 'classHours' => function ($query) {
-                    $query->select('id', 'class_room_id', 'duration', 'google_meet_link', 'status', 'link_updated_at', 'join_teacher_at', 'join_student_at', 'completed_at')->latest();
+                    $query->select('id', 'class_room_id', 'duration', 'google_meet_link', 'status', 'link_updated_at', 'join_teacher_at', 'join_student_at', 'completed_at', 'created_at')->latest();
                 }
             ])
             ->findOrFail(decrypt($id));

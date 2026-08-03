@@ -42,7 +42,7 @@ class StudentController extends Controller
 
     public function index(Request $request)
     {
-        $students = Student::select('id', 'name', 'admission_no', 'contact_number', 'email', 'status', 'is_blocked', 'student_lead_id', 'country_id', 'photo')
+        $students = Student::select('id', 'name', 'admission_no', 'contact_number', 'email', 'status', 'is_blocked', 'student_lead_id', 'country_id', 'photo', 'dob', 'is_whatsapp_different', 'whatsapp_number')
             ->with([
                 'lead' => fn($q) => $q->select('id', 'name'),
                 'country' => fn($q) => $q->select('id', 'name', 'code')
@@ -398,7 +398,7 @@ class StudentController extends Controller
             ->with([
                 'country' => fn($q) => $q->select('id', 'name', 'code'),
                 'relatedStudents' => fn($q) => $q->select('students.id', 'students.name', 'students.admission_no', 'students.is_blocked', 'students.country_id', 'students.contact_number')->with(['country' => fn($qc) => $qc->select('id', 'name', 'code')]),
-                'class_rooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id')
+                'class_rooms' => fn($q) => $q->select('class_rooms.id', 'class_rooms.name', 'class_rooms.course_id', 'class_rooms.class_type_id', 'class_rooms.selected_days', 'class_rooms.time_slot')
                     ->with([
                         'course' => fn($qc) => $qc->select('id', 'name'),
                         'classType' => fn($qt) => $qt->select('id', 'name')
@@ -410,7 +410,9 @@ class StudentController extends Controller
 
         $teachers = Teacher::whereHas('classRooms', function ($q) use ($student) {
             $q->whereIn('class_rooms.id', $student->class_rooms->pluck('id'));
-        })->select('id', 'name', 'whatsapp_number', 'upi_number')->get();
+        })->select('id', 'name', 'phone', 'email', 'whatsapp_number', 'upi_number', 'country_id')
+            ->with(['country' => fn($q) => $q->select('id', 'code')])
+            ->get();
 
         $attendance = [
             'total' => $student->attendances->count(),

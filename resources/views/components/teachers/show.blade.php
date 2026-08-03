@@ -182,7 +182,7 @@
 
                                     <tr>
 
-                                        <td>{{ $teacher->SalaryCreditDate }}</td>
+                                        <td>{{ optional($salary->credit_date)->format('d M Y') ?? '-' }}</td>
 
                                         <td>₹ {{ number_format($salary->total_amount, 2) }}</td>
 
