@@ -125,7 +125,7 @@ class HomeworkController extends Controller
             ->findOrFail(decrypt($id));
 
         // Get submissions indexed by student ID for easier lookup
-        $submissions = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'submitted_text', 'graded_at', 'mark_obtained', 'total_mark', 'teacher_comments')
+        $submissions = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'submitted_text', 'created_at', 'graded_at', 'mark_obtained', 'total_mark', 'teacher_comments')
             ->with([
                 'files' => fn($q) => $q->select('id', 'homework_submission_id', 'file_name', 'file_path', 'file_size')
             ])

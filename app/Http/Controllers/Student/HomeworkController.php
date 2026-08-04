@@ -51,7 +51,7 @@ class HomeworkController extends Controller
             ->whereIn('class_room_id', $classRoomIds)
             ->findOrFail(decrypt($id));
 
-        $submission = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'submitted_text', 'graded_at', 'mark_obtained', 'total_mark', 'teacher_comments', 'graded_by')
+        $submission = HomeworkSubmission::select('id', 'homework_id', 'student_id', 'submitted_text', 'created_at', 'graded_at', 'mark_obtained', 'total_mark', 'teacher_comments', 'graded_by')
             ->with([
                 'files' => fn($q) => $q->select('id', 'homework_submission_id', 'file_name', 'file_path', 'file_size'),
                 'grader' => fn($q) => $q->select('id', 'name')
